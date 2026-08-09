@@ -25,9 +25,19 @@ const products = [
   "Consórcio de serviços"
 ];
 
-/* =========================================================
-   FORMATA TELEFONE
-   ========================================================= */
+function getGreeting() {
+  const hour = new Date().getHours();
+
+  if (hour >= 5 && hour < 12) {
+    return "Bom dia";
+  }
+
+  if (hour >= 12 && hour < 18) {
+    return "Boa tarde";
+  }
+
+  return "Boa noite";
+}
 
 function formatPhone(value) {
   const numbers = String(value)
@@ -50,27 +60,47 @@ function formatPhone(value) {
   return `(${ddd}) ${rest.slice(0, 5)}-${rest.slice(5)}`;
 }
 
-/* =========================================================
-   PRIMEIRO NOME
-   ========================================================= */
-
 function firstName(name) {
   return String(name)
     .trim()
     .split(/\s+/)[0];
 }
 
-/* =========================================================
-   APP
-   ========================================================= */
+function normalize(value) {
+  return String(value)
+    .trim()
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "");
+}
+
+function looksLikeGreetingInsteadOfName(value) {
+  const text = normalize(value);
+
+  const blocked = [
+    "oi",
+    "ola",
+    "olá",
+    "bom dia",
+    "boa tarde",
+    "boa noite",
+    "tudo bem",
+    "tudo bom",
+    "beleza",
+    "opa",
+    "e ai",
+    "e aí",
+    "hey",
+    "hello"
+  ];
+
+  return blocked.includes(text);
+}
 
 function App() {
   const [screen, setScreen] = useState("home");
-
   const [messages, setMessages] = useState([]);
-
   const [text, setText] = useState("");
-
   const [busy, setBusy] = useState(false);
 
   const [chatHeight, setChatHeight] =
@@ -79,9 +109,9 @@ function App() {
   /*
     ETAPAS:
     name
+    city
     phone
     whatsapp
-    city
     ready
   */
 
@@ -89,32 +119,26 @@ function App() {
 
   const [customer, setCustomer] = useState({
     name: "",
+    city: "",
     phone: "",
-    whatsapp: false,
-    city: ""
+    whatsapp: false
   });
 
   const [pendingMessage, setPendingMessage] =
     useState("");
 
   const chatRef = useRef(null);
-
   const messagesRef = useRef([]);
 
   useEffect(() => {
     messagesRef.current = messages;
   }, [messages]);
 
-  /* =========================================================
-     TECLADO DO IPHONE
-     ========================================================= */
-
   useEffect(() => {
     if (screen !== "chat") return;
 
     const updateViewport = () => {
-      const viewport =
-        window.visualViewport;
+      const viewport = window.visualViewport;
 
       const height = viewport
         ? viewport.height
@@ -166,10 +190,6 @@ function App() {
     };
   }, [screen]);
 
-  /* =========================================================
-     HISTÓRICO SEMPRE NO FINAL
-     ========================================================= */
-
   useEffect(() => {
     if (screen !== "chat") return;
 
@@ -184,10 +204,6 @@ function App() {
       });
     });
   }, [messages, busy, screen]);
-
-  /* =========================================================
-     ADICIONAR MENSAGEM
-     ========================================================= */
 
   function addMessage(role, messageText) {
     const message = {
@@ -207,33 +223,28 @@ function App() {
     });
   }
 
-  /* =========================================================
-     ABRIR CHAT
-     ========================================================= */
-
   function openChat(firstMessage = "") {
+    const greeting = getGreeting();
+
     const initialMessages = [
       {
         role: "assistant",
         text:
-          "Oi! Eu sou o Creditin, assistente da Crediti. Para começar, me diz seu nome."
+          `${greeting}! Eu sou o Creditin, assistente da Crediti. Tudo bem? Para começar, como posso te chamar?`
       }
     ];
 
     setMessages(initialMessages);
-
-    messagesRef.current =
-      initialMessages;
+    messagesRef.current = initialMessages;
 
     setCustomer({
       name: "",
+      city: "",
       phone: "",
-      whatsapp: false,
-      city: ""
+      whatsapp: false
     });
 
     setStep("name");
-
     setText("");
 
     setPendingMessage(
@@ -243,40 +254,61 @@ function App() {
     setScreen("chat");
   }
 
-  /* =========================================================
-     CADASTRO INICIAL
-     ========================================================= */
-
   function handleRegistration(value) {
     const cleanValue =
       String(value).trim();
 
     if (step === "name") {
-      if (cleanValue.length < 2) {
+      if (
+        cleanValue.length < 2 ||
+        looksLikeGreetingInsteadOfName(cleanValue)
+      ) {
         addMessage(
           "assistant",
-          "Me diz seu nome para a gente continuar."
+          "Tudo bem! Agora me diz seu nome para eu poder te atender direitinho."
         );
 
         return;
       }
 
-      const name =
-        cleanValue;
-
-      const shortName =
-        firstName(name);
+      const name = cleanValue;
+      const shortName = firstName(name);
 
       setCustomer((current) => ({
         ...current,
         name
       }));
 
+      setStep("city");
+
+      addMessage(
+        "assistant",
+        `Prazer, ${shortName}! De qual cidade você está falando?`
+      );
+
+      return;
+    }
+
+    if (step === "city") {
+      if (cleanValue.length < 2) {
+        addMessage(
+          "assistant",
+          "Me diz o nome da sua cidade para a gente continuar."
+        );
+
+        return;
+      }
+
+      setCustomer((current) => ({
+        ...current,
+        city: cleanValue
+      }));
+
       setStep("phone");
 
       addMessage(
         "assistant",
-        `Prazer, ${shortName}! Agora me passa seu número de telefone com DDD.`
+        `${firstName(customer.name)}, agora me passa seu número de telefone com DDD.`
       );
 
       return;
@@ -307,68 +339,33 @@ function App() {
 
       addMessage(
         "assistant",
-        `${firstName(customer.name)}, esse número ${formatted} também é seu WhatsApp? Responda sim ou não.`
+        `${firstName(customer.name)}, esse número ${formatted} também é seu WhatsApp? Pode responder sim ou não.`
       );
 
       return;
     }
 
     if (step === "whatsapp") {
-      const answer =
-        cleanValue
-          .toLowerCase()
-          .normalize("NFD")
-          .replace(
-            /[\u0300-\u036f]/g,
-            ""
-          );
+      const answer = normalize(cleanValue);
 
-      const yes =
-        [
-          "sim",
-          "s",
-          "sou",
-          "e",
-          "é",
-          "yes"
-        ].includes(answer);
+      const yes = [
+        "sim",
+        "s",
+        "yes",
+        "e",
+        "é"
+      ].includes(answer);
 
-      const no =
-        [
-          "nao",
-          "n",
-          "não"
-        ].includes(answer);
+      const no = [
+        "nao",
+        "não",
+        "n"
+      ].includes(answer);
 
       if (!yes && !no) {
         addMessage(
           "assistant",
-          "Só confirma para mim: esse número é seu WhatsApp? Pode responder sim ou não."
-        );
-
-        return;
-      }
-
-      setCustomer((current) => ({
-        ...current,
-        whatsapp: yes
-      }));
-
-      setStep("city");
-
-      addMessage(
-        "assistant",
-        `Perfeito, ${firstName(customer.name)}. Agora me diz de qual cidade você está falando.`
-      );
-
-      return;
-    }
-
-    if (step === "city") {
-      if (cleanValue.length < 2) {
-        addMessage(
-          "assistant",
-          "Me diz o nome da sua cidade para continuarmos."
+          "Só confirma para mim: esse número também é seu WhatsApp? Pode responder sim ou não."
         );
 
         return;
@@ -376,13 +373,10 @@ function App() {
 
       const updatedCustomer = {
         ...customer,
-        city: cleanValue
+        whatsapp: yes
       };
 
-      setCustomer(
-        updatedCustomer
-      );
-
+      setCustomer(updatedCustomer);
       setStep("ready");
 
       if (pendingMessage) {
@@ -393,7 +387,7 @@ function App() {
 
         addMessage(
           "assistant",
-          `Tudo certo, ${firstName(updatedCustomer.name)}! Agora vou te ajudar com isso.`
+          `Perfeito, ${firstName(updatedCustomer.name)}. Já tenho seus dados básicos. Agora vou te ajudar com o que você precisa.`
         );
 
         setTimeout(() => {
@@ -405,15 +399,11 @@ function App() {
       } else {
         addMessage(
           "assistant",
-          `Tudo certo, ${firstName(updatedCustomer.name)}! Agora me conta o que você precisa. Vou buscar a melhor opção para você.`
+          `Perfeito, ${firstName(updatedCustomer.name)}. Agora me conta o que você precisa e eu vou buscar a melhor opção para você.`
         );
       }
     }
   }
-
-  /* =========================================================
-     ENVIAR PARA IA
-     ========================================================= */
 
   async function sendToAI(
     value,
@@ -441,7 +431,6 @@ function App() {
 
           body: JSON.stringify({
             message: value,
-
             history,
 
             customer: {
@@ -453,14 +442,14 @@ function App() {
                   customerData.name
                 ),
 
+              city:
+                customerData.city,
+
               phone:
                 customerData.phone,
 
               whatsapp:
-                customerData.whatsapp,
-
-              city:
-                customerData.city
+                customerData.whatsapp
             }
           })
         }
@@ -492,10 +481,6 @@ function App() {
     }
   }
 
-  /* =========================================================
-     ENVIAR
-     ========================================================= */
-
   function sendMessage() {
     const value =
       String(text).trim();
@@ -511,25 +496,15 @@ function App() {
 
     if (step !== "ready") {
       handleRegistration(value);
-
       return;
     }
 
     sendToAI(value);
   }
 
-  /* =========================================================
-     ALTERAÇÃO DO CAMPO
-     ========================================================= */
-
   function handleInputChange(event) {
     let value =
       event.target.value;
-
-    /*
-      Durante a etapa do telefone,
-      aplica máscara automaticamente.
-    */
 
     if (step === "phone") {
       value =
@@ -538,10 +513,6 @@ function App() {
 
     setText(value);
   }
-
-  /* =========================================================
-     PARCEIRO
-     ========================================================= */
 
   function becomePartner() {
     const url =
@@ -559,10 +530,6 @@ function App() {
       );
     }
   }
-
-  /* =========================================================
-     TREINAMENTO
-     ========================================================= */
 
   function training() {
     const number =
@@ -588,10 +555,6 @@ function App() {
       "_blank"
     );
   }
-
-  /* =========================================================
-     CHAT
-     ========================================================= */
 
   if (screen === "chat") {
     return (
@@ -681,11 +644,9 @@ function App() {
         <div className="composer">
           <input
             value={text}
-
             onChange={
               handleInputChange
             }
-
             onFocus={() => {
               setTimeout(() => {
                 window.scrollTo(
@@ -694,7 +655,6 @@ function App() {
                 );
               }, 100);
             }}
-
             onKeyDown={(event) => {
               if (
                 event.key ===
@@ -705,25 +665,22 @@ function App() {
                 sendMessage();
               }
             }}
-
             placeholder={
               step === "name"
                 ? "Digite seu nome..."
-                : step === "phone"
-                ? "(85) 99203-2558"
-                : step === "whatsapp"
-                ? "Sim ou não..."
                 : step === "city"
                 ? "Digite sua cidade..."
+                : step === "phone"
+                ? "(XX) XXXXX-XXXX"
+                : step === "whatsapp"
+                ? "Sim ou não..."
                 : "Digite sua dúvida..."
             }
-
             inputMode={
               step === "phone"
                 ? "numeric"
                 : "text"
             }
-
             autoComplete={
               step === "phone"
                 ? "tel"
@@ -743,10 +700,6 @@ function App() {
       </div>
     );
   }
-
-  /* =========================================================
-     PRODUTOS
-     ========================================================= */
 
   if (screen === "products") {
     return (
@@ -778,7 +731,6 @@ function App() {
               <button
                 className="yellow"
                 key={index}
-
                 onClick={() =>
                   openChat(
                     "Quero saber sobre " +
@@ -803,11 +755,9 @@ function App() {
             </h2>
 
             <p>
-              Quer se tornar um
-              bancário autônomo?
-              Faça seu cadastro na
-              plataforma Renda Extra
-              Crediti.
+              Quer se tornar um bancário autônomo?
+              Faça seu cadastro na plataforma
+              Renda Extra Crediti.
             </p>
 
             <button
@@ -823,18 +773,13 @@ function App() {
               className="yellow"
               onClick={training}
             >
-              SOLICITAR TREINAMENTO
-              AGORA
+              SOLICITAR TREINAMENTO AGORA
             </button>
           </section>
         </main>
       </div>
     );
   }
-
-  /* =========================================================
-     HOME
-     ========================================================= */
 
   return (
     <div className="app">
