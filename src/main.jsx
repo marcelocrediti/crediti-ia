@@ -25,37 +25,96 @@ const products = [
   "Consórcio de serviços"
 ];
 
-const welcomeMessage = {
-  role: "assistant",
-  text:
-    "Olá! Eu sou o Creditin, assistente da Crediti. Me conte o que você precisa. Você não precisa saber o nome do produto."
-};
+/* =========================================================
+   FORMATA TELEFONE
+   ========================================================= */
+
+function formatPhone(value) {
+  const numbers = String(value)
+    .replace(/\D/g, "")
+    .slice(0, 11);
+
+  if (!numbers) return "";
+
+  if (numbers.length <= 2) {
+    return `(${numbers}`;
+  }
+
+  const ddd = numbers.slice(0, 2);
+  const rest = numbers.slice(2);
+
+  if (rest.length <= 5) {
+    return `(${ddd}) ${rest}`;
+  }
+
+  return `(${ddd}) ${rest.slice(0, 5)}-${rest.slice(5)}`;
+}
+
+/* =========================================================
+   PRIMEIRO NOME
+   ========================================================= */
+
+function firstName(name) {
+  return String(name)
+    .trim()
+    .split(/\s+/)[0];
+}
+
+/* =========================================================
+   APP
+   ========================================================= */
 
 function App() {
   const [screen, setScreen] = useState("home");
+
   const [messages, setMessages] = useState([]);
+
   const [text, setText] = useState("");
+
   const [busy, setBusy] = useState(false);
 
   const [chatHeight, setChatHeight] =
     useState(window.innerHeight);
 
+  /*
+    ETAPAS:
+    name
+    phone
+    whatsapp
+    city
+    ready
+  */
+
+  const [step, setStep] = useState("name");
+
+  const [customer, setCustomer] = useState({
+    name: "",
+    phone: "",
+    whatsapp: false,
+    city: ""
+  });
+
+  const [pendingMessage, setPendingMessage] =
+    useState("");
+
   const chatRef = useRef(null);
+
   const messagesRef = useRef([]);
 
   useEffect(() => {
     messagesRef.current = messages;
   }, [messages]);
 
-  /* ======================================================
-     CONTROLE DO TECLADO NO IPHONE
-     ====================================================== */
+  /* =========================================================
+     TECLADO DO IPHONE
+     ========================================================= */
 
   useEffect(() => {
     if (screen !== "chat") return;
 
     const updateViewport = () => {
-      const viewport = window.visualViewport;
+      const viewport =
+        window.visualViewport;
 
       const height = viewport
         ? viewport.height
@@ -63,10 +122,6 @@ function App() {
 
       setChatHeight(height);
 
-      /*
-        Impede o Safari de deslocar a página inteira
-        quando o teclado aparece.
-      */
       requestAnimationFrame(() => {
         window.scrollTo(0, 0);
       });
@@ -111,9 +166,9 @@ function App() {
     };
   }, [screen]);
 
-  /* ======================================================
-     ROLA SOMENTE O HISTÓRICO
-     ====================================================== */
+  /* =========================================================
+     HISTÓRICO SEMPRE NO FINAL
+     ========================================================= */
 
   useEffect(() => {
     if (screen !== "chat") return;
@@ -130,65 +185,250 @@ function App() {
     });
   }, [messages, busy, screen]);
 
-  /* ======================================================
-     ABRIR CHAT
-     ====================================================== */
+  /* =========================================================
+     ADICIONAR MENSAGEM
+     ========================================================= */
 
-  const openChat = (firstMessage = "") => {
+  function addMessage(role, messageText) {
+    const message = {
+      role,
+      text: messageText
+    };
+
+    setMessages((current) => {
+      const next = [
+        ...current,
+        message
+      ];
+
+      messagesRef.current = next;
+
+      return next;
+    });
+  }
+
+  /* =========================================================
+     ABRIR CHAT
+     ========================================================= */
+
+  function openChat(firstMessage = "") {
     const initialMessages = [
-      welcomeMessage
+      {
+        role: "assistant",
+        text:
+          "Oi! Eu sou o Creditin, assistente da Crediti. Para começar, me diz seu nome."
+      }
     ];
 
     setMessages(initialMessages);
-    messagesRef.current = initialMessages;
+
+    messagesRef.current =
+      initialMessages;
+
+    setCustomer({
+      name: "",
+      phone: "",
+      whatsapp: false,
+      city: ""
+    });
+
+    setStep("name");
+
+    setText("");
+
+    setPendingMessage(
+      firstMessage || ""
+    );
 
     setScreen("chat");
+  }
 
-    if (firstMessage) {
-      setTimeout(() => {
-        sendMessage(
-          firstMessage,
-          initialMessages
+  /* =========================================================
+     CADASTRO INICIAL
+     ========================================================= */
+
+  function handleRegistration(value) {
+    const cleanValue =
+      String(value).trim();
+
+    if (step === "name") {
+      if (cleanValue.length < 2) {
+        addMessage(
+          "assistant",
+          "Me diz seu nome para a gente continuar."
         );
-      }, 150);
+
+        return;
+      }
+
+      const name =
+        cleanValue;
+
+      const shortName =
+        firstName(name);
+
+      setCustomer((current) => ({
+        ...current,
+        name
+      }));
+
+      setStep("phone");
+
+      addMessage(
+        "assistant",
+        `Prazer, ${shortName}! Agora me passa seu número de telefone com DDD.`
+      );
+
+      return;
     }
-  };
 
-  /* ======================================================
-     ENVIAR MENSAGEM
-     ====================================================== */
+    if (step === "phone") {
+      const numbers =
+        cleanValue.replace(/\D/g, "");
 
-  async function sendMessage(
-    value = text,
-    customHistory = null
+      if (numbers.length !== 11) {
+        addMessage(
+          "assistant",
+          "Esse número parece incompleto. Digite o DDD e o número completo para mim."
+        );
+
+        return;
+      }
+
+      const formatted =
+        formatPhone(numbers);
+
+      setCustomer((current) => ({
+        ...current,
+        phone: formatted
+      }));
+
+      setStep("whatsapp");
+
+      addMessage(
+        "assistant",
+        `${firstName(customer.name)}, esse número ${formatted} também é seu WhatsApp? Responda sim ou não.`
+      );
+
+      return;
+    }
+
+    if (step === "whatsapp") {
+      const answer =
+        cleanValue
+          .toLowerCase()
+          .normalize("NFD")
+          .replace(
+            /[\u0300-\u036f]/g,
+            ""
+          );
+
+      const yes =
+        [
+          "sim",
+          "s",
+          "sou",
+          "e",
+          "é",
+          "yes"
+        ].includes(answer);
+
+      const no =
+        [
+          "nao",
+          "n",
+          "não"
+        ].includes(answer);
+
+      if (!yes && !no) {
+        addMessage(
+          "assistant",
+          "Só confirma para mim: esse número é seu WhatsApp? Pode responder sim ou não."
+        );
+
+        return;
+      }
+
+      setCustomer((current) => ({
+        ...current,
+        whatsapp: yes
+      }));
+
+      setStep("city");
+
+      addMessage(
+        "assistant",
+        `Perfeito, ${firstName(customer.name)}. Agora me diz de qual cidade você está falando.`
+      );
+
+      return;
+    }
+
+    if (step === "city") {
+      if (cleanValue.length < 2) {
+        addMessage(
+          "assistant",
+          "Me diz o nome da sua cidade para continuarmos."
+        );
+
+        return;
+      }
+
+      const updatedCustomer = {
+        ...customer,
+        city: cleanValue
+      };
+
+      setCustomer(
+        updatedCustomer
+      );
+
+      setStep("ready");
+
+      if (pendingMessage) {
+        const request =
+          pendingMessage;
+
+        setPendingMessage("");
+
+        addMessage(
+          "assistant",
+          `Tudo certo, ${firstName(updatedCustomer.name)}! Agora vou te ajudar com isso.`
+        );
+
+        setTimeout(() => {
+          sendToAI(
+            request,
+            updatedCustomer
+          );
+        }, 300);
+      } else {
+        addMessage(
+          "assistant",
+          `Tudo certo, ${firstName(updatedCustomer.name)}! Agora me conta o que você precisa. Vou buscar a melhor opção para você.`
+        );
+      }
+    }
+  }
+
+  /* =========================================================
+     ENVIAR PARA IA
+     ========================================================= */
+
+  async function sendToAI(
+    value,
+    customerData = customer
   ) {
     value = String(value).trim();
 
     if (!value || busy) return;
 
-    setText("");
-
-    const history =
-      customHistory ||
-      messagesRef.current;
-
-    const userMessage = {
-      role: "user",
-      text: value
-    };
-
-    const updatedMessages = [
-      ...history,
-      userMessage
-    ];
-
-    setMessages(updatedMessages);
-    messagesRef.current =
-      updatedMessages;
-
     setBusy(true);
 
     try {
+      const history =
+        messagesRef.current;
+
       const response = await fetch(
         "https://crediti-ia.onrender.com/api/chat",
         {
@@ -201,68 +441,107 @@ function App() {
 
           body: JSON.stringify({
             message: value,
-            history
+
+            history,
+
+            customer: {
+              name:
+                customerData.name,
+
+              firstName:
+                firstName(
+                  customerData.name
+                ),
+
+              phone:
+                customerData.phone,
+
+              whatsapp:
+                customerData.whatsapp,
+
+              city:
+                customerData.city
+            }
           })
         }
       );
 
       if (!response.ok) {
         throw new Error(
-          "Erro no servidor: " +
-            response.status
+          `Erro ${response.status}`
         );
       }
 
       const data =
         await response.json();
 
-      const assistantMessage = {
-        role: "assistant",
-        text:
-          data.reply ||
+      addMessage(
+        "assistant",
+        data.reply ||
           "Não consegui responder agora."
-      };
-
-      setMessages((current) => {
-        const next = [
-          ...current,
-          assistantMessage
-        ];
-
-        messagesRef.current = next;
-
-        return next;
-      });
-    } catch (error) {
-      console.error(
-        "Erro no atendimento:",
-        error
       );
+    } catch (error) {
+      console.error(error);
 
-      const errorMessage = {
-        role: "assistant",
-        text:
-          "Não consegui acessar o atendimento agora."
-      };
-
-      setMessages((current) => {
-        const next = [
-          ...current,
-          errorMessage
-        ];
-
-        messagesRef.current = next;
-
-        return next;
-      });
+      addMessage(
+        "assistant",
+        "Não consegui acessar o atendimento agora."
+      );
     } finally {
       setBusy(false);
     }
   }
 
-  /* ======================================================
-     RENDA EXTRA
-     ====================================================== */
+  /* =========================================================
+     ENVIAR
+     ========================================================= */
+
+  function sendMessage() {
+    const value =
+      String(text).trim();
+
+    if (!value || busy) return;
+
+    setText("");
+
+    addMessage(
+      "user",
+      value
+    );
+
+    if (step !== "ready") {
+      handleRegistration(value);
+
+      return;
+    }
+
+    sendToAI(value);
+  }
+
+  /* =========================================================
+     ALTERAÇÃO DO CAMPO
+     ========================================================= */
+
+  function handleInputChange(event) {
+    let value =
+      event.target.value;
+
+    /*
+      Durante a etapa do telefone,
+      aplica máscara automaticamente.
+    */
+
+    if (step === "phone") {
+      value =
+        formatPhone(value);
+    }
+
+    setText(value);
+  }
+
+  /* =========================================================
+     PARCEIRO
+     ========================================================= */
 
   function becomePartner() {
     const url =
@@ -281,9 +560,9 @@ function App() {
     }
   }
 
-  /* ======================================================
+  /* =========================================================
      TREINAMENTO
-     ====================================================== */
+     ========================================================= */
 
   function training() {
     const number =
@@ -310,18 +589,23 @@ function App() {
     );
   }
 
-  /* ======================================================
+  /* =========================================================
      CHAT
-     ====================================================== */
+     ========================================================= */
 
   if (screen === "chat") {
     return (
       <div
         className="app chat-app"
         style={{
-          height: `${chatHeight}px`,
-          minHeight: `${chatHeight}px`,
-          maxHeight: `${chatHeight}px`
+          height:
+            `${chatHeight}px`,
+
+          minHeight:
+            `${chatHeight}px`,
+
+          maxHeight:
+            `${chatHeight}px`
         }}
       >
         <header className="chat-header">
@@ -397,17 +681,12 @@ function App() {
         <div className="composer">
           <input
             value={text}
-            onChange={(event) =>
-              setText(
-                event.target.value
-              )
+
+            onChange={
+              handleInputChange
             }
+
             onFocus={() => {
-              /*
-                Depois que o teclado abrir,
-                força o documento a continuar
-                no topo.
-              */
               setTimeout(() => {
                 window.scrollTo(
                   0,
@@ -415,23 +694,47 @@ function App() {
                 );
               }, 100);
             }}
+
             onKeyDown={(event) => {
               if (
-                event.key === "Enter"
+                event.key ===
+                "Enter"
               ) {
                 event.preventDefault();
 
                 sendMessage();
               }
             }}
-            placeholder="Digite sua dúvida..."
-            autoComplete="off"
+
+            placeholder={
+              step === "name"
+                ? "Digite seu nome..."
+                : step === "phone"
+                ? "(85) 99203-2558"
+                : step === "whatsapp"
+                ? "Sim ou não..."
+                : step === "city"
+                ? "Digite sua cidade..."
+                : "Digite sua dúvida..."
+            }
+
+            inputMode={
+              step === "phone"
+                ? "numeric"
+                : "text"
+            }
+
+            autoComplete={
+              step === "phone"
+                ? "tel"
+                : "off"
+            }
           />
 
           <button
             className="yellow send"
-            onClick={() =>
-              sendMessage()
+            onClick={
+              sendMessage
             }
           >
             ENVIAR
@@ -441,9 +744,9 @@ function App() {
     );
   }
 
-  /* ======================================================
+  /* =========================================================
      PRODUTOS
-     ====================================================== */
+     ========================================================= */
 
   if (screen === "products") {
     return (
@@ -475,6 +778,7 @@ function App() {
               <button
                 className="yellow"
                 key={index}
+
                 onClick={() =>
                   openChat(
                     "Quero saber sobre " +
@@ -528,9 +832,9 @@ function App() {
     );
   }
 
-  /* ======================================================
+  /* =========================================================
      HOME
-     ====================================================== */
+     ========================================================= */
 
   return (
     <div className="app">
@@ -593,7 +897,9 @@ function App() {
 
         <button
           className="yellow"
-          onClick={becomePartner}
+          onClick={
+            becomePartner
+          }
         >
           QUERO SER PARCEIRO
         </button>
