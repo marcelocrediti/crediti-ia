@@ -453,10 +453,8 @@ button {
   }
 
   .card {
-    padding: /* =========================================
-   CREDITI IA - NOVO VISUAL
-   AMARELO + PRETO + BRANCO
-   ========================================= */
+  padding: 17px;
+}
 
 :root {
   --credi-yellow: #FFD400;
