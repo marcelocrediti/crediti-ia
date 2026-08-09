@@ -22,6 +22,11 @@ body,
   min-height: 100%;
 }
 
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
 html,
 body {
   overflow-x: hidden;
@@ -52,7 +57,9 @@ button {
   overflow-x: hidden;
 }
 
-/* CREDITI NO TOPO */
+/* =========================================================
+   CREDITI NO TOPO
+   ========================================================= */
 
 .brand {
   width: min(100%, 720px);
@@ -71,7 +78,9 @@ button {
   color: var(--credi-black);
 }
 
-/* HOME */
+/* =========================================================
+   HOME
+   ========================================================= */
 
 .home {
   width: min(100%, 620px);
@@ -89,9 +98,6 @@ button {
   background: var(--credi-yellow);
 }
 
-/* CREDITIN
-   TAMANHO PRESERVADO */
-
 .home .hero {
   width: min(275px, 72vw);
   height: min(275px, 72vw);
@@ -99,10 +105,8 @@ button {
   object-fit: contain;
   display: block;
 
-  margin: 0 auto 0;
+  margin: 0 auto;
 }
-
-/* TÍTULO */
 
 .home h1 {
   margin: -2px 0 2px;
@@ -116,8 +120,6 @@ button {
   color: var(--credi-black);
 }
 
-/* FRASE */
-
 .home > p {
   margin: 2px 0 9px;
 
@@ -128,8 +130,6 @@ button {
 
   color: var(--credi-black);
 }
-
-/* COMO PODEMOS AJUDAR */
 
 .home .prompt {
   width: 94%;
@@ -158,7 +158,9 @@ button {
   text-align: center;
 }
 
-/* BOTÕES */
+/* =========================================================
+   BOTÕES
+   ========================================================= */
 
 .yellow {
   width: 94%;
@@ -200,7 +202,9 @@ button {
   margin-bottom: 0;
 }
 
-/* TELAS INTERNAS */
+/* =========================================================
+   HEADER INTERNO
+   ========================================================= */
 
 header {
   width: 100%;
@@ -215,9 +219,7 @@ header {
   align-items: center;
   gap: 9px;
 
-  position: sticky;
-  top: 0;
-  z-index: 50;
+  flex: 0 0 auto;
 
   background: var(--credi-black);
   color: var(--credi-white);
@@ -277,7 +279,9 @@ header small {
   flex-basis: 32px;
 }
 
-/* PRODUTOS */
+/* =========================================================
+   PRODUTOS
+   ========================================================= */
 
 .page {
   width: min(100%, 620px);
@@ -309,7 +313,9 @@ header small {
   font-size: 12px;
 }
 
-/* RENDA EXTRA */
+/* =========================================================
+   RENDA EXTRA
+   ========================================================= */
 
 .partner {
   width: 94%;
@@ -365,20 +371,46 @@ header small {
   margin-bottom: 0;
 }
 
-/* CHAT */
+/* =========================================================
+   CHAT
+   FIXO NA TELA DO CELULAR
+   ========================================================= */
+
+.app:has(.chat) {
+  height: 100vh;
+  height: 100dvh;
+  min-height: 100dvh;
+
+  display: flex;
+  flex-direction: column;
+
+  overflow: hidden;
+
+  background: var(--credi-white);
+}
+
+.app:has(.chat) header {
+  flex: 0 0 auto;
+}
 
 .chat {
   width: min(100%, 620px);
-  margin: 0 auto;
 
-  padding:
-    14px
-    12px
-    calc(92px + env(safe-area-inset-bottom));
+  flex: 1 1 auto;
+  min-height: 0;
+
+  margin: 0 auto;
+  padding: 14px 12px;
 
   background: var(--credi-white);
 
   overflow-x: hidden;
+  overflow-y: auto;
+
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+
+  scroll-behavior: smooth;
 }
 
 .row {
@@ -406,15 +438,17 @@ header small {
 
   border-radius: 15px;
 
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 500;
   line-height: 1.4;
 
   overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .row.assistant .bubble {
   background: var(--credi-gray);
+
   border: 1px solid var(--credi-border);
   border-bottom-left-radius: 5px;
 }
@@ -426,15 +460,21 @@ header small {
   border-bottom-right-radius: 5px;
 }
 
-/* DIGITAÇÃO */
+/* =========================================================
+   CAMPO DE DIGITAÇÃO
+   NÃO USA FIXED
+   NÃO DÁ ZOOM NO IPHONE
+   ========================================================= */
 
 .composer {
   width: 100%;
 
-  position: fixed;
-  left: 0;
-  bottom: 0;
-  z-index: 100;
+  flex: 0 0 auto;
+
+  position: relative;
+  left: auto;
+  right: auto;
+  bottom: auto;
 
   padding:
     8px
@@ -443,48 +483,114 @@ header small {
 
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 7px;
 
   background: var(--credi-white);
 
   border-top: 2px solid var(--credi-black);
+
+  z-index: 20;
 }
 
 .composer input {
-  flex: 1;
+  flex: 1 1 auto;
 
+  width: 100%;
   min-width: 0;
-  height: 44px;
+  max-width: 100%;
 
-  padding: 0 11px;
+  height: 48px;
+
+  padding: 0 13px;
 
   background: var(--credi-gray);
-
-  border: 2px solid var(--credi-black);
-  border-radius: 13px;
-
-  font-size: 13px;
   color: var(--credi-black);
 
+  border: 2px solid var(--credi-black);
+  border-radius: 14px;
+
   outline: none;
+
+  /*
+    IMPORTANTE:
+    16px evita o zoom automático do Safari/iPhone.
+  */
+  font-size: 16px;
+  font-weight: 500;
+
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.composer input::placeholder {
+  color: #8A8A8A;
+  opacity: 1;
+}
+
+.composer input:focus {
+  background: var(--credi-white);
 }
 
 .composer .send {
   width: auto;
-  min-width: 70px;
+  min-width: 76px;
 
-  height: 44px;
-  min-height: 44px;
+  height: 48px;
+  min-height: 48px;
 
   margin: 0;
-  padding: 0 8px;
+  padding: 0 10px;
 
-  border-radius: 13px;
+  flex: 0 0 auto;
 
-  font-size: 10px;
+  border-radius: 14px;
+
+  font-size: 11px;
 }
 
-/* IPHONES MENORES */
+/* =========================================================
+   CELULARES
+   ========================================================= */
+
+@media (max-width: 480px) {
+
+  .app:has(.chat) {
+    width: 100%;
+    max-width: 100vw;
+  }
+
+  .app:has(.chat) header {
+    width: 100%;
+    max-width: 100vw;
+  }
+
+  .chat {
+    width: 100%;
+    max-width: 100vw;
+
+    padding: 12px 10px;
+  }
+
+  .bubble {
+    max-width: 82%;
+  }
+
+  .composer {
+    width: 100%;
+    max-width: 100vw;
+
+    padding-left: 8px;
+    padding-right: 8px;
+  }
+
+  .composer input {
+    font-size: 16px;
+  }
+}
+
+/* =========================================================
+   IPHONES MENORES
+   ========================================================= */
 
 @media (max-width: 380px) {
 
@@ -521,9 +627,21 @@ header small {
     min-height: 43px;
     font-size: 11px;
   }
+
+  .composer {
+    gap: 5px;
+  }
+
+  .composer .send {
+    min-width: 68px;
+    padding: 0 7px;
+    font-size: 10px;
+  }
 }
 
-/* TELAS GRANDES */
+/* =========================================================
+   TELAS GRANDES
+   ========================================================= */
 
 @media (min-width: 700px) {
 
@@ -559,11 +677,16 @@ header small {
   }
 }
 
+/* =========================================================
+   REDUÇÃO DE MOVIMENTO
+   ========================================================= */
+
 @media (prefers-reduced-motion: reduce) {
 
   *,
   *::before,
   *::after {
     transition: none !important;
+    scroll-behavior: auto !important;
   }
 }
