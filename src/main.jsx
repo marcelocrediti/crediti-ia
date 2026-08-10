@@ -534,6 +534,15 @@ function App() {
         data.reply
       );
 
+      if (data.showAnalysts === true) {
+        setShowAnalysts(true);
+
+        saveLead(
+          updatedCustomer,
+          "aguardando_escolha_analista"
+        );
+      }
+
       saveLead(
         updatedCustomer,
         "em_atendimento"
@@ -570,7 +579,7 @@ function App() {
 
     addMessage(
       "assistant",
-      `${firstName(customer.name)}, vou passar seu atendimento para um de nossos analistas. Escolha abaixo com quem você deseja continuar.`
+      `${firstName(customer.name)}, escolha abaixo com qual analista deseja continuar.`
     );
   }
 
