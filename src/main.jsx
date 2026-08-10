@@ -10,6 +10,18 @@ import "./styles.css";
 const API_URL =
   "https://crediti-ia-api.onrender.com";
 
+const SUPABASE_URL =
+  "https://vgdtywdpywezrwlrsawq.supabase.co/rest/v1";
+
+const SUPABASE_KEY =
+  "sb_publishable_dmoTPKmglghAohv0MrRA9A_2zlUYhER";
+
+const SUPABASE_LEADS_URL =
+  "https://vgdtywdpywezrwlrsawq.supabase.co/rest/v1/leads";
+
+const SUPABASE_PUBLISHABLE_KEY =
+  "COLE_AQUI_SUA_PUBLISHABLE_KEY";
+
 const RENDA_EXTRA_URL =
   "https://crediti.startcapital.app/signIn";
 
@@ -564,51 +576,59 @@ function App() {
       "em_atendimento"
   ) {
     try {
-      await fetch(
-        `${API_URL}/api/leads`,
-        {
-          method: "POST",
+      const response =
+        await fetch(
+          `${SUPABASE_URL}/leads`,
+          {
+            method: "POST",
 
-          headers: {
-            "Content-Type":
-              "application/json"
-          },
+            headers: {
+              "Content-Type":
+                "application/json",
+              "apikey":
+                SUPABASE_KEY,
+              "Authorization":
+                `Bearer ${SUPABASE_KEY}`,
+              "Prefer":
+                "return=minimal"
+            },
 
-          body:
-            JSON.stringify({
-              name:
-                data.name || "",
+            body:
+              JSON.stringify({
+                nome:
+                  data.name || "",
 
-              phone:
-                data.phone || "",
+                telefone:
+                  data.phone || "",
 
-              city:
-                data.city || "",
+                cidade:
+                  data.city || "",
 
-              whatsapp:
-                data.whatsapp ||
-                false,
+                produto_interesse:
+                  data.interest || "",
 
-              interest:
-                data.interest ||
-                "",
+                origem:
+                  "crediti_ia",
 
-              analyst:
-                data.analyst ||
-                "",
+                status,
 
-              analystEmail:
-                data.analystEmail ||
-                "",
+                politica_aceita:
+                  false,
 
-              status,
+                politica_versao:
+                  "v1.0"
+              })
+          }
+        );
 
-              createdAt:
-                new Date()
-                  .toISOString()
-            })
-        }
-      );
+      if (!response.ok) {
+        const errorText =
+          await response.text();
+
+        throw new Error(
+          `Supabase ${response.status}: ${errorText}`
+        );
+      }
     } catch (error) {
       console.log(
         "Lead não registrado:",
