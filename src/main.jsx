@@ -1,8 +1,14 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, {
+  useEffect,
+  useRef,
+  useState
+} from "react";
+
 import { createRoot } from "react-dom/client";
 import "./styles.css";
 
-const API_URL = "https://crediti-ia-api.onrender.com";
+const API_URL =
+  "https://crediti-ia-api.onrender.com";
 
 const ANALYSTS = {
   samila: {
@@ -18,33 +24,336 @@ const ANALYSTS = {
     title: "Analista Marcelino",
     phone: "(85) 99203-2558",
     whatsapp: "5585992032558",
-    email: "marcelinoteixeira.santos@gmail.com"
+    email:
+      "marcelinoteixeira.santos@gmail.com"
   }
 };
 
+/* =========================================================
+   PRODUTOS EDUCATIVOS
+   ========================================================= */
+
 const products = [
-  "Consignado INSS",
-  "BPC / LOAS",
-  "Consignado CLT",
-  "Crédito pessoal Bolsa Família",
-  "FGTS",
-  "Empréstimo no cartão de crédito",
-  "Empréstimo na conta de luz",
-  "Empréstimo com garantia de carro ou moto",
-  "Financiamento de carro",
-  "Financiamento de moto",
-  "Seguro Auto para carro ou moto",
-  "Consórcio de carro",
-  "Consórcio de moto",
-  "Consórcio de caminhão pesado",
-  "Consórcio de serviços"
+  {
+    id: "inss",
+    name: "Consignado INSS",
+
+    what:
+      "É um crédito voltado para aposentados e pensionistas do INSS. As parcelas são descontadas diretamente do benefício.",
+
+    forWho:
+      "Para aposentados e pensionistas que precisam de crédito e querem saber se possuem possibilidade de contratação.",
+
+    how:
+      "Primeiro é feita uma análise do benefício e das condições disponíveis. Na Crediti, a regra inicial cadastrada é idade de até 72 anos.",
+
+    when:
+      "Pode ser uma opção para quem precisa organizar uma despesa, resolver uma necessidade ou trocar uma dívida mais cara por uma condição que faça mais sentido.",
+
+    tip:
+      "Antes de contratar, veja quanto da sua renda já está comprometida. A parcela precisa caber no benefício sem apertar suas despesas do mês."
+  },
+
+  {
+    id: "bpc",
+    name: "BPC / LOAS",
+
+    what:
+      "É uma possibilidade de crédito analisada para pessoas que recebem o benefício BPC/LOAS.",
+
+    forWho:
+      "Para quem recebe o próprio benefício BPC/LOAS e quer verificar se existe uma opção disponível.",
+
+    how:
+      "A Crediti faz uma análise inicial do benefício. Atualmente não atendemos casos com representante legal ou curatela.",
+
+    when:
+      "Pode fazer sentido quando o beneficiário precisa de crédito e quer entender quais possibilidades existem para o seu benefício.",
+
+    tip:
+      "Não comprometa uma parte grande do benefício. Ele normalmente é usado para despesas essenciais, então a parcela precisa ser confortável."
+  },
+
+  {
+    id: "clt",
+    name: "Consignado CLT",
+
+    what:
+      "É uma modalidade voltada para trabalhadores com carteira assinada.",
+
+    forWho:
+      "Para trabalhadores registrados que querem verificar uma possibilidade de crédito usando o vínculo de trabalho na análise.",
+
+    how:
+      "Na regra cadastrada da Crediti, é necessário ter pelo menos 22 anos e no mínimo 12 meses de carteira assinada.",
+
+    when:
+      "Pode ser interessante para quem trabalha registrado e precisa organizar alguma despesa sem recorrer imediatamente ao cartão ou outras dívidas caras.",
+
+    tip:
+      "Não olhe só para a parcela. Pense também se ela continuará cabendo no orçamento caso apareça alguma despesa inesperada."
+  },
+
+  {
+    id: "bolsa",
+    name: "Crédito pessoal Bolsa Família",
+
+    what:
+      "É uma possibilidade de crédito analisada para pessoas que recebem Bolsa Família.",
+
+    forWho:
+      "Para beneficiários maiores de 18 anos que recebem pelo Caixa Tem e querem verificar as condições disponíveis.",
+
+    how:
+      "Na regra cadastrada, é necessário receber pelo Caixa Tem há pelo menos 30 dias e não possuir outro contrato ativo dessa modalidade.",
+
+    when:
+      "Pode ajudar em uma necessidade específica, desde que a nova parcela não comprometa o dinheiro usado nas despesas básicas da família.",
+
+    tip:
+      "O benefício é importante para o orçamento da casa. Antes de contratar qualquer crédito, veja se a parcela não vai faltar para alimentação, água, energia e outras despesas essenciais."
+  },
+
+  {
+    id: "fgts",
+    name: "FGTS",
+
+    what:
+      "É uma possibilidade que utiliza valores relacionados ao FGTS do trabalhador.",
+
+    forWho:
+      "Para quem possui saldo no FGTS e acesso ao aplicativo.",
+
+    how:
+      "Na regra cadastrada, é necessário ter acesso ao aplicativo FGTS e estar com a sistemática de saque-aniversário ativada.",
+
+    when:
+      "Pode ser uma alternativa para quem precisa de dinheiro e possui saldo disponível no FGTS.",
+
+    tip:
+      "Antes de usar seu FGTS, pense no motivo. Esse dinheiro também pode ser importante em momentos futuros. Use quando realmente fizer sentido."
+  },
+
+  {
+    id: "cartao",
+    name:
+      "Empréstimo no cartão de crédito",
+
+    what:
+      "É uma possibilidade de transformar parte do limite disponível do cartão em dinheiro, conforme análise.",
+
+    forWho:
+      "Para quem possui cartão no próprio nome e limite disponível.",
+
+    how:
+      "A pessoa precisa ser titular do cartão utilizado e possuir limite suficiente para a operação.",
+
+    when:
+      "Pode ajudar em uma necessidade pontual, principalmente quando a pessoa já sabe como vai organizar o pagamento.",
+
+    tip:
+      "Limite de cartão não é dinheiro sobrando. Antes de usar, veja o custo e evite transformar uma necessidade pequena em uma dívida longa."
+  },
+
+  {
+    id: "energia",
+    name:
+      "Empréstimo na conta de luz",
+
+    what:
+      "É uma modalidade de crédito em que a análise considera a conta de energia do cliente.",
+
+    forWho:
+      "Para pessoas que possuem conta de luz no próprio nome e querem verificar uma possibilidade de crédito.",
+
+    how:
+      "Na regra cadastrada, a conta precisa estar no nome do cliente há pelo menos 6 meses e a pessoa deve ter no mínimo 22 anos.",
+
+    when:
+      "Pode ser uma alternativa para quem precisa de crédito e possui um bom histórico de titularidade da conta.",
+
+    tip:
+      "A conta de energia é uma despesa essencial. Veja se o compromisso assumido não vai dificultar o pagamento das contas normais da casa."
+  },
+
+  {
+    id: "garantia",
+    name:
+      "Empréstimo com garantia de carro ou moto",
+
+    what:
+      "É um crédito para quem já possui carro ou moto e deseja usar o próprio veículo como garantia para conseguir dinheiro.",
+
+    forWho:
+      "Para quem já possui um veículo no próprio nome e precisa de dinheiro, sem estar tentando comprar outro veículo.",
+
+    how:
+      "Na regra cadastrada, o veículo precisa estar no nome da pessoa, apto a rodar, com documentação regularizável e o CPF deve estar sem restrição.",
+
+    when:
+      "Pode fazer sentido para quem já possui patrimônio e precisa levantar dinheiro para uma necessidade específica.",
+
+    tip:
+      "Seu veículo é um bem importante. Só use como garantia quando tiver certeza de que a parcela cabe no orçamento."
+  },
+
+  {
+    id: "financiamento-carro",
+    name: "Financiamento de carro",
+
+    what:
+      "É uma forma de comprar um carro agora e pagar o valor financiado em parcelas.",
+
+    forWho:
+      "Para quem quer comprar um carro e não pretende ou não consegue pagar todo o valor à vista.",
+
+    how:
+      "A instituição analisa o perfil do cliente e o veículo. Na regra inicial cadastrada, consideramos CPF sem restrição e score a partir de 700 pontos, além da documentação e transferência do veículo.",
+
+    when:
+      "Pode fazer mais sentido para quem precisa do carro agora e possui condições de assumir uma parcela mensal.",
+
+    tip:
+      "Não escolha o financiamento apenas pela menor parcela. Veja entrada, prazo e quanto a prestação representa da sua renda."
+  },
+
+  {
+    id: "financiamento-moto",
+    name: "Financiamento de moto",
+
+    what:
+      "É uma forma de comprar uma moto agora e pagar o valor financiado ao longo do tempo.",
+
+    forWho:
+      "Para quem precisa ou deseja comprar uma moto e não vai pagar todo o valor à vista.",
+
+    how:
+      "A instituição analisa o perfil do cliente e a moto. Na regra inicial cadastrada, consideramos CPF sem restrição e score a partir de 700 pontos, além da documentação e transferência.",
+
+    when:
+      "Pode fazer sentido para quem precisa da moto agora, seja para trabalhar, se locomover ou resolver uma necessidade pessoal.",
+
+    tip:
+      "Além da parcela, lembre de combustível, manutenção, documentação e seguro. A moto precisa caber no orçamento completo."
+  },
+
+  {
+    id: "seguro",
+    name:
+      "Seguro Auto para carro ou moto",
+
+    what:
+      "É uma proteção para ajudar o proprietário do veículo em situações previstas na contratação do seguro.",
+
+    forWho:
+      "Para quem possui carro ou moto e quer reduzir o impacto financeiro de determinados imprevistos.",
+
+    how:
+      "As condições dependem da análise e do plano escolhido. Na regra cadastrada, o condutor principal deve possuir CNH.",
+
+    when:
+      "Pode fazer sentido para quem depende do veículo no dia a dia e não quer ficar totalmente exposto a um prejuízo inesperado.",
+
+    tip:
+      "Não escolha seguro apenas pelo preço. Veja o que realmente está protegido e se a cobertura combina com sua rotina."
+  },
+
+  {
+    id: "consorcio-carro",
+    name: "Consórcio de carro",
+
+    what:
+      "É uma forma de planejar a compra de um carro por meio de um grupo de consórcio, sem ser a mesma coisa que financiamento.",
+
+    forWho:
+      "Para quem deseja comprar um carro, mas não precisa necessariamente retirar o veículo imediatamente.",
+
+    how:
+      "O cliente participa do grupo e aguarda a contemplação conforme as regras do consórcio. Na regra cadastrada, é necessário estar com o nome limpo quando for contemplado.",
+
+    when:
+      "Pode fazer sentido para quem consegue se planejar e aceita esperar pela contemplação.",
+
+    tip:
+      "Consórcio exige paciência e planejamento. Não entre contando com contemplação imediata."
+  },
+
+  {
+    id: "consorcio-moto",
+    name: "Consórcio de moto",
+
+    what:
+      "É uma maneira de planejar a compra de uma moto por meio de um grupo de consórcio.",
+
+    forWho:
+      "Para quem quer uma moto, mas não precisa necessariamente pegar o veículo agora.",
+
+    how:
+      "O participante entra em um grupo e aguarda a contemplação conforme as regras do consórcio. É necessário estar com o nome limpo no momento da contemplação.",
+
+    when:
+      "Pode ser uma opção para quem prefere se organizar para uma compra futura.",
+
+    tip:
+      "Se você precisa da moto imediatamente, compare com financiamento. Se pode esperar, o consórcio pode ser estudado com mais calma."
+  },
+
+  {
+    id: "consorcio-pesado",
+    name:
+      "Consórcio de caminhão pesado",
+
+    what:
+      "É uma modalidade de consórcio voltada para quem deseja adquirir caminhão ou veículo pesado.",
+
+    forWho:
+      "Para quem pretende comprar um veículo pesado e consegue planejar a aquisição.",
+
+    how:
+      "O cliente participa do grupo e aguarda a contemplação. Na regra cadastrada, precisa estar com o nome limpo quando for contemplado.",
+
+    when:
+      "Pode fazer sentido para quem trabalha ou pretende trabalhar com transporte e não precisa do veículo de forma imediata.",
+
+    tip:
+      "Antes de assumir a parcela, coloque na conta combustível, manutenção, seguro e os demais custos do veículo pesado."
+  },
+
+  {
+    id: "consorcio-servicos",
+    name: "Consórcio de serviços",
+
+    what:
+      "É uma modalidade de consórcio usada para contratar determinados tipos de serviços.",
+
+    forWho:
+      "Para quem quer se planejar financeiramente para realizar um serviço no futuro.",
+
+    how:
+      "Depois da contemplação, é necessário seguir as regras da administradora. Na regra cadastrada, deve ser apresentada nota fiscal do serviço.",
+
+    when:
+      "Pode fazer sentido para quem possui um projeto planejado e não precisa realizar o serviço imediatamente.",
+
+    tip:
+      "Defina primeiro quanto realmente precisa para o serviço. Evite assumir uma carta maior apenas porque a parcela parece pequena."
+  }
 ];
+
+/* =========================================================
+   FUNÇÕES BÁSICAS
+   ========================================================= */
 
 function getGreeting() {
   const hour = new Date().getHours();
 
-  if (hour >= 5 && hour < 12) return "Bom dia";
-  if (hour >= 12 && hour < 18) return "Boa tarde";
+  if (hour >= 5 && hour < 12) {
+    return "Bom dia";
+  }
+
+  if (hour >= 12 && hour < 18) {
+    return "Boa tarde";
+  }
 
   return "Boa noite";
 }
@@ -71,7 +380,11 @@ function formatPhone(value) {
 }
 
 function firstName(name) {
-  return String(name).trim().split(/\s+/)[0] || "";
+  return (
+    String(name)
+      .trim()
+      .split(/\s+/)[0] || ""
+  );
 }
 
 function normalize(value) {
@@ -79,10 +392,15 @@ function normalize(value) {
     .trim()
     .toLowerCase()
     .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "");
+    .replace(
+      /[\u0300-\u036f]/g,
+      ""
+    );
 }
 
-function looksLikeGreetingInsteadOfName(value) {
+function looksLikeGreetingInsteadOfName(
+  value
+) {
   const text = normalize(value);
 
   return [
@@ -101,43 +419,76 @@ function looksLikeGreetingInsteadOfName(value) {
   ].includes(text);
 }
 
+/* =========================================================
+   APP
+   ========================================================= */
+
 function App() {
-  const [screen, setScreen] = useState("home");
-  const [messages, setMessages] = useState([]);
-  const [text, setText] = useState("");
-  const [busy, setBusy] = useState(false);
+  const [screen, setScreen] =
+    useState("home");
 
-  const [chatHeight, setChatHeight] = useState(
-    window.innerHeight
-  );
+  const [messages, setMessages] =
+    useState([]);
 
-  const [step, setStep] = useState("name");
+  const [text, setText] =
+    useState("");
 
-  const [customer, setCustomer] = useState({
-    name: "",
-    city: "",
-    phone: "",
-    whatsapp: false,
-    interest: "",
-    analyst: "",
-    analystEmail: ""
-  });
+  const [busy, setBusy] =
+    useState(false);
 
-  const [pendingMessage, setPendingMessage] = useState("");
-  const [showAnalysts, setShowAnalysts] = useState(false);
+  const [chatHeight, setChatHeight] =
+    useState(window.innerHeight);
 
-  const chatRef = useRef(null);
-  const messagesRef = useRef([]);
+  const [step, setStep] =
+    useState("name");
+
+  const [selectedProduct, setSelectedProduct] =
+    useState(null);
+
+  const [customer, setCustomer] =
+    useState({
+      name: "",
+      city: "",
+      phone: "",
+      whatsapp: false,
+      interest: "",
+      analyst: "",
+      analystEmail: ""
+    });
+
+  const [
+    pendingMessage,
+    setPendingMessage
+  ] = useState("");
+
+  const [
+    showAnalysts,
+    setShowAnalysts
+  ] = useState(false);
+
+  const chatRef =
+    useRef(null);
+
+  const messagesRef =
+    useRef([]);
 
   useEffect(() => {
-    messagesRef.current = messages;
+    messagesRef.current =
+      messages;
   }, [messages]);
 
+  /* ======================================================
+     TECLADO DO IPHONE
+     ====================================================== */
+
   useEffect(() => {
-    if (screen !== "chat") return;
+    if (screen !== "chat") {
+      return;
+    }
 
     const updateViewport = () => {
-      const viewport = window.visualViewport;
+      const viewport =
+        window.visualViewport;
 
       const height = viewport
         ? viewport.height
@@ -152,9 +503,14 @@ function App() {
 
     updateViewport();
 
-    window.addEventListener("resize", updateViewport);
+    window.addEventListener(
+      "resize",
+      updateViewport
+    );
 
-    if (window.visualViewport) {
+    if (
+      window.visualViewport
+    ) {
       window.visualViewport.addEventListener(
         "resize",
         updateViewport
@@ -172,7 +528,9 @@ function App() {
         updateViewport
       );
 
-      if (window.visualViewport) {
+      if (
+        window.visualViewport
+      ) {
         window.visualViewport.removeEventListener(
           "resize",
           updateViewport
@@ -186,12 +544,21 @@ function App() {
     };
   }, [screen]);
 
+  /* ======================================================
+     ROLAGEM DO CHAT
+     ====================================================== */
+
   useEffect(() => {
-    if (screen !== "chat") return;
+    if (screen !== "chat") {
+      return;
+    }
 
-    const chat = chatRef.current;
+    const chat =
+      chatRef.current;
 
-    if (!chat) return;
+    if (!chat) {
+      return;
+    }
 
     requestAnimationFrame(() => {
       chat.scrollTo({
@@ -199,93 +566,162 @@ function App() {
         behavior: "smooth"
       });
     });
-  }, [messages, busy, showAnalysts, screen]);
+  }, [
+    messages,
+    busy,
+    showAnalysts,
+    screen
+  ]);
 
-  function addMessage(role, messageText) {
+  /* ======================================================
+     MENSAGEM
+     ====================================================== */
+
+  function addMessage(
+    role,
+    messageText
+  ) {
     const message = {
       role,
       text: messageText
     };
 
     setMessages((current) => {
-      const next = [...current, message];
+      const next = [
+        ...current,
+        message
+      ];
 
-      messagesRef.current = next;
+      messagesRef.current =
+        next;
 
       return next;
     });
   }
+
+  /* ======================================================
+     LEADS
+     ====================================================== */
 
   async function saveLead(
     data,
     status = "em_atendimento"
   ) {
     try {
-      await fetch(`${API_URL}/api/leads`, {
-        method: "POST",
+      await fetch(
+        `${API_URL}/api/leads`,
+        {
+          method: "POST",
 
-        headers: {
-          "Content-Type": "application/json"
-        },
+          headers: {
+            "Content-Type":
+              "application/json"
+          },
 
-        body: JSON.stringify({
-          name: data.name || "",
-          phone: data.phone || "",
-          city: data.city || "",
-          whatsapp: data.whatsapp || false,
-          interest: data.interest || "",
-          analyst: data.analyst || "",
-          analystEmail: data.analystEmail || "",
-          status,
-          createdAt: new Date().toISOString()
-        })
-      });
+          body: JSON.stringify({
+            name:
+              data.name || "",
+
+            phone:
+              data.phone || "",
+
+            city:
+              data.city || "",
+
+            whatsapp:
+              data.whatsapp || false,
+
+            interest:
+              data.interest || "",
+
+            analyst:
+              data.analyst || "",
+
+            analystEmail:
+              data.analystEmail || "",
+
+            status,
+
+            createdAt:
+              new Date().toISOString()
+          })
+        }
+      );
     } catch (error) {
       console.log(
-        "Lead não registrado neste momento:",
+        "Lead não registrado:",
         error
       );
     }
   }
 
-  function openChat(firstMessage = "") {
-    const greeting = getGreeting();
+  /* ======================================================
+     ABRIR CHAT
+     ====================================================== */
+
+  function openChat(
+    firstMessage = ""
+  ) {
+    const greeting =
+      getGreeting();
 
     const initialMessages = [
       {
         role: "assistant",
+
         text:
           `${greeting}! Eu sou o Creditin, assistente da Crediti. Tudo bem? Para começar, como posso te chamar?`
       }
     ];
 
-    setMessages(initialMessages);
-    messagesRef.current = initialMessages;
+    setMessages(
+      initialMessages
+    );
+
+    messagesRef.current =
+      initialMessages;
 
     setCustomer({
       name: "",
       city: "",
       phone: "",
       whatsapp: false,
-      interest: firstMessage || "",
+      interest:
+        firstMessage || "",
       analyst: "",
       analystEmail: ""
     });
 
     setStep("name");
     setText("");
+
     setShowAnalysts(false);
-    setPendingMessage(firstMessage || "");
+
+    setPendingMessage(
+      firstMessage || ""
+    );
+
     setScreen("chat");
   }
 
-  function handleRegistration(value) {
-    const cleanValue = String(value).trim();
+  /* ======================================================
+     ENTREVISTA INICIAL
+     ====================================================== */
 
-    if (step === "name") {
+  function handleRegistration(
+    value
+  ) {
+    const cleanValue =
+      String(value).trim();
+
+    if (
+      step === "name"
+    ) {
       if (
         cleanValue.length < 2 ||
-        looksLikeGreetingInsteadOfName(cleanValue)
+        looksLikeGreetingInsteadOfName(
+          cleanValue
+        )
       ) {
         addMessage(
           "assistant",
@@ -295,13 +731,18 @@ function App() {
         return;
       }
 
-      const name = cleanValue;
-      const shortName = firstName(name);
+      const name =
+        cleanValue;
 
-      setCustomer((current) => ({
-        ...current,
-        name
-      }));
+      const shortName =
+        firstName(name);
+
+      setCustomer(
+        (current) => ({
+          ...current,
+          name
+        })
+      );
 
       setStep("city");
 
@@ -313,8 +754,12 @@ function App() {
       return;
     }
 
-    if (step === "city") {
-      if (cleanValue.length < 2) {
+    if (
+      step === "city"
+    ) {
+      if (
+        cleanValue.length < 2
+      ) {
         addMessage(
           "assistant",
           "Me diz o nome da sua cidade para a gente continuar."
@@ -323,10 +768,12 @@ function App() {
         return;
       }
 
-      setCustomer((current) => ({
-        ...current,
-        city: cleanValue
-      }));
+      setCustomer(
+        (current) => ({
+          ...current,
+          city: cleanValue
+        })
+      );
 
       setStep("phone");
 
@@ -338,10 +785,18 @@ function App() {
       return;
     }
 
-    if (step === "phone") {
-      const numbers = cleanValue.replace(/\D/g, "");
+    if (
+      step === "phone"
+    ) {
+      const numbers =
+        cleanValue.replace(
+          /\D/g,
+          ""
+        );
 
-      if (numbers.length !== 11) {
+      if (
+        numbers.length !== 11
+      ) {
         addMessage(
           "assistant",
           "Esse número parece incompleto. Digite o DDD e o número completo para mim."
@@ -350,12 +805,15 @@ function App() {
         return;
       }
 
-      const formatted = formatPhone(numbers);
+      const formatted =
+        formatPhone(numbers);
 
-      setCustomer((current) => ({
-        ...current,
-        phone: formatted
-      }));
+      setCustomer(
+        (current) => ({
+          ...current,
+          phone: formatted
+        })
+      );
 
       setStep("whatsapp");
 
@@ -367,22 +825,35 @@ function App() {
       return;
     }
 
-    if (step === "whatsapp") {
-      const answer = normalize(cleanValue);
+    if (
+      step === "whatsapp"
+    ) {
+      const answer =
+        normalize(cleanValue);
 
-      const yes = [
-        "sim",
-        "s",
-        "yes",
-        "e"
-      ].includes(answer);
+      const yes =
+        [
+          "sim",
+          "s",
+          "ss",
+          "simn",
+          "claro",
+          "pode",
+          "isso",
+          "yes",
+          "e"
+        ].includes(answer);
 
-      const no = [
-        "nao",
-        "n"
-      ].includes(answer);
+      const no =
+        [
+          "nao",
+          "n"
+        ].includes(answer);
 
-      if (!yes && !no) {
+      if (
+        !yes &&
+        !no
+      ) {
         addMessage(
           "assistant",
           "Só confirma para mim: esse número também é seu WhatsApp? Pode responder sim ou não."
@@ -396,7 +867,10 @@ function App() {
         whatsapp: yes
       };
 
-      setCustomer(updatedCustomer);
+      setCustomer(
+        updatedCustomer
+      );
+
       setStep("ready");
 
       saveLead(
@@ -404,8 +878,11 @@ function App() {
         "dados_coletados"
       );
 
-      if (pendingMessage) {
-        const request = pendingMessage;
+      if (
+        pendingMessage
+      ) {
+        const request =
+          pendingMessage;
 
         setPendingMessage("");
 
@@ -429,82 +906,106 @@ function App() {
     }
   }
 
+  /* ======================================================
+     IA
+     ====================================================== */
+
   async function sendToAI(
     value,
     customerData = customer
   ) {
-    value = String(value).trim();
+    value =
+      String(value).trim();
 
-    if (!value || busy) return;
+    if (
+      !value ||
+      busy
+    ) {
+      return;
+    }
 
     setBusy(true);
 
     const updatedCustomer = {
       ...customerData,
+
       interest:
-        customerData.interest || value
+        customerData.interest ||
+        value
     };
 
-    setCustomer(updatedCustomer);
+    setCustomer(
+      updatedCustomer
+    );
 
     try {
-      const controller = new AbortController();
+      const controller =
+        new AbortController();
 
-      const timeout = setTimeout(() => {
-        controller.abort();
-      }, 65000);
+      const timeout =
+        setTimeout(() => {
+          controller.abort();
+        }, 65000);
 
-      const response = await fetch(
-        `${API_URL}/api/chat`,
-        {
-          method: "POST",
+      const response =
+        await fetch(
+          `${API_URL}/api/chat`,
+          {
+            method: "POST",
 
-          signal: controller.signal,
+            signal:
+              controller.signal,
 
-          headers: {
-            "Content-Type": "application/json"
-          },
+            headers: {
+              "Content-Type":
+                "application/json"
+            },
 
-          body: JSON.stringify({
-            message: value,
+            body: JSON.stringify({
+              message: value,
 
-            history:
-              messagesRef.current,
+              history:
+                messagesRef.current,
 
-            customer: {
-              name:
-                updatedCustomer.name,
+              customer: {
+                name:
+                  updatedCustomer.name,
 
-              firstName:
-                firstName(
-                  updatedCustomer.name
-                ),
+                firstName:
+                  firstName(
+                    updatedCustomer.name
+                  ),
 
-              city:
-                updatedCustomer.city,
+                city:
+                  updatedCustomer.city,
 
-              phone:
-                updatedCustomer.phone,
+                phone:
+                  updatedCustomer.phone,
 
-              whatsapp:
-                updatedCustomer.whatsapp,
+                whatsapp:
+                  updatedCustomer.whatsapp,
 
-              interest:
-                updatedCustomer.interest
-            }
-          })
-        }
+                interest:
+                  updatedCustomer.interest
+              }
+            })
+          }
+        );
+
+      clearTimeout(
+        timeout
       );
 
-      clearTimeout(timeout);
-
-      const rawText = await response.text();
+      const rawText =
+        await response.text();
 
       let data = {};
 
       try {
         data = rawText
-          ? JSON.parse(rawText)
+          ? JSON.parse(
+              rawText
+            )
           : {};
       } catch {
         data = {
@@ -512,18 +1013,18 @@ function App() {
         };
       }
 
-      if (!response.ok) {
-        const errorMessage =
-          data.error ||
-          data.message ||
-          `Erro ${response.status}`;
-
+      if (
+        !response.ok
+      ) {
         throw new Error(
-          errorMessage
+          data.error ||
+            `Erro ${response.status}`
         );
       }
 
-      if (!data.reply) {
+      if (
+        !data.reply
+      ) {
         throw new Error(
           "A API respondeu, mas não retornou texto."
         );
@@ -534,8 +1035,13 @@ function App() {
         data.reply
       );
 
-      if (data.showAnalysts === true) {
-        setShowAnalysts(true);
+      if (
+        data.showAnalysts ===
+        true
+      ) {
+        setShowAnalysts(
+          true
+        );
 
         saveLead(
           updatedCustomer,
@@ -559,12 +1065,15 @@ function App() {
       ) {
         addMessage(
           "assistant",
-          "O atendimento demorou mais que o esperado para responder. Tente novamente em alguns segundos."
+          "O atendimento demorou mais que o esperado. Tente novamente em alguns segundos."
         );
       } else {
         addMessage(
           "assistant",
-          `Erro no atendimento: ${error?.message || "não identificado"}`
+          `Erro no atendimento: ${
+            error?.message ||
+            "não identificado"
+          }`
         );
       }
     } finally {
@@ -572,29 +1081,134 @@ function App() {
     }
   }
 
-  function offerHumanService() {
-    if (showAnalysts) return;
+  /* ======================================================
+     ENVIAR CHAT
+     ====================================================== */
 
-    setShowAnalysts(true);
+  function sendMessage() {
+    const value =
+      String(text).trim();
+
+    if (
+      !value ||
+      busy
+    ) {
+      return;
+    }
+
+    setText("");
 
     addMessage(
-      "assistant",
-      `${firstName(customer.name)}, escolha abaixo com qual analista deseja continuar.`
+      "user",
+      value
+    );
+
+    if (
+      step !== "ready"
+    ) {
+      handleRegistration(
+        value
+      );
+
+      return;
+    }
+
+    sendToAI(value);
+  }
+
+  function handleInputChange(
+    event
+  ) {
+    let value =
+      event.target.value;
+
+    if (
+      step === "phone"
+    ) {
+      value =
+        formatPhone(value);
+    }
+
+    setText(value);
+  }
+
+  /* ======================================================
+     WHATSAPP
+     ====================================================== */
+
+  function openAnalystWhatsApp(
+    analystKey,
+    productName = ""
+  ) {
+    const analyst =
+      ANALYSTS[analystKey];
+
+    if (!analyst) {
+      return;
+    }
+
+    let whatsappMessage;
+
+    if (productName) {
+      whatsappMessage =
+        `Olá, ${analyst.name}! ` +
+        `Conheci o produto "${productName}" pelo Crediti IA ` +
+        `e gostaria de saber mais e verificar as possibilidades para mim.`;
+    } else {
+      const interest =
+        customer.interest ||
+        "uma solução da Crediti";
+
+      whatsappMessage =
+        `Olá, ${analyst.name}! ` +
+        `Meu nome é ${customer.name || ""}. ` +
+        `${
+          customer.city
+            ? `Sou de ${customer.city}. `
+            : ""
+        }` +
+        `Fiz meu atendimento pelo Crediti IA ` +
+        `e tenho interesse em ${interest}.`;
+    }
+
+    const url =
+      "https://wa.me/" +
+      analyst.whatsapp +
+      "?text=" +
+      encodeURIComponent(
+        whatsappMessage
+      );
+
+    window.open(
+      url,
+      "_blank"
     );
   }
 
-  function chooseAnalyst(analystKey) {
-    const analyst = ANALYSTS[analystKey];
+  function chooseAnalyst(
+    analystKey
+  ) {
+    const analyst =
+      ANALYSTS[analystKey];
 
-    if (!analyst) return;
+    if (!analyst) {
+      return;
+    }
 
     const updatedCustomer = {
       ...customer,
-      analyst: analyst.title,
-      analystEmail: analyst.email
+
+      analyst:
+        analyst.title,
+
+      analystEmail:
+        analyst.email
     };
 
-    setCustomer(updatedCustomer);
+    setCustomer(
+      updatedCustomer
+    );
+
     setShowAnalysts(false);
 
     saveLead(
@@ -607,93 +1221,16 @@ function App() {
       `Certo, ${firstName(updatedCustomer.name)}! Vou te encaminhar para ${analyst.title}.`
     );
 
-    const interest =
-      updatedCustomer.interest ||
-      "um produto da Crediti";
-
-    const whatsappMessage =
-      `Olá, ${analyst.name}! ` +
-      `Meu nome é ${updatedCustomer.name}. ` +
-      `Sou de ${updatedCustomer.city}. ` +
-      `Fiz meu atendimento pelo Crediti IA ` +
-      `e tenho interesse em ${interest}.`;
-
-    const url =
-      "https://wa.me/" +
-      analyst.whatsapp +
-      "?text=" +
-      encodeURIComponent(
-        whatsappMessage
-      );
-
     setTimeout(() => {
-      window.open(
-        url,
-        "_blank"
+      openAnalystWhatsApp(
+        analystKey
       );
     }, 250);
   }
 
-  function sendMessage() {
-    const value = String(text).trim();
-
-    if (!value || busy) return;
-
-    setText("");
-
-    addMessage(
-      "user",
-      value
-    );
-
-    if (step !== "ready") {
-      handleRegistration(value);
-      return;
-    }
-
-    const normalized =
-      normalize(value);
-
-    const humanRequests = [
-      "quero falar com atendente",
-      "quero falar com um atendente",
-      "quero falar com uma pessoa",
-      "falar com atendente",
-      "falar com analista",
-      "quero contratar",
-      "quero fazer agora",
-      "quero prosseguir",
-      "quero continuar",
-      "quero atendimento",
-      "falar com a crediti"
-    ];
-
-    if (
-      humanRequests.some(
-        (phrase) =>
-          normalized.includes(
-            phrase
-          )
-      )
-    ) {
-      offerHumanService();
-      return;
-    }
-
-    sendToAI(value);
-  }
-
-  function handleInputChange(event) {
-    let value =
-      event.target.value;
-
-    if (step === "phone") {
-      value =
-        formatPhone(value);
-    }
-
-    setText(value);
-  }
+  /* ======================================================
+     RENDA EXTRA
+     ====================================================== */
 
   function becomePartner() {
     const url =
@@ -712,10 +1249,17 @@ function App() {
     }
   }
 
-  if (screen === "chat") {
+  /* ======================================================
+     CHAT
+     ====================================================== */
+
+  if (
+    screen === "chat"
+  ) {
     return (
       <div
         className="app chat-app"
+
         style={{
           height:
             `${chatHeight}px`,
@@ -728,12 +1272,15 @@ function App() {
         }}
       >
         <header className="chat-header">
+
           <button
             className="back"
+
             onClick={() =>
-              setScreen("home")
+              setScreen(
+                "home"
+              )
             }
-            aria-label="Voltar"
           >
             ‹
           </button>
@@ -745,9 +1292,15 @@ function App() {
           />
 
           <div>
-            <b>Crediti IA</b>
-            <small>Assistente da Crediti</small>
+            <b>
+              Crediti IA
+            </b>
+
+            <small>
+              Assistente da Crediti
+            </small>
           </div>
+
         </header>
 
         <main
@@ -755,12 +1308,16 @@ function App() {
           ref={chatRef}
         >
           {messages.map(
-            (message, index) => (
+            (
+              message,
+              index
+            ) => (
               <div
                 className={
                   "row " +
                   message.role
                 }
+
                 key={index}
               >
                 {message.role ===
@@ -775,14 +1332,17 @@ function App() {
                 <div className="bubble">
                   {message.text}
                 </div>
+
               </div>
             )
           )}
 
           {showAnalysts && (
             <div className="analyst-options">
+
               <button
                 className="analyst-button"
+
                 onClick={() =>
                   chooseAnalyst(
                     "samila"
@@ -800,6 +1360,7 @@ function App() {
 
               <button
                 className="analyst-button"
+
                 onClick={() =>
                   chooseAnalyst(
                     "marcelino"
@@ -814,11 +1375,13 @@ function App() {
                   Continuar pelo WhatsApp
                 </small>
               </button>
+
             </div>
           )}
 
           {busy && (
             <div className="row assistant">
+
               <img
                 src="/creditin.png"
                 className="avatar small"
@@ -828,14 +1391,21 @@ function App() {
               <div className="bubble">
                 Analisando...
               </div>
+
             </div>
           )}
+
         </main>
 
         <div className="composer">
+
           <input
             value={text}
-            onChange={handleInputChange}
+
+            onChange={
+              handleInputChange
+            }
+
             onFocus={() => {
               setTimeout(() => {
                 window.scrollTo(
@@ -844,31 +1414,40 @@ function App() {
                 );
               }, 100);
             }}
+
             onKeyDown={(event) => {
               if (
                 event.key ===
                 "Enter"
               ) {
                 event.preventDefault();
+
                 sendMessage();
               }
             }}
+
             placeholder={
               step === "name"
                 ? "Digite seu nome..."
+
                 : step === "city"
                 ? "Digite sua cidade..."
+
                 : step === "phone"
                 ? "(XX) XXXXX-XXXX"
+
                 : step === "whatsapp"
                 ? "Sim ou não..."
+
                 : "Digite sua dúvida..."
             }
+
             inputMode={
               step === "phone"
                 ? "numeric"
                 : "text"
             }
+
             autoComplete={
               step === "phone"
                 ? "tel"
@@ -878,71 +1457,334 @@ function App() {
 
           <button
             className="yellow send"
-            onClick={sendMessage}
+
+            onClick={
+              sendMessage
+            }
           >
             ENVIAR
           </button>
+
         </div>
       </div>
     );
   }
 
-  if (screen === "products") {
+  /* ======================================================
+     LISTA DE PRODUTOS
+     ====================================================== */
+
+  if (
+    screen === "products"
+  ) {
     return (
       <div className="app">
+
         <header>
+
           <button
             className="back"
+
             onClick={() =>
-              setScreen("home")
+              setScreen(
+                "home"
+              )
             }
           >
             ‹
           </button>
 
           <div>
-            <b>Produtos Crediti</b>
-            <small>Conheça nossas opções</small>
+            <b>
+              Produtos Crediti
+            </b>
+
+            <small>
+              Conheça antes de contratar
+            </small>
           </div>
+
         </header>
 
         <main className="page">
+
           {products.map(
-            (product, index) => (
+            (product) => (
               <button
                 className="yellow"
-                key={index}
-                onClick={() =>
-                  openChat(
-                    "Quero saber sobre " +
-                      product +
-                      "."
-                  )
+
+                key={
+                  product.id
                 }
+
+                onClick={() => {
+                  setSelectedProduct(
+                    product
+                  );
+
+                  setScreen(
+                    "productDetail"
+                  );
+                }}
               >
-                {product}
+                {product.name}
               </button>
             )
           )}
+
         </main>
       </div>
     );
   }
 
+  /* ======================================================
+     DETALHE EDUCATIVO DO PRODUTO
+     ====================================================== */
+
+  if (
+    screen ===
+      "productDetail" &&
+    selectedProduct
+  ) {
+    return (
+      <div className="app">
+
+        <header>
+
+          <button
+            className="back"
+
+            onClick={() =>
+              setScreen(
+                "products"
+              )
+            }
+          >
+            ‹
+          </button>
+
+          <div>
+            <b>
+              {selectedProduct.name}
+            </b>
+
+            <small>
+              Entenda antes de decidir
+            </small>
+          </div>
+
+        </header>
+
+        <main className="page">
+
+          <section className="partner">
+
+            <img
+              src="/creditin.png"
+              alt="Creditin"
+            />
+
+            <h2>
+              {selectedProduct.name}
+            </h2>
+
+            <p>
+              <strong>
+                O que é?
+              </strong>
+              <br />
+              {
+                selectedProduct.what
+              }
+            </p>
+
+            <p>
+              <strong>
+                Para quem é?
+              </strong>
+              <br />
+              {
+                selectedProduct.forWho
+              }
+            </p>
+
+            <p>
+              <strong>
+                Como funciona?
+              </strong>
+              <br />
+              {
+                selectedProduct.how
+              }
+            </p>
+
+            <p>
+              <strong>
+                Quando pode ajudar?
+              </strong>
+              <br />
+              {
+                selectedProduct.when
+              }
+            </p>
+
+            <p>
+              <strong>
+                Dica do Creditin
+              </strong>
+              <br />
+              {
+                selectedProduct.tip
+              }
+            </p>
+
+            <p>
+              <strong>
+                Gostou dessa opção?
+              </strong>
+              <br />
+              Podemos verificar as possibilidades para você. A aprovação e as condições dependem da análise da instituição responsável.
+            </p>
+
+            <button
+              className="yellow"
+
+              onClick={() =>
+                openAnalystWhatsApp(
+                  "samila",
+                  selectedProduct.name
+                )
+              }
+            >
+              ANALISTA SAMILA
+            </button>
+
+            <button
+              className="yellow"
+
+              onClick={() =>
+                openAnalystWhatsApp(
+                  "marcelino",
+                  selectedProduct.name
+                )
+              }
+            >
+              ANALISTA MARCELINO
+            </button>
+
+          </section>
+
+        </main>
+      </div>
+    );
+  }
+
+  /* ======================================================
+     FALAR DIRETO COM A CREDITI
+     ====================================================== */
+
+  if (
+    screen === "human"
+  ) {
+    return (
+      <div className="app">
+
+        <header>
+
+          <button
+            className="back"
+
+            onClick={() =>
+              setScreen(
+                "home"
+              )
+            }
+          >
+            ‹
+          </button>
+
+          <div>
+            <b>
+              Falar com a Crediti
+            </b>
+
+            <small>
+              Escolha um analista
+            </small>
+          </div>
+
+        </header>
+
+        <main className="page">
+
+          <section className="partner">
+
+            <img
+              src="/creditin.png"
+              alt="Creditin"
+            />
+
+            <h2>
+              Atendimento Crediti
+            </h2>
+
+            <p>
+              Escolha com quem você deseja falar. Samila e Marcelino atendem os produtos da Crediti.
+            </p>
+
+            <button
+              className="yellow"
+
+              onClick={() =>
+                openAnalystWhatsApp(
+                  "samila"
+                )
+              }
+            >
+              ANALISTA SAMILA
+            </button>
+
+            <button
+              className="yellow"
+
+              onClick={() =>
+                openAnalystWhatsApp(
+                  "marcelino"
+                )
+              }
+            >
+              ANALISTA MARCELINO
+            </button>
+
+          </section>
+
+        </main>
+      </div>
+    );
+  }
+
+  /* ======================================================
+     HOME
+     ====================================================== */
+
   return (
     <div className="app">
+
       <div className="brand">
         CREDITI
       </div>
 
       <main className="home">
+
         <img
           src="/creditin.png"
           className="hero"
           alt="Creditin"
         />
 
-        <h1>CREDITI IA</h1>
+        <h1>
+          CREDITI IA
+        </h1>
 
         <p>
           Seu crédito. Mais simples.
@@ -950,6 +1792,7 @@ function App() {
 
         <button
           className="prompt"
+
           onClick={() =>
             openChat()
           }
@@ -959,6 +1802,7 @@ function App() {
 
         <button
           className="yellow"
+
           onClick={() =>
             openChat()
           }
@@ -968,8 +1812,11 @@ function App() {
 
         <button
           className="yellow"
+
           onClick={() =>
-            setScreen("products")
+            setScreen(
+              "products"
+            )
           }
         >
           CONHECER NOSSOS PRODUTOS
@@ -977,9 +1824,10 @@ function App() {
 
         <button
           className="yellow"
+
           onClick={() =>
-            openChat(
-              "Quero falar com a Crediti."
+            setScreen(
+              "human"
             )
           }
         >
@@ -988,15 +1836,22 @@ function App() {
 
         <button
           className="yellow"
-          onClick={becomePartner}
+
+          onClick={
+            becomePartner
+          }
         >
           QUERO SER PARCEIRO
         </button>
+
       </main>
+
     </div>
   );
 }
 
 createRoot(
-  document.getElementById("root")
+  document.getElementById(
+    "root"
+  )
 ).render(<App />);
