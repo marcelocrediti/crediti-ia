@@ -10,11 +10,13 @@ import "./styles.css";
 const API_URL =
   "https://crediti-ia-api.onrender.com";
 
+const RENDA_EXTRA_URL =
+  "https://crediti.startcapital.app/signIn";
+
 const ANALYSTS = {
   samila: {
     name: "Samila",
     title: "Analista Samila",
-    phone: "(85) 99440-9719",
     whatsapp: "5585994409719",
     email: "samilaf9@gmail.com"
   },
@@ -22,336 +24,256 @@ const ANALYSTS = {
   marcelino: {
     name: "Marcelino",
     title: "Analista Marcelino",
-    phone: "(85) 99203-2558",
     whatsapp: "5585992032558",
     email:
       "marcelinoteixeira.santos@gmail.com"
   }
 };
 
-/* =========================================================
-   PRODUTOS EDUCATIVOS
-   ========================================================= */
-
 const products = [
   {
     id: "inss",
     name: "Consignado INSS",
-
     what:
-      "É um crédito voltado para aposentados e pensionistas do INSS. As parcelas são descontadas diretamente do benefício.",
-
+      "Crédito para aposentados e pensionistas do INSS, com parcelas descontadas do benefício.",
     forWho:
-      "Para aposentados e pensionistas que precisam de crédito e querem saber se possuem possibilidade de contratação.",
-
+      "Aposentados e pensionistas que querem verificar uma possibilidade de crédito.",
     how:
-      "Primeiro é feita uma análise do benefício e das condições disponíveis. Na Crediti, a regra inicial cadastrada é idade de até 72 anos.",
-
+      "A Crediti faz uma análise inicial. A regra cadastrada atualmente considera idade de até 72 anos.",
     when:
-      "Pode ser uma opção para quem precisa organizar uma despesa, resolver uma necessidade ou trocar uma dívida mais cara por uma condição que faça mais sentido.",
-
+      "Pode ajudar em uma necessidade específica ou na organização de despesas.",
     tip:
-      "Antes de contratar, veja quanto da sua renda já está comprometida. A parcela precisa caber no benefício sem apertar suas despesas do mês."
+      "Não comprometa uma parte grande do benefício. A parcela precisa continuar confortável todo mês."
   },
 
   {
     id: "bpc",
     name: "BPC / LOAS",
-
     what:
-      "É uma possibilidade de crédito analisada para pessoas que recebem o benefício BPC/LOAS.",
-
+      "Possibilidade de crédito analisada para quem recebe BPC/LOAS.",
     forWho:
-      "Para quem recebe o próprio benefício BPC/LOAS e quer verificar se existe uma opção disponível.",
-
+      "Para quem recebe o próprio benefício e deseja verificar uma opção disponível.",
     how:
-      "A Crediti faz uma análise inicial do benefício. Atualmente não atendemos casos com representante legal ou curatela.",
-
+      "A Crediti faz uma análise inicial. Não atendemos representante legal nem casos de curatela.",
     when:
-      "Pode fazer sentido quando o beneficiário precisa de crédito e quer entender quais possibilidades existem para o seu benefício.",
-
+      "Pode ajudar quando o beneficiário precisa resolver uma necessidade financeira.",
     tip:
-      "Não comprometa uma parte grande do benefício. Ele normalmente é usado para despesas essenciais, então a parcela precisa ser confortável."
+      "O benefício costuma pagar despesas essenciais. Evite assumir uma parcela que aperte o orçamento."
   },
 
   {
     id: "clt",
     name: "Consignado CLT",
-
     what:
-      "É uma modalidade voltada para trabalhadores com carteira assinada.",
-
+      "Crédito voltado para trabalhadores com carteira assinada.",
     forWho:
-      "Para trabalhadores registrados que querem verificar uma possibilidade de crédito usando o vínculo de trabalho na análise.",
-
+      "Para quem trabalha registrado e quer verificar uma possibilidade de crédito.",
     how:
-      "Na regra cadastrada da Crediti, é necessário ter pelo menos 22 anos e no mínimo 12 meses de carteira assinada.",
-
+      "A regra cadastrada considera idade mínima de 22 anos e pelo menos 12 meses de carteira assinada.",
     when:
-      "Pode ser interessante para quem trabalha registrado e precisa organizar alguma despesa sem recorrer imediatamente ao cartão ou outras dívidas caras.",
-
+      "Pode ajudar em uma despesa necessária ou na reorganização financeira.",
     tip:
-      "Não olhe só para a parcela. Pense também se ela continuará cabendo no orçamento caso apareça alguma despesa inesperada."
+      "Veja se a parcela continuará cabendo no orçamento mesmo quando aparecer uma despesa inesperada."
   },
 
   {
     id: "bolsa",
-    name: "Crédito pessoal Bolsa Família",
-
+    name: "Crédito Bolsa Família",
     what:
-      "É uma possibilidade de crédito analisada para pessoas que recebem Bolsa Família.",
-
+      "Possibilidade de crédito analisada para beneficiários do Bolsa Família.",
     forWho:
-      "Para beneficiários maiores de 18 anos que recebem pelo Caixa Tem e querem verificar as condições disponíveis.",
-
+      "Maiores de 18 anos que recebem pelo Caixa Tem e querem verificar condições disponíveis.",
     how:
-      "Na regra cadastrada, é necessário receber pelo Caixa Tem há pelo menos 30 dias e não possuir outro contrato ativo dessa modalidade.",
-
+      "É necessário receber pelo Caixa Tem há pelo menos 30 dias e não possuir outro contrato ativo dessa modalidade.",
     when:
-      "Pode ajudar em uma necessidade específica, desde que a nova parcela não comprometa o dinheiro usado nas despesas básicas da família.",
-
+      "Pode ajudar em uma necessidade específica quando a parcela cabe no orçamento.",
     tip:
-      "O benefício é importante para o orçamento da casa. Antes de contratar qualquer crédito, veja se a parcela não vai faltar para alimentação, água, energia e outras despesas essenciais."
+      "Não comprometa o dinheiro necessário para alimentação, água, energia e outras despesas da casa."
   },
 
   {
     id: "fgts",
     name: "FGTS",
-
     what:
-      "É uma possibilidade que utiliza valores relacionados ao FGTS do trabalhador.",
-
+      "Possibilidade de usar valores relacionados ao seu FGTS.",
     forWho:
-      "Para quem possui saldo no FGTS e acesso ao aplicativo.",
-
+      "Para quem possui saldo e acesso ao aplicativo FGTS.",
     how:
-      "Na regra cadastrada, é necessário ter acesso ao aplicativo FGTS e estar com a sistemática de saque-aniversário ativada.",
-
+      "É necessário ter acesso ao aplicativo e saque-aniversário ativado.",
     when:
-      "Pode ser uma alternativa para quem precisa de dinheiro e possui saldo disponível no FGTS.",
-
+      "Pode ser uma alternativa para quem precisa de dinheiro e possui saldo disponível.",
     tip:
-      "Antes de usar seu FGTS, pense no motivo. Esse dinheiro também pode ser importante em momentos futuros. Use quando realmente fizer sentido."
+      "Use seu FGTS com objetivo claro. Esse dinheiro também pode ser importante no futuro."
   },
 
   {
     id: "cartao",
-    name:
-      "Empréstimo no cartão de crédito",
-
+    name: "Crédito no cartão",
     what:
-      "É uma possibilidade de transformar parte do limite disponível do cartão em dinheiro, conforme análise.",
-
+      "Possibilidade de transformar parte do limite disponível do cartão em dinheiro, conforme análise.",
     forWho:
-      "Para quem possui cartão no próprio nome e limite disponível.",
-
+      "Para quem é titular do cartão e possui limite disponível.",
     how:
-      "A pessoa precisa ser titular do cartão utilizado e possuir limite suficiente para a operação.",
-
+      "O cartão utilizado precisa estar no nome da própria pessoa.",
     when:
-      "Pode ajudar em uma necessidade pontual, principalmente quando a pessoa já sabe como vai organizar o pagamento.",
-
+      "Pode ajudar em uma necessidade pontual.",
     tip:
-      "Limite de cartão não é dinheiro sobrando. Antes de usar, veja o custo e evite transformar uma necessidade pequena em uma dívida longa."
+      "Limite não é dinheiro sobrando. Veja o custo antes de transformar o cartão em dívida."
   },
 
   {
     id: "energia",
-    name:
-      "Empréstimo na conta de luz",
-
+    name: "Crédito na conta de luz",
     what:
-      "É uma modalidade de crédito em que a análise considera a conta de energia do cliente.",
-
+      "Modalidade de crédito que considera a titularidade e o histórico da conta de energia.",
     forWho:
-      "Para pessoas que possuem conta de luz no próprio nome e querem verificar uma possibilidade de crédito.",
-
+      "Para quem possui conta de luz no próprio nome.",
     how:
-      "Na regra cadastrada, a conta precisa estar no nome do cliente há pelo menos 6 meses e a pessoa deve ter no mínimo 22 anos.",
-
+      "A regra cadastrada considera conta no nome do cliente há pelo menos 6 meses e idade mínima de 22 anos.",
     when:
-      "Pode ser uma alternativa para quem precisa de crédito e possui um bom histórico de titularidade da conta.",
-
+      "Pode ser uma alternativa para quem precisa verificar uma opção de crédito.",
     tip:
-      "A conta de energia é uma despesa essencial. Veja se o compromisso assumido não vai dificultar o pagamento das contas normais da casa."
+      "Energia é despesa essencial. A nova obrigação não pode dificultar o pagamento das contas da casa."
   },
 
   {
     id: "garantia",
     name:
-      "Empréstimo com garantia de carro ou moto",
-
+      "Crédito com garantia (carro ou moto)",
     what:
-      "É um crédito para quem já possui carro ou moto e deseja usar o próprio veículo como garantia para conseguir dinheiro.",
-
+      "Crédito para quem já possui carro ou moto e deseja usar o veículo como garantia.",
     forWho:
-      "Para quem já possui um veículo no próprio nome e precisa de dinheiro, sem estar tentando comprar outro veículo.",
-
+      "Para quem já tem veículo no próprio nome e precisa de dinheiro.",
     how:
-      "Na regra cadastrada, o veículo precisa estar no nome da pessoa, apto a rodar, com documentação regularizável e o CPF deve estar sem restrição.",
-
+      "O veículo precisa estar no nome da pessoa, apto a rodar, com documentação regularizável e CPF sem restrição.",
     when:
-      "Pode fazer sentido para quem já possui patrimônio e precisa levantar dinheiro para uma necessidade específica.",
-
+      "Pode fazer sentido para quem possui um veículo e precisa levantar dinheiro.",
     tip:
-      "Seu veículo é um bem importante. Só use como garantia quando tiver certeza de que a parcela cabe no orçamento."
+      "Seu veículo é um patrimônio. Só use como garantia se tiver segurança para pagar as parcelas."
   },
 
   {
     id: "financiamento-carro",
     name: "Financiamento de carro",
-
     what:
-      "É uma forma de comprar um carro agora e pagar o valor financiado em parcelas.",
-
+      "Uma forma de comprar um carro agora e pagar o valor financiado em parcelas.",
     forWho:
-      "Para quem quer comprar um carro e não pretende ou não consegue pagar todo o valor à vista.",
-
+      "Para quem precisa comprar um carro e não vai pagar todo o valor à vista.",
     how:
-      "A instituição analisa o perfil do cliente e o veículo. Na regra inicial cadastrada, consideramos CPF sem restrição e score a partir de 700 pontos, além da documentação e transferência do veículo.",
-
+      "A regra inicial cadastrada considera CPF sem restrição, score a partir de 700, documentação e transferência.",
     when:
-      "Pode fazer mais sentido para quem precisa do carro agora e possui condições de assumir uma parcela mensal.",
-
+      "Pode fazer sentido para quem precisa do veículo agora.",
     tip:
-      "Não escolha o financiamento apenas pela menor parcela. Veja entrada, prazo e quanto a prestação representa da sua renda."
+      "Não olhe apenas a parcela. Considere entrada, prazo e quanto ela representa da sua renda."
   },
 
   {
     id: "financiamento-moto",
     name: "Financiamento de moto",
-
     what:
-      "É uma forma de comprar uma moto agora e pagar o valor financiado ao longo do tempo.",
-
+      "Uma forma de comprar uma moto agora e pagar o valor financiado em parcelas.",
     forWho:
-      "Para quem precisa ou deseja comprar uma moto e não vai pagar todo o valor à vista.",
-
+      "Para quem precisa ou deseja comprar uma moto.",
     how:
-      "A instituição analisa o perfil do cliente e a moto. Na regra inicial cadastrada, consideramos CPF sem restrição e score a partir de 700 pontos, além da documentação e transferência.",
-
+      "A regra inicial cadastrada considera CPF sem restrição, score a partir de 700, documentação e transferência.",
     when:
-      "Pode fazer sentido para quem precisa da moto agora, seja para trabalhar, se locomover ou resolver uma necessidade pessoal.",
-
+      "Pode ser útil para trabalho, locomoção ou necessidade pessoal.",
     tip:
-      "Além da parcela, lembre de combustível, manutenção, documentação e seguro. A moto precisa caber no orçamento completo."
+      "Além da parcela, considere combustível, manutenção, documentação e seguro."
   },
 
   {
     id: "seguro",
-    name:
-      "Seguro Auto para carro ou moto",
-
+    name: "Seguro Auto",
     what:
-      "É uma proteção para ajudar o proprietário do veículo em situações previstas na contratação do seguro.",
-
+      "Proteção para carro ou moto conforme as coberturas contratadas.",
     forWho:
-      "Para quem possui carro ou moto e quer reduzir o impacto financeiro de determinados imprevistos.",
-
+      "Para quem possui veículo e quer reduzir o impacto financeiro de determinados imprevistos.",
     how:
-      "As condições dependem da análise e do plano escolhido. Na regra cadastrada, o condutor principal deve possuir CNH.",
-
+      "As condições dependem do plano e da análise. O condutor principal deve possuir CNH.",
     when:
-      "Pode fazer sentido para quem depende do veículo no dia a dia e não quer ficar totalmente exposto a um prejuízo inesperado.",
-
+      "Pode fazer sentido principalmente para quem depende do veículo no dia a dia.",
     tip:
-      "Não escolha seguro apenas pelo preço. Veja o que realmente está protegido e se a cobertura combina com sua rotina."
+      "Não escolha apenas pelo preço. Veja quais situações realmente estão cobertas."
   },
 
   {
     id: "consorcio-carro",
     name: "Consórcio de carro",
-
     what:
-      "É uma forma de planejar a compra de um carro por meio de um grupo de consórcio, sem ser a mesma coisa que financiamento.",
-
+      "Forma planejada de comprar um carro através de um grupo de consórcio.",
     forWho:
-      "Para quem deseja comprar um carro, mas não precisa necessariamente retirar o veículo imediatamente.",
-
+      "Para quem quer comprar um carro, mas pode esperar pela contemplação.",
     how:
-      "O cliente participa do grupo e aguarda a contemplação conforme as regras do consórcio. Na regra cadastrada, é necessário estar com o nome limpo quando for contemplado.",
-
+      "O participante entra no grupo e aguarda a contemplação conforme as regras. Precisa estar com o nome limpo quando contemplado.",
     when:
-      "Pode fazer sentido para quem consegue se planejar e aceita esperar pela contemplação.",
-
+      "Pode fazer sentido para quem consegue planejar a compra.",
     tip:
-      "Consórcio exige paciência e planejamento. Não entre contando com contemplação imediata."
+      "Não entre contando com contemplação imediata. Consórcio exige planejamento."
   },
 
   {
     id: "consorcio-moto",
     name: "Consórcio de moto",
-
     what:
-      "É uma maneira de planejar a compra de uma moto por meio de um grupo de consórcio.",
-
+      "Forma planejada de adquirir uma moto através de consórcio.",
     forWho:
-      "Para quem quer uma moto, mas não precisa necessariamente pegar o veículo agora.",
-
+      "Para quem quer uma moto, mas pode esperar pela contemplação.",
     how:
-      "O participante entra em um grupo e aguarda a contemplação conforme as regras do consórcio. É necessário estar com o nome limpo no momento da contemplação.",
-
+      "O participante entra no grupo e segue as regras de contemplação.",
     when:
-      "Pode ser uma opção para quem prefere se organizar para uma compra futura.",
-
+      "Pode ser uma alternativa para uma compra futura planejada.",
     tip:
-      "Se você precisa da moto imediatamente, compare com financiamento. Se pode esperar, o consórcio pode ser estudado com mais calma."
+      "Se precisa da moto agora, compare com financiamento. Se pode esperar, avalie o consórcio."
   },
 
   {
     id: "consorcio-pesado",
     name:
       "Consórcio de caminhão pesado",
-
     what:
-      "É uma modalidade de consórcio voltada para quem deseja adquirir caminhão ou veículo pesado.",
-
+      "Consórcio voltado para aquisição de caminhões e veículos pesados.",
     forWho:
-      "Para quem pretende comprar um veículo pesado e consegue planejar a aquisição.",
-
+      "Para quem trabalha ou pretende trabalhar com transporte e consegue planejar a compra.",
     how:
-      "O cliente participa do grupo e aguarda a contemplação. Na regra cadastrada, precisa estar com o nome limpo quando for contemplado.",
-
+      "O participante entra no grupo e aguarda a contemplação. Precisa estar com o nome limpo quando contemplado.",
     when:
-      "Pode fazer sentido para quem trabalha ou pretende trabalhar com transporte e não precisa do veículo de forma imediata.",
-
+      "Pode fazer sentido para uma aquisição planejada de veículo pesado.",
     tip:
-      "Antes de assumir a parcela, coloque na conta combustível, manutenção, seguro e os demais custos do veículo pesado."
+      "Inclua combustível, manutenção, seguro e demais custos do caminhão no seu planejamento."
   },
 
   {
     id: "consorcio-servicos",
     name: "Consórcio de serviços",
-
     what:
-      "É uma modalidade de consórcio usada para contratar determinados tipos de serviços.",
-
+      "Consórcio usado para contratar determinados serviços.",
     forWho:
-      "Para quem quer se planejar financeiramente para realizar um serviço no futuro.",
-
+      "Para quem deseja planejar financeiramente um serviço futuro.",
     how:
-      "Depois da contemplação, é necessário seguir as regras da administradora. Na regra cadastrada, deve ser apresentada nota fiscal do serviço.",
-
+      "Depois da contemplação, deve seguir as regras da administradora e apresentar nota fiscal.",
     when:
-      "Pode fazer sentido para quem possui um projeto planejado e não precisa realizar o serviço imediatamente.",
-
+      "Pode ajudar em projetos que não precisam ser realizados imediatamente.",
     tip:
-      "Defina primeiro quanto realmente precisa para o serviço. Evite assumir uma carta maior apenas porque a parcela parece pequena."
+      "Defina quanto realmente precisa antes de escolher o valor da carta."
   }
 ];
 
-/* =========================================================
-   FUNÇÕES BÁSICAS
-   ========================================================= */
-
 function getGreeting() {
-  const hour = new Date().getHours();
+  const hour =
+    new Date().getHours();
 
-  if (hour >= 5 && hour < 12) {
+  if (
+    hour >= 5 &&
+    hour < 12
+  ) {
     return "Bom dia";
   }
 
-  if (hour >= 12 && hour < 18) {
+  if (
+    hour >= 12 &&
+    hour < 18
+  ) {
     return "Boa tarde";
   }
 
@@ -359,24 +281,37 @@ function getGreeting() {
 }
 
 function formatPhone(value) {
-  const numbers = String(value)
-    .replace(/\D/g, "")
-    .slice(0, 11);
+  const numbers =
+    String(value)
+      .replace(/\D/g, "")
+      .slice(0, 11);
 
-  if (!numbers) return "";
+  if (!numbers) {
+    return "";
+  }
 
-  if (numbers.length <= 2) {
+  if (
+    numbers.length <= 2
+  ) {
     return `(${numbers}`;
   }
 
-  const ddd = numbers.slice(0, 2);
-  const rest = numbers.slice(2);
+  const ddd =
+    numbers.slice(0, 2);
 
-  if (rest.length <= 5) {
+  const rest =
+    numbers.slice(2);
+
+  if (
+    rest.length <= 5
+  ) {
     return `(${ddd}) ${rest}`;
   }
 
-  return `(${ddd}) ${rest.slice(0, 5)}-${rest.slice(5)}`;
+  return `(${ddd}) ${rest.slice(
+    0,
+    5
+  )}-${rest.slice(5)}`;
 }
 
 function firstName(name) {
@@ -401,7 +336,8 @@ function normalize(value) {
 function looksLikeGreetingInsteadOfName(
   value
 ) {
-  const text = normalize(value);
+  const text =
+    normalize(value);
 
   return [
     "oi",
@@ -413,48 +349,60 @@ function looksLikeGreetingInsteadOfName(
     "tudo bom",
     "beleza",
     "opa",
-    "e ai",
-    "hey",
-    "hello"
+    "e ai"
   ].includes(text);
 }
 
-/* =========================================================
-   APP
-   ========================================================= */
-
 function App() {
-  const [screen, setScreen] =
-    useState("home");
+  const [
+    screen,
+    setScreen
+  ] = useState("home");
 
-  const [messages, setMessages] =
-    useState([]);
+  const [
+    messages,
+    setMessages
+  ] = useState([]);
 
-  const [text, setText] =
-    useState("");
+  const [
+    text,
+    setText
+  ] = useState("");
 
-  const [busy, setBusy] =
-    useState(false);
+  const [
+    busy,
+    setBusy
+  ] = useState(false);
 
-  const [chatHeight, setChatHeight] =
-    useState(window.innerHeight);
+  const [
+    chatHeight,
+    setChatHeight
+  ] = useState(
+    window.innerHeight
+  );
 
-  const [step, setStep] =
-    useState("name");
+  const [
+    step,
+    setStep
+  ] = useState("name");
 
-  const [selectedProduct, setSelectedProduct] =
-    useState(null);
+  const [
+    selectedProduct,
+    setSelectedProduct
+  ] = useState(null);
 
-  const [customer, setCustomer] =
-    useState({
-      name: "",
-      city: "",
-      phone: "",
-      whatsapp: false,
-      interest: "",
-      analyst: "",
-      analystEmail: ""
-    });
+  const [
+    customer,
+    setCustomer
+  ] = useState({
+    name: "",
+    city: "",
+    phone: "",
+    whatsapp: false,
+    interest: "",
+    analyst: "",
+    analystEmail: ""
+  });
 
   const [
     pendingMessage,
@@ -477,29 +425,36 @@ function App() {
       messages;
   }, [messages]);
 
-  /* ======================================================
-     TECLADO DO IPHONE
-     ====================================================== */
-
   useEffect(() => {
-    if (screen !== "chat") {
+    if (
+      screen !== "chat"
+    ) {
       return;
     }
 
-    const updateViewport = () => {
-      const viewport =
-        window.visualViewport;
+    const updateViewport =
+      () => {
+        const viewport =
+          window.visualViewport;
 
-      const height = viewport
-        ? viewport.height
-        : window.innerHeight;
+        const height =
+          viewport
+            ? viewport.height
+            : window.innerHeight;
 
-      setChatHeight(height);
+        setChatHeight(
+          height
+        );
 
-      requestAnimationFrame(() => {
-        window.scrollTo(0, 0);
-      });
-    };
+        requestAnimationFrame(
+          () => {
+            window.scrollTo(
+              0,
+              0
+            );
+          }
+        );
+      };
 
     updateViewport();
 
@@ -511,15 +466,17 @@ function App() {
     if (
       window.visualViewport
     ) {
-      window.visualViewport.addEventListener(
-        "resize",
-        updateViewport
-      );
+      window.visualViewport
+        .addEventListener(
+          "resize",
+          updateViewport
+        );
 
-      window.visualViewport.addEventListener(
-        "scroll",
-        updateViewport
-      );
+      window.visualViewport
+        .addEventListener(
+          "scroll",
+          updateViewport
+        );
     }
 
     return () => {
@@ -531,25 +488,25 @@ function App() {
       if (
         window.visualViewport
       ) {
-        window.visualViewport.removeEventListener(
-          "resize",
-          updateViewport
-        );
+        window.visualViewport
+          .removeEventListener(
+            "resize",
+            updateViewport
+          );
 
-        window.visualViewport.removeEventListener(
-          "scroll",
-          updateViewport
-        );
+        window.visualViewport
+          .removeEventListener(
+            "scroll",
+            updateViewport
+          );
       }
     };
   }, [screen]);
 
-  /* ======================================================
-     ROLAGEM DO CHAT
-     ====================================================== */
-
   useEffect(() => {
-    if (screen !== "chat") {
+    if (
+      screen !== "chat"
+    ) {
       return;
     }
 
@@ -560,22 +517,22 @@ function App() {
       return;
     }
 
-    requestAnimationFrame(() => {
-      chat.scrollTo({
-        top: chat.scrollHeight,
-        behavior: "smooth"
-      });
-    });
+    requestAnimationFrame(
+      () => {
+        chat.scrollTo({
+          top:
+            chat.scrollHeight,
+          behavior:
+            "smooth"
+        });
+      }
+    );
   }, [
     messages,
     busy,
     showAnalysts,
     screen
   ]);
-
-  /* ======================================================
-     MENSAGEM
-     ====================================================== */
 
   function addMessage(
     role,
@@ -586,26 +543,25 @@ function App() {
       text: messageText
     };
 
-    setMessages((current) => {
-      const next = [
-        ...current,
-        message
-      ];
+    setMessages(
+      (current) => {
+        const next = [
+          ...current,
+          message
+        ];
 
-      messagesRef.current =
-        next;
+        messagesRef.current =
+          next;
 
-      return next;
-    });
+        return next;
+      }
+    );
   }
-
-  /* ======================================================
-     LEADS
-     ====================================================== */
 
   async function saveLead(
     data,
-    status = "em_atendimento"
+    status =
+      "em_atendimento"
   ) {
     try {
       await fetch(
@@ -618,33 +574,39 @@ function App() {
               "application/json"
           },
 
-          body: JSON.stringify({
-            name:
-              data.name || "",
+          body:
+            JSON.stringify({
+              name:
+                data.name || "",
 
-            phone:
-              data.phone || "",
+              phone:
+                data.phone || "",
 
-            city:
-              data.city || "",
+              city:
+                data.city || "",
 
-            whatsapp:
-              data.whatsapp || false,
+              whatsapp:
+                data.whatsapp ||
+                false,
 
-            interest:
-              data.interest || "",
+              interest:
+                data.interest ||
+                "",
 
-            analyst:
-              data.analyst || "",
+              analyst:
+                data.analyst ||
+                "",
 
-            analystEmail:
-              data.analystEmail || "",
+              analystEmail:
+                data.analystEmail ||
+                "",
 
-            status,
+              status,
 
-            createdAt:
-              new Date().toISOString()
-          })
+              createdAt:
+                new Date()
+                  .toISOString()
+            })
         }
       );
     } catch (error) {
@@ -655,10 +617,6 @@ function App() {
     }
   }
 
-  /* ======================================================
-     ABRIR CHAT
-     ====================================================== */
-
   function openChat(
     firstMessage = ""
   ) {
@@ -667,7 +625,8 @@ function App() {
 
     const initialMessages = [
       {
-        role: "assistant",
+        role:
+          "assistant",
 
         text:
           `${greeting}! Eu sou o Creditin, assistente da Crediti. Tudo bem? Para começar, como posso te chamar?`
@@ -693,9 +652,12 @@ function App() {
     });
 
     setStep("name");
+
     setText("");
 
-    setShowAnalysts(false);
+    setShowAnalysts(
+      false
+    );
 
     setPendingMessage(
       firstMessage || ""
@@ -703,10 +665,6 @@ function App() {
 
     setScreen("chat");
   }
-
-  /* ======================================================
-     ENTREVISTA INICIAL
-     ====================================================== */
 
   function handleRegistration(
     value
@@ -718,7 +676,8 @@ function App() {
       step === "name"
     ) {
       if (
-        cleanValue.length < 2 ||
+        cleanValue.length <
+          2 ||
         looksLikeGreetingInsteadOfName(
           cleanValue
         )
@@ -734,9 +693,6 @@ function App() {
       const name =
         cleanValue;
 
-      const shortName =
-        firstName(name);
-
       setCustomer(
         (current) => ({
           ...current,
@@ -748,7 +704,7 @@ function App() {
 
       addMessage(
         "assistant",
-        `Prazer, ${shortName}! De qual cidade você está falando?`
+        `Prazer, ${firstName(name)}! De qual cidade você está falando?`
       );
 
       return;
@@ -758,7 +714,8 @@ function App() {
       step === "city"
     ) {
       if (
-        cleanValue.length < 2
+        cleanValue.length <
+        2
       ) {
         addMessage(
           "assistant",
@@ -795,7 +752,8 @@ function App() {
         );
 
       if (
-        numbers.length !== 11
+        numbers.length !==
+        11
       ) {
         addMessage(
           "assistant",
@@ -815,7 +773,9 @@ function App() {
         })
       );
 
-      setStep("whatsapp");
+      setStep(
+        "whatsapp"
+      );
 
       addMessage(
         "assistant",
@@ -829,7 +789,9 @@ function App() {
       step === "whatsapp"
     ) {
       const answer =
-        normalize(cleanValue);
+        normalize(
+          cleanValue
+        );
 
       const yes =
         [
@@ -842,13 +804,17 @@ function App() {
           "isso",
           "yes",
           "e"
-        ].includes(answer);
+        ].includes(
+          answer
+        );
 
       const no =
         [
           "nao",
           "n"
-        ].includes(answer);
+        ].includes(
+          answer
+        );
 
       if (
         !yes &&
@@ -862,10 +828,11 @@ function App() {
         return;
       }
 
-      const updatedCustomer = {
-        ...customer,
-        whatsapp: yes
-      };
+      const updatedCustomer =
+        {
+          ...customer,
+          whatsapp: yes
+        };
 
       setCustomer(
         updatedCustomer
@@ -884,19 +851,24 @@ function App() {
         const request =
           pendingMessage;
 
-        setPendingMessage("");
+        setPendingMessage(
+          ""
+        );
 
         addMessage(
           "assistant",
           `Perfeito, ${firstName(updatedCustomer.name)}. Já tenho seus dados básicos. Agora vou analisar o que você procura.`
         );
 
-        setTimeout(() => {
-          sendToAI(
-            request,
-            updatedCustomer
-          );
-        }, 250);
+        setTimeout(
+          () => {
+            sendToAI(
+              request,
+              updatedCustomer
+            );
+          },
+          250
+        );
       } else {
         addMessage(
           "assistant",
@@ -906,13 +878,10 @@ function App() {
     }
   }
 
-  /* ======================================================
-     IA
-     ====================================================== */
-
   async function sendToAI(
     value,
-    customerData = customer
+    customerData =
+      customer
   ) {
     value =
       String(value).trim();
@@ -926,92 +895,68 @@ function App() {
 
     setBusy(true);
 
-    const updatedCustomer = {
-      ...customerData,
+    const updatedCustomer =
+      {
+        ...customerData,
 
-      interest:
-        customerData.interest ||
-        value
-    };
+        interest:
+          customerData
+            .interest ||
+          value
+      };
 
     setCustomer(
       updatedCustomer
     );
 
     try {
-      const controller =
-        new AbortController();
-
-      const timeout =
-        setTimeout(() => {
-          controller.abort();
-        }, 65000);
-
       const response =
         await fetch(
           `${API_URL}/api/chat`,
           {
-            method: "POST",
-
-            signal:
-              controller.signal,
+            method:
+              "POST",
 
             headers: {
               "Content-Type":
                 "application/json"
             },
 
-            body: JSON.stringify({
-              message: value,
+            body:
+              JSON.stringify({
+                message:
+                  value,
 
-              history:
-                messagesRef.current,
+                history:
+                  messagesRef.current,
 
-              customer: {
-                name:
-                  updatedCustomer.name,
+                customer: {
+                  name:
+                    updatedCustomer.name,
 
-                firstName:
-                  firstName(
-                    updatedCustomer.name
-                  ),
+                  firstName:
+                    firstName(
+                      updatedCustomer.name
+                    ),
 
-                city:
-                  updatedCustomer.city,
+                  city:
+                    updatedCustomer.city,
 
-                phone:
-                  updatedCustomer.phone,
+                  phone:
+                    updatedCustomer.phone,
 
-                whatsapp:
-                  updatedCustomer.whatsapp,
+                  whatsapp:
+                    updatedCustomer.whatsapp,
 
-                interest:
-                  updatedCustomer.interest
-              }
-            })
+                  interest:
+                    updatedCustomer.interest
+                }
+              })
           }
         );
 
-      clearTimeout(
-        timeout
-      );
-
-      const rawText =
-        await response.text();
-
-      let data = {};
-
-      try {
-        data = rawText
-          ? JSON.parse(
-              rawText
-            )
-          : {};
-      } catch {
-        data = {
-          error: rawText
-        };
-      }
+      const data =
+        await response.json();
 
       if (
         !response.ok
@@ -1019,14 +964,6 @@ function App() {
         throw new Error(
           data.error ||
             `Erro ${response.status}`
-        );
-      }
-
-      if (
-        !data.reply
-      ) {
-        throw new Error(
-          "A API respondeu, mas não retornou texto."
         );
       }
 
@@ -1042,11 +979,6 @@ function App() {
         setShowAnalysts(
           true
         );
-
-        saveLead(
-          updatedCustomer,
-          "aguardando_escolha_analista"
-        );
       }
 
       saveLead(
@@ -1054,36 +986,14 @@ function App() {
         "em_atendimento"
       );
     } catch (error) {
-      console.error(
-        "ERRO CREDITI IA:",
-        error
+      addMessage(
+        "assistant",
+        "Não consegui responder agora. Tente novamente em alguns segundos."
       );
-
-      if (
-        error?.name ===
-        "AbortError"
-      ) {
-        addMessage(
-          "assistant",
-          "O atendimento demorou mais que o esperado. Tente novamente em alguns segundos."
-        );
-      } else {
-        addMessage(
-          "assistant",
-          `Erro no atendimento: ${
-            error?.message ||
-            "não identificado"
-          }`
-        );
-      }
     } finally {
       setBusy(false);
     }
   }
-
-  /* ======================================================
-     ENVIAR CHAT
-     ====================================================== */
 
   function sendMessage() {
     const value =
@@ -1132,43 +1042,31 @@ function App() {
     setText(value);
   }
 
-  /* ======================================================
-     WHATSAPP
-     ====================================================== */
-
   function openAnalystWhatsApp(
     analystKey,
     productName = ""
   ) {
     const analyst =
-      ANALYSTS[analystKey];
+      ANALYSTS[
+        analystKey
+      ];
 
     if (!analyst) {
       return;
     }
 
-    let whatsappMessage;
+    let message;
 
-    if (productName) {
-      whatsappMessage =
+    if (
+      productName
+    ) {
+      message =
         `Olá, ${analyst.name}! ` +
-        `Conheci o produto "${productName}" pelo Crediti IA ` +
-        `e gostaria de saber mais e verificar as possibilidades para mim.`;
+        `Conheci "${productName}" pelo Crediti IA e gostaria de saber mais e verificar as possibilidades para mim.`;
     } else {
-      const interest =
-        customer.interest ||
-        "uma solução da Crediti";
-
-      whatsappMessage =
+      message =
         `Olá, ${analyst.name}! ` +
-        `Meu nome é ${customer.name || ""}. ` +
-        `${
-          customer.city
-            ? `Sou de ${customer.city}. `
-            : ""
-        }` +
-        `Fiz meu atendimento pelo Crediti IA ` +
-        `e tenho interesse em ${interest}.`;
+        `Gostaria de falar com a Crediti e continuar meu atendimento com você.`;
     }
 
     const url =
@@ -1176,7 +1074,7 @@ function App() {
       analyst.whatsapp +
       "?text=" +
       encodeURIComponent(
-        whatsappMessage
+        message
       );
 
     window.open(
@@ -1189,93 +1087,59 @@ function App() {
     analystKey
   ) {
     const analyst =
-      ANALYSTS[analystKey];
+      ANALYSTS[
+        analystKey
+      ];
 
     if (!analyst) {
       return;
     }
 
-    const updatedCustomer = {
-      ...customer,
+    const updatedCustomer =
+      {
+        ...customer,
 
-      analyst:
-        analyst.title,
+        analyst:
+          analyst.title,
 
-      analystEmail:
-        analyst.email
-    };
-
-    setCustomer(
-      updatedCustomer
-    );
-
-    setShowAnalysts(false);
+        analystEmail:
+          analyst.email
+      };
 
     saveLead(
       updatedCustomer,
       "encaminhado"
     );
 
-    addMessage(
-      "assistant",
-      `Certo, ${firstName(updatedCustomer.name)}! Vou te encaminhar para ${analyst.title}.`
+    openAnalystWhatsApp(
+      analystKey,
+      customer.interest
     );
-
-    setTimeout(() => {
-      openAnalystWhatsApp(
-        analystKey
-      );
-    }, 250);
   }
-
-  /* ======================================================
-     RENDA EXTRA
-     ====================================================== */
-
-  function becomePartner() {
-    const url =
-      import.meta.env
-        .VITE_RENDA_EXTRA_URL;
-
-    if (url) {
-      window.open(
-        url,
-        "_blank"
-      );
-    } else {
-      alert(
-        "O link do Renda Extra ainda será configurado."
-      );
-    }
-  }
-
-  /* ======================================================
-     CHAT
-     ====================================================== */
 
   if (
     screen === "chat"
   ) {
     return (
       <div
-        className="app chat-app"
+        className=
+          "app chat-app"
 
         style={{
           height:
             `${chatHeight}px`,
-
           minHeight:
             `${chatHeight}px`,
-
           maxHeight:
             `${chatHeight}px`
         }}
       >
-        <header className="chat-header">
-
+        <header
+          className=
+            "chat-header"
+        >
           <button
             className="back"
-
             onClick={() =>
               setScreen(
                 "home"
@@ -1300,7 +1164,6 @@ function App() {
               Assistente da Crediti
             </small>
           </div>
-
         </header>
 
         <main
@@ -1317,31 +1180,38 @@ function App() {
                   "row " +
                   message.role
                 }
-
                 key={index}
               >
                 {message.role ===
                   "assistant" && (
                   <img
                     src="/creditin.png"
-                    className="avatar small"
+                    className=
+                      "avatar small"
                     alt=""
                   />
                 )}
 
-                <div className="bubble">
-                  {message.text}
+                <div
+                  className=
+                    "bubble"
+                >
+                  {
+                    message.text
+                  }
                 </div>
-
               </div>
             )
           )}
 
           {showAnalysts && (
-            <div className="analyst-options">
-
+            <div
+              className=
+                "analyst-options"
+            >
               <button
-                className="analyst-button"
+                className=
+                  "analyst-button"
 
                 onClick={() =>
                   chooseAnalyst(
@@ -1359,7 +1229,8 @@ function App() {
               </button>
 
               <button
-                className="analyst-button"
+                className=
+                  "analyst-button"
 
                 onClick={() =>
                   chooseAnalyst(
@@ -1375,70 +1246,65 @@ function App() {
                   Continuar pelo WhatsApp
                 </small>
               </button>
-
             </div>
           )}
 
           {busy && (
-            <div className="row assistant">
-
+            <div
+              className=
+                "row assistant"
+            >
               <img
                 src="/creditin.png"
-                className="avatar small"
+                className=
+                  "avatar small"
                 alt=""
               />
 
-              <div className="bubble">
+              <div
+                className=
+                  "bubble"
+              >
                 Analisando...
               </div>
-
             </div>
           )}
-
         </main>
 
-        <div className="composer">
-
+        <div
+          className=
+            "composer"
+        >
           <input
             value={text}
 
-            onChange={
-              handleInputChange
-            }
-
-            onFocus={() => {
-              setTimeout(() => {
-                window.scrollTo(
-                  0,
-                  0
-                );
-              }, 100);
-            }}
-
-            onKeyDown={(event) => {
-              if (
-                event.key ===
-                "Enter"
-              ) {
-                event.preventDefault();
-
-                sendMessage();
+            onChange=
+              {
+                handleInputChange
               }
-            }}
+
+            onKeyDown={
+              (event) => {
+                if (
+                  event.key ===
+                  "Enter"
+                ) {
+                  event.preventDefault();
+
+                  sendMessage();
+                }
+              }
+            }
 
             placeholder={
               step === "name"
                 ? "Digite seu nome..."
-
                 : step === "city"
                 ? "Digite sua cidade..."
-
                 : step === "phone"
                 ? "(XX) XXXXX-XXXX"
-
                 : step === "whatsapp"
                 ? "Sim ou não..."
-
                 : "Digite sua dúvida..."
             }
 
@@ -1447,44 +1313,33 @@ function App() {
                 ? "numeric"
                 : "text"
             }
-
-            autoComplete={
-              step === "phone"
-                ? "tel"
-                : "off"
-            }
           />
 
           <button
-            className="yellow send"
+            className=
+              "yellow send"
 
-            onClick={
-              sendMessage
-            }
+            onClick=
+              {
+                sendMessage
+              }
           >
             ENVIAR
           </button>
-
         </div>
       </div>
     );
   }
 
-  /* ======================================================
-     LISTA DE PRODUTOS
-     ====================================================== */
-
   if (
-    screen === "products"
+    screen ===
+    "products"
   ) {
     return (
       <div className="app">
-
         <header>
-
           <button
             className="back"
-
             onClick={() =>
               setScreen(
                 "home"
@@ -1503,15 +1358,17 @@ function App() {
               Conheça antes de contratar
             </small>
           </div>
-
         </header>
 
-        <main className="page">
-
+        <main
+          className=
+            "page product-list"
+        >
           {products.map(
             (product) => (
               <button
-                className="yellow"
+                className=
+                  "yellow"
 
                 key={
                   product.id
@@ -1527,19 +1384,16 @@ function App() {
                   );
                 }}
               >
-                {product.name}
+                {
+                  product.name
+                }
               </button>
             )
           )}
-
         </main>
       </div>
     );
   }
-
-  /* ======================================================
-     DETALHE EDUCATIVO DO PRODUTO
-     ====================================================== */
 
   if (
     screen ===
@@ -1547,10 +1401,11 @@ function App() {
     selectedProduct
   ) {
     return (
-      <div className="app">
-
+      <div
+        className=
+          "app detail-app"
+      >
         <header>
-
           <button
             className="back"
 
@@ -1565,135 +1420,163 @@ function App() {
 
           <div>
             <b>
-              {selectedProduct.name}
+              {
+                selectedProduct.name
+              }
             </b>
 
             <small>
               Entenda antes de decidir
             </small>
           </div>
-
         </header>
 
-        <main className="page">
+        <main
+          className=
+            "product-detail"
+        >
+          <div
+            className=
+              "product-card"
+          >
+            <div
+              className=
+                "product-top"
+            >
+              <img
+                src="/creditin.png"
+                alt="Creditin"
+              />
 
-          <section className="partner">
+              <h2>
+                {
+                  selectedProduct.name
+                }
+              </h2>
+            </div>
 
-            <img
-              src="/creditin.png"
-              alt="Creditin"
-            />
+            <div
+              className=
+                "info-grid"
+            >
+              <section>
+                <strong>
+                  O que é?
+                </strong>
 
-            <h2>
-              {selectedProduct.name}
-            </h2>
+                <p>
+                  {
+                    selectedProduct.what
+                  }
+                </p>
+              </section>
 
-            <p>
-              <strong>
-                O que é?
-              </strong>
-              <br />
-              {
-                selectedProduct.what
-              }
-            </p>
+              <section>
+                <strong>
+                  Para quem é?
+                </strong>
 
-            <p>
-              <strong>
-                Para quem é?
-              </strong>
-              <br />
-              {
-                selectedProduct.forWho
-              }
-            </p>
+                <p>
+                  {
+                    selectedProduct.forWho
+                  }
+                </p>
+              </section>
 
-            <p>
-              <strong>
-                Como funciona?
-              </strong>
-              <br />
-              {
-                selectedProduct.how
-              }
-            </p>
+              <section>
+                <strong>
+                  Como funciona?
+                </strong>
 
-            <p>
-              <strong>
-                Quando pode ajudar?
-              </strong>
-              <br />
-              {
-                selectedProduct.when
-              }
-            </p>
+                <p>
+                  {
+                    selectedProduct.how
+                  }
+                </p>
+              </section>
 
-            <p>
+              <section>
+                <strong>
+                  Quando pode ajudar?
+                </strong>
+
+                <p>
+                  {
+                    selectedProduct.when
+                  }
+                </p>
+              </section>
+            </div>
+
+            <div
+              className=
+                "creditin-tip"
+            >
               <strong>
                 Dica do Creditin
               </strong>
-              <br />
-              {
-                selectedProduct.tip
-              }
-            </p>
 
-            <p>
+              <p>
+                {
+                  selectedProduct.tip
+                }
+              </p>
+            </div>
+
+            <div
+              className=
+                "product-cta"
+            >
               <strong>
                 Gostou dessa opção?
               </strong>
-              <br />
-              Podemos verificar as possibilidades para você. A aprovação e as condições dependem da análise da instituição responsável.
-            </p>
 
-            <button
-              className="yellow"
+              <p>
+                Fale com um dos nossos analistas e veja se essa solução faz sentido para você.
+              </p>
+            </div>
 
-              onClick={() =>
-                openAnalystWhatsApp(
-                  "samila",
-                  selectedProduct.name
-                )
-              }
+            <div
+              className=
+                "product-analysts"
             >
-              ANALISTA SAMILA
-            </button>
+              <button
+                onClick={() =>
+                  openAnalystWhatsApp(
+                    "samila",
+                    selectedProduct.name
+                  )
+                }
+              >
+                SAMILA
+              </button>
 
-            <button
-              className="yellow"
-
-              onClick={() =>
-                openAnalystWhatsApp(
-                  "marcelino",
-                  selectedProduct.name
-                )
-              }
-            >
-              ANALISTA MARCELINO
-            </button>
-
-          </section>
-
+              <button
+                onClick={() =>
+                  openAnalystWhatsApp(
+                    "marcelino",
+                    selectedProduct.name
+                  )
+                }
+              >
+                MARCELINO
+              </button>
+            </div>
+          </div>
         </main>
       </div>
     );
   }
 
-  /* ======================================================
-     FALAR DIRETO COM A CREDITI
-     ====================================================== */
-
   if (
-    screen === "human"
+    screen ===
+    "human"
   ) {
     return (
       <div className="app">
-
         <header>
-
           <button
             className="back"
-
             onClick={() =>
               setScreen(
                 "home"
@@ -1709,76 +1592,152 @@ function App() {
             </b>
 
             <small>
-              Escolha um analista
+              Escolha seu atendimento
             </small>
           </div>
-
         </header>
 
-        <main className="page">
+        <main
+          className=
+            "simple-screen"
+        >
+          <img
+            src="/creditin.png"
+            alt="Creditin"
+          />
 
-          <section className="partner">
+          <h2>
+            Fale com a gente
+          </h2>
 
-            <img
-              src="/creditin.png"
-              alt="Creditin"
-            />
+          <p>
+            Escolha um de nossos analistas para continuar seu atendimento pelo WhatsApp.
+          </p>
 
-            <h2>
-              Atendimento Crediti
-            </h2>
+          <button
+            className="yellow"
+            onClick={() =>
+              openAnalystWhatsApp(
+                "samila"
+              )
+            }
+          >
+            ANALISTA SAMILA
+          </button>
 
-            <p>
-              Escolha com quem você deseja falar. Samila e Marcelino atendem os produtos da Crediti.
-            </p>
-
-            <button
-              className="yellow"
-
-              onClick={() =>
-                openAnalystWhatsApp(
-                  "samila"
-                )
-              }
-            >
-              ANALISTA SAMILA
-            </button>
-
-            <button
-              className="yellow"
-
-              onClick={() =>
-                openAnalystWhatsApp(
-                  "marcelino"
-                )
-              }
-            >
-              ANALISTA MARCELINO
-            </button>
-
-          </section>
-
+          <button
+            className="yellow"
+            onClick={() =>
+              openAnalystWhatsApp(
+                "marcelino"
+              )
+            }
+          >
+            ANALISTA MARCELINO
+          </button>
         </main>
       </div>
     );
   }
 
-  /* ======================================================
-     HOME
-     ====================================================== */
+  if (
+    screen ===
+    "partner"
+  ) {
+    return (
+      <div className="app">
+        <header>
+          <button
+            className="back"
+            onClick={() =>
+              setScreen(
+                "home"
+              )
+            }
+          >
+            ‹
+          </button>
+
+          <div>
+            <b>
+              Renda Extra Crediti
+            </b>
+
+            <small>
+              Seja nosso parceiro
+            </small>
+          </div>
+        </header>
+
+        <main
+          className=
+            "simple-screen"
+        >
+          <img
+            src="/creditin.png"
+            alt="Creditin"
+          />
+
+          <h2>
+            Renda Extra Crediti
+          </h2>
+
+          <p>
+            É o programa de parceria da Crediti para quem quer trabalhar indicando oportunidades de crédito e ganhar comissões.
+          </p>
+
+          <p>
+            Você se cadastra na plataforma, conhece os produtos disponíveis, encontra clientes e acompanha suas oportunidades.
+          </p>
+
+          <div
+            className=
+              "partner-tip"
+          >
+            <strong>
+              Dica do Creditin
+            </strong>
+
+            <p>
+              Trabalhe sempre com informação clara e responsabilidade. Nunca prometa aprovação para o cliente.
+            </p>
+          </div>
+
+          <button
+            className=
+              "yellow partner-register"
+
+            onClick={() =>
+              window.open(
+                RENDA_EXTRA_URL,
+                "_blank"
+              )
+            }
+          >
+            QUERO ME CADASTRAR
+          </button>
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className="app">
-
-      <div className="brand">
+      <div
+        className=
+          "brand"
+      >
         CREDITI
       </div>
 
-      <main className="home">
-
+      <main
+        className=
+          "home"
+      >
         <img
           src="/creditin.png"
-          className="hero"
+          className=
+            "hero"
           alt="Creditin"
         />
 
@@ -1791,18 +1750,7 @@ function App() {
         </p>
 
         <button
-          className="prompt"
-
-          onClick={() =>
-            openChat()
-          }
-        >
-          Como podemos ajudar?
-        </button>
-
-        <button
           className="yellow"
-
           onClick={() =>
             openChat()
           }
@@ -1812,7 +1760,6 @@ function App() {
 
         <button
           className="yellow"
-
           onClick={() =>
             setScreen(
               "products"
@@ -1824,7 +1771,6 @@ function App() {
 
         <button
           className="yellow"
-
           onClick={() =>
             setScreen(
               "human"
@@ -1836,16 +1782,15 @@ function App() {
 
         <button
           className="yellow"
-
-          onClick={
-            becomePartner
+          onClick={() =>
+            setScreen(
+              "partner"
+            )
           }
         >
           QUERO SER PARCEIRO
         </button>
-
       </main>
-
     </div>
   );
 }
