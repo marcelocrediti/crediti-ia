@@ -570,11 +570,23 @@ function App() {
     );
   }
 
+  const leadSavedRef = useRef(false);
+
   async function saveLead(
     data,
     status =
       "em_atendimento"
   ) {
+    if (
+      !data?.name ||
+      !data?.phone ||
+      !data?.city ||
+      !data?.interest ||
+      leadSavedRef.current
+    ) {
+      return;
+    }
+
     try {
       const response =
         await fetch(
@@ -629,6 +641,9 @@ function App() {
           `Supabase ${response.status}: ${errorText}`
         );
       }
+
+      leadSavedRef.current =
+        true;
     } catch (error) {
       console.log(
         "Lead não registrado:",
