@@ -30,7 +30,12 @@ body {
 body {
   background: var(--credi-yellow);
   color: var(--credi-black);
-  font-family: "Montserrat", Arial, sans-serif;
+
+  font-family:
+    "Montserrat",
+    Arial,
+    sans-serif;
+
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
@@ -52,9 +57,12 @@ button {
 
 .app {
   width: 100%;
+
   min-height: 100vh;
   min-height: 100dvh;
+
   background: var(--credi-yellow);
+
   overflow-x: hidden;
 }
 
@@ -64,6 +72,7 @@ button {
 
 .brand {
   width: min(100%, 720px);
+
   margin: 0 auto;
 
   padding:
@@ -102,7 +111,6 @@ button {
 
 /* =========================================================
    CREDITIN PRINCIPAL
-   TAMANHO PRESERVADO
    ========================================================= */
 
 .home .hero {
@@ -110,6 +118,7 @@ button {
   height: min(275px, 72vw);
 
   display: block;
+
   object-fit: contain;
 
   margin: 0 auto;
@@ -126,8 +135,10 @@ button {
 
   font-size: clamp(32px, 9vw, 40px);
   font-weight: 900;
+
   line-height: 0.95;
   letter-spacing: -2px;
+
   text-align: center;
 }
 
@@ -143,6 +154,7 @@ button {
   font-size: 13px;
   font-weight: 600;
   line-height: 1.2;
+
   text-align: center;
 }
 
@@ -157,6 +169,7 @@ button {
   min-height: 44px;
 
   margin: 0 auto 8px;
+
   padding: 8px 14px;
 
   display: flex;
@@ -169,16 +182,19 @@ button {
   border: 2px solid var(--credi-black);
   border-radius: 14px;
 
-  box-shadow: 0 3px 0 var(--credi-black);
+  box-shadow:
+    0 3px 0
+    var(--credi-black);
 
   font-size: 14px;
   font-weight: 800;
   line-height: 1.15;
+
   text-align: center;
 }
 
 /* =========================================================
-   BOTÕES
+   BOTÕES GERAIS
    ========================================================= */
 
 .yellow {
@@ -188,6 +204,7 @@ button {
   min-height: 45px;
 
   margin: 0 auto 7px;
+
   padding: 8px 12px;
 
   display: flex;
@@ -197,15 +214,22 @@ button {
   background: var(--credi-yellow);
   color: var(--credi-black);
 
-  border: 2px solid var(--credi-black);
+  border:
+    2px solid
+    var(--credi-black);
+
   border-radius: 14px;
 
-  box-shadow: 0 3px 0 var(--credi-black);
+  box-shadow:
+    0 3px 0
+    var(--credi-black);
 
   font-size: 12px;
   font-weight: 900;
+
   line-height: 1.15;
   letter-spacing: -0.1px;
+
   text-align: center;
 
   overflow-wrap: anywhere;
@@ -214,7 +238,10 @@ button {
 .yellow:active,
 .home .prompt:active {
   transform: translateY(2px);
-  box-shadow: 0 1px 0 var(--credi-black);
+
+  box-shadow:
+    0 1px 0
+    var(--credi-black);
 }
 
 .home > .yellow:last-child {
@@ -236,10 +263,12 @@ header {
 
   display: flex;
   align-items: center;
+
   gap: 9px;
 
   position: sticky;
   top: 0;
+
   z-index: 50;
 
   background: var(--credi-black);
@@ -251,6 +280,7 @@ header > div {
 
   display: flex;
   flex-direction: column;
+
   gap: 2px;
 }
 
@@ -282,7 +312,10 @@ header small {
   align-items: center;
   justify-content: center;
 
-  border: 2px solid var(--credi-white);
+  border:
+    2px solid
+    var(--credi-white);
+
   border-radius: 12px;
 
   background: transparent;
@@ -303,6 +336,7 @@ header small {
   flex: 0 0 40px;
 
   display: block;
+
   object-fit: contain;
 
   border-radius: 50%;
@@ -318,42 +352,116 @@ header small {
 }
 
 /* =========================================================
-   PRODUTOS
+   PÁGINAS INTERNAS
    ========================================================= */
 
 .page {
   width: min(100%, 620px);
 
-  min-height: calc(100dvh - 64px);
+  min-height:
+    calc(100dvh - 64px);
 
   margin: 0 auto;
 
   padding:
-    16px
     14px
+    12px
     calc(28px + env(safe-area-inset-bottom));
 
   display: flex;
   flex-direction: column;
   align-items: center;
 
-  background: var(--credi-white);
-}
-
-.page > .yellow {
-  width: 94%;
-  max-width: 520px;
-
-  min-height: 46px;
-
-  margin: 0 auto 8px;
-  padding: 8px 12px;
-
-  font-size: 12px;
+  background:
+    var(--credi-white);
 }
 
 /* =========================================================
-   RENDA EXTRA
+   LISTA DE PRODUTOS
+   2 COLUNAS IGUAIS
+   ========================================================= */
+
+/*
+   Na página que possui apenas os botões
+   de produtos, eles ficam compactos.
+*/
+
+.page:has(> .yellow:nth-child(3)) {
+  display: grid;
+
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+
+  grid-auto-rows: 58px;
+
+  align-content: start;
+  align-items: stretch;
+
+  gap: 9px;
+
+  padding:
+    12px
+    12px
+    calc(24px + env(safe-area-inset-bottom));
+}
+
+/* =========================================================
+   BOTÕES DOS PRODUTOS
+   TODOS EXATAMENTE IGUAIS
+   ========================================================= */
+
+.page:has(> .yellow:nth-child(3))
+> .yellow {
+  width: 100%;
+  max-width: none;
+
+  height: 58px;
+  min-height: 58px;
+  max-height: 58px;
+
+  margin: 0;
+
+  padding: 6px 7px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background:
+    var(--credi-yellow);
+
+  color:
+    var(--credi-black);
+
+  border:
+    2px solid
+    var(--credi-black);
+
+  border-radius: 14px;
+
+  box-shadow:
+    0 3px 0
+    var(--credi-black);
+
+  font-size: 10.5px;
+  font-weight: 900;
+
+  line-height: 1.08;
+
+  letter-spacing: -0.25px;
+
+  text-align: center;
+
+  white-space: normal;
+
+  overflow-wrap: normal;
+  word-break: normal;
+
+  overflow: hidden;
+}
+
+/* =========================================================
+   DETALHE EDUCATIVO
    ========================================================= */
 
 .partner {
@@ -361,11 +469,16 @@ header small {
   max-width: 520px;
 
   margin: 8px auto 0;
+
   padding: 17px 14px;
 
-  background: var(--credi-gray);
+  background:
+    var(--credi-gray);
 
-  border: 2px solid var(--credi-black);
+  border:
+    2px solid
+    var(--credi-black);
+
   border-radius: 18px;
 
   text-align: center;
@@ -378,33 +491,57 @@ header small {
   max-width: 100%;
 
   display: block;
+
   object-fit: contain;
 
-  margin: 0 auto 6px;
+  margin:
+    0
+    auto
+    8px;
 }
 
 .partner h2 {
-  margin-bottom: 5px;
+  margin-bottom: 13px;
+
+  color:
+    var(--credi-black);
 
   font-size: 19px;
   font-weight: 900;
-  line-height: 1.05;
+
+  line-height: 1.1;
 }
 
 .partner p {
-  margin: 0 auto 12px;
+  width: 100%;
 
-  color: var(--credi-muted);
+  margin:
+    0
+    auto
+    13px;
+
+  color:
+    var(--credi-muted);
 
   font-size: 12px;
   font-weight: 500;
-  line-height: 1.4;
+
+  line-height: 1.45;
+
+  text-align: left;
+}
+
+.partner p strong {
+  color:
+    var(--credi-black);
+
+  font-weight: 800;
 }
 
 .partner .yellow {
   width: 100%;
 
-  margin-bottom: 7px;
+  margin-bottom: 8px;
 }
 
 .partner .yellow:last-child {
@@ -423,7 +560,8 @@ header small {
 
   overflow: hidden;
 
-  background: var(--credi-white);
+  background:
+    var(--credi-white);
 }
 
 /* =========================================================
@@ -434,6 +572,7 @@ header small {
   flex: 0 0 auto;
 
   position: relative;
+
   top: auto;
 
   width: 100%;
@@ -443,13 +582,13 @@ header small {
 
 /* =========================================================
    ÁREA DAS MENSAGENS
-   SOMENTE ELA ROLA
    ========================================================= */
 
 .chat {
   width: min(100%, 620px);
 
   flex: 1 1 auto;
+
   min-height: 0;
 
   margin: 0 auto;
@@ -459,13 +598,17 @@ header small {
     12px
     14px;
 
-  background: var(--credi-white);
+  background:
+    var(--credi-white);
 
   overflow-x: hidden;
   overflow-y: auto;
 
-  -webkit-overflow-scrolling: touch;
-  overscroll-behavior: contain;
+  -webkit-overflow-scrolling:
+    touch;
+
+  overscroll-behavior:
+    contain;
 }
 
 /* =========================================================
@@ -476,18 +619,22 @@ header small {
   width: 100%;
 
   display: flex;
+
   align-items: flex-end;
+
   gap: 6px;
 
   margin-bottom: 11px;
 }
 
 .row.user {
-  justify-content: flex-end;
+  justify-content:
+    flex-end;
 }
 
 .row.assistant {
-  justify-content: flex-start;
+  justify-content:
+    flex-start;
 }
 
 /* =========================================================
@@ -497,32 +644,52 @@ header small {
 .bubble {
   max-width: 84%;
 
-  padding: 10px 12px;
+  padding:
+    10px
+    12px;
 
   border-radius: 15px;
 
   font-size: 13px;
   font-weight: 500;
+
   line-height: 1.4;
 
-  overflow-wrap: anywhere;
-  word-break: normal;
+  overflow-wrap:
+    anywhere;
+
+  word-break:
+    normal;
 }
 
 .row.assistant .bubble {
-  background: var(--credi-gray);
-  color: var(--credi-black);
+  background:
+    var(--credi-gray);
 
-  border: 1px solid var(--credi-border);
-  border-bottom-left-radius: 5px;
+  color:
+    var(--credi-black);
+
+  border:
+    1px solid
+    var(--credi-border);
+
+  border-bottom-left-radius:
+    5px;
 }
 
 .row.user .bubble {
-  background: var(--credi-yellow);
-  color: var(--credi-black);
+  background:
+    var(--credi-yellow);
 
-  border: 2px solid var(--credi-black);
-  border-bottom-right-radius: 5px;
+  color:
+    var(--credi-black);
+
+  border:
+    2px solid
+    var(--credi-black);
+
+  border-bottom-right-radius:
+    5px;
 }
 
 /* =========================================================
@@ -530,7 +697,9 @@ header small {
    ========================================================= */
 
 .analyst-options {
-  width: calc(100% - 38px);
+  width:
+    calc(100% - 38px);
+
   max-width: 520px;
 
   margin:
@@ -540,29 +709,50 @@ header small {
     auto;
 
   display: flex;
-  flex-direction: column;
+
+  flex-direction:
+    column;
+
   gap: 9px;
 }
 
 .analyst-button {
   width: 100%;
+
   min-height: 52px;
 
-  padding: 10px 14px;
+  padding:
+    10px
+    14px;
 
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
+
+  flex-direction:
+    column;
+
+  align-items:
+    center;
+
+  justify-content:
+    center;
+
   gap: 2px;
 
-  background: var(--credi-yellow);
-  color: var(--credi-black);
+  background:
+    var(--credi-yellow);
 
-  border: 2px solid var(--credi-black);
+  color:
+    var(--credi-black);
+
+  border:
+    2px solid
+    var(--credi-black);
+
   border-radius: 14px;
 
-  box-shadow: 0 3px 0 var(--credi-black);
+  box-shadow:
+    0 3px 0
+    var(--credi-black);
 
   text-align: center;
 }
@@ -570,20 +760,27 @@ header small {
 .analyst-button strong {
   font-size: 13px;
   font-weight: 900;
+
   line-height: 1.2;
 }
 
 .analyst-button small {
-  color: var(--credi-black);
+  color:
+    var(--credi-black);
 
   font-size: 10px;
   font-weight: 600;
+
   line-height: 1.2;
 }
 
 .analyst-button:active {
-  transform: translateY(2px);
-  box-shadow: 0 1px 0 var(--credi-black);
+  transform:
+    translateY(2px);
+
+  box-shadow:
+    0 1px 0
+    var(--credi-black);
 }
 
 /* =========================================================
@@ -596,8 +793,10 @@ header small {
   flex: 0 0 auto;
 
   position: relative;
+
   left: auto;
   bottom: auto;
+
   z-index: 30;
 
   padding:
@@ -606,26 +805,41 @@ header small {
     calc(8px + env(safe-area-inset-bottom));
 
   display: flex;
-  align-items: center;
+
+  align-items:
+    center;
+
   gap: 6px;
 
-  background: var(--credi-white);
+  background:
+    var(--credi-white);
 
-  border-top: 2px solid var(--credi-black);
+  border-top:
+    2px solid
+    var(--credi-black);
 }
 
 .composer input {
   flex: 1;
 
   min-width: 0;
+
   height: 44px;
 
-  padding: 0 11px;
+  padding:
+    0
+    11px;
 
-  background: var(--credi-gray);
-  color: var(--credi-black);
+  background:
+    var(--credi-gray);
 
-  border: 2px solid var(--credi-black);
+  color:
+    var(--credi-black);
+
+  border:
+    2px solid
+    var(--credi-black);
+
   border-radius: 13px;
 
   outline: none;
@@ -634,23 +848,30 @@ header small {
 }
 
 .composer input::placeholder {
-  color: #999999;
+  color:
+    #999999;
+
   opacity: 1;
 }
 
 .composer input:focus {
-  background: var(--credi-white);
+  background:
+    var(--credi-white);
 }
 
 .composer .send {
   width: auto;
+
   min-width: 70px;
 
   height: 44px;
   min-height: 44px;
 
   margin: 0;
-  padding: 0 8px;
+
+  padding:
+    0
+    8px;
 
   flex: 0 0 auto;
 
@@ -664,6 +885,7 @@ header small {
    ========================================================= */
 
 @media (max-width: 380px) {
+
   .brand {
     padding-left: 16px;
     padding-right: 16px;
@@ -701,6 +923,31 @@ header small {
     font-size: 11px;
   }
 
+  .page:has(> .yellow:nth-child(3)) {
+    grid-auto-rows:
+      56px;
+
+    gap: 7px;
+
+    padding-left: 9px;
+    padding-right: 9px;
+  }
+
+  .page:has(> .yellow:nth-child(3))
+  > .yellow {
+    height: 56px;
+    min-height: 56px;
+    max-height: 56px;
+
+    padding:
+      5px
+      6px;
+
+    font-size: 9.7px;
+
+    line-height: 1.05;
+  }
+
   .bubble {
     max-width: 86%;
 
@@ -717,6 +964,7 @@ header small {
    ========================================================= */
 
 @media (min-width: 700px) {
+
   .brand {
     padding-top: 28px;
   }
@@ -750,6 +998,25 @@ header small {
     font-size: 14px;
   }
 
+  .page:has(> .yellow:nth-child(3)) {
+    grid-template-columns:
+      repeat(3, minmax(0, 1fr));
+
+    grid-auto-rows:
+      66px;
+
+    gap: 12px;
+  }
+
+  .page:has(> .yellow:nth-child(3))
+  > .yellow {
+    height: 66px;
+    min-height: 66px;
+    max-height: 66px;
+
+    font-size: 12px;
+  }
+
   .bubble {
     font-size: 14px;
   }
@@ -763,11 +1030,18 @@ header small {
    REDUÇÃO DE MOVIMENTO
    ========================================================= */
 
-@media (prefers-reduced-motion: reduce) {
+@media (
+  prefers-reduced-motion:
+  reduce
+) {
+
   *,
   *::before,
   *::after {
-    transition: none !important;
-    scroll-behavior: auto !important;
+    transition:
+      none !important;
+
+    scroll-behavior:
+      auto !important;
   }
 }
