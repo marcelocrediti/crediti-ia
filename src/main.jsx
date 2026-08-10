@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
 import "./styles.css";
 
-const API_URL = "https://crediti-ia.onrender.com";
+const API_URL = "https://crediti-ia-api.onrender.com";
 
 const ANALYSTS = {
   samila: {
@@ -43,8 +43,13 @@ const products = [
 function getGreeting() {
   const hour = new Date().getHours();
 
-  if (hour >= 5 && hour < 12) return "Bom dia";
-  if (hour >= 12 && hour < 18) return "Boa tarde";
+  if (hour >= 5 && hour < 12) {
+    return "Bom dia";
+  }
+
+  if (hour >= 12 && hour < 18) {
+    return "Boa tarde";
+  }
 
   return "Boa noite";
 }
@@ -54,7 +59,9 @@ function formatPhone(value) {
     .replace(/\D/g, "")
     .slice(0, 11);
 
-  if (!numbers) return "";
+  if (!numbers) {
+    return "";
+  }
 
   if (numbers.length <= 2) {
     return `(${numbers}`;
@@ -71,7 +78,9 @@ function formatPhone(value) {
 }
 
 function firstName(name) {
-  return String(name).trim().split(/\s+/)[0];
+  return String(name)
+    .trim()
+    .split(/\s+/)[0];
 }
 
 function normalize(value) {
@@ -139,7 +148,9 @@ function App() {
   }, [messages]);
 
   useEffect(() => {
-    if (screen !== "chat") return;
+    if (screen !== "chat") {
+      return;
+    }
 
     const updateViewport = () => {
       const viewport = window.visualViewport;
@@ -157,7 +168,10 @@ function App() {
 
     updateViewport();
 
-    window.addEventListener("resize", updateViewport);
+    window.addEventListener(
+      "resize",
+      updateViewport
+    );
 
     if (window.visualViewport) {
       window.visualViewport.addEventListener(
@@ -192,11 +206,15 @@ function App() {
   }, [screen]);
 
   useEffect(() => {
-    if (screen !== "chat") return;
+    if (screen !== "chat") {
+      return;
+    }
 
     const chat = chatRef.current;
 
-    if (!chat) return;
+    if (!chat) {
+      return;
+    }
 
     requestAnimationFrame(() => {
       chat.scrollTo({
@@ -204,7 +222,12 @@ function App() {
         behavior: "smooth"
       });
     });
-  }, [messages, busy, screen, showAnalysts]);
+  }, [
+    messages,
+    busy,
+    screen,
+    showAnalysts
+  ]);
 
   function addMessage(role, messageText) {
     const message = {
@@ -213,7 +236,10 @@ function App() {
     };
 
     setMessages((current) => {
-      const next = [...current, message];
+      const next = [
+        ...current,
+        message
+      ];
 
       messagesRef.current = next;
 
@@ -226,25 +252,45 @@ function App() {
     status = "em_atendimento"
   ) {
     try {
-      await fetch(`${API_URL}/api/leads`, {
-        method: "POST",
+      await fetch(
+        `${API_URL}/api/leads`,
+        {
+          method: "POST",
 
-        headers: {
-          "Content-Type": "application/json"
-        },
+          headers: {
+            "Content-Type":
+              "application/json"
+          },
 
-        body: JSON.stringify({
-          name: data.name || "",
-          phone: data.phone || "",
-          city: data.city || "",
-          whatsapp: data.whatsapp || false,
-          interest: data.interest || "",
-          analyst: data.analyst || "",
-          analystEmail: data.analystEmail || "",
-          status,
-          createdAt: new Date().toISOString()
-        })
-      });
+          body: JSON.stringify({
+            name:
+              data.name || "",
+
+            phone:
+              data.phone || "",
+
+            city:
+              data.city || "",
+
+            whatsapp:
+              data.whatsapp || false,
+
+            interest:
+              data.interest || "",
+
+            analyst:
+              data.analyst || "",
+
+            analystEmail:
+              data.analystEmail || "",
+
+            status,
+
+            createdAt:
+              new Date().toISOString()
+          })
+        }
+      );
     } catch (error) {
       console.log(
         "Registro do lead ainda não disponível.",
@@ -253,26 +299,35 @@ function App() {
     }
   }
 
-  function openChat(firstMessage = "") {
-    const greeting = getGreeting();
+  function openChat(
+    firstMessage = ""
+  ) {
+    const greeting =
+      getGreeting();
 
     const initialMessages = [
       {
         role: "assistant",
+
         text:
           `${greeting}! Eu sou o Creditin, assistente da Crediti. Tudo bem? Para começar, como posso te chamar?`
       }
     ];
 
-    setMessages(initialMessages);
-    messagesRef.current = initialMessages;
+    setMessages(
+      initialMessages
+    );
+
+    messagesRef.current =
+      initialMessages;
 
     setCustomer({
       name: "",
       city: "",
       phone: "",
       whatsapp: false,
-      interest: firstMessage || "",
+      interest:
+        firstMessage || "",
       analyst: "",
       analystEmail: ""
     });
@@ -280,17 +335,26 @@ function App() {
     setStep("name");
     setText("");
     setShowAnalysts(false);
-    setPendingMessage(firstMessage || "");
+
+    setPendingMessage(
+      firstMessage || ""
+    );
+
     setScreen("chat");
   }
 
-  function handleRegistration(value) {
-    const cleanValue = String(value).trim();
+  function handleRegistration(
+    value
+  ) {
+    const cleanValue =
+      String(value).trim();
 
     if (step === "name") {
       if (
         cleanValue.length < 2 ||
-        looksLikeGreetingInsteadOfName(cleanValue)
+        looksLikeGreetingInsteadOfName(
+          cleanValue
+        )
       ) {
         addMessage(
           "assistant",
@@ -300,13 +364,18 @@ function App() {
         return;
       }
 
-      const name = cleanValue;
-      const shortName = firstName(name);
+      const name =
+        cleanValue;
 
-      setCustomer((current) => ({
-        ...current,
-        name
-      }));
+      const shortName =
+        firstName(name);
+
+      setCustomer(
+        (current) => ({
+          ...current,
+          name
+        })
+      );
 
       setStep("city");
 
@@ -319,7 +388,9 @@ function App() {
     }
 
     if (step === "city") {
-      if (cleanValue.length < 2) {
+      if (
+        cleanValue.length < 2
+      ) {
         addMessage(
           "assistant",
           "Me diz o nome da sua cidade para a gente continuar."
@@ -328,10 +399,12 @@ function App() {
         return;
       }
 
-      setCustomer((current) => ({
-        ...current,
-        city: cleanValue
-      }));
+      setCustomer(
+        (current) => ({
+          ...current,
+          city: cleanValue
+        })
+      );
 
       setStep("phone");
 
@@ -344,9 +417,15 @@ function App() {
     }
 
     if (step === "phone") {
-      const numbers = cleanValue.replace(/\D/g, "");
+      const numbers =
+        cleanValue.replace(
+          /\D/g,
+          ""
+        );
 
-      if (numbers.length !== 11) {
+      if (
+        numbers.length !== 11
+      ) {
         addMessage(
           "assistant",
           "Esse número parece incompleto. Digite o DDD e o número completo para mim."
@@ -355,12 +434,15 @@ function App() {
         return;
       }
 
-      const formatted = formatPhone(numbers);
+      const formatted =
+        formatPhone(numbers);
 
-      setCustomer((current) => ({
-        ...current,
-        phone: formatted
-      }));
+      setCustomer(
+        (current) => ({
+          ...current,
+          phone: formatted
+        })
+      );
 
       setStep("whatsapp");
 
@@ -372,8 +454,11 @@ function App() {
       return;
     }
 
-    if (step === "whatsapp") {
-      const answer = normalize(cleanValue);
+    if (
+      step === "whatsapp"
+    ) {
+      const answer =
+        normalize(cleanValue);
 
       const yes = [
         "sim",
@@ -387,7 +472,10 @@ function App() {
         "n"
       ].includes(answer);
 
-      if (!yes && !no) {
+      if (
+        !yes &&
+        !no
+      ) {
         addMessage(
           "assistant",
           "Só confirma para mim: esse número também é seu WhatsApp? Pode responder sim ou não."
@@ -401,7 +489,10 @@ function App() {
         whatsapp: yes
       };
 
-      setCustomer(updatedCustomer);
+      setCustomer(
+        updatedCustomer
+      );
+
       setStep("ready");
 
       saveLead(
@@ -410,7 +501,8 @@ function App() {
       );
 
       if (pendingMessage) {
-        const request = pendingMessage;
+        const request =
+          pendingMessage;
 
         setPendingMessage("");
 
@@ -438,57 +530,90 @@ function App() {
     value,
     customerData = customer
   ) {
-    value = String(value).trim();
+    value =
+      String(value).trim();
 
-    if (!value || busy) return;
+    if (
+      !value ||
+      busy
+    ) {
+      return;
+    }
 
     setBusy(true);
 
     const updatedCustomer = {
       ...customerData,
+
       interest:
-        customerData.interest || value
+        customerData.interest ||
+        value
     };
 
-    setCustomer(updatedCustomer);
+    setCustomer(
+      updatedCustomer
+    );
 
     try {
-      const response = await fetch(
-        `${API_URL}/api/chat`,
-        {
-          method: "POST",
+      const response =
+        await fetch(
+          `${API_URL}/api/chat`,
+          {
+            method: "POST",
 
-          headers: {
-            "Content-Type": "application/json"
-          },
+            headers: {
+              "Content-Type":
+                "application/json"
+            },
 
-          body: JSON.stringify({
-            message: value,
-            history: messagesRef.current,
+            body: JSON.stringify({
+              message: value,
 
-            customer: {
-              name: updatedCustomer.name,
+              history:
+                messagesRef.current,
 
-              firstName: firstName(
-                updatedCustomer.name
-              ),
+              customer: {
+                name:
+                  updatedCustomer.name,
 
-              city: updatedCustomer.city,
-              phone: updatedCustomer.phone,
-              whatsapp: updatedCustomer.whatsapp,
-              interest: updatedCustomer.interest
-            }
-          })
-        }
-      );
+                firstName:
+                  firstName(
+                    updatedCustomer.name
+                  ),
+
+                city:
+                  updatedCustomer.city,
+
+                phone:
+                  updatedCustomer.phone,
+
+                whatsapp:
+                  updatedCustomer.whatsapp,
+
+                interest:
+                  updatedCustomer.interest
+              }
+            })
+          }
+        );
 
       if (!response.ok) {
+        const errorText =
+          await response.text();
+
+        console.error(
+          "Erro da API:",
+          response.status,
+          errorText
+        );
+
         throw new Error(
           `Erro ${response.status}`
         );
       }
 
-      const data = await response.json();
+      const data =
+        await response.json();
 
       addMessage(
         "assistant",
@@ -501,7 +626,10 @@ function App() {
         "em_atendimento"
       );
     } catch (error) {
-      console.error(error);
+      console.error(
+        "Erro ao acessar a Crediti IA:",
+        error
+      );
 
       addMessage(
         "assistant",
@@ -513,7 +641,9 @@ function App() {
   }
 
   function offerHumanService() {
-    if (showAnalysts) return;
+    if (showAnalysts) {
+      return;
+    }
 
     setShowAnalysts(true);
 
@@ -523,18 +653,30 @@ function App() {
     );
   }
 
-  function chooseAnalyst(analystKey) {
-    const analyst = ANALYSTS[analystKey];
+  function chooseAnalyst(
+    analystKey
+  ) {
+    const analyst =
+      ANALYSTS[analystKey];
 
-    if (!analyst) return;
+    if (!analyst) {
+      return;
+    }
 
     const updatedCustomer = {
       ...customer,
-      analyst: analyst.title,
-      analystEmail: analyst.email
+
+      analyst:
+        analyst.title,
+
+      analystEmail:
+        analyst.email
     };
 
-    setCustomer(updatedCustomer);
+    setCustomer(
+      updatedCustomer
+    );
+
     setShowAnalysts(false);
 
     saveLead(
@@ -562,17 +704,28 @@ function App() {
       "https://wa.me/" +
       analyst.whatsapp +
       "?text=" +
-      encodeURIComponent(whatsappMessage);
+      encodeURIComponent(
+        whatsappMessage
+      );
 
     setTimeout(() => {
-      window.open(url, "_blank");
+      window.open(
+        url,
+        "_blank"
+      );
     }, 250);
   }
 
   function sendMessage() {
-    const value = String(text).trim();
+    const value =
+      String(text).trim();
 
-    if (!value || busy) return;
+    if (
+      !value ||
+      busy
+    ) {
+      return;
+    }
 
     setText("");
 
@@ -581,12 +734,18 @@ function App() {
       value
     );
 
-    if (step !== "ready") {
-      handleRegistration(value);
+    if (
+      step !== "ready"
+    ) {
+      handleRegistration(
+        value
+      );
+
       return;
     }
 
-    const normalized = normalize(value);
+    const normalized =
+      normalize(value);
 
     const humanRequests = [
       "quero falar com atendente",
@@ -603,22 +762,32 @@ function App() {
     ];
 
     if (
-      humanRequests.some((phrase) =>
-        normalized.includes(phrase)
+      humanRequests.some(
+        (phrase) =>
+          normalized.includes(
+            phrase
+          )
       )
     ) {
       offerHumanService();
+
       return;
     }
 
     sendToAI(value);
   }
 
-  function handleInputChange(event) {
-    let value = event.target.value;
+  function handleInputChange(
+    event
+  ) {
+    let value =
+      event.target.value;
 
-    if (step === "phone") {
-      value = formatPhone(value);
+    if (
+      step === "phone"
+    ) {
+      value =
+        formatPhone(value);
     }
 
     setText(value);
@@ -626,10 +795,14 @@ function App() {
 
   function becomePartner() {
     const url =
-      import.meta.env.VITE_RENDA_EXTRA_URL;
+      import.meta.env
+        .VITE_RENDA_EXTRA_URL;
 
     if (url) {
-      window.open(url, "_blank");
+      window.open(
+        url,
+        "_blank"
+      );
     } else {
       alert(
         "O link do Renda Extra ainda será configurado."
@@ -637,20 +810,32 @@ function App() {
     }
   }
 
-  if (screen === "chat") {
+  if (
+    screen === "chat"
+  ) {
     return (
       <div
         className="app chat-app"
+
         style={{
-          height: `${chatHeight}px`,
-          minHeight: `${chatHeight}px`,
-          maxHeight: `${chatHeight}px`
+          height:
+            `${chatHeight}px`,
+
+          minHeight:
+            `${chatHeight}px`,
+
+          maxHeight:
+            `${chatHeight}px`
         }}
       >
         <header className="chat-header">
           <button
             className="back"
-            onClick={() => setScreen("home")}
+
+            onClick={() =>
+              setScreen("home")
+            }
+
             aria-label="Voltar"
           >
             ‹
@@ -663,8 +848,13 @@ function App() {
           />
 
           <div>
-            <b>Crediti IA</b>
-            <small>Assistente da Crediti</small>
+            <b>
+              Crediti IA
+            </b>
+
+            <small>
+              Assistente da Crediti
+            </small>
           </div>
         </header>
 
@@ -673,11 +863,16 @@ function App() {
           ref={chatRef}
         >
           {messages.map(
-            (message, index) => (
+            (
+              message,
+              index
+            ) => (
               <div
                 className={
-                  "row " + message.role
+                  "row " +
+                  message.role
                 }
+
                 key={index}
               >
                 {message.role ===
@@ -698,13 +893,20 @@ function App() {
 
           {showAnalysts && (
             <div className="analyst-options">
+
               <button
                 className="analyst-button"
+
                 onClick={() =>
-                  chooseAnalyst("samila")
+                  chooseAnalyst(
+                    "samila"
+                  )
                 }
               >
-                <strong>ANALISTA SAMILA</strong>
+                <strong>
+                  ANALISTA SAMILA
+                </strong>
+
                 <small>
                   Continuar pelo WhatsApp
                 </small>
@@ -712,15 +914,22 @@ function App() {
 
               <button
                 className="analyst-button"
+
                 onClick={() =>
-                  chooseAnalyst("marcelino")
+                  chooseAnalyst(
+                    "marcelino"
+                  )
                 }
               >
-                <strong>ANALISTA MARCELINO</strong>
+                <strong>
+                  ANALISTA MARCELINO
+                </strong>
+
                 <small>
                   Continuar pelo WhatsApp
                 </small>
               </button>
+
             </div>
           )}
 
@@ -742,34 +951,53 @@ function App() {
         <div className="composer">
           <input
             value={text}
-            onChange={handleInputChange}
+
+            onChange={
+              handleInputChange
+            }
+
             onFocus={() => {
               setTimeout(() => {
-                window.scrollTo(0, 0);
+                window.scrollTo(
+                  0,
+                  0
+                );
               }, 100);
             }}
+
             onKeyDown={(event) => {
-              if (event.key === "Enter") {
+              if (
+                event.key ===
+                "Enter"
+              ) {
                 event.preventDefault();
+
                 sendMessage();
               }
             }}
+
             placeholder={
               step === "name"
                 ? "Digite seu nome..."
+
                 : step === "city"
                 ? "Digite sua cidade..."
+
                 : step === "phone"
                 ? "(XX) XXXXX-XXXX"
+
                 : step === "whatsapp"
                 ? "Sim ou não..."
+
                 : "Digite sua dúvida..."
             }
+
             inputMode={
               step === "phone"
                 ? "numeric"
                 : "text"
             }
+
             autoComplete={
               step === "phone"
                 ? "tel"
@@ -779,7 +1007,10 @@ function App() {
 
           <button
             className="yellow send"
-            onClick={sendMessage}
+
+            onClick={
+              sendMessage
+            }
           >
             ENVIAR
           </button>
@@ -788,29 +1019,45 @@ function App() {
     );
   }
 
-  if (screen === "products") {
+  if (
+    screen === "products"
+  ) {
     return (
       <div className="app">
+
         <header>
           <button
             className="back"
-            onClick={() => setScreen("home")}
+
+            onClick={() =>
+              setScreen("home")
+            }
           >
             ‹
           </button>
 
           <div>
-            <b>Produtos Crediti</b>
-            <small>Conheça nossas opções</small>
+            <b>
+              Produtos Crediti
+            </b>
+
+            <small>
+              Conheça nossas opções
+            </small>
           </div>
         </header>
 
         <main className="page">
           {products.map(
-            (product, index) => (
+            (
+              product,
+              index
+            ) => (
               <button
                 className="yellow"
+
                 key={index}
+
                 onClick={() =>
                   openChat(
                     "Quero saber sobre " +
@@ -830,18 +1077,22 @@ function App() {
 
   return (
     <div className="app">
+
       <div className="brand">
         CREDITI
       </div>
 
       <main className="home">
+
         <img
           src="/creditin.png"
           className="hero"
           alt="Creditin"
         />
 
-        <h1>CREDITI IA</h1>
+        <h1>
+          CREDITI IA
+        </h1>
 
         <p>
           Seu crédito. Mais simples.
@@ -849,22 +1100,31 @@ function App() {
 
         <button
           className="prompt"
-          onClick={() => openChat()}
+
+          onClick={() =>
+            openChat()
+          }
         >
           Como podemos ajudar?
         </button>
 
         <button
           className="yellow"
-          onClick={() => openChat()}
+
+          onClick={() =>
+            openChat()
+          }
         >
           ENCONTRAR MEU CRÉDITO
         </button>
 
         <button
           className="yellow"
+
           onClick={() =>
-            setScreen("products")
+            setScreen(
+              "products"
+            )
           }
         >
           CONHECER NOSSOS PRODUTOS
@@ -872,6 +1132,7 @@ function App() {
 
         <button
           className="yellow"
+
           onClick={() =>
             openChat(
               "Quero falar com a Crediti."
@@ -883,15 +1144,21 @@ function App() {
 
         <button
           className="yellow"
-          onClick={becomePartner}
+
+          onClick={
+            becomePartner
+          }
         >
           QUERO SER PARCEIRO
         </button>
+
       </main>
     </div>
   );
 }
 
 createRoot(
-  document.getElementById("root")
+  document.getElementById(
+    "root"
+  )
 ).render(<App />);
