@@ -16,12 +16,6 @@ const SUPABASE_URL =
 const SUPABASE_KEY =
   "sb_publishable_dmoTPKmglghAohv0MrRA9A_2zlUYhER";
 
-const SUPABASE_LEADS_URL =
-  "https://vgdtywdpywezrwlrsawq.supabase.co/rest/v1/leads";
-
-const SUPABASE_PUBLISHABLE_KEY =
-  "COLE_AQUI_SUA_PUBLISHABLE_KEY";
-
 const RENDA_EXTRA_URL =
   "https://crediti.startcapital.app/signIn";
 
@@ -1079,43 +1073,68 @@ function App() {
 
   function openAnalystWhatsApp(
     analystKey,
-    productName = ""
+    productName = "",
+    customerData = customer
   ) {
-    const analyst =
-      ANALYSTS[
-        analystKey
-      ];
+    const analyst = ANALYSTS[analystKey];
 
     if (!analyst) {
       return;
     }
 
+    const finalProduct =
+      productName ||
+      customerData?.interest ||
+      "Não informado";
+
+    const customerName =
+      customerData?.name || "Não informado";
+
+    const customerCity =
+      customerData?.city || "Não informada";
+
+    const customerPhone =
+      customerData?.phone || "Não informado";
+
+    const whatsappAnswer =
+      customerData?.whatsapp ? "Sim" : "Não informado";
+
     let message;
 
-    if (
-      productName
-    ) {
+    if (customerData?.name) {
       message =
-        `Olá, ${analyst.name}! ` +
-        `Conheci "${productName}" pelo Crediti IA e gostaria de saber mais e verificar as possibilidades para mim.`;
+        `Olá, ${analyst.name}! Vim pelo Crediti IA e já fiz meu atendimento inicial com o Creditin.
+
+` +
+        `FICHA DO CLIENTE
+` +
+        `Nome: ${customerName}
+` +
+        `Cidade: ${customerCity}
+` +
+        `Telefone: ${customerPhone}
+` +
+        `WhatsApp: ${whatsappAnswer}
+` +
+        `Produto de interesse: ${finalProduct}
+
+` +
+        `Quero continuar meu atendimento com você.`;
+    } else if (productName) {
+      message =
+        `Olá, ${analyst.name}! Conheci "${productName}" pelo Crediti IA e gostaria de saber mais e verificar as possibilidades para mim.`;
     } else {
       message =
-        `Olá, ${analyst.name}! ` +
-        `Gostaria de falar com a Crediti e continuar meu atendimento com você.`;
+        `Olá, ${analyst.name}! Gostaria de falar com a Crediti e continuar meu atendimento com você.`;
     }
 
     const url =
       "https://wa.me/" +
       analyst.whatsapp +
       "?text=" +
-      encodeURIComponent(
-        message
-      );
+      encodeURIComponent(message);
 
-    window.open(
-      url,
-      "_blank"
-    );
+    window.open(url, "_blank");
   }
 
   function chooseAnalyst(
@@ -1148,7 +1167,8 @@ function App() {
 
     openAnalystWhatsApp(
       analystKey,
-      customer.interest
+      customer.interest,
+      updatedCustomer
     );
   }
 
