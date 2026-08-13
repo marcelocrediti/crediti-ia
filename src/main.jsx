@@ -359,6 +359,36 @@ function looksLikeGreetingInsteadOfName(
   ].includes(text);
 }
 
+
+function isValidCustomerName(value) {
+  const text = String(value || "").trim();
+
+  if (text.length < 2 || text.length > 80) return false;
+  if (looksLikeGreetingInsteadOfName(text)) return false;
+
+  if (!/^[A-Za-zÀ-ÖØ-öø-ÿ' -]+$/.test(text)) return false;
+
+  const words = text.split(/\s+/).filter(Boolean);
+  if (words.some((word) => word.length < 2)) return false;
+
+  const forbiddenWords = [
+    "emprestimo", "credito", "financiamento", "consignado", "dinheiro",
+    "cartao", "fgts", "inss", "loas", "bpc", "clt", "consorcio",
+    "seguro", "parcela", "valor", "limite", "preciso", "quero",
+    "gostaria", "tenho", "tem", "algum", "disponivel", "saber",
+    "simular", "simulacao", "ajuda", "ajudar", "atendimento",
+    "atendente", "whatsapp", "telefone", "cidade", "meu", "minha",
+    "pra", "para", "mim", "como", "quanto", "qual", "posso", "pode"
+  ];
+
+  const normalizedWords = normalize(text).split(/\s+/);
+  if (normalizedWords.some((word) => forbiddenWords.includes(word))) return false;
+
+  if (words.length > 5) return false;
+
+  return true;
+}
+
 function App() {
   const [
     screen,
@@ -705,15 +735,13 @@ function App() {
       step === "name"
     ) {
       if (
-        cleanValue.length <
-          2 ||
-        looksLikeGreetingInsteadOfName(
+        !isValidCustomerName(
           cleanValue
         )
       ) {
         addMessage(
           "assistant",
-          "Tudo bem! Agora me diz seu nome para eu poder te atender direitinho."
+          "Para continuar, digite somente seu nome. Exemplo: Maria Silva."
         );
 
         return;
