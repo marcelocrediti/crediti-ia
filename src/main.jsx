@@ -363,13 +363,36 @@ function looksLikeGreetingInsteadOfName(
 function isValidCustomerName(value) {
   const text = String(value || "").trim();
 
-  if (text.length < 2 || text.length > 80) return false;
-  if (looksLikeGreetingInsteadOfName(text)) return false;
+  if (text.length < 5 || text.length > 80) {
+    return false;
+  }
 
-  if (!/^[A-Za-zÀ-ÖØ-öø-ÿ' -]+$/.test(text)) return false;
+  if (looksLikeGreetingInsteadOfName(text)) {
+    return false;
+  }
 
-  const words = text.split(/\s+/).filter(Boolean);
-  if (words.some((word) => word.length < 2)) return false;
+  if (!/^[A-Za-zÀ-ÖØ-öø-ÿ' -]+$/.test(text)) {
+    return false;
+  }
+
+  const words = text
+    .split(/\s+/)
+    .filter(Boolean);
+
+  // Para evitar palavras soltas como "coisa", "credito", "oi" etc.,
+  // o cadastro exige nome + sobrenome.
+  if (words.length < 2 || words.length > 6) {
+    return false;
+  }
+
+  if (
+    words.some(
+      (word) =>
+        word.replace(/['-]/g, "").length < 2
+    )
+  ) {
+    return false;
+  }
 
   const forbiddenWords = [
     "emprestimo", "credito", "financiamento", "consignado", "dinheiro",
@@ -378,13 +401,22 @@ function isValidCustomerName(value) {
     "gostaria", "tenho", "tem", "algum", "disponivel", "saber",
     "simular", "simulacao", "ajuda", "ajudar", "atendimento",
     "atendente", "whatsapp", "telefone", "cidade", "meu", "minha",
-    "pra", "para", "mim", "como", "quanto", "qual", "posso", "pode"
+    "pra", "para", "mim", "como", "quanto", "qual", "posso", "pode",
+    "coisa", "teste", "cliente", "pessoa", "nome", "nao", "sim",
+    "ola", "oi", "opa", "beleza"
   ];
 
-  const normalizedWords = normalize(text).split(/\s+/);
-  if (normalizedWords.some((word) => forbiddenWords.includes(word))) return false;
+  const normalizedWords =
+    normalize(text).split(/\s+/);
 
-  if (words.length > 5) return false;
+  if (
+    normalizedWords.some(
+      (word) =>
+        forbiddenWords.includes(word)
+    )
+  ) {
+    return false;
+  }
 
   return true;
 }
@@ -603,6 +635,7 @@ function App() {
   ) {
     if (
       !data?.name ||
+      !isValidCustomerName(data.name) ||
       !data?.phone ||
       !data?.city ||
       !data?.interest ||
@@ -688,7 +721,7 @@ function App() {
           "assistant",
 
         text:
-          `${greeting}! Eu sou o Creditin, assistente da Crediti. Tudo bem? Para começar, como posso te chamar?`
+          `${greeting}! Eu sou o Creditin, assistente da Crediti. Tudo bem? Para começar, me diga seu nome e sobrenome.`
       }
     ];
 
@@ -741,7 +774,7 @@ function App() {
       ) {
         addMessage(
           "assistant",
-          "Para continuar, digite somente seu nome. Exemplo: Maria Silva."
+          "Para continuar, digite seu nome e sobrenome. Exemplo: Maria Silva."
         );
 
         return;
@@ -1381,7 +1414,7 @@ function App() {
 
             placeholder={
               step === "name"
-                ? "Digite seu nome..."
+                ? "Digite seu nome e sobrenome..."
                 : step === "city"
                 ? "Digite sua cidade..."
                 : step === "phone"
