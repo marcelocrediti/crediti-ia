@@ -19,6 +19,56 @@ const SUPABASE_KEY =
 const RENDA_EXTRA_URL =
   "https://crediti.startcapital.app/signIn";
 
+const PARTNER_PRODUCTS = {
+  inss: {
+    name: "Consignado INSS",
+    partner: "Banco BRB",
+    logo: "/partners/brb.jpeg",
+    url: "https://solution.consig360.com.br/self-hire/EkCwaEb",
+    button: "SIMULAR NO BANCO PARCEIRO"
+  },
+
+  fgts: {
+    name: "Antecipação do FGTS",
+    partner: "Grandino Bank",
+    logo: "/partners/grandino.png",
+    url: "https://crediti.startcapital.app/credit/fgts",
+    button: "CONSULTAR MEU FGTS"
+  },
+
+  bolsa: {
+    name: "Crédito Bolsa Família",
+    partner: "Crefisa",
+    logo: "/partners/crefisa.png",
+    url: "https://crediti.startcapital.app/credit/baixarenda",
+    button: "FAZER MINHA SIMULAÇÃO"
+  },
+
+  energia: {
+    name: "Crédito na conta de luz",
+    partner: "Crefaz",
+    logo: "/partners/crefaz.jpeg",
+    url: "https://crediti.startcapital.app/credit/cdccontadeluz",
+    button: "FAZER MINHA SIMULAÇÃO"
+  },
+
+  clt: {
+    name: "Consignado CLT",
+    partner: "Grandino Bank",
+    logo: "/partners/grandino.png",
+    url: "https://crediti.startcapital.app/credit/cltctps",
+    button: "SIMULAR NO BANCO PARCEIRO"
+  },
+
+  cartao: {
+    name: "Empréstimo no cartão de crédito",
+    partner: "Plataforma GYROO SaaS",
+    logo: "/partners/gyroo.png",
+    url: "https://crediti.emprestimodisponivel.com.br/?l=EW9XMSWNPMR8&u=uCwu5cFx4n6t",
+    button: "SIMULAR AGORA"
+  }
+};
+
 const ANALYSTS = {
   samila: {
     name: "Samila",
@@ -482,6 +532,11 @@ function App() {
     setShowAnalysts
   ] = useState(false);
 
+  const [
+    partnerProduct,
+    setPartnerProduct
+  ] = useState("");
+
   const chatRef =
     useRef(null);
 
@@ -750,6 +805,8 @@ function App() {
     setShowAnalysts(
       false
     );
+
+    setPartnerProduct("");
 
     setPendingMessage(
       firstMessage || ""
@@ -1066,8 +1123,23 @@ function App() {
         data.showAnalysts ===
         true
       ) {
+        setPartnerProduct("");
+
         setShowAnalysts(
           true
+        );
+      }
+
+      if (
+        data.partnerProduct &&
+        PARTNER_PRODUCTS[
+          data.partnerProduct
+        ]
+      ) {
+        setShowAnalysts(false);
+
+        setPartnerProduct(
+          data.partnerProduct
         );
       }
 
@@ -1196,6 +1268,25 @@ function App() {
       encodeURIComponent(message);
 
     window.open(url, "_blank");
+  }
+
+  function openPartnerLink(
+    productKey
+  ) {
+    const product =
+      PARTNER_PRODUCTS[
+        productKey
+      ];
+
+    if (!product?.url) {
+      return;
+    }
+
+    window.open(
+      product.url,
+      "_blank",
+      "noopener,noreferrer"
+    );
   }
 
   function chooseAnalyst(
@@ -1364,6 +1455,61 @@ function App() {
               </button>
             </div>
           )}
+
+          {partnerProduct &&
+            PARTNER_PRODUCTS[
+              partnerProduct
+            ] && (
+              <div className="partner-result-card">
+                <div className="partner-yellow-detail" />
+
+                <span className="partner-result-label">
+                  OPÇÃO ENCONTRADA PARA VOCÊ
+                </span>
+
+                <div className="partner-logo-box">
+                  <img
+                    src={
+                      PARTNER_PRODUCTS[
+                        partnerProduct
+                      ].logo
+                    }
+                    alt={
+                      PARTNER_PRODUCTS[
+                        partnerProduct
+                      ].partner
+                    }
+                  />
+                </div>
+
+                <strong className="partner-product-name">
+                  {
+                    PARTNER_PRODUCTS[
+                      partnerProduct
+                    ].name
+                  }
+                </strong>
+
+                <p className="partner-result-text">
+                  A simulação, a análise e a contratação serão realizadas no ambiente seguro do parceiro. A aprovação e as condições finais dependem da instituição responsável.
+                </p>
+
+                <button
+                  className="partner-link-button"
+                  onClick={() =>
+                    openPartnerLink(
+                      partnerProduct
+                    )
+                  }
+                >
+                  {
+                    PARTNER_PRODUCTS[
+                      partnerProduct
+                    ].button
+                  }
+                </button>
+              </div>
+            )}
 
           {busy && (
             <div

@@ -190,11 +190,13 @@ Regra:
 
 Pergunte a idade antes de concluir a pré-análise.
 
-Quando houver interesse em seguir, pergunte se pode encaminhar.
+Quando houver interesse em seguir, pergunte se pode encaminhar para a simulação no ambiente do banco parceiro.
 
 Quando aceitar:
 
-[[HANDOFF]]
+responda de forma curta que a opção foi encontrada e que o botão abaixo leva ao ambiente seguro do parceiro.
+
+[[PARTNER:inss]]
 
 BPC / LOAS
 
@@ -226,11 +228,13 @@ Depois pergunte a idade, se ainda não souber.
 
 Não conclua antes de verificar as duas regras.
 
-Quando puder seguir, pergunte se pode encaminhar.
+Quando puder seguir, pergunte se pode encaminhar para a simulação no ambiente do parceiro.
 
 Quando aceitar:
 
-[[HANDOFF]]
+responda de forma curta que a opção foi encontrada e que o botão abaixo leva ao ambiente seguro do parceiro.
+
+[[PARTNER:clt]]
 
 CRÉDITO PESSOAL BOLSA FAMÍLIA
 
@@ -242,11 +246,13 @@ Regras:
 
 Faça as perguntas progressivamente.
 
-Quando aparentemente atender às regras, pergunte se pode encaminhar.
+Quando aparentemente atender às regras, pergunte se pode encaminhar para a simulação no ambiente do parceiro.
 
 Quando aceitar:
 
-[[HANDOFF]]
+responda de forma curta que a opção foi encontrada e que o botão abaixo leva ao ambiente seguro do parceiro.
+
+[[PARTNER:bolsa]]
 
 FGTS
 
@@ -257,11 +263,13 @@ Regras:
 
 Pergunte uma informação por vez.
 
-Quando atender inicialmente, pergunte se pode encaminhar.
+Quando atender inicialmente, pergunte se pode encaminhar para consultar no ambiente do parceiro.
 
 Quando aceitar:
 
-[[HANDOFF]]
+responda de forma curta que a opção foi encontrada e que o botão abaixo leva ao ambiente seguro do parceiro.
+
+[[PARTNER:fgts]]
 
 EMPRÉSTIMO NO CARTÃO DE CRÉDITO
 
@@ -272,11 +280,13 @@ Regras:
 
 Verifique as duas condições.
 
-Quando houver interesse, pergunte se pode encaminhar.
+Quando houver interesse, pergunte se pode encaminhar para a simulação na plataforma parceira.
 
 Quando aceitar:
 
-[[HANDOFF]]
+responda de forma curta que a opção foi encontrada e que o botão abaixo leva ao ambiente seguro do parceiro.
+
+[[PARTNER:cartao]]
 
 EMPRÉSTIMO NA CONTA DE LUZ
 
@@ -287,11 +297,13 @@ Regras:
 
 Verifique as duas condições.
 
-Quando aparentemente atender, pergunte se pode encaminhar.
+Quando aparentemente atender, pergunte se pode encaminhar para a simulação no ambiente do parceiro.
 
 Quando aceitar:
 
-[[HANDOFF]]
+responda de forma curta que a opção foi encontrada e que o botão abaixo leva ao ambiente seguro do parceiro.
+
+[[PARTNER:energia]]
 
 SEGURO AUTO
 
@@ -408,6 +420,10 @@ Prefira:
 - "a aprovação final depende da instituição responsável."
 
 ENCAMINHAMENTO HUMANO
+
+ATENÇÃO: os produtos INSS, CLT, Bolsa Família, FGTS, empréstimo no cartão e empréstimo na conta de luz possuem link próprio. Para esses seis produtos, nunca mostre [[HANDOFF]] e nunca encaminhe primeiro aos analistas. Depois da triagem e da confirmação do cliente, use exclusivamente o marcador [[PARTNER:produto]] indicado na regra de cada produto.
+
+Para BPC/LOAS, financiamento, consórcio, garantia de veículo, seguro e demais produtos sem link, mantenha o encaminhamento humano abaixo.
 
 Existem dois analistas:
 
@@ -575,17 +591,32 @@ Não peça novamente os dados acima quando já estiverem informados.
 function processAIReply(text = "") {
   const marker = "[[HANDOFF]]";
 
+  const partnerMatch =
+    text.match(
+      /\[\[PARTNER:(inss|fgts|clt|bolsa|energia|cartao)\]\]/i
+    );
+
+  const partnerProduct =
+    partnerMatch?.[1]
+      ?.toLowerCase() || "";
+
   const showAnalysts =
-    text.includes(marker);
+    text.includes(marker) &&
+    !partnerProduct;
 
   const cleanReply =
     text
       .replaceAll(marker, "")
+      .replace(
+        /\[\[PARTNER:(inss|fgts|clt|bolsa|energia|cartao)\]\]/gi,
+        ""
+      )
       .trim();
 
   return {
     reply: cleanReply,
-    showAnalysts
+    showAnalysts,
+    partnerProduct
   };
 }
 
@@ -665,13 +696,15 @@ app.post("/api/chat", async (req, res) => {
 
     const {
       reply,
-      showAnalysts
+      showAnalysts,
+      partnerProduct
     } = processAIReply(rawReply);
 
     return res.json({
       success: true,
       reply,
       showAnalysts,
+      partnerProduct,
       model: MODEL
     });
   } catch (error) {
