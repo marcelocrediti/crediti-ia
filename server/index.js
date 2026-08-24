@@ -1,4 +1,4 @@
-import m from"express";import f from"cors";import O from"openai";const s=m();s.use(f({origin:"*",methods:["GET","POST","OPTIONS"],allowedHeaders:["Content-Type"]})),s.use(m.json({limit:"1mb"}));const N=new O({apiKey:process.env.OPENAI_API_KEY}),l=process.env.PORT||1e4,d="gpt-5.6-luna",R=`
+import O from"express";import h from"cors";import E from"openai";const s=O();s.use(h({origin:"*",methods:["GET","POST","OPTIONS"],allowedHeaders:["Content-Type"]})),s.use(O.json({limit:"1mb"}));const v=new E({apiKey:process.env.OPENAI_API_KEY}),N=process.env.PORT||1e4,m="gpt-5.6-luna",S=`
 Voc\xEA \xE9 o Creditin, assistente inteligente oficial da Crediti.
 
 Voc\xEA atende clientes reais interessados nos produtos e servi\xE7os financeiros da Crediti.
@@ -41,7 +41,7 @@ FINANCIAMENTO DE CARRO
 
 Objetivo: comprar um carro.
 
-Regras iniciais:
+Regras:
 
 - CPF sem restri\xE7\xE3o;
 - score m\xEDnimo de 700 pontos;
@@ -60,9 +60,7 @@ Se estiver sem restri\xE7\xE3o, obrigatoriamente pergunte:
 
 N\xE3o conclua a pr\xE9-an\xE1lise antes de perguntar o score.
 
-Se estiver dentro das regras, pergunte se pode encaminhar para um analista.
-
-Quando aceitar:
+Quando aceitar atendimento humano:
 
 [[HANDOFF]]
 
@@ -134,9 +132,9 @@ Regra:
 
 Pergunte a idade antes de concluir a pr\xE9-an\xE1lise.
 
-Quando houver interesse em seguir, pergunte se pode encaminhar para a simula\xE7\xE3o no ambiente do banco parceiro.
+Quando houver interesse, pergunte se pode encaminhar para a simula\xE7\xE3o no banco parceiro.
 
-Quando aceitar, responda que a op\xE7\xE3o foi encontrada e que o bot\xE3o abaixo leva ao ambiente seguro do parceiro.
+Quando aceitar:
 
 [[PARTNER:inss]]
 
@@ -164,11 +162,9 @@ Regras:
 
 Pergunte primeiro o tempo de carteira.
 
-Depois pergunte a idade, se ainda n\xE3o souber.
+Depois pergunte a idade.
 
-Quando atender \xE0s regras, pergunte se pode encaminhar para a simula\xE7\xE3o no ambiente do parceiro.
-
-Quando aceitar, responda que a op\xE7\xE3o foi encontrada e que o bot\xE3o abaixo leva ao ambiente seguro do parceiro.
+Quando aceitar a simula\xE7\xE3o no parceiro:
 
 [[PARTNER:clt]]
 
@@ -182,7 +178,7 @@ Regras:
 
 Fa\xE7a as perguntas progressivamente.
 
-Quando atender \xE0s regras, pergunte se pode encaminhar para a Analista Samila continuar o atendimento.
+Quando atender \xE0s regras, pergunte se pode encaminhar para a Analista Samila.
 
 Quando aceitar, responda:
 
@@ -199,9 +195,7 @@ Regras:
 
 Pergunte uma informa\xE7\xE3o por vez.
 
-Quando atender inicialmente, pergunte se pode encaminhar para consultar no ambiente do parceiro.
-
-Quando aceitar, responda que a op\xE7\xE3o foi encontrada e que o bot\xE3o abaixo leva ao ambiente seguro do parceiro.
+Quando aceitar consultar no parceiro:
 
 [[PARTNER:fgts]]
 
@@ -214,9 +208,7 @@ Regras:
 
 Verifique as duas condi\xE7\xF5es.
 
-Quando houver interesse, pergunte se pode encaminhar para a simula\xE7\xE3o na plataforma parceira.
-
-Quando aceitar, responda que a op\xE7\xE3o foi encontrada e que o bot\xE3o abaixo leva ao ambiente seguro do parceiro.
+Quando aceitar a simula\xE7\xE3o:
 
 [[PARTNER:cartao]]
 
@@ -229,9 +221,7 @@ Regras:
 
 Verifique as duas condi\xE7\xF5es.
 
-Quando atender, pergunte se pode encaminhar para a simula\xE7\xE3o no ambiente do parceiro.
-
-Quando aceitar, responda que a op\xE7\xE3o foi encontrada e que o bot\xE3o abaixo leva ao ambiente seguro do parceiro.
+Quando aceitar a simula\xE7\xE3o:
 
 [[PARTNER:energia]]
 
@@ -242,8 +232,6 @@ Atende carro e moto.
 Regra:
 
 - condutor principal deve possuir CNH.
-
-Descubra se \xE9 carro ou moto quando necess\xE1rio.
 
 Quando aceitar atendimento humano:
 
@@ -273,7 +261,7 @@ RENDA EXTRA CREDITI
 
 Programa para quem deseja atuar como parceiro da Crediti.
 
-Pode identificar inten\xE7\xF5es como:
+Identifique frases como:
 
 - quero trabalhar com cr\xE9dito;
 - quero ganhar comiss\xE3o;
@@ -283,18 +271,6 @@ Pode identificar inten\xE7\xF5es como:
 
 Explique de maneira curta.
 
-COMPARA\xC7\xC3O DE PRODUTOS
-
-Quando algu\xE9m quer comprar carro ou moto, as possibilidades principais s\xE3o financiamento e cons\xF3rcio.
-
-Pergunte se precisa do ve\xEDculo agora ou pode esperar.
-
-Se precisa agora, priorize financiamento.
-
-Se pode esperar, apresente cons\xF3rcio.
-
-N\xE3o apresente empr\xE9stimo com garantia nesse fluxo.
-
 CLIENTE DIZ "PRECISO DE DINHEIRO"
 
 N\xE3o escolha um produto imediatamente.
@@ -303,13 +279,13 @@ Pergunte:
 
 "Hoje voc\xEA \xE9 aposentado, trabalha registrado, recebe algum benef\xEDcio ou possui carro ou moto no seu nome?"
 
-Depois use a resposta para seguir para o produto relacionado.
+Depois siga para o produto relacionado.
 
 MEM\xD3RIA
 
 Use todo o hist\xF3rico recebido.
 
-Nunca pergunte novamente uma informa\xE7\xE3o que j\xE1 foi respondida.
+Nunca pergunte novamente uma informa\xE7\xE3o j\xE1 respondida.
 
 PR\xC9-AN\xC1LISE
 
@@ -334,28 +310,26 @@ ENCAMINHAMENTO
 
 INSS, CLT, FGTS, empr\xE9stimo no cart\xE3o e empr\xE9stimo na conta de luz possuem links pr\xF3prios.
 
-Para esses produtos, nunca use [[HANDOFF]]. Use exclusivamente o marcador [[PARTNER:produto]] indicado na regra de cada produto.
+Para esses produtos, nunca use [[HANDOFF]]. Use o marcador [[PARTNER:produto]].
 
 Bolsa Fam\xEDlia n\xE3o possui contrata\xE7\xE3o direta.
 
-No Bolsa Fam\xEDlia, encaminhe exclusivamente para a Analista Samila usando:
+No Bolsa Fam\xEDlia, encaminhe exclusivamente para a Analista Samila:
 
 [[HANDOFF:SAMILA]]
 
-Para os produtos sem link, existem dois analistas:
+Para produtos sem link, existem dois analistas:
 
 - Analista Samila;
 - Analista Marcelino.
 
 O cliente escolhe com quem deseja continuar.
 
-Nunca escolha por ele.
-
 Pergunte:
 
 "Posso te encaminhar para um de nossos analistas para continuar o atendimento?"
 
-Quando o cliente aceitar, responda:
+Quando aceitar:
 
 "Perfeito! Escolha abaixo com qual analista deseja continuar."
 
@@ -392,14 +366,8 @@ Nunca invente:
 - percentual de aprova\xE7\xE3o;
 - entrada.
 
-Quando uma informa\xE7\xE3o comercial n\xE3o estiver cadastrada, diga que depende da simula\xE7\xE3o ou an\xE1lise.
-
-REGRA FINAL
-
-No financiamento de carro e moto, CPF sem restri\xE7\xE3o n\xE3o \xE9 suficiente.
-
-\xC9 obrigat\xF3rio verificar se o score \xE9 700 ou mais antes de concluir a pr\xE9-an\xE1lise.
-`;function E(o=[],a,e={}){const r=[],i=`
+Quando uma informa\xE7\xE3o n\xE3o estiver cadastrada, diga que depende da simula\xE7\xE3o ou an\xE1lise.
+`;function I(o=[],a,e={}){const n=[],c=`
 DADOS J\xC1 COLETADOS:
 
 Nome: ${e.name||"n\xE3o informado"}
@@ -420,4 +388,6 @@ Interesse inicial:
 ${e.interest||"n\xE3o identificado"}
 
 N\xE3o pe\xE7a novamente os dados acima quando j\xE1 estiverem informados.
-`;if(r.push({role:"developer",content:i}),Array.isArray(o)){const p=o.slice(-30);for(const n of p)!n||typeof n.text!="string"||(n.role==="user"&&r.push({role:"user",content:n.text}),n.role==="assistant"&&r.push({role:"assistant",content:n.text}))}const t=String(a).trim(),c=r[r.length-1];return c&&c.role==="user"&&String(c.content).trim()===t||r.push({role:"user",content:t}),r}function h(o=""){const a="[[HANDOFF]]",e="[[HANDOFF:SAMILA]]",i=o.match(/\[\[PARTNER:(inss|fgts|clt|energia|cartao)\]\]/i)?.[1]?.toLowerCase()||"",t=(o.includes(a)||o.includes(e))&&!i,c=o.includes(e)?"samila":"";return{reply:o.replaceAll(e,"").replaceAll(a,"").replace(/\[\[PARTNER:(inss|fgts|clt|energia|cartao)\]\]/gi,"").trim(),showAnalysts:t,analystKey:c,partnerProduct:i}}s.get("/",(o,a)=>{a.json({status:"online",app:"Crediti IA",assistant:"Creditin",model:d})}),s.get("/health",(o,a)=>{a.json({status:"ok",openaiConfigured:!!process.env.OPENAI_API_KEY,model:d})}),s.post("/api/chat",async(o,a)=>{try{const{message:e,history:r=[],customer:i={}}=o.body||{};if(!e||typeof e!="string"||!e.trim())return a.status(400).json({error:"Mensagem n\xE3o informada."});if(!process.env.OPENAI_API_KEY)return a.status(500).json({error:"OPENAI_API_KEY n\xE3o configurada."});const t=E(r,e,i),u=(await N.responses.create({model:d,reasoning:{effort:"low"},instructions:R,input:t,max_output_tokens:500})).output_text?.trim();if(!u)return a.status(502).json({error:"A IA n\xE3o retornou uma resposta v\xE1lida."});const{reply:p,showAnalysts:n,analystKey:g,partnerProduct:A}=h(u);return a.json({success:!0,reply:p,showAnalysts:n,analystKey:g,partnerProduct:A,model:d})}catch(e){return console.error("ERRO CREDITI IA:"),console.error(e),a.status(e?.status||500).json({error:e?.message||"N\xE3o foi poss\xEDvel responder agora."})}}),s.post("/api/leads",async(o,a)=>{try{const e=o.body||{};return console.log("LEAD CREDITI IA:",JSON.stringify({name:e.name||"",phone:e.phone||"",city:e.city||"",whatsapp:e.whatsapp||!1,interest:e.interest||"",analyst:e.analyst||"",analystEmail:e.analystEmail||"",status:e.status||"",createdAt:e.createdAt||new Date().toISOString()})),a.status(201).json({success:!0,message:"Lead recebido."})}catch{return a.status(500).json({success:!1,error:"N\xE3o foi poss\xEDvel registrar o lead."})}}),s.use((o,a)=>{a.status(404).json({error:"Rota n\xE3o encontrada."})}),s.listen(l,"0.0.0.0",()=>{console.log(`Crediti IA online na porta ${l}`),console.log("OpenAI configurada:",!!process.env.OPENAI_API_KEY),console.log("Modelo:",d)});
+`;if(n.push({role:"developer",content:c}),Array.isArray(o)){const t=o.slice(-30);for(const r of t)!r||typeof r.text!="string"||(r.role==="user"&&n.push({role:"user",content:r.text}),r.role==="assistant"&&n.push({role:"assistant",content:r.text}))}const i=String(a).trim(),d=n[n.length-1];return d&&d.role==="user"&&String(d.content).trim()===i||n.push({role:"user",content:i}),n}function P(o=""){const a="[[HANDOFF]]",e="[[HANDOFF:SAMILA]]",c=o.match(/\[\[PARTNER:(inss|fgts|clt|energia|cartao)\]\]/i)?.[1]?.toLowerCase()||"",i=(o.includes(a)||o.includes(e))&&!c,d=o.includes(e)?"samila":"";let u=o.replaceAll(e,"").replaceAll(a,"").replace(/\[\[PARTNER:(inss|fgts|clt|energia|cartao)\]\]/gi,"").trim();if(i){const t=new Intl.DateTimeFormat("en-US",{timeZone:"America/Fortaleza",weekday:"short",hour:"2-digit",minute:"2-digit",hour12:!1}).formatToParts(new Date),r=t.find(p=>p.type==="weekday")?.value||"",l=Number(t.find(p=>p.type==="hour")?.value||0),g=Number(t.find(p=>p.type==="minute")?.value||0),A=l*60+g,f=r==="Sat"||r==="Sun",R=r==="Fri"&&A>=1020;!f&&A>=460&&A<1020||(u+=`
+
+AVISO DE HOR\xC1RIO: nosso atendimento humano funciona de segunda a sexta, das 7h40 \xE0s 17h. ${f||R?"Sua mensagem ser\xE1 recebida e respondida na segunda-feira.":"Sua mensagem ser\xE1 recebida e respondida no pr\xF3ximo hor\xE1rio de atendimento."}`)}return{reply:u,showAnalysts:i,analystKey:d,partnerProduct:c}}s.get("/",(o,a)=>{a.json({status:"online",app:"Crediti IA",assistant:"Creditin",model:m})}),s.get("/health",(o,a)=>{a.json({status:"ok",openaiConfigured:!!process.env.OPENAI_API_KEY,model:m})}),s.post("/api/chat",async(o,a)=>{try{const{message:e,history:n=[],customer:c={}}=o.body||{};if(!e||typeof e!="string"||!e.trim())return a.status(400).json({error:"Mensagem n\xE3o informada."});if(!process.env.OPENAI_API_KEY)return a.status(500).json({error:"OPENAI_API_KEY n\xE3o configurada."});const i=I(n,e,c),u=(await v.responses.create({model:m,reasoning:{effort:"low"},instructions:S,input:i,max_output_tokens:500})).output_text?.trim();if(!u)return a.status(502).json({error:"A IA n\xE3o retornou uma resposta v\xE1lida."});const{reply:t,showAnalysts:r,analystKey:l,partnerProduct:g}=P(u);return a.json({success:!0,reply:t,showAnalysts:r,analystKey:l,partnerProduct:g,model:m})}catch(e){return console.error("ERRO CREDITI IA:"),console.error(e),a.status(e?.status||500).json({error:e?.message||"N\xE3o foi poss\xEDvel responder agora."})}}),s.post("/api/leads",async(o,a)=>{try{const e=o.body||{};return console.log("LEAD CREDITI IA:",JSON.stringify({name:e.name||"",phone:e.phone||"",city:e.city||"",whatsapp:e.whatsapp||!1,interest:e.interest||"",analyst:e.analyst||"",analystEmail:e.analystEmail||"",status:e.status||"",createdAt:e.createdAt||new Date().toISOString()})),a.status(201).json({success:!0,message:"Lead recebido."})}catch{return a.status(500).json({success:!1,error:"N\xE3o foi poss\xEDvel registrar o lead."})}}),s.use((o,a)=>{a.status(404).json({error:"Rota n\xE3o encontrada."})}),s.listen(N,"0.0.0.0",()=>{console.log(`Crediti IA online na porta ${N}`),console.log("OpenAI configurada:",!!process.env.OPENAI_API_KEY),console.log("Modelo:",m)});
