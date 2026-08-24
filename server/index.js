@@ -11,7 +11,7 @@ Seu trabalho \xE9:
 4. perguntar somente o necess\xE1rio;
 5. n\xE3o repetir perguntas j\xE1 respondidas;
 6. nunca prometer aprova\xE7\xE3o;
-7. identificar quando chegou o momento de encaminhar para atendimento humano.
+7. identificar quando chegou o momento de encaminhar.
 
 FORMA DE CONVERSAR
 
@@ -29,11 +29,11 @@ Nunca invente informa\xE7\xF5es.
 
 REGRA DE OURO
 
-Voc\xEA deve entender a inten\xE7\xE3o antes de escolher um produto.
+Entenda a inten\xE7\xE3o antes de escolher um produto.
 
-Se o cliente disser apenas "carro", pergunte se quer comprar um carro ou se j\xE1 possui um carro e est\xE1 buscando dinheiro.
+Se o cliente disser apenas "carro", pergunte se quer comprar um carro ou se j\xE1 possui um e est\xE1 buscando dinheiro.
 
-Se disser "moto", pergunte se quer comprar uma moto ou se j\xE1 possui uma moto e est\xE1 buscando dinheiro.
+Se disser "moto", pergunte se quer comprar uma moto ou se j\xE1 possui uma e est\xE1 buscando dinheiro.
 
 N\xE3o misture financiamento com empr\xE9stimo com garantia.
 
@@ -58,7 +58,7 @@ Se estiver sem restri\xE7\xE3o, obrigatoriamente pergunte:
 
 "Seu score est\xE1 em 700 pontos ou mais?"
 
-N\xE3o conclua a pr\xE9-an\xE1lise antes de perguntar o score.
+N\xE3o conclua antes de perguntar o score.
 
 Quando aceitar atendimento humano:
 
@@ -85,7 +85,7 @@ Quando aceitar atendimento humano:
 
 CONS\xD3RCIO DE CARRO
 
-Pode ser apresentado para quem deseja comprar carro e pode esperar.
+Pode ser apresentado para quem deseja comprar um carro e pode esperar.
 
 Regra:
 
@@ -134,7 +134,7 @@ Pergunte a idade antes de concluir a pr\xE9-an\xE1lise.
 
 Quando houver interesse, pergunte se pode encaminhar para a simula\xE7\xE3o no banco parceiro.
 
-Quando aceitar:
+Quando aceitar, responda que a op\xE7\xE3o foi encontrada e que o bot\xE3o abaixo leva ao ambiente seguro do parceiro.
 
 [[PARTNER:inss]]
 
@@ -145,13 +145,18 @@ Atende benefici\xE1rios BPC/LOAS.
 N\xE3o atende:
 
 - representante legal;
-- curatela.
+- curatela;
+- benef\xEDcio recebido por outra pessoa.
 
 Pergunte se o benef\xEDcio \xE9 recebido pela pr\xF3pria pessoa.
 
-Quando aceitar atendimento humano:
+Se o cliente disser que possui representante legal, curatela ou que outra pessoa recebe o benef\xEDcio, n\xE3o encaminhe para o link.
 
-[[HANDOFF]]
+Quando estiver dentro das condi\xE7\xF5es, pergunte se pode encaminhar para a simula\xE7\xE3o no ambiente do Banco BRB.
+
+Quando aceitar, responda que a op\xE7\xE3o foi encontrada e que o bot\xE3o abaixo leva ao ambiente seguro do parceiro.
+
+[[PARTNER:bpc]]
 
 CONSIGNADO CLT
 
@@ -164,7 +169,7 @@ Pergunte primeiro o tempo de carteira.
 
 Depois pergunte a idade.
 
-Quando aceitar a simula\xE7\xE3o no parceiro:
+Quando aceitar a simula\xE7\xE3o:
 
 [[PARTNER:clt]]
 
@@ -308,9 +313,9 @@ Prefira:
 
 ENCAMINHAMENTO
 
-INSS, CLT, FGTS, empr\xE9stimo no cart\xE3o e empr\xE9stimo na conta de luz possuem links pr\xF3prios.
+INSS, BPC/LOAS, CLT, FGTS, empr\xE9stimo no cart\xE3o e empr\xE9stimo na conta de luz possuem links pr\xF3prios.
 
-Para esses produtos, nunca use [[HANDOFF]]. Use o marcador [[PARTNER:produto]].
+Para esses produtos, nunca use [[HANDOFF]]. Use exclusivamente o marcador [[PARTNER:produto]] indicado em cada regra.
 
 Bolsa Fam\xEDlia n\xE3o possui contrata\xE7\xE3o direta.
 
@@ -318,7 +323,7 @@ No Bolsa Fam\xEDlia, encaminhe exclusivamente para a Analista Samila:
 
 [[HANDOFF:SAMILA]]
 
-Para produtos sem link, existem dois analistas:
+Para financiamento, cons\xF3rcio, garantia de ve\xEDculo, seguro e outros produtos sem link, existem dois analistas:
 
 - Analista Samila;
 - Analista Marcelino.
@@ -388,6 +393,6 @@ Interesse inicial:
 ${e.interest||"n\xE3o identificado"}
 
 N\xE3o pe\xE7a novamente os dados acima quando j\xE1 estiverem informados.
-`;if(n.push({role:"developer",content:c}),Array.isArray(o)){const t=o.slice(-30);for(const r of t)!r||typeof r.text!="string"||(r.role==="user"&&n.push({role:"user",content:r.text}),r.role==="assistant"&&n.push({role:"assistant",content:r.text}))}const i=String(a).trim(),d=n[n.length-1];return d&&d.role==="user"&&String(d.content).trim()===i||n.push({role:"user",content:i}),n}function P(o=""){const a="[[HANDOFF]]",e="[[HANDOFF:SAMILA]]",c=o.match(/\[\[PARTNER:(inss|fgts|clt|energia|cartao)\]\]/i)?.[1]?.toLowerCase()||"",i=(o.includes(a)||o.includes(e))&&!c,d=o.includes(e)?"samila":"";let u=o.replaceAll(e,"").replaceAll(a,"").replace(/\[\[PARTNER:(inss|fgts|clt|energia|cartao)\]\]/gi,"").trim();if(i){const t=new Intl.DateTimeFormat("en-US",{timeZone:"America/Fortaleza",weekday:"short",hour:"2-digit",minute:"2-digit",hour12:!1}).formatToParts(new Date),r=t.find(p=>p.type==="weekday")?.value||"",l=Number(t.find(p=>p.type==="hour")?.value||0),g=Number(t.find(p=>p.type==="minute")?.value||0),A=l*60+g,f=r==="Sat"||r==="Sun",R=r==="Fri"&&A>=1020;!f&&A>=460&&A<1020||(u+=`
+`;if(n.push({role:"developer",content:c}),Array.isArray(o)){const t=o.slice(-30);for(const r of t)!r||typeof r.text!="string"||(r.role==="user"&&n.push({role:"user",content:r.text}),r.role==="assistant"&&n.push({role:"assistant",content:r.text}))}const i=String(a).trim(),d=n[n.length-1];return d&&d.role==="user"&&String(d.content).trim()===i||n.push({role:"user",content:i}),n}function b(o=""){const a="[[HANDOFF]]",e="[[HANDOFF:SAMILA]]",c=o.match(/\[\[PARTNER:(inss|bpc|fgts|clt|energia|cartao)\]\]/i)?.[1]?.toLowerCase()||"",i=(o.includes(a)||o.includes(e))&&!c,d=o.includes(e)?"samila":"";let u=o.replaceAll(e,"").replaceAll(a,"").replace(/\[\[PARTNER:(inss|bpc|fgts|clt|energia|cartao)\]\]/gi,"").trim();if(i){const t=new Intl.DateTimeFormat("en-US",{timeZone:"America/Fortaleza",weekday:"short",hour:"2-digit",minute:"2-digit",hour12:!1}).formatToParts(new Date),r=t.find(p=>p.type==="weekday")?.value||"",l=Number(t.find(p=>p.type==="hour")?.value||0),g=Number(t.find(p=>p.type==="minute")?.value||0),A=l*60+g,f=r==="Sat"||r==="Sun",R=r==="Fri"&&A>=1020;!f&&A>=460&&A<1020||(u+=`
 
-AVISO DE HOR\xC1RIO: nosso atendimento humano funciona de segunda a sexta, das 7h40 \xE0s 17h. ${f||R?"Sua mensagem ser\xE1 recebida e respondida na segunda-feira.":"Sua mensagem ser\xE1 recebida e respondida no pr\xF3ximo hor\xE1rio de atendimento."}`)}return{reply:u,showAnalysts:i,analystKey:d,partnerProduct:c}}s.get("/",(o,a)=>{a.json({status:"online",app:"Crediti IA",assistant:"Creditin",model:m})}),s.get("/health",(o,a)=>{a.json({status:"ok",openaiConfigured:!!process.env.OPENAI_API_KEY,model:m})}),s.post("/api/chat",async(o,a)=>{try{const{message:e,history:n=[],customer:c={}}=o.body||{};if(!e||typeof e!="string"||!e.trim())return a.status(400).json({error:"Mensagem n\xE3o informada."});if(!process.env.OPENAI_API_KEY)return a.status(500).json({error:"OPENAI_API_KEY n\xE3o configurada."});const i=I(n,e,c),u=(await v.responses.create({model:m,reasoning:{effort:"low"},instructions:S,input:i,max_output_tokens:500})).output_text?.trim();if(!u)return a.status(502).json({error:"A IA n\xE3o retornou uma resposta v\xE1lida."});const{reply:t,showAnalysts:r,analystKey:l,partnerProduct:g}=P(u);return a.json({success:!0,reply:t,showAnalysts:r,analystKey:l,partnerProduct:g,model:m})}catch(e){return console.error("ERRO CREDITI IA:"),console.error(e),a.status(e?.status||500).json({error:e?.message||"N\xE3o foi poss\xEDvel responder agora."})}}),s.post("/api/leads",async(o,a)=>{try{const e=o.body||{};return console.log("LEAD CREDITI IA:",JSON.stringify({name:e.name||"",phone:e.phone||"",city:e.city||"",whatsapp:e.whatsapp||!1,interest:e.interest||"",analyst:e.analyst||"",analystEmail:e.analystEmail||"",status:e.status||"",createdAt:e.createdAt||new Date().toISOString()})),a.status(201).json({success:!0,message:"Lead recebido."})}catch{return a.status(500).json({success:!1,error:"N\xE3o foi poss\xEDvel registrar o lead."})}}),s.use((o,a)=>{a.status(404).json({error:"Rota n\xE3o encontrada."})}),s.listen(N,"0.0.0.0",()=>{console.log(`Crediti IA online na porta ${N}`),console.log("OpenAI configurada:",!!process.env.OPENAI_API_KEY),console.log("Modelo:",m)});
+AVISO DE HOR\xC1RIO: nosso atendimento humano funciona de segunda a sexta, das 7h40 \xE0s 17h. ${f||R?"Sua mensagem ser\xE1 recebida e respondida na segunda-feira.":"Sua mensagem ser\xE1 recebida e respondida no pr\xF3ximo hor\xE1rio de atendimento."}`)}return{reply:u,showAnalysts:i,analystKey:d,partnerProduct:c}}s.get("/",(o,a)=>{a.json({status:"online",app:"Crediti IA",assistant:"Creditin",model:m})}),s.get("/health",(o,a)=>{a.json({status:"ok",openaiConfigured:!!process.env.OPENAI_API_KEY,model:m})}),s.post("/api/chat",async(o,a)=>{try{const{message:e,history:n=[],customer:c={}}=o.body||{};if(!e||typeof e!="string"||!e.trim())return a.status(400).json({error:"Mensagem n\xE3o informada."});if(!process.env.OPENAI_API_KEY)return a.status(500).json({error:"OPENAI_API_KEY n\xE3o configurada."});const i=I(n,e,c),u=(await v.responses.create({model:m,reasoning:{effort:"low"},instructions:S,input:i,max_output_tokens:500})).output_text?.trim();if(!u)return a.status(502).json({error:"A IA n\xE3o retornou uma resposta v\xE1lida."});const{reply:t,showAnalysts:r,analystKey:l,partnerProduct:g}=b(u);return a.json({success:!0,reply:t,showAnalysts:r,analystKey:l,partnerProduct:g,model:m})}catch(e){return console.error("ERRO CREDITI IA:"),console.error(e),a.status(e?.status||500).json({error:e?.message||"N\xE3o foi poss\xEDvel responder agora."})}}),s.post("/api/leads",async(o,a)=>{try{const e=o.body||{};return console.log("LEAD CREDITI IA:",JSON.stringify({name:e.name||"",phone:e.phone||"",city:e.city||"",whatsapp:e.whatsapp||!1,interest:e.interest||"",analyst:e.analyst||"",analystEmail:e.analystEmail||"",status:e.status||"",createdAt:e.createdAt||new Date().toISOString()})),a.status(201).json({success:!0,message:"Lead recebido."})}catch{return a.status(500).json({success:!1,error:"N\xE3o foi poss\xEDvel registrar o lead."})}}),s.use((o,a)=>{a.status(404).json({error:"Rota n\xE3o encontrada."})}),s.listen(N,"0.0.0.0",()=>{console.log(`Crediti IA online na porta ${N}`),console.log("OpenAI configurada:",!!process.env.OPENAI_API_KEY),console.log("Modelo:",m)});
