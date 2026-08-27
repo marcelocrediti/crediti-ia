@@ -1427,7 +1427,7 @@ function App() {
         </strong>
 
         <p className="app-splash__message">
-          Encontre opções e<br />
+          Encontre opções de crédito e<br />
           simule com segurança
         </p>
 
