@@ -19,6 +19,9 @@ const SUPABASE_KEY =
 const RENDA_EXTRA_URL =
   "https://crediti.startcapital.app/signIn";
 
+const SHOPEE_STORE_URL =
+  "https://collshp.com/marceloachou?view=storefront";
+
 const PARTNER_PRODUCTS = {
   inss: {
     name: "Consignado INSS",
@@ -751,6 +754,11 @@ function BottomNav({
       id: "services",
       icon: "▦",
       label: "Serviços"
+    },
+    {
+      id: "shop",
+      icon: "S",
+      label: "Shop"
     }
   ];
 
@@ -2181,6 +2189,90 @@ function App() {
     );
   }
 
+  if (screen === "shop") {
+    return (
+      <div className="app app-white app-with-nav">
+        <AppHeader
+          title="Crediti Shop"
+          subtitle="Achadinhos escolhidos para você"
+        />
+
+        <main className="modern-page shop-page">
+          <section className="shop-hero">
+            <span className="eyebrow">
+              VITRINE DE OFERTAS
+            </span>
+
+            <h1>
+              Produtos úteis em um só lugar
+            </h1>
+
+            <p>
+              Acesse nossa seleção de achadinhos e finalize sua compra diretamente na Shopee.
+            </p>
+
+            <button
+              className="shop-main-button"
+              onClick={() =>
+                openExternal(
+                  SHOPEE_STORE_URL
+                )
+              }
+            >
+              ABRIR VITRINE NA SHOPEE
+            </button>
+          </section>
+
+          <section className="shop-benefits">
+            <article>
+              <span>01</span>
+              <strong>
+                Achadinhos selecionados
+              </strong>
+              <p>
+                Uma vitrine organizada para facilitar sua busca.
+              </p>
+            </article>
+
+            <article>
+              <span>02</span>
+              <strong>
+                Compra dentro da Shopee
+              </strong>
+              <p>
+                Pagamento, entrega e atendimento acontecem na plataforma.
+              </p>
+            </article>
+
+            <article>
+              <span>03</span>
+              <strong>
+                Novidades na vitrine
+              </strong>
+              <p>
+                Os produtos e preços podem mudar conforme a disponibilidade.
+              </p>
+            </article>
+          </section>
+
+          <section className="affiliate-notice">
+            <strong>
+              Transparência
+            </strong>
+            <p>
+              A Crediti participa do programa de afiliados da Shopee e poderá receber uma comissão pelas compras realizadas através deste link, sem custo adicional para você. Preços, estoque, pagamento, entrega, troca e garantia são de responsabilidade dos vendedores e da Shopee.
+            </p>
+          </section>
+        </main>
+
+        <BottomNav
+          active="shop"
+          onNavigate={navigateMain}
+        />
+      </div>
+    );
+  }
+
   if (
     screen === "chat"
   ) {
@@ -3196,6 +3288,26 @@ function App() {
             }
           >
             ACESSAR SITE OFICIAL
+          </button>
+        </section>
+
+        <section className="home-section shop-feature">
+          <div>
+            <small>CREDITI SHOP</small>
+            <h2>
+              Achadinhos para você
+            </h2>
+            <p>
+              Conheça nossa vitrine de produtos e compre diretamente na Shopee.
+            </p>
+          </div>
+
+          <button
+            onClick={() =>
+              setScreen("shop")
+            }
+          >
+            CONHECER O SHOP
           </button>
         </section>
       </main>

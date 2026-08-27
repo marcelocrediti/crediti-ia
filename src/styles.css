@@ -1738,7 +1738,7 @@ html.splash-active #root {
     10px
     calc(7px + env(safe-area-inset-bottom));
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   position: fixed;
   left: 0;
   right: 0;
@@ -1776,7 +1776,7 @@ html.splash-active #root {
 }
 
 .bottom-nav small {
-  font-size: 8.5px;
+  font-size: 7.8px;
   font-weight: 800;
 }
 
@@ -1786,6 +1786,172 @@ html.splash-active #root {
 
 .bottom-nav button.active span {
   background: #ffd400;
+}
+
+.shop-feature {
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  background: #fff1e7;
+  border: 1px solid #ffd8bb;
+  border-radius: 22px;
+}
+
+.shop-feature small {
+  color: #a94700;
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+}
+
+.shop-feature h2 {
+  margin-top: 4px;
+  font-size: 21px;
+  font-weight: 900;
+  line-height: 1.1;
+  letter-spacing: -0.7px;
+}
+
+.shop-feature p {
+  margin-top: 7px;
+  color: #626262;
+  font-size: 10.5px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.shop-feature button,
+.shop-main-button {
+  min-height: 44px;
+  padding: 11px 14px;
+  border: 0;
+  border-radius: 12px;
+  background: #ff6500;
+  color: #ffffff;
+  font-size: 9px;
+  font-weight: 900;
+}
+
+.shop-feature button {
+  min-width: 120px;
+}
+
+.shop-page {
+  display: grid;
+  gap: 20px;
+}
+
+.shop-hero {
+  min-height: 360px;
+  padding: 28px 22px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  overflow: hidden;
+  position: relative;
+  background:
+    radial-gradient(circle at 82% 18%, rgba(255, 255, 255, 0.38) 0 56px, transparent 57px),
+    #ffd400;
+  border-radius: 26px;
+}
+
+.shop-hero::after {
+  content: "SHOP";
+  position: absolute;
+  top: 28px;
+  right: 20px;
+  color: rgba(17, 17, 17, 0.09);
+  font-size: 62px;
+  font-weight: 900;
+  letter-spacing: -4px;
+}
+
+.shop-hero .eyebrow {
+  color: #655400;
+}
+
+.shop-hero h1 {
+  max-width: 520px;
+  font-size: clamp(32px, 9vw, 52px);
+  font-weight: 900;
+  line-height: 0.98;
+  letter-spacing: -2px;
+}
+
+.shop-hero p {
+  max-width: 490px;
+  margin-top: 13px;
+  color: #403700;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.45;
+}
+
+.shop-main-button {
+  width: min(100%, 320px);
+  margin-top: 22px;
+  min-height: 50px;
+  background: #111111;
+  font-size: 11px;
+}
+
+.shop-benefits {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.shop-benefits article {
+  min-height: 180px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid #e4e4e4;
+  border-radius: 18px;
+  background: #f7f7f7;
+}
+
+.shop-benefits span {
+  color: #b64b00;
+  font-size: 10px;
+  font-weight: 900;
+}
+
+.shop-benefits strong {
+  margin-top: auto;
+  font-size: 13px;
+  font-weight: 900;
+  line-height: 1.25;
+}
+
+.shop-benefits p {
+  margin-top: 7px;
+  color: #686868;
+  font-size: 9px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.affiliate-notice {
+  padding: 18px;
+  background: #f5f5f5;
+  border: 1px solid #e4e4e4;
+  border-radius: 18px;
+}
+
+.affiliate-notice strong {
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.affiliate-notice p {
+  margin-top: 7px;
+  color: #666666;
+  font-size: 9.5px;
+  font-weight: 600;
+  line-height: 1.5;
 }
 
 /* Modernização visual do chat sem alterar seu fluxo */
@@ -1867,6 +2033,23 @@ html.splash-active #root {
   .useful-feature {
     align-items: stretch;
     flex-direction: column;
+  }
+
+  .shop-feature {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .shop-feature button {
+    width: 100%;
+  }
+
+  .shop-benefits {
+    grid-template-columns: 1fr;
+  }
+
+  .shop-benefits article {
+    min-height: 130px;
   }
 
   .useful-feature button {
