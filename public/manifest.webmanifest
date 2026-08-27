@@ -1,11 +1,11 @@
 {
-  "name": "Crediti IA",
-  "short_name": "Crediti IA",
+  "name": "Crediti: Simule Crédito",
+  "short_name": "Crediti",
   "description": "Assistente inteligente da Crediti",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
-  "background_color": "#FFD400",
+  "background_color": "#111111",
   "theme_color": "#FFD400",
   "orientation": "portrait",
   "icons": [
@@ -20,6 +20,12 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
+    },
+    {
+      "src": "/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
     }
   ]
 }
