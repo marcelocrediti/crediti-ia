@@ -1007,25 +1007,60 @@ header small {
   inset: 0;
   z-index: 9999;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   width: 100%;
   height: 100vh;
   height: 100dvh;
+  padding:
+    calc(36px + env(safe-area-inset-top))
+    24px
+    calc(32px + env(safe-area-inset-bottom));
   overflow: hidden;
-  background: #111111;
+  background: #fffdf7;
+  color: #111111;
+  text-align: center;
 }
 
 html.splash-active,
 html.splash-active body,
 html.splash-active #root {
-  background: #111111 !important;
+  background: #fffdf7 !important;
 }
 
-.app-splash img {
+.app-splash__icon {
   display: block;
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  background: #111111;
+  width: clamp(172px, 48vw, 232px);
+  height: clamp(172px, 48vw, 232px);
+  object-fit: cover;
+  border-radius: 22%;
+  box-shadow: 0 16px 34px rgba(17, 17, 17, 0.16);
+}
+
+.app-splash__brand {
+  margin-top: 34px;
+  font-size: clamp(42px, 12vw, 64px);
+  font-weight: 900;
+  line-height: 0.95;
+  letter-spacing: -2px;
+}
+
+.app-splash__message {
+  margin-top: 24px;
+  font-size: clamp(21px, 5.7vw, 29px);
+  font-weight: 500;
+  line-height: 1.25;
+  letter-spacing: -0.5px;
+}
+
+.app-splash__tagline {
+  position: absolute;
+  left: 24px;
+  right: 24px;
+  bottom: calc(38px + env(safe-area-inset-bottom));
+  color: #666666;
+  font-size: clamp(14px, 4vw, 18px);
+  font-weight: 500;
+  line-height: 1.3;
 }

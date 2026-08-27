@@ -586,7 +586,7 @@ function App() {
 
     themeColor?.setAttribute(
       "content",
-      "#111111"
+      "#FFFDF7"
     );
 
     const splashTimer =
@@ -1413,13 +1413,27 @@ function App() {
     return (
       <div
         className="app-splash"
-        role="img"
-        aria-label="Crediti. Encontre opções e simule com segurança."
+        role="status"
+        aria-label="Abrindo a Crediti"
       >
         <img
-          src="/splash-screen.png"
+          className="app-splash__icon"
+          src="/icon-512.png?v=3"
           alt=""
         />
+
+        <strong className="app-splash__brand">
+          CREDITI
+        </strong>
+
+        <p className="app-splash__message">
+          Encontre opções e<br />
+          simule com segurança
+        </p>
+
+        <small className="app-splash__tagline">
+          Crédito com responsabilidade
+        </small>
       </div>
     );
   }
