@@ -25,7 +25,7 @@ const PARTNER_PRODUCTS = {
     partner: "Banco BRB",
     logo: "/partners/brb.jpeg",
     url: "https://solution.consig360.com.br/self-hire/EkCwaEb",
-    button: "SIMULAR NO BANCO PARCEIRO"
+    button: "SIMULAR SEU CRÉDITO"
   },
 
   bpc: {
@@ -33,7 +33,7 @@ const PARTNER_PRODUCTS = {
     partner: "Banco BRB",
     logo: "/partners/brb.jpeg",
     url: "https://solution.consig360.com.br/self-hire/EkCwaEb",
-    button: "SIMULAR NO BANCO PARCEIRO"
+    button: "SIMULAR SEU CRÉDITO"
   },
 
   fgts: {
@@ -41,7 +41,7 @@ const PARTNER_PRODUCTS = {
     partner: "Grandino Bank",
     logo: "/partners/grandino.png",
     url: "https://crediti.startcapital.app/credit/fgts",
-    button: "CONSULTAR MEU FGTS"
+    button: "SIMULAR SEU CRÉDITO"
   },
 
   energia: {
@@ -49,7 +49,7 @@ const PARTNER_PRODUCTS = {
     partner: "Crefaz",
     logo: "/partners/crefaz.jpeg",
     url: "https://crediti.startcapital.app/credit/cdccontadeluz",
-    button: "FAZER MINHA SIMULAÇÃO"
+    button: "SIMULAR SEU CRÉDITO"
   },
 
   clt: {
@@ -57,7 +57,7 @@ const PARTNER_PRODUCTS = {
     partner: "Grandino Bank",
     logo: "/partners/grandino.png",
     url: "https://crediti.startcapital.app/credit/cltctps",
-    button: "SIMULAR NO BANCO PARCEIRO"
+    button: "SIMULAR SEU CRÉDITO"
   },
 
   cartao: {
@@ -65,7 +65,7 @@ const PARTNER_PRODUCTS = {
     partner: "Plataforma GYROO SaaS",
     logo: "/partners/gyroo.png",
     url: "https://crediti.emprestimodisponivel.com.br/?l=EW9XMSWNPMR8&u=uCwu5cFx4n6t",
-    button: "SIMULAR AGORA"
+    button: "SIMULAR SEU CRÉDITO"
   }
 };
 
@@ -213,7 +213,7 @@ const products = [
     forWho:
       "Para quem precisa comprar um carro e não vai pagar todo o valor à vista.",
     how:
-      "A regra inicial cadastrada considera CPF sem restrição, score a partir de 700, documentação e transferência.",
+      "A regra inicial cadastrada considera CPF sem restrição, score a partir de 700, documentação e transferência. Disponível em Itapajé, Irauçuba e Uruburetama.",
     when:
       "Pode fazer sentido para quem precisa do veículo agora.",
     tip:
@@ -228,11 +228,26 @@ const products = [
     forWho:
       "Para quem precisa ou deseja comprar uma moto.",
     how:
-      "A regra inicial cadastrada considera CPF sem restrição, score a partir de 700, documentação e transferência.",
+      "A regra inicial cadastrada considera CPF sem restrição, score a partir de 700, documentação e transferência. Disponível em Itapajé, Irauçuba e Uruburetama.",
     when:
       "Pode ser útil para trabalho, locomoção ou necessidade pessoal.",
     tip:
       "Além da parcela, considere combustível, manutenção, documentação e seguro."
+  },
+
+  {
+    id: "refinanciamento-carro",
+    name: "Refinanciamento de carro",
+    what:
+      "Possibilidade de usar um carro já quitado como garantia para solicitar crédito.",
+    forWho:
+      "Para quem possui carro no próprio nome e deseja verificar uma opção de crédito.",
+    how:
+      "A instituição analisa o veículo, a documentação e o perfil do cliente. O atendimento está disponível em todo o Brasil.",
+    when:
+      "Pode ajudar quando a pessoa precisa de crédito e possui um carro como patrimônio.",
+    tip:
+      "O carro ficará ligado ao contrato. Só avance se a parcela couber com segurança no orçamento."
   },
 
   {
@@ -309,6 +324,223 @@ const products = [
       "Pode ajudar em projetos que não precisam ser realizados imediatamente.",
     tip:
       "Defina quanto realmente precisa antes de escolher o valor da carta."
+  }
+];
+
+const DIRECT_PRODUCT_KEYS = [
+  "inss",
+  "bpc",
+  "fgts",
+  "clt",
+  "cartao",
+  "energia"
+];
+
+const LEARN_ARTICLES = [
+  {
+    id: "dividas",
+    title: "Como organizar suas dívidas",
+    category: "Educação financeira",
+    summary: "Veja por onde começar quando as contas apertarem.",
+    points: [
+      "Anote todas as dívidas, parcelas e vencimentos.",
+      "Priorize moradia, alimentação, água e energia.",
+      "Negocie primeiro as dívidas com juros mais altos.",
+      "Não aceite uma parcela que não caiba no orçamento."
+    ]
+  },
+  {
+    id: "comparar",
+    title: "Como comparar um empréstimo",
+    category: "Crédito responsável",
+    summary: "A menor parcela nem sempre representa o menor custo.",
+    points: [
+      "Compare o valor total que será pago.",
+      "Confira juros, prazo, tarifas e seguros incluídos.",
+      "Leia as condições antes de assinar.",
+      "Escolha uma parcela confortável para sua renda."
+    ]
+  },
+  {
+    id: "golpes",
+    title: "Proteja-se de golpes",
+    category: "Segurança",
+    summary: "Aprenda a reconhecer promessas e cobranças suspeitas.",
+    points: [
+      "Nunca pague valor antecipado para liberar crédito.",
+      "Não compartilhe senhas ou códigos recebidos por SMS.",
+      "Confirme o endereço do site antes de preencher dados.",
+      "Desconfie de aprovação garantida e urgência exagerada."
+    ]
+  },
+  {
+    id: "reserva",
+    title: "Comece sua reserva",
+    category: "Economia",
+    summary: "Guardar um pouco por mês já cria proteção para imprevistos.",
+    points: [
+      "Comece com um valor que consiga manter.",
+      "Separe o dinheiro assim que receber.",
+      "Evite usar a reserva em compras comuns.",
+      "Aumente o valor guardado quando sua renda permitir."
+    ]
+  },
+  {
+    id: "juros",
+    title: "Entenda juros e parcelas",
+    category: "Educação financeira",
+    summary: "Prazo maior reduz a parcela, mas pode aumentar o custo total.",
+    points: [
+      "Confira quantas parcelas serão pagas.",
+      "Pergunte pelo custo total da operação.",
+      "Compare propostas com o mesmo valor e prazo.",
+      "Considere outras despesas que vencem todo mês."
+    ]
+  },
+  {
+    id: "quando-ajuda",
+    title: "Quando o crédito pode ajudar",
+    category: "Crédito responsável",
+    summary: "Crédito deve resolver uma necessidade sem criar um problema maior.",
+    points: [
+      "Tenha um objetivo claro para o dinheiro.",
+      "Verifique se a parcela cabe depois das despesas essenciais.",
+      "Evite contratar por impulso.",
+      "Se estiver em dúvida, converse com um analista."
+    ]
+  }
+];
+
+const SERVICE_GROUPS = [
+  {
+    title: "Receita Federal",
+    items: [
+      {
+        name: "Situação cadastral do CPF",
+        description: "Consulta feita no site oficial da Receita.",
+        url: "https://servicos.receita.fazenda.gov.br/Servicos/CPF/ConsultaSituacao/ConsultaPublica.asp"
+      },
+      {
+        name: "Consulta e comprovante de CNPJ",
+        description: "Consulte os dados públicos de uma empresa.",
+        url: "https://solucoes.receita.fazenda.gov.br/Servicos/cnpjreva/Cnpjreva_Solicitacao.asp"
+      },
+      {
+        name: "Redesim",
+        description: "Serviços oficiais para empresas e negócios.",
+        url: "https://www.gov.br/empresas-e-negocios/pt-br/redesim"
+      }
+    ]
+  },
+  {
+    title: "Banco Central",
+    items: [
+      {
+        name: "Registrato",
+        description: "Consulte relacionamentos e operações no sistema financeiro.",
+        url: "https://registrato.bcb.gov.br/registrato/login/"
+      },
+      {
+        name: "Valores a Receber",
+        description: "Verifique se existe dinheiro esquecido em instituições.",
+        url: "https://valoresareceber.bcb.gov.br/publico"
+      },
+      {
+        name: "Calculadora do Cidadão",
+        description: "Faça cálculos e simulações financeiras.",
+        url: "https://www3.bcb.gov.br/CALCIDADAO/publico/exibirFormCorrecaoValores.do?method=exibirFormCorrecaoValores"
+      },
+      {
+        name: "Instituições autorizadas",
+        description: "Confira empresas supervisionadas pelo Banco Central.",
+        url: "https://www.bcb.gov.br/meubc/encontreinstituicao"
+      }
+    ]
+  },
+  {
+    title: "Crédito e consumidor",
+    items: [
+      {
+        name: "Serasa",
+        description: "Consulte score, dívidas e opções de negociação no Serasa.",
+        url: "https://www.serasa.com.br/"
+      },
+      {
+        name: "Consumidor.gov.br",
+        description: "Canal público para solucionar problemas de consumo.",
+        url: "https://www.consumidor.gov.br/"
+      },
+      {
+        name: "Procon Ceará",
+        description: "Orientações e serviços de defesa do consumidor.",
+        url: "https://www.proconceara.ce.gov.br/"
+      }
+    ]
+  },
+  {
+    title: "Portais oficiais",
+    items: [
+      {
+        name: "Meu INSS",
+        description: "Serviços e informações do seu benefício.",
+        url: "https://meu.inss.gov.br/"
+      },
+      {
+        name: "Aplicativo FGTS",
+        description: "Informações oficiais da Caixa sobre o aplicativo.",
+        url: "https://www.caixa.gov.br/atendimento/aplicativos/fgts/Paginas/default.aspx"
+      },
+      {
+        name: "Gov.br",
+        description: "Acesso aos serviços digitais do Governo Federal.",
+        url: "https://www.gov.br/"
+      }
+    ]
+  },
+  {
+    title: "Itapajé",
+    items: [
+      {
+        name: "Prefeitura de Itapajé",
+        description: "Portal oficial e serviços municipais.",
+        url: "https://www.itapaje.ce.gov.br/"
+      }
+    ]
+  },
+  {
+    title: "Redes da Crediti",
+    items: [
+      {
+        name: "Instagram",
+        description: "Acompanhe @crediti.oficial.",
+        url: "https://www.instagram.com/crediti.oficial/"
+      },
+      {
+        name: "TikTok",
+        description: "Conteúdos em @marcelo.financiamentos.",
+        url: "https://www.tiktok.com/@marcelo.financiamentos?_r=1&_t=ZS-99FD1UHxlTQ"
+      },
+      {
+        name: "Kwai",
+        description: "Acompanhe @creditiveiculo.",
+        url: "https://k.kwai.com/u/@creditiveiculo/RbCCURAC"
+      },
+      {
+        name: "WhatsApp Samila",
+        description: "Atendimento com a analista Samila.",
+        url: "https://wa.me/5585994409719"
+      },
+      {
+        name: "WhatsApp Marcelino",
+        description: "Atendimento com o analista Marcelino.",
+        url: "https://wa.me/5585992032558"
+      },
+      {
+        name: "Site oficial",
+        description: "Conheça a Crediti Soluções Financeiras.",
+        url: "https://www.creditisolucoes.com.br"
+      }
+    ]
   }
 ];
 
@@ -495,6 +727,88 @@ function isValidCustomerName(value) {
   return true;
 }
 
+function BottomNav({
+  active,
+  onNavigate
+}) {
+  const items = [
+    {
+      id: "home",
+      icon: "⌂",
+      label: "Início"
+    },
+    {
+      id: "credit",
+      icon: "R$",
+      label: "Crédito"
+    },
+    {
+      id: "learn",
+      icon: "✓",
+      label: "Aprenda"
+    },
+    {
+      id: "services",
+      icon: "▦",
+      label: "Serviços"
+    }
+  ];
+
+  return (
+    <nav
+      className="bottom-nav"
+      aria-label="Navegação principal"
+    >
+      {items.map((item) => (
+        <button
+          key={item.id}
+          className={
+            active === item.id
+              ? "active"
+              : ""
+          }
+          onClick={() =>
+            onNavigate(item.id)
+          }
+        >
+          <span aria-hidden="true">
+            {item.icon}
+          </span>
+
+          <small>{item.label}</small>
+        </button>
+      ))}
+    </nav>
+  );
+}
+
+function AppHeader({
+  title,
+  subtitle,
+  onBack
+}) {
+  return (
+    <header className="light-header">
+      {onBack && (
+        <button
+          className="back"
+          onClick={onBack}
+          aria-label="Voltar"
+        >
+          ‹
+        </button>
+      )}
+
+      <div>
+        <b>{title}</b>
+        {subtitle && (
+          <small>{subtitle}</small>
+        )}
+      </div>
+    </header>
+  );
+}
+
 function App() {
   const serviceNotice = getServiceNotice();
 
@@ -538,6 +852,11 @@ function App() {
   const [
     selectedProduct,
     setSelectedProduct
+  ] = useState(null);
+
+  const [
+    selectedArticle,
+    setSelectedArticle
   ] = useState(null);
 
   const [
@@ -601,7 +920,7 @@ function App() {
 
           themeColor?.setAttribute(
             "content",
-            "#FFD400"
+            "#FFFFFF"
           );
         },
         1600
@@ -619,7 +938,7 @@ function App() {
 
       themeColor?.setAttribute(
         "content",
-        "#FFD400"
+        "#FFFFFF"
       );
     };
   }, []);
@@ -843,6 +1162,23 @@ function App() {
         error
       );
     }
+  }
+
+  function navigateMain(
+    destination
+  ) {
+    setSelectedArticle(null);
+    setSelectedProduct(null);
+    setScreen(destination);
+    window.scrollTo(0, 0);
+  }
+
+  function openExternal(url) {
+    window.open(
+      url,
+      "_blank",
+      "noopener,noreferrer"
+    );
   }
 
   function openChat(
@@ -1438,6 +1774,413 @@ function App() {
     );
   }
 
+  if (screen === "direct") {
+    return (
+      <div className="app app-white app-with-nav">
+        <AppHeader
+          title="Simule seu crédito"
+          subtitle="Escolha uma opção disponível"
+          onBack={() =>
+            setScreen("credit")
+          }
+        />
+
+        <main className="modern-page">
+          <section className="page-intro compact">
+            <span className="eyebrow">
+              SIMULAÇÃO ONLINE
+            </span>
+
+            <h1>
+              Qual crédito você quer simular?
+            </h1>
+
+            <p>
+              Escolha uma opção e continue no ambiente seguro da instituição responsável.
+            </p>
+          </section>
+
+          <div className="direct-grid">
+            {DIRECT_PRODUCT_KEYS.map(
+              (productKey) => {
+                const product =
+                  PARTNER_PRODUCTS[
+                    productKey
+                  ];
+
+                return (
+                  <article
+                    className="direct-card"
+                    key={productKey}
+                  >
+                    <div className="direct-logo">
+                      <img
+                        src={product.logo}
+                        alt={product.partner}
+                      />
+                    </div>
+
+                    <div>
+                      <small>
+                        {product.partner}
+                      </small>
+
+                      <h2>
+                        {product.name}
+                      </h2>
+                    </div>
+
+                    <button
+                      className="primary-action"
+                      onClick={() =>
+                        openPartnerLink(
+                          productKey
+                        )
+                      }
+                    >
+                      SIMULAR SEU CRÉDITO
+                    </button>
+                  </article>
+                );
+              }
+            )}
+          </div>
+
+          <p className="external-note">
+            A análise, as condições e a contratação são de responsabilidade da instituição escolhida. A Crediti não garante aprovação.
+          </p>
+        </main>
+
+        <BottomNav
+          active="credit"
+          onNavigate={navigateMain}
+        />
+      </div>
+    );
+  }
+
+  if (screen === "credit") {
+    return (
+      <div className="app app-white app-with-nav">
+        <AppHeader
+          title="Crédito"
+          subtitle="Escolha como deseja continuar"
+        />
+
+        <main className="modern-page">
+          <section className="page-intro">
+            <span className="eyebrow">
+              CREDITI
+            </span>
+
+            <h1>
+              Crédito com orientação e responsabilidade
+            </h1>
+
+            <p>
+              Simule diretamente ou converse com a Crediti IA para entender qual opção pode fazer sentido.
+            </p>
+          </section>
+
+          <div className="hub-grid">
+            <button
+              className="hub-card featured"
+              onClick={() =>
+                setScreen("direct")
+              }
+            >
+              <span className="hub-icon">
+                R$
+              </span>
+              <strong>
+                Quero simular agora
+              </strong>
+              <small>
+                Veja os créditos disponíveis para simulação online.
+              </small>
+            </button>
+
+            <button
+              className="hub-card"
+              onClick={() =>
+                openChat()
+              }
+            >
+              <span className="hub-icon">
+                IA
+              </span>
+              <strong>
+                Converse com a Crediti IA
+              </strong>
+              <small>
+                Tire dúvidas, entenda seu perfil e gere seu atendimento.
+              </small>
+            </button>
+
+            <button
+              className="hub-card"
+              onClick={() =>
+                setScreen("products")
+              }
+            >
+              <span className="hub-icon">
+                +
+              </span>
+              <strong>
+                Conheça nossos produtos
+              </strong>
+              <small>
+                Veja regras, perguntas e dicas antes de decidir.
+              </small>
+            </button>
+
+            <button
+              className="hub-card"
+              onClick={() =>
+                setScreen("human")
+              }
+            >
+              <span className="hub-icon">
+                C
+              </span>
+              <strong>
+                Atendimento com analista
+              </strong>
+              <small>
+                Fale com a equipe da Crediti pelo WhatsApp.
+              </small>
+            </button>
+          </div>
+
+          <section className="region-note">
+            <strong>
+              Onde atendemos financiamento?
+            </strong>
+            <p>
+              Financiamento de carro e moto está disponível em Itapajé, Irauçuba e Uruburetama. Refinanciamento de carro está disponível em todo o Brasil.
+            </p>
+          </section>
+        </main>
+
+        <BottomNav
+          active="credit"
+          onNavigate={navigateMain}
+        />
+      </div>
+    );
+  }
+
+  if (
+    screen === "learnDetail" &&
+    selectedArticle
+  ) {
+    return (
+      <div className="app app-white app-with-nav">
+        <AppHeader
+          title="Aprenda com a Crediti"
+          subtitle={selectedArticle.category}
+          onBack={() =>
+            setScreen("learn")
+          }
+        />
+
+        <main className="modern-page">
+          <article className="article-detail">
+            <span className="eyebrow">
+              {selectedArticle.category}
+            </span>
+
+            <h1>
+              {selectedArticle.title}
+            </h1>
+
+            <p className="article-summary">
+              {selectedArticle.summary}
+            </p>
+
+            <ul>
+              {selectedArticle.points.map(
+                (point) => (
+                  <li key={point}>
+                    {point}
+                  </li>
+                )
+              )}
+            </ul>
+
+            <div className="creditin-advice">
+              <strong>
+                Dica do Creditin
+              </strong>
+              <p>
+                Informação ajuda a decidir melhor. Se ainda tiver dúvida sobre crédito, converse com a Crediti IA.
+              </p>
+            </div>
+
+            <button
+              className="primary-action"
+              onClick={() =>
+                openChat()
+              }
+            >
+              CONVERSAR COM A CREDITI IA
+            </button>
+          </article>
+        </main>
+
+        <BottomNav
+          active="learn"
+          onNavigate={navigateMain}
+        />
+      </div>
+    );
+  }
+
+  if (screen === "learn") {
+    return (
+      <div className="app app-white app-with-nav">
+        <AppHeader
+          title="Aprenda"
+          subtitle="Informação para decidir melhor"
+        />
+
+        <main className="modern-page">
+          <section className="page-intro">
+            <span className="eyebrow">
+              EDUCAÇÃO FINANCEIRA
+            </span>
+
+            <h1>
+              Cuide melhor do seu dinheiro
+            </h1>
+
+            <p>
+              Conteúdos simples sobre crédito, economia e segurança.
+            </p>
+          </section>
+
+          <div className="article-grid">
+            {LEARN_ARTICLES.map(
+              (article) => (
+                <button
+                  className="article-card"
+                  key={article.id}
+                  onClick={() => {
+                    setSelectedArticle(
+                      article
+                    );
+                    setScreen(
+                      "learnDetail"
+                    );
+                    window.scrollTo(0, 0);
+                  }}
+                >
+                  <small>
+                    {article.category}
+                  </small>
+                  <strong>
+                    {article.title}
+                  </strong>
+                  <p>
+                    {article.summary}
+                  </p>
+                  <span>
+                    LER DICA ›
+                  </span>
+                </button>
+              )
+            )}
+          </div>
+
+          <section className="content-source-card">
+            <strong>
+              Conteúdos confiáveis
+            </strong>
+            <p>
+              Também indicaremos materiais do Banco Central, Receita Federal, Serasa e Portal do Investidor. Links externos serão sempre identificados.
+            </p>
+          </section>
+        </main>
+
+        <BottomNav
+          active="learn"
+          onNavigate={navigateMain}
+        />
+      </div>
+    );
+  }
+
+  if (screen === "services") {
+    return (
+      <div className="app app-white app-with-nav">
+        <AppHeader
+          title="Serviços"
+          subtitle="Consultas e canais confiáveis"
+        />
+
+        <main className="modern-page">
+          <section className="page-intro">
+            <span className="eyebrow">
+              ACESSO RÁPIDO
+            </span>
+
+            <h1>
+              Serviços úteis em um só lugar
+            </h1>
+
+            <p>
+              A Crediti apenas direciona. Seus dados serão preenchidos nos sites oficiais escolhidos.
+            </p>
+          </section>
+
+          <div className="service-groups">
+            {SERVICE_GROUPS.map(
+              (group) => (
+                <section
+                  className="service-group"
+                  key={group.title}
+                >
+                  <h2>{group.title}</h2>
+
+                  <div className="service-grid">
+                    {group.items.map(
+                      (item) => (
+                        <button
+                          className="service-card"
+                          key={item.name}
+                          onClick={() =>
+                            openExternal(
+                              item.url
+                            )
+                          }
+                        >
+                          <strong>
+                            {item.name}
+                          </strong>
+                          <small>
+                            {item.description}
+                          </small>
+                          <span>
+                            ACESSAR ›
+                          </span>
+                        </button>
+                      )
+                    )}
+                  </div>
+                </section>
+              )
+            )}
+          </div>
+        </main>
+
+        <BottomNav
+          active="services"
+          onNavigate={navigateMain}
+        />
+      </div>
+    );
+  }
+
   if (
     screen === "chat"
   ) {
@@ -1916,7 +2659,7 @@ function App() {
                 }}
               >
                 <strong style={{ fontSize: "16px" }}>
-                  SIMULAÇÃO DIRETA NO PARCEIRO
+                  SIMULAÇÃO ONLINE
                 </strong>
 
                 <div
@@ -1944,7 +2687,7 @@ function App() {
                 </div>
 
                 <p style={{ margin: 0, color: "#555555" }}>
-                  Faça sua simulação no ambiente seguro do parceiro. A análise, as condições e a contratação são de responsabilidade da instituição.
+                  Faça sua simulação no ambiente seguro da instituição. A análise, as condições e a contratação são de responsabilidade dela.
                 </p>
 
                 <button
@@ -2207,75 +2950,260 @@ function App() {
   }
 
   return (
-    <div className="app">
-      <div
-        className=
-          "brand"
-      >
-        CREDITI
-      </div>
+    <div className="app app-white app-with-nav">
+      <header className="home-header">
+        <div>
+          <strong>CREDITI</strong>
+          <small>
+            Crédito com responsabilidade
+          </small>
+        </div>
 
-      <main
-        className=
-          "home"
-      >
         <img
-          src="/creditin.png"
-          className=
-            "hero"
-          alt="Creditin"
+          src="/icon-192.png?v=3"
+          alt=""
         />
+      </header>
 
-        <h1>
-          CREDITI IA
-        </h1>
+      <main className="modern-home">
+        <section className="home-welcome">
+          <div>
+            <span className="eyebrow">
+              BEM-VINDO À CREDITI IA
+            </span>
 
-        <p>
-          Seu crédito. Mais simples.
-        </p>
+            <h1>
+              Olá! Como a Crediti pode ajudar você hoje?
+            </h1>
+          </div>
 
-        <button
-          className="yellow"
-          onClick={() =>
-            openChat()
-          }
-        >
-          QUERO SIMULAR AGORA
-        </button>
+          <img
+            src="/creditin.png"
+            alt="Creditin"
+          />
+        </section>
 
-        <button
-          className="yellow"
-          onClick={() =>
-            setScreen(
-              "products"
-            )
-          }
-        >
-          CONHECER NOSSOS PRODUTOS
-        </button>
+        <div className="home-banners">
+          <button
+            className="home-banner yellow-banner"
+            onClick={() =>
+              setScreen("direct")
+            }
+          >
+            <small>
+              SIMULAÇÃO ONLINE
+            </small>
+            <strong>
+              Encontre opções de crédito
+            </strong>
+            <span>
+              Escolha e simule com segurança ›
+            </span>
+          </button>
 
-        <button
-          className="yellow"
-          onClick={() =>
-            setScreen(
-              "human"
-            )
-          }
-        >
-          FALAR COM A CREDITI
-        </button>
+          <button
+            className="home-banner dark-banner"
+            onClick={() =>
+              setScreen("learn")
+            }
+          >
+            <small>
+              DICA DO CREDITIN
+            </small>
+            <strong>
+              Nunca pague para liberar crédito
+            </strong>
+            <span>
+              Veja como evitar golpes ›
+            </span>
+          </button>
 
-        <button
-          className="yellow"
-          onClick={() =>
-            setScreen(
-              "partner"
-            )
-          }
-        >
-          QUERO SER PARCEIRO
-        </button>
+          <button
+            className="home-banner light-banner"
+            onClick={() =>
+              setScreen("services")
+            }
+          >
+            <small>
+              SERVIÇOS OFICIAIS
+            </small>
+            <strong>
+              Receita, Banco Central e Serasa
+            </strong>
+            <span>
+              Acesse serviços úteis ›
+            </span>
+          </button>
+        </div>
+
+        <section className="home-section">
+          <div className="section-title-row">
+            <div>
+              <small>ACESSO RÁPIDO</small>
+              <h2>O que você deseja fazer?</h2>
+            </div>
+          </div>
+
+          <div className="quick-grid">
+            <button
+              className="quick-card primary"
+              onClick={() =>
+                setScreen("direct")
+              }
+            >
+              <span>R$</span>
+              <strong>
+                Quero simular agora
+              </strong>
+              <small>
+                Acesse os créditos disponíveis.
+              </small>
+            </button>
+
+            <button
+              className="quick-card"
+              onClick={() =>
+                openChat()
+              }
+            >
+              <span>IA</span>
+              <strong>
+                Converse com a Crediti IA
+              </strong>
+              <small>
+                Encontre uma opção para seu perfil.
+              </small>
+            </button>
+
+            <button
+              className="quick-card"
+              onClick={() =>
+                setScreen("products")
+              }
+            >
+              <span>+</span>
+              <strong>
+                Conheça nossos produtos
+              </strong>
+              <small>
+                Entenda regras e condições.
+              </small>
+            </button>
+
+            <button
+              className="quick-card"
+              onClick={() =>
+                setScreen("partner")
+              }
+            >
+              <span>C</span>
+              <strong>
+                Quero ser parceiro
+              </strong>
+              <small>
+                Conheça o Renda Extra Crediti.
+              </small>
+            </button>
+          </div>
+        </section>
+
+        <section className="home-section">
+          <div className="section-title-row">
+            <div>
+              <small>SIMULE ONLINE</small>
+              <h2>Créditos em destaque</h2>
+            </div>
+
+            <button
+              onClick={() =>
+                setScreen("direct")
+              }
+            >
+              Ver todos
+            </button>
+          </div>
+
+          <div className="product-strip">
+            {DIRECT_PRODUCT_KEYS.slice(
+              0,
+              4
+            ).map((productKey) => (
+              <button
+                key={productKey}
+                onClick={() =>
+                  setScreen("direct")
+                }
+              >
+                <img
+                  src={
+                    PARTNER_PRODUCTS[
+                      productKey
+                    ].logo
+                  }
+                  alt=""
+                />
+                <strong>
+                  {
+                    PARTNER_PRODUCTS[
+                      productKey
+                    ].name
+                  }
+                </strong>
+                <span>Simular ›</span>
+              </button>
+            ))}
+          </div>
+        </section>
+
+        <section className="home-section tip-feature">
+          <img
+            src="/creditin.png"
+            alt=""
+          />
+          <div>
+            <small>DICA DO CREDITIN</small>
+            <h2>
+              Parcela pequena também precisa caber no orçamento
+            </h2>
+            <p>
+              Antes de contratar, veja quanto sobrará depois das despesas essenciais.
+            </p>
+            <button
+              onClick={() =>
+                setScreen("learn")
+              }
+            >
+              VER MAIS DICAS
+            </button>
+          </div>
+        </section>
+
+        <section className="home-section useful-feature">
+          <div>
+            <small>SERVIÇO ÚTIL</small>
+            <h2>
+              Consulte Valores a Receber
+            </h2>
+            <p>
+              Acesse o sistema oficial do Banco Central sem informar seus dados à Crediti.
+            </p>
+          </div>
+          <button
+            onClick={() =>
+              openExternal(
+                "https://valoresareceber.bcb.gov.br/publico"
+              )
+            }
+          >
+            ACESSAR SITE OFICIAL
+          </button>
+        </section>
       </main>
+
+      <BottomNav
+        active="home"
+        onNavigate={navigateMain}
+      />
     </div>
   );
 }
