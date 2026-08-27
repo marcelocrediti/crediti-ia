@@ -579,10 +579,30 @@ function App() {
     useRef([]);
 
   useEffect(() => {
+    const themeColor =
+      document.querySelector(
+        'meta[name="theme-color"]'
+      );
+
+    themeColor?.setAttribute(
+      "content",
+      "#111111"
+    );
+
     const splashTimer =
       window.setTimeout(
         () => {
           setShowSplash(false);
+
+          document.documentElement
+            .classList.remove(
+              "splash-active"
+            );
+
+          themeColor?.setAttribute(
+            "content",
+            "#FFD400"
+          );
         },
         1600
       );
@@ -590,6 +610,16 @@ function App() {
     return () => {
       window.clearTimeout(
         splashTimer
+      );
+
+      document.documentElement
+        .classList.remove(
+          "splash-active"
+        );
+
+      themeColor?.setAttribute(
+        "content",
+        "#FFD400"
       );
     };
   }, []);

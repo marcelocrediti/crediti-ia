@@ -1016,6 +1016,12 @@ header small {
   background: #111111;
 }
 
+html.splash-active,
+html.splash-active body,
+html.splash-active #root {
+  background: #111111 !important;
+}
+
 .app-splash img {
   display: block;
   width: 100%;
