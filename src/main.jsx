@@ -2257,10 +2257,10 @@ function App() {
 
           <section className="affiliate-notice">
             <strong>
-              Transparência
+              Compra segura
             </strong>
             <p>
-              A Crediti participa do programa de afiliados da Shopee e poderá receber uma comissão pelas compras realizadas através deste link, sem custo adicional para você. Preços, estoque, pagamento, entrega, troca e garantia são de responsabilidade dos vendedores e da Shopee.
+              Você será direcionado para a Shopee. Preços, estoque, pagamento, entrega, troca e garantia são informados e realizados dentro da plataforma.
             </p>
           </section>
         </main>
