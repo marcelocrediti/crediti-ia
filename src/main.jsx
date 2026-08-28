@@ -25,6 +25,9 @@ const SHOPEE_STORE_URL =
 const MAGALU_STORE_URL =
   "https://www.influenciadormagalu.com.br/creditishop";
 
+const SHEIN_STORE_URL =
+  "https://onelink.shein.com/50/609j6zizsh3r";
+
 const PARTNER_PRODUCTS = {
   inss: {
     name: "Consignado INSS",
@@ -2414,6 +2417,36 @@ function App() {
                   ABRIR MAGALU
                 </button>
               </article>
+
+              <article className="shop-store-card shein-store-card">
+                <div
+                  className="shop-store-art shein-art"
+                  aria-hidden="true"
+                >
+                  <span className="shein-hanger">
+                    <svg viewBox="0 0 48 48" focusable="false">
+                      <path d="M24 10c0-4 6-4 6 0 0 3-3 4-6 6L7 31c-2 2-1 5 2 5h30c3 0 4-3 2-5L27 19" />
+                    </svg>
+                  </span>
+                  <b>SHEIN</b>
+                </div>
+
+                <small>VITRINE CREDITI</small>
+                <h2>Moda e ofertas na SHEIN</h2>
+                <p>
+                  Acesse nossa seleção e compre diretamente na SHEIN.
+                </p>
+
+                <button
+                  onClick={() =>
+                    openExternal(
+                      SHEIN_STORE_URL
+                    )
+                  }
+                >
+                  ABRIR SHEIN
+                </button>
+              </article>
             </div>
           </section>
 
@@ -3511,7 +3544,7 @@ function App() {
               Achadinhos para você
             </h2>
             <p>
-              Conheça nossa vitrine de produtos e compre diretamente na Shopee.
+              Conheça nossas vitrines de produtos e compre diretamente nas lojas parceiras.
             </p>
           </div>
 
