@@ -2226,14 +2226,6 @@ function App() {
             )}
           </div>
 
-          <section className="content-source-card">
-            <strong>
-              Conteúdos confiáveis
-            </strong>
-            <p>
-              Também indicaremos materiais do Banco Central, Receita Federal, Serasa e Portal do Investidor. Links externos serão sempre identificados.
-            </p>
-          </section>
         </main>
 
         <BottomNav
@@ -2323,6 +2315,12 @@ function App() {
 
         <main className="modern-page shop-page">
           <section className="shop-hero">
+            <img
+              className="shop-delivery-art"
+              src="/creditin-moto-shop.png"
+              alt="Creditin em uma moto de entrega da Crediti Shop"
+            />
+
             <span className="eyebrow">
               VITRINE DE OFERTAS
             </span>
@@ -3129,10 +3127,7 @@ function App() {
           </div>
         </header>
 
-        <main
-          className=
-            "simple-screen"
-        >
+        <main className="simple-screen simple-modern-screen">
           <img
             src="/creditin-oficial.png"
             alt="Creditin"
@@ -3169,27 +3164,31 @@ function App() {
             </div>
           )}
 
-          <button
-            className="yellow"
-            onClick={() =>
-              openAnalystWhatsApp(
-                "samila"
-              )
-            }
-          >
-            ANALISTA SAMILA
-          </button>
+          <div className="simple-action-list">
+            <button
+              className="simple-action-card"
+              onClick={() => openAnalystWhatsApp("samila")}
+            >
+              <span className="simple-action-icon" aria-hidden="true">S</span>
+              <span className="simple-action-copy">
+                <strong>Samila</strong>
+                <small>Falar com a analista pelo WhatsApp</small>
+              </span>
+              <span className="simple-action-arrow" aria-hidden="true">›</span>
+            </button>
 
-          <button
-            className="yellow"
-            onClick={() =>
-              openAnalystWhatsApp(
-                "marcelino"
-              )
-            }
-          >
-            ANALISTA MARCELINO
-          </button>
+            <button
+              className="simple-action-card"
+              onClick={() => openAnalystWhatsApp("marcelino")}
+            >
+              <span className="simple-action-icon" aria-hidden="true">M</span>
+              <span className="simple-action-copy">
+                <strong>Marcelino</strong>
+                <small>Falar com o analista pelo WhatsApp</small>
+              </span>
+              <span className="simple-action-arrow" aria-hidden="true">›</span>
+            </button>
+          </div>
         </main>
       </div>
     );
@@ -3224,10 +3223,7 @@ function App() {
           </div>
         </header>
 
-        <main
-          className=
-            "simple-screen"
-        >
+        <main className="simple-screen simple-modern-screen">
           <img
             src="/creditin-oficial.png"
             alt="Creditin"
@@ -3259,9 +3255,7 @@ function App() {
           </div>
 
           <button
-            className=
-              "yellow partner-register"
-
+            className="partner-register-modern"
             onClick={() =>
               window.open(
                 RENDA_EXTRA_URL,
@@ -3269,7 +3263,12 @@ function App() {
               )
             }
           >
-            QUERO ME CADASTRAR
+            <span className="simple-action-icon" aria-hidden="true">C</span>
+            <span className="simple-action-copy">
+              <strong>Quero me cadastrar</strong>
+              <small>Abrir a plataforma Renda Extra Crediti</small>
+            </span>
+            <span className="simple-action-arrow" aria-hidden="true">›</span>
           </button>
         </main>
       </div>

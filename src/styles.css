@@ -582,6 +582,93 @@ header small {
   margin-top: 2px;
 }
 
+.simple-modern-screen {
+  gap: 4px;
+}
+
+.simple-action-list {
+  width: 94%;
+  max-width: 500px;
+  display: grid;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.simple-action-card,
+.partner-register-modern {
+  width: 100%;
+  min-height: 76px;
+  padding: 12px 14px;
+  display: grid;
+  grid-template-columns: 46px minmax(0, 1fr) 32px;
+  align-items: center;
+  gap: 12px;
+  border: 1px solid #e2e2e2;
+  border-radius: 18px;
+  background: #ffffff;
+  color: var(--credi-black);
+  box-shadow: 0 8px 22px rgba(17, 17, 17, 0.07);
+  text-align: left;
+  transition: transform 160ms ease, box-shadow 160ms ease;
+}
+
+.simple-action-card:active,
+.partner-register-modern:active {
+  transform: scale(0.985);
+  box-shadow: 0 4px 12px rgba(17, 17, 17, 0.08);
+}
+
+.simple-action-icon {
+  width: 46px;
+  height: 46px;
+  display: grid;
+  place-items: center;
+  border-radius: 14px;
+  background: var(--credi-yellow);
+  color: var(--credi-black);
+  font-size: 18px;
+  font-weight: 900;
+}
+
+.simple-action-copy {
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+}
+
+.simple-action-copy strong {
+  font-size: 14px;
+  font-weight: 900;
+  line-height: 1.15;
+}
+
+.simple-action-copy small {
+  color: var(--credi-muted);
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.simple-action-arrow {
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  border-radius: 11px;
+  background: #f1f1f1;
+  font-size: 25px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.partner-register-modern {
+  width: 94%;
+  max-width: 500px;
+  margin-top: 4px;
+  border-color: #e6bd00;
+  background: #fff7cc;
+}
+
 /* =========================================================
    CHAT
    ========================================================= */
@@ -1602,7 +1689,6 @@ html.splash-active #root {
 
 .tip-feature,
 .useful-feature,
-.content-source-card,
 .region-note {
   padding: 19px;
   border-radius: 22px;
@@ -1628,7 +1714,6 @@ html.splash-active #root {
 
 .tip-feature p,
 .useful-feature p,
-.content-source-card p,
 .region-note p {
   margin-top: 8px;
   color: #5f5f5f;
@@ -1700,15 +1785,13 @@ html.splash-active #root {
   font-size: 16px;
 }
 
-.region-note,
-.content-source-card {
+.region-note {
   margin-top: 20px;
   background: #f5f5f5;
   border: 1px solid #e5e5e5;
 }
 
-.region-note strong,
-.content-source-card strong {
+.region-note strong {
   font-size: 14px;
   font-weight: 900;
 }
@@ -2056,19 +2139,19 @@ html.splash-active #root {
   border-radius: 26px;
 }
 
-.shop-hero::after {
-  content: "🏬";
-  width: auto;
-  height: auto;
+.shop-delivery-art {
+  width: min(62%, 310px);
+  height: 205px;
   display: block;
   position: absolute;
-  top: 24px;
-  right: 28px;
-  border-radius: 0;
+  top: 8px;
+  right: 8px;
+  z-index: 1;
+  object-fit: contain;
+  object-position: right top;
   background: transparent;
-  color: #111111;
-  font-size: 62px;
-  line-height: 1;
+  filter: drop-shadow(0 9px 10px rgba(17, 17, 17, 0.18));
+  pointer-events: none;
 }
 
 .shop-hero .eyebrow {
