@@ -1,7 +1,7 @@
 {
-  "name": "Crediti: Simule Crédito",
+  "name": "Crediti",
   "short_name": "Crediti",
-  "description": "Assistente inteligente da Crediti",
+  "description": "Crédito com responsabilidade",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
