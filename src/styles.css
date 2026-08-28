@@ -2129,7 +2129,7 @@ html.splash-active #root {
   max-width: 100%;
   box-sizing: border-box;
   min-height: 360px;
-  padding: 28px 22px;
+  padding: 28px 22px 38px;
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
@@ -2140,12 +2140,12 @@ html.splash-active #root {
 }
 
 .shop-delivery-art {
-  width: min(32%, 130px);
-  height: 110px;
+  width: min(27%, 105px);
+  height: 90px;
   display: block;
   position: absolute;
   top: 14px;
-  right: 16px;
+  right: 18px;
   z-index: 1;
   object-fit: contain;
   object-position: right top;
@@ -2248,6 +2248,32 @@ html.splash-active #root {
 .magalu-art b {
   font-size: 30px;
   text-transform: lowercase;
+}
+
+.shop-store-art.shein-art {
+  background: linear-gradient(135deg, #242424, #050505);
+}
+
+.shein-art b {
+  font-size: 29px;
+  letter-spacing: 0.08em;
+}
+
+.shop-store-art .shein-hanger {
+  width: 58px;
+  height: 58px;
+  display: grid;
+  place-items: center;
+}
+
+.shein-hanger svg {
+  width: 54px;
+  height: 54px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 3.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
 .shop-store-card > small {
