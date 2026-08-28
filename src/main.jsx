@@ -3372,27 +3372,6 @@ function App() {
           </div>
         </section>
 
-        <section className="home-section useful-feature">
-          <div>
-            <small>SERVIÇO ÚTIL</small>
-            <h2>
-              Consulte Valores a Receber
-            </h2>
-            <p>
-              Acesse o sistema oficial do Banco Central sem informar seus dados à Crediti.
-            </p>
-          </div>
-          <button
-            onClick={() =>
-              openExternal(
-                "https://valoresareceber.bcb.gov.br/publico"
-              )
-            }
-          >
-            ACESSAR SITE OFICIAL
-          </button>
-        </section>
-
         <section className="home-section shop-feature">
           <div>
             <small>CREDITI SHOP</small>
