@@ -2057,7 +2057,7 @@ html.splash-active #root {
 }
 
 .shop-hero::after {
-  content: "🏷️";
+  content: "🏬";
   width: auto;
   height: auto;
   display: block;
@@ -2067,7 +2067,7 @@ html.splash-active #root {
   border-radius: 0;
   background: transparent;
   color: #111111;
-  font-size: 54px;
+  font-size: 62px;
   line-height: 1;
 }
 
