@@ -22,6 +22,9 @@ const RENDA_EXTRA_URL =
 const SHOPEE_STORE_URL =
   "https://collshp.com/marceloachou?view=storefront";
 
+const MAGALU_STORE_URL =
+  "https://www.influenciadormagalu.com.br/creditishop";
+
 const PARTNER_PRODUCTS = {
   inss: {
     name: "Consignado INSS",
@@ -2329,19 +2332,91 @@ function App() {
             </h1>
 
             <p>
-              Acesse nossa seleção de achadinhos e finalize sua compra diretamente na Shopee.
+              Escolha sua vitrine e finalize a compra diretamente na loja parceira.
             </p>
 
             <button
               className="shop-main-button"
-              onClick={() =>
-                openExternal(
-                  SHOPEE_STORE_URL
-                )
-              }
+              onClick={() => {
+                document
+                  .getElementById(
+                    "lojas-parceiras"
+                  )
+                  ?.scrollIntoView({
+                    behavior: "smooth"
+                  });
+              }}
             >
-              ABRIR VITRINE NA SHOPEE
+              VER LOJAS PARCEIRAS
             </button>
+          </section>
+
+          <section
+            className="shop-store-section"
+            id="lojas-parceiras"
+          >
+            <div className="section-title-row">
+              <div>
+                <span className="eyebrow">
+                  ESCOLHA SUA VITRINE
+                </span>
+                <h2>Lojas parceiras</h2>
+              </div>
+            </div>
+
+            <div className="shop-store-carousel">
+              <article className="shop-store-card shopee-store-card">
+                <div
+                  className="shop-store-art"
+                  aria-hidden="true"
+                >
+                  <span>🛍️</span>
+                  <b>Shopee</b>
+                </div>
+
+                <small>VITRINE CREDITI</small>
+                <h2>Achadinhos na Shopee</h2>
+                <p>
+                  Confira produtos escolhidos para facilitar sua busca.
+                </p>
+
+                <button
+                  onClick={() =>
+                    openExternal(
+                      SHOPEE_STORE_URL
+                    )
+                  }
+                >
+                  ABRIR SHOPEE
+                </button>
+              </article>
+
+              <article className="shop-store-card magalu-store-card">
+                <div
+                  className="shop-store-art magalu-art"
+                  aria-hidden="true"
+                >
+                  <span>🛒</span>
+                  <b>magalu</b>
+                </div>
+
+                <small>VITRINE CREDITI</small>
+                <h2>Ofertas no Magalu</h2>
+                <p>
+                  Acesse nossa seleção e compre diretamente no Magalu.
+                </p>
+
+                <button
+                  onClick={() =>
+                    openExternal(
+                      MAGALU_STORE_URL
+                    )
+                  }
+                >
+                  ABRIR MAGALU
+                </button>
+              </article>
+            </div>
           </section>
 
           <section className="shop-benefits">
@@ -2358,7 +2433,7 @@ function App() {
             <article>
               <span>02</span>
               <strong>
-                Compra dentro da Shopee
+                Compra na loja escolhida
               </strong>
               <p>
                 Pagamento, entrega e atendimento acontecem na plataforma.
@@ -2381,7 +2456,7 @@ function App() {
               Compra segura
             </strong>
             <p>
-              Você será direcionado para a Shopee. Preços, estoque, pagamento, entrega, troca e garantia são informados e realizados dentro da plataforma.
+              Você será direcionado para a loja escolhida. Preços, estoque, pagamento, entrega, troca e garantia são informados e realizados dentro da plataforma.
             </p>
           </section>
         </main>
