@@ -201,7 +201,7 @@ const products = [
     forWho:
       "Para quem já tem veículo no próprio nome e precisa de dinheiro.",
     how:
-      "O veículo precisa estar no nome da pessoa, apto a rodar, com documentação regularizável e CPF sem restrição.",
+      "O veículo precisa estar no nome da pessoa, apto a rodar, com documentação regularizável e CPF sem restrição. Esta opção está disponível em todo o Brasil.",
     when:
       "Pode fazer sentido para quem possui um veículo e precisa levantar dinheiro.",
     tip:
@@ -236,21 +236,6 @@ const products = [
       "Pode ser útil para trabalho, locomoção ou necessidade pessoal.",
     tip:
       "Além da parcela, considere combustível, manutenção, documentação e seguro."
-  },
-
-  {
-    id: "refinanciamento-carro",
-    name: "Refinanciamento de carro",
-    what:
-      "Possibilidade de usar um carro já quitado como garantia para solicitar crédito.",
-    forWho:
-      "Para quem possui carro no próprio nome e deseja verificar uma opção de crédito.",
-    how:
-      "A instituição analisa o veículo, a documentação e o perfil do cliente. O atendimento está disponível em todo o Brasil.",
-    when:
-      "Pode ajudar quando a pessoa precisa de crédito e possui um carro como patrimônio.",
-    tip:
-      "O carro ficará ligado ao contrato. Só avance se a parcela couber com segurança no orçamento."
   },
 
   {
@@ -389,11 +374,6 @@ const PRODUCT_VISUALS = {
     icon: "🏍",
     label: "Compre sua moto",
     tone: "orange"
-  },
-  "refinanciamento-carro": {
-    icon: "🚗↻",
-    label: "Seu carro pode ajudar",
-    tone: "green"
   },
   seguro: {
     icon: "🛡",
@@ -2048,7 +2028,7 @@ function App() {
               Onde atendemos financiamento?
             </strong>
             <p>
-              Financiamento de carro e moto está disponível em Itapajé, Irauçuba e Uruburetama. Refinanciamento de carro está disponível em todo o Brasil.
+              Financiamento de carro e moto está disponível em Itapajé, Irauçuba e Uruburetama. Crédito com garantia de carro ou moto está disponível em todo o Brasil.
             </p>
           </section>
         </main>
