@@ -967,32 +967,32 @@ header small {
   white-space: nowrap;
 }
 
-.product-visual.green {
+.product-visual.product-tone-green {
   background: #dff4e4;
   color: #17652b;
 }
 
-.product-visual.blue {
+.product-visual.product-tone-blue {
   background: #e4efff;
   color: #174e8c;
 }
 
-.product-visual.purple {
+.product-visual.product-tone-purple {
   background: #eee7ff;
   color: #5b3895;
 }
 
-.product-visual.orange {
+.product-visual.product-tone-orange {
   background: #ffeadb;
   color: #a64600;
 }
 
-.product-visual.soft-yellow {
+.product-visual.product-tone-soft-yellow {
   background: #fff5bd;
   color: #6b5900;
 }
 
-.product-visual.yellow {
+.product-visual.product-tone-yellow {
   background: #ffd400;
 }
 
