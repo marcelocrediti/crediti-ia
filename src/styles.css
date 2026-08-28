@@ -1963,6 +1963,11 @@ html.splash-active #root {
   font-weight: 900;
 }
 
+.bottom-nav button:first-child span {
+  font-size: 20px;
+  line-height: 1;
+}
+
 .bottom-nav small {
   font-size: 7.8px;
   font-weight: 800;
