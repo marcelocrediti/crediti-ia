@@ -565,16 +565,43 @@ const SERVICE_GROUPS = [
         name: "Gov.br",
         description: "Acesso aos serviços digitais do Governo Federal.",
         url: "https://www.gov.br/"
+      },
+      {
+        name: "Caixa Tem",
+        description: "Baixe o aplicativo oficial para benefícios e serviços financeiros.",
+        url: "https://www.caixa.gov.br/caixatem/paginas/default.aspx",
+        iosUrl: "https://apps.apple.com/br/app/caixa-tem/id1485424267",
+        androidUrl: "https://play.google.com/store/apps/details?id=br.gov.caixa.tem"
       }
     ]
   },
   {
-    title: "Itapajé",
+    title: "Itapajé e região",
     items: [
       {
         name: "Prefeitura de Itapajé",
         description: "Portal oficial e serviços municipais.",
         url: "https://www.itapaje.ce.gov.br/"
+      },
+      {
+        name: "Vagas IDT/SINE",
+        description: "Consulte vagas e oportunidades de trabalho no Ceará.",
+        url: "https://www.idt.org.br/vagas-disponiveis"
+      },
+      {
+        name: "Detran Ceará",
+        description: "Acesse serviços oficiais de veículos e habilitação.",
+        url: "https://www.detran.ce.gov.br/"
+      },
+      {
+        name: "Enel Ceará",
+        description: "Segunda via, débitos e serviços da conta de energia.",
+        url: "https://www.enel.com.br/pt-ceara"
+      },
+      {
+        name: "Portal do Empreendedor",
+        description: "Formalização e serviços oficiais para MEI.",
+        url: "https://www.gov.br/empresas-e-negocios/pt-br/empreendedor"
       }
     ]
   },
@@ -1255,6 +1282,29 @@ function App() {
       "_blank",
       "noopener,noreferrer"
     );
+  }
+
+  function openService(item) {
+    const userAgent =
+      navigator.userAgent || "";
+
+    let destination = item.url;
+
+    if (
+      item.iosUrl &&
+      /iPad|iPhone|iPod/i.test(
+        userAgent
+      )
+    ) {
+      destination = item.iosUrl;
+    } else if (
+      item.androidUrl &&
+      /Android/i.test(userAgent)
+    ) {
+      destination = item.androidUrl;
+    }
+
+    openExternal(destination);
   }
 
   function openChat(
@@ -2225,9 +2275,7 @@ function App() {
                           className="service-card"
                           key={item.name}
                           onClick={() =>
-                            openExternal(
-                              item.url
-                            )
+                            openService(item)
                           }
                         >
                           <strong>
