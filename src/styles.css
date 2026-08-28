@@ -2100,6 +2100,114 @@ html.splash-active #root {
   font-size: 11px;
 }
 
+.shop-store-section {
+  min-width: 0;
+}
+
+.shop-store-carousel {
+  width: 100%;
+  padding: 0 0 6px;
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.shop-store-carousel::-webkit-scrollbar {
+  display: none;
+}
+
+.shop-store-card {
+  width: min(82vw, 380px);
+  min-width: min(82vw, 380px);
+  min-height: 330px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  scroll-snap-align: start;
+  border: 1px solid #e2e2e2;
+  border-radius: 23px;
+  background: #ffffff;
+  box-shadow: 0 9px 25px rgba(17, 17, 17, 0.07);
+}
+
+.shop-store-art {
+  width: 100%;
+  min-height: 132px;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  overflow: hidden;
+  border-radius: 17px;
+  background: linear-gradient(135deg, #ff6b18, #ee4d2d);
+  color: #ffffff;
+}
+
+.shop-store-art span {
+  font-size: 50px;
+  line-height: 1;
+}
+
+.shop-store-art b {
+  font-size: 27px;
+  font-weight: 900;
+  letter-spacing: -1px;
+}
+
+.shop-store-art.magalu-art {
+  background: linear-gradient(135deg, #0086ff, #004fc4);
+}
+
+.magalu-art b {
+  font-size: 30px;
+  text-transform: lowercase;
+}
+
+.shop-store-card > small {
+  margin-top: 17px;
+  color: #756100;
+  font-size: 8.5px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+}
+
+.shop-store-card > h2 {
+  margin-top: 5px;
+  font-size: 21px;
+  font-weight: 900;
+  line-height: 1.1;
+  letter-spacing: -0.6px;
+}
+
+.shop-store-card > p {
+  margin-top: 7px;
+  color: #666666;
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.shop-store-card > button {
+  width: 100%;
+  min-height: 46px;
+  margin-top: auto;
+  padding: 11px 14px;
+  border: 0;
+  border-radius: 13px;
+  background: #111111;
+  color: #ffffff;
+  font-size: 10px;
+  font-weight: 900;
+}
+
+.magalu-store-card > button {
+  background: #006bdb;
+}
+
 .shop-benefits {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
