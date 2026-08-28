@@ -2057,7 +2057,7 @@ html.splash-active #root {
 }
 
 .shop-hero::after {
-  content: "🛍";
+  content: "🏷️";
   width: auto;
   height: auto;
   display: block;
