@@ -1443,6 +1443,10 @@ html.splash-active #root {
   color: #111111;
 }
 
+.yellow-banner strong {
+  max-width: 280px;
+}
+
 .dark-banner {
   background: #171717;
   color: #ffffff;
