@@ -2369,7 +2369,7 @@ function App() {
           </button>
 
           <img
-            src="/creditin-oficial.jpeg"
+            src="/creditin-oficial.png"
             className="avatar"
             alt="Creditin"
           />
@@ -2404,7 +2404,7 @@ function App() {
                 {message.role ===
                   "assistant" && (
                   <img
-                    src="/creditin-oficial.jpeg"
+                    src="/creditin-oficial.png"
                     className=
                       "avatar small"
                     alt=""
@@ -2532,7 +2532,7 @@ function App() {
                 "row assistant"
             >
               <img
-                src="/creditin-oficial.jpeg"
+                src="/creditin-oficial.png"
                 className=
                   "avatar small"
                 alt=""
@@ -2852,7 +2852,7 @@ function App() {
                 "creditin-tip"
             >
               <img
-                src="/creditin-oficial.jpeg"
+                src="/creditin-oficial.png"
                 alt="Creditin"
               />
 
@@ -3001,7 +3001,7 @@ function App() {
             "simple-screen"
         >
           <img
-            src="/creditin-oficial.jpeg"
+            src="/creditin-oficial.png"
             alt="Creditin"
           />
 
@@ -3096,7 +3096,7 @@ function App() {
             "simple-screen"
         >
           <img
-            src="/creditin-oficial.jpeg"
+            src="/creditin-oficial.png"
             alt="Creditin"
           />
 
@@ -3172,7 +3172,7 @@ function App() {
           </div>
 
           <img
-            src="/creditin-oficial.jpeg"
+            src="/creditin-oficial.png"
             alt="Creditin"
           />
         </section>
@@ -3351,7 +3351,7 @@ function App() {
 
         <section className="home-section tip-feature">
           <img
-            src="/creditin-oficial.jpeg"
+            src="/creditin-oficial.png"
             alt=""
           />
           <div>
