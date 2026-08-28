@@ -239,10 +239,12 @@ header small {
   flex: 0 0 40px;
 
   display: block;
-  object-fit: contain;
+  object-fit: cover;
+  object-position: center 8%;
 
   border-radius: 50%;
-  background: var(--credi-yellow);
+  border: 2px solid var(--credi-yellow);
+  background: var(--credi-white);
 }
 
 .avatar.small {
@@ -516,6 +518,11 @@ header small {
   height: 100px;
 
   object-fit: contain;
+
+  padding: 3px;
+  border: 1px solid var(--credi-border);
+  border-radius: 24px;
+  background: var(--credi-white);
 
   margin-bottom: 5px;
 }
@@ -1367,6 +1374,9 @@ html.splash-active #root {
   width: 112px;
   height: 112px;
   object-fit: contain;
+  padding: 3px;
+  border-radius: 22px;
+  background: #ffffff;
   align-self: end;
   transform: translate(9px, 16px);
 }
@@ -1606,6 +1616,9 @@ html.splash-active #root {
   width: 84px;
   height: 108px;
   object-fit: contain;
+  padding: 3px;
+  border-radius: 18px;
+  background: #ffffff;
 }
 
 .tip-feature p,
@@ -2033,14 +2046,19 @@ html.splash-active #root {
 }
 
 .shop-hero::after {
-  content: "SHOP";
+  content: "🛍";
+  width: 112px;
+  height: 112px;
+  display: grid;
+  place-items: center;
   position: absolute;
-  top: 28px;
-  right: 20px;
-  color: rgba(17, 17, 17, 0.09);
-  font-size: 62px;
-  font-weight: 900;
-  letter-spacing: -4px;
+  top: 18px;
+  right: 22px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.35);
+  color: #111111;
+  font-size: 45px;
+  line-height: 1;
 }
 
 .shop-hero .eyebrow {
@@ -2380,7 +2398,10 @@ html.splash-active #root {
   width: 48px;
   height: 48px;
   flex: 0 0 48px;
-  object-fit: contain;
+  object-fit: cover;
+  object-position: center 8%;
+  border-radius: 15px;
+  background: #ffffff;
 }
 
 .creditin-tip > div {
