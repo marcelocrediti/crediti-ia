@@ -2128,11 +2128,11 @@ html.splash-active #root {
   width: 100%;
   max-width: 100%;
   box-sizing: border-box;
-  min-height: 0;
-  padding: 18px 22px 28px;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  align-items: start;
+  min-height: 360px;
+  padding: 28px 22px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
   overflow: hidden;
   position: relative;
   background: #ffd400;
@@ -2140,16 +2140,17 @@ html.splash-active #root {
 }
 
 .shop-delivery-art {
-  width: min(68%, 270px);
-  height: 170px;
+  width: min(32%, 130px);
+  height: 110px;
   display: block;
-  position: static;
-  justify-self: end;
-  margin: 0 0 8px;
+  position: absolute;
+  top: 14px;
+  right: 16px;
+  z-index: 1;
   object-fit: contain;
-  object-position: right center;
+  object-position: right top;
   background: transparent;
-  filter: drop-shadow(0 9px 10px rgba(17, 17, 17, 0.18));
+  filter: drop-shadow(0 6px 7px rgba(17, 17, 17, 0.16));
   pointer-events: none;
 }
 
