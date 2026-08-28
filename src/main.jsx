@@ -26,7 +26,7 @@ const MAGALU_STORE_URL =
   "https://www.influenciadormagalu.com.br/creditishop";
 
 const SHEIN_STORE_URL =
-  "https://onelink.shein.com/50/609j6zizsh3r";
+  "https://onelink.shein.com/50/609kponu54lj";
 
 const PARTNER_PRODUCTS = {
   inss: {
