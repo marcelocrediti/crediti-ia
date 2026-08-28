@@ -2706,6 +2706,20 @@ function App() {
       "productDetail" &&
     selectedProduct
   ) {
+    const selectedVisual =
+      PRODUCT_VISUALS[
+        selectedProduct.id
+      ] || {
+        icon: "+",
+        label: "Conheça esta opção",
+        tone: "yellow"
+      };
+
+    const selectedPartner =
+      PARTNER_PRODUCTS[
+        selectedProduct.id
+      ];
+
     return (
       <div
         className=
@@ -2747,18 +2761,33 @@ function App() {
           >
             <div
               className=
-                "product-top"
+                "product-detail-hero"
             >
-              <img
-                src="/creditin.png"
-                alt="Creditin"
-              />
-
-              <h2>
-                {
-                  selectedProduct.name
+              <span
+                className={
+                  "product-visual product-tone-" +
+                  selectedVisual.tone
                 }
-              </h2>
+                aria-hidden="true"
+              >
+                {selectedVisual.icon}
+              </span>
+
+              <div>
+                <small>
+                  OPÇÃO DE CRÉDITO
+                </small>
+
+                <h2>
+                  {
+                    selectedProduct.name
+                  }
+                </h2>
+
+                <p>
+                  {selectedVisual.label}
+                </p>
+              </div>
             </div>
 
             <div
@@ -2766,6 +2795,7 @@ function App() {
                 "info-grid"
             >
               <section>
+                <span>01</span>
                 <strong>
                   O que é?
                 </strong>
@@ -2778,6 +2808,7 @@ function App() {
               </section>
 
               <section>
+                <span>02</span>
                 <strong>
                   Para quem é?
                 </strong>
@@ -2790,6 +2821,7 @@ function App() {
               </section>
 
               <section>
+                <span>03</span>
                 <strong>
                   Como funciona?
                 </strong>
@@ -2802,6 +2834,7 @@ function App() {
               </section>
 
               <section>
+                <span>04</span>
                 <strong>
                   Quando pode ajudar?
                 </strong>
@@ -2818,68 +2851,54 @@ function App() {
               className=
                 "creditin-tip"
             >
-              <strong>
-                Dica do Creditin
-              </strong>
+              <img
+                src="/creditin.png"
+                alt="Creditin"
+              />
 
-              <p>
-                {
-                  selectedProduct.tip
-                }
-              </p>
-            </div>
-
-            {PARTNER_PRODUCTS[selectedProduct.id] && (
-              <div
-                style={{
-                  marginTop: "18px",
-                  padding: "16px",
-                  background: "#ffffff",
-                  border: "2px solid #111111",
-                  borderRadius: "18px",
-                  textAlign: "center",
-                  display: "grid",
-                  gap: "12px"
-                }}
-              >
-                <strong style={{ fontSize: "16px" }}>
-                  SIMULAÇÃO ONLINE
+              <div>
+                <strong>
+                  Dica do Creditin
                 </strong>
 
+                <p>
+                  {
+                    selectedProduct.tip
+                  }
+                </p>
+              </div>
+            </div>
+
+            {selectedPartner && (
+              <div
+                className="simulation-panel"
+              >
+                <div className="simulation-heading">
+                  <span>SIMULAÇÃO ONLINE</span>
+                  <strong>
+                    Continue com a instituição parceira
+                  </strong>
+                </div>
+
                 <div
-                  style={{
-                    minHeight: "90px",
-                    padding: "12px",
-                    border: "1px solid #dddddd",
-                    borderRadius: "14px",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center"
-                  }}
+                  className="partner-logo-card"
                 >
                   <img
-                    src={PARTNER_PRODUCTS[selectedProduct.id].logo}
-                    alt={PARTNER_PRODUCTS[selectedProduct.id].partner}
-                    style={{
-                      display: "block",
-                      width: "100%",
-                      maxWidth: "210px",
-                      maxHeight: "85px",
-                      objectFit: "contain"
-                    }}
+                    src={selectedPartner.logo}
+                    alt={selectedPartner.partner}
                   />
                 </div>
 
-                <p style={{ margin: 0, color: "#555555" }}>
+                <p>
                   Faça sua simulação no ambiente seguro da instituição. A análise, as condições e a contratação são de responsabilidade dela.
                 </p>
 
                 <button
-                  className="yellow"
-                  style={{ width: "100%" }}
+                  className="simulation-button"
                   onClick={() => openPartnerLink(selectedProduct.id)}
                 >
-                  {PARTNER_PRODUCTS[selectedProduct.id].button}
+                  {selectedPartner.button}
+                  <span>›</span>
                 </button>
               </div>
             )}
@@ -2889,13 +2908,13 @@ function App() {
                 "product-cta"
             >
               <strong>
-                {PARTNER_PRODUCTS[selectedProduct.id]
+                {selectedPartner
                   ? "Precisa de ajuda?"
                   : "Gostou dessa opção?"}
               </strong>
 
               <p>
-                {PARTNER_PRODUCTS[selectedProduct.id]
+                {selectedPartner
                   ? "Se preferir, fale com um de nossos analistas pelo WhatsApp."
                   : "Fale com um dos nossos analistas e veja se essa solução faz sentido para você."}
               </p>
@@ -2904,19 +2923,6 @@ function App() {
             {serviceNotice && (
               <div
                 className="service-hours-notice"
-                style={{
-                  width: "100%",
-                  boxSizing: "border-box",
-                  background: "#fff7cc",
-                  border: "2px solid #ffd400",
-                  borderRadius: "14px",
-                  padding: "12px",
-                  color: "#171717",
-                  textAlign: "center",
-                  display: "grid",
-                  gap: "5px",
-                  marginBottom: "12px"
-                }}
               >
                 <strong>AVISO DE HORÁRIO</strong>
                 <span>{serviceNotice}</span>
@@ -2935,7 +2941,9 @@ function App() {
                   )
                 }
               >
-                SAMILA
+                <span>WhatsApp</span>
+                <strong>Samila</strong>
+                <small>Falar com analista</small>
               </button>
 
               {selectedProduct.id !== "bolsa" && (
@@ -2947,7 +2955,9 @@ function App() {
                     )
                   }
                 >
-                  MARCELINO
+                  <span>WhatsApp</span>
+                  <strong>Marcelino</strong>
+                  <small>Falar com analista</small>
                 </button>
               )}
             </div>
