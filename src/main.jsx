@@ -495,6 +495,11 @@ const SERVICE_GROUPS = [
         name: "Redesim",
         description: "Serviços oficiais para empresas e negócios.",
         url: "https://www.gov.br/empresas-e-negocios/pt-br/redesim"
+      },
+      {
+        name: "Portal da Receita Federal",
+        description: "Imposto de renda, pendências, certidões e outros serviços.",
+        url: "https://servicos.receitafederal.gov.br/"
       }
     ]
   },
@@ -591,12 +596,12 @@ const SERVICE_GROUPS = [
       {
         name: "Detran Ceará",
         description: "Acesse serviços oficiais de veículos e habilitação.",
-        url: "https://www.detran.ce.gov.br/"
+        url: "https://sistemas.detran.ce.gov.br/central"
       },
       {
         name: "Enel Ceará",
         description: "Segunda via, débitos e serviços da conta de energia.",
-        url: "https://www.enel.com.br/pt-ceara"
+        url: "https://www.enel.com.br/pt-ceara.html"
       },
       {
         name: "Portal do Empreendedor",
