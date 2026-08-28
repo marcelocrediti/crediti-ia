@@ -3328,7 +3328,7 @@ function App() {
         <section className="home-welcome">
           <div>
             <span className="eyebrow">
-              BEM-VINDO À CREDITI IA
+              BEM-VINDO À CREDITI
             </span>
 
             <h1>
