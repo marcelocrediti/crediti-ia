@@ -524,7 +524,7 @@ const SERVICE_GROUPS = [
     ]
   },
   {
-    title: "Crédito e consumidor",
+    title: "Consumidor",
     items: [
       {
         name: "Serasa",
@@ -540,6 +540,11 @@ const SERVICE_GROUPS = [
         name: "Procon Ceará",
         description: "Orientações e serviços de defesa do consumidor.",
         url: "https://www.proconceara.ce.gov.br/"
+      },
+      {
+        name: "Não Me Perturbe",
+        description: "Bloqueie ligações de ofertas das empresas participantes.",
+        url: "https://www.naomeperturbe.com.br/"
       }
     ]
   },
