@@ -339,6 +339,89 @@ const DIRECT_PRODUCT_KEYS = [
   "energia"
 ];
 
+const PRODUCT_VISUALS = {
+  inss: {
+    icon: "INSS",
+    label: "Aposentados e pensionistas",
+    tone: "yellow"
+  },
+  bpc: {
+    icon: "🤝",
+    label: "Beneficiários BPC/LOAS",
+    tone: "soft-yellow"
+  },
+  clt: {
+    icon: "👷",
+    label: "Trabalhador com carteira",
+    tone: "blue"
+  },
+  bolsa: {
+    icon: "👨‍👩‍👧",
+    label: "Beneficiário do programa",
+    tone: "green"
+  },
+  fgts: {
+    icon: "FGTS",
+    label: "Antecipação de saldo",
+    tone: "green"
+  },
+  cartao: {
+    icon: "💳",
+    label: "Limite do cartão",
+    tone: "purple"
+  },
+  energia: {
+    icon: "💡",
+    label: "Crédito pela conta de luz",
+    tone: "yellow"
+  },
+  garantia: {
+    icon: "🔑",
+    label: "Carro ou moto em garantia",
+    tone: "blue"
+  },
+  "financiamento-carro": {
+    icon: "🚗",
+    label: "Compre seu carro",
+    tone: "yellow"
+  },
+  "financiamento-moto": {
+    icon: "🏍",
+    label: "Compre sua moto",
+    tone: "orange"
+  },
+  "refinanciamento-carro": {
+    icon: "🚗↻",
+    label: "Seu carro pode ajudar",
+    tone: "green"
+  },
+  seguro: {
+    icon: "🛡",
+    label: "Proteção para carro e moto",
+    tone: "blue"
+  },
+  "consorcio-carro": {
+    icon: "🚘",
+    label: "Planeje seu próximo carro",
+    tone: "soft-yellow"
+  },
+  "consorcio-moto": {
+    icon: "🛵",
+    label: "Planeje sua próxima moto",
+    tone: "orange"
+  },
+  "consorcio-pesado": {
+    icon: "🚛",
+    label: "Caminhões e pesados",
+    tone: "blue"
+  },
+  "consorcio-servicos": {
+    icon: "🧰",
+    label: "Projetos e serviços",
+    tone: "purple"
+  }
+};
+
 const LEARN_ARTICLES = [
   {
     id: "dividas",
@@ -2579,30 +2662,59 @@ function App() {
             "page product-list"
         >
           {products.map(
-            (product) => (
-              <button
-                className=
-                  "yellow"
-
-                key={
+            (product) => {
+              const visual =
+                PRODUCT_VISUALS[
                   product.id
-                }
+                ] || {
+                  icon: "+",
+                  label:
+                    "Conheça esta opção",
+                  tone: "yellow"
+                };
 
-                onClick={() => {
-                  setSelectedProduct(
-                    product
-                  );
+              return (
+                <button
+                  className="product-modern-card"
+                  key={product.id}
+                  onClick={() => {
+                    setSelectedProduct(
+                      product
+                    );
 
-                  setScreen(
-                    "productDetail"
-                  );
-                }}
-              >
-                {
-                  product.name
-                }
-              </button>
-            )
+                    setScreen(
+                      "productDetail"
+                    );
+                  }}
+                >
+                  <span
+                    className={
+                      "product-visual " +
+                      visual.tone
+                    }
+                    aria-hidden="true"
+                  >
+                    {visual.icon}
+                  </span>
+
+                  <span className="product-modern-copy">
+                    <strong>
+                      {product.name}
+                    </strong>
+                    <small>
+                      {visual.label}
+                    </small>
+                  </span>
+
+                  <span
+                    className="product-modern-arrow"
+                    aria-hidden="true"
+                  >
+                    ›
+                  </span>
+                </button>
+              );
+            }
           )}
         </main>
       </div>
