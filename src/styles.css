@@ -1397,15 +1397,16 @@ html.splash-active #root {
 }
 
 .home-banners {
-  margin: 18px -16px 0;
-  padding: 0 16px 4px;
+  width: 100%;
+  margin: 18px 0 0;
+  padding: 0 0 6px;
 }
 
 .home-banner {
-  width: min(82vw, 430px);
-  min-width: min(82vw, 430px);
-  min-height: 150px;
-  padding: 20px;
+  width: 100%;
+  min-width: 100%;
+  min-height: 160px;
+  padding: 24px 22px 30px;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
