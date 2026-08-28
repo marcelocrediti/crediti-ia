@@ -2032,6 +2032,9 @@ html.splash-active #root {
 }
 
 .shop-hero {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
   min-height: 360px;
   padding: 28px 22px;
   display: flex;
@@ -2039,25 +2042,22 @@ html.splash-active #root {
   justify-content: flex-end;
   overflow: hidden;
   position: relative;
-  background:
-    radial-gradient(circle at 82% 18%, rgba(255, 255, 255, 0.38) 0 56px, transparent 57px),
-    #ffd400;
+  background: #ffd400;
   border-radius: 26px;
 }
 
 .shop-hero::after {
   content: "🛍";
-  width: 112px;
-  height: 112px;
-  display: grid;
-  place-items: center;
+  width: auto;
+  height: auto;
+  display: block;
   position: absolute;
-  top: 18px;
-  right: 22px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.35);
+  top: 24px;
+  right: 28px;
+  border-radius: 0;
+  background: transparent;
   color: #111111;
-  font-size: 45px;
+  font-size: 54px;
   line-height: 1;
 }
 
