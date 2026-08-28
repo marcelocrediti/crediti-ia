@@ -2689,7 +2689,7 @@ function App() {
                 >
                   <span
                     className={
-                      "product-visual " +
+                      "product-visual product-tone-" +
                       visual.tone
                     }
                     aria-hidden="true"
