@@ -239,12 +239,12 @@ header small {
   flex: 0 0 40px;
 
   display: block;
-  object-fit: cover;
-  object-position: center 8%;
+  object-fit: contain;
+  object-position: center;
 
   border-radius: 50%;
-  border: 2px solid var(--credi-yellow);
-  background: var(--credi-white);
+  border: 0;
+  background: transparent;
 }
 
 .avatar.small {
@@ -519,10 +519,10 @@ header small {
 
   object-fit: contain;
 
-  padding: 3px;
-  border: 1px solid var(--credi-border);
-  border-radius: 24px;
-  background: var(--credi-white);
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
 
   margin-bottom: 5px;
 }
@@ -1374,9 +1374,9 @@ html.splash-active #root {
   width: 112px;
   height: 112px;
   object-fit: contain;
-  padding: 3px;
-  border-radius: 22px;
-  background: #ffffff;
+  padding: 0;
+  border-radius: 0;
+  background: transparent;
   align-self: end;
   transform: translate(9px, 16px);
 }
@@ -1616,9 +1616,9 @@ html.splash-active #root {
   width: 84px;
   height: 108px;
   object-fit: contain;
-  padding: 3px;
-  border-radius: 18px;
-  background: #ffffff;
+  padding: 0;
+  border-radius: 0;
+  background: transparent;
 }
 
 .tip-feature p,
@@ -2398,10 +2398,10 @@ html.splash-active #root {
   width: 48px;
   height: 48px;
   flex: 0 0 48px;
-  object-fit: cover;
-  object-position: center 8%;
-  border-radius: 15px;
-  background: #ffffff;
+  object-fit: contain;
+  object-position: center;
+  border-radius: 0;
+  background: transparent;
 }
 
 .creditin-tip > div {
