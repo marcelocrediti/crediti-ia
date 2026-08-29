@@ -1998,19 +1998,6 @@ html.splash-active #root {
   margin-top: 0;
 }
 
-.service-card-icon {
-  width: 38px;
-  height: 38px;
-  margin-bottom: 12px;
-  display: grid;
-  place-items: center;
-  border-radius: 12px;
-  background: #172235;
-  color: #ffffff;
-  font-size: 20px;
-  line-height: 1;
-}
-
 .service-card small {
   margin-top: 8px;
   color: #6b6b6b;
