@@ -2510,6 +2510,56 @@ html.splash-active #root {
   background: #0063aa;
 }
 
+.shop-store-art.natura-art {
+  background: linear-gradient(135deg, #f79222, #d85a00);
+}
+
+.natura-art b,
+.avon-art b {
+  font-size: 28px;
+}
+
+.shop-store-art .natura-leaf,
+.shop-store-art .avon-beauty {
+  width: 66px;
+  height: 66px;
+  display: grid;
+  place-items: center;
+  border-radius: 21px;
+  background: rgba(255, 255, 255, 0.95);
+}
+
+.natura-leaf svg,
+.avon-beauty svg {
+  width: 49px;
+  height: 49px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 3.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.natura-leaf {
+  color: #df6800;
+}
+
+.natura-store-card > button {
+  background: #df6800;
+}
+
+.shop-store-art.avon-art {
+  background: linear-gradient(135deg, #7b32d5, #d73591);
+}
+
+.avon-beauty {
+  color: #8a2dc0;
+}
+
+.avon-store-card > button {
+  background: #8a2dc0;
+}
+
 .shop-benefits {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
