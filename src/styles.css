@@ -2363,6 +2363,80 @@ html.splash-active #root {
   color: #111820;
 }
 
+.shop-store-art.babystock-art {
+  background: linear-gradient(135deg, #f06992, #9e5fc1);
+}
+
+.babystock-art b {
+  font-size: 26px;
+}
+
+.shop-store-art .babystock-icon {
+  width: 66px;
+  height: 66px;
+  display: grid;
+  place-items: center;
+  border-radius: 21px;
+  background: #fff4be;
+  color: #e45584;
+  font-size: 34px;
+  transform: rotate(-7deg);
+}
+
+.babystock-store-card > button {
+  background: #ad5dad;
+}
+
+.shop-store-art.kidy-art {
+  background: linear-gradient(135deg, #ff743e, #f33f55);
+}
+
+.kidy-art b {
+  font-size: 32px;
+  letter-spacing: -1.2px;
+}
+
+.shop-store-art .kidy-shoe {
+  width: 66px;
+  height: 66px;
+  display: grid;
+  place-items: center;
+  border-radius: 21px;
+  background: #ffffff;
+  font-size: 35px;
+}
+
+.store-coupon {
+  width: 100%;
+  margin: 12px 0 10px;
+  padding: 9px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  border: 1px dashed #ef4d4d;
+  border-radius: 11px;
+  background: #fff1e8;
+}
+
+.store-coupon span {
+  color: #a7432c;
+  font-size: 8px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+}
+
+.store-coupon strong {
+  color: #111111;
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+}
+
+.kidy-store-card > button {
+  background: #ef4750;
+}
+
 .shop-benefits {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
