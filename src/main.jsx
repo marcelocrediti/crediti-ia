@@ -632,6 +632,22 @@ const SERVICE_GROUPS = [
     ]
   },
   {
+    title: "Serviços e produtos para lojistas e empresas",
+    items: [
+      {
+        name: "TikTok para Empresas",
+        description: "Crie sua conta de anúncios e divulgue sua loja, serviço ou empresa no TikTok.",
+        url: "https://getstartedtiktok.partnerlinks.io/2bvjzvpuq4hy",
+        action: "COMEÇAR ›"
+      },
+      {
+        name: "Conta PJ Cora",
+        description: "Conta digital pensada para facilitar a rotina financeira da sua empresa.",
+        status: "EM BREVE"
+      }
+    ]
+  },
+  {
     title: "Redes da Crediti",
     items: [
       {
@@ -2290,11 +2306,14 @@ function App() {
                     {group.items.map(
                       (item) => (
                         <button
-                          className="service-card"
+                          className={`service-card${item.status ? " service-card-disabled" : ""}`}
                           key={item.name}
-                          onClick={() =>
-                            openService(item)
-                          }
+                          onClick={() => {
+                            if (!item.status) {
+                              openService(item);
+                            }
+                          }}
+                          disabled={Boolean(item.status)}
                         >
                           <strong>
                             {item.name}
@@ -2303,7 +2322,7 @@ function App() {
                             {item.description}
                           </small>
                           <span>
-                            ACESSAR ›
+                            {item.status || item.action || "ACESSAR ›"}
                           </span>
                         </button>
                       )
