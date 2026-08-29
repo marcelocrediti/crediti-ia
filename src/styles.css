@@ -2006,6 +2006,18 @@ html.splash-active #root {
   line-height: 1.4;
 }
 
+.service-card-disabled {
+  cursor: default;
+  opacity: 0.78;
+}
+
+.service-card-disabled span {
+  padding: 7px 10px;
+  border-radius: 999px;
+  background: #fff1a8;
+  color: #6b5900;
+}
+
 .bottom-nav {
   width: 100%;
   min-height: calc(66px + env(safe-area-inset-bottom));
