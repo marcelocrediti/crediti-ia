@@ -513,6 +513,13 @@ const SERVICE_GROUPS = [
         description: "Abra sua conta digital PJ grátis e solicite um cartão de crédito empresarial, sujeito à análise da Cora.",
         url: "https://conta.cora.com.br/r/conta-digital/?convite=HM74R&i=MjgxMTU0NTQwMDAxMjc=&n=TWFyY2VsaW5v",
         action: "ABRIR CONTA ›"
+      },
+      {
+        name: "KingHost",
+        description: "Crie seu site, registre seu domínio e tenha um e-mail profissional para sua empresa.",
+        url: "https://king.host?ref=79E443DAF29A6",
+        action: "CONHECER SOLUÇÕES ›",
+        icon: "🌐"
       }
     ]
   },
@@ -2316,6 +2323,14 @@ function App() {
                           }}
                           disabled={Boolean(item.status)}
                         >
+                          {item.icon && (
+                            <b
+                              className="service-card-icon"
+                              aria-hidden="true"
+                            >
+                              {item.icon}
+                            </b>
+                          )}
                           <strong>
                             {item.name}
                           </strong>
