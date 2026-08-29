@@ -3180,3 +3180,79 @@ html.splash-active #root {
   display: grid;
   gap: 12px;
 }
+
+
+/* Card de formação com identidade visual da Estácio */
+.career-card {
+  min-height: 0;
+  padding: 12px;
+  gap: 0;
+  border-color: #d9dfe9;
+  background: #ffffff;
+}
+
+.career-brand {
+  width: 100%;
+  min-height: 66px;
+  padding: 12px 18px;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #0055d9 0%, #1437a8 100%);
+  color: #ffffff;
+}
+
+.career-brand i {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border: 2px solid rgba(255, 255, 255, 0.92);
+  transform: rotate(45deg);
+  border-radius: 8px;
+  font-size: 0;
+}
+
+.career-brand i::after {
+  content: "";
+  width: 12px;
+  height: 12px;
+  border: 2px solid #ffffff;
+  border-radius: 3px;
+}
+
+.career-brand b {
+  font-size: 25px;
+  font-weight: 900;
+  letter-spacing: -0.04em;
+}
+
+.career-copy {
+  width: 100%;
+  padding: 14px 5px 4px;
+  box-sizing: border-box;
+  display: grid;
+  gap: 6px;
+}
+
+.career-card .career-copy small {
+  color: #21469b;
+  font-size: 8.5px;
+  font-weight: 900;
+  letter-spacing: 0.07em;
+}
+
+.career-card .career-copy strong {
+  margin: 0;
+  font-size: 18px;
+  line-height: 1.12;
+}
+
+.career-card .career-copy span {
+  margin: 5px 0 0;
+  padding: 0;
+  color: #173b91;
+  font-size: 9px;
+}
