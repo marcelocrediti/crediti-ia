@@ -43,6 +43,9 @@ const XIAOMI_STORE_URL =
 const ITATIAIA_STORE_URL =
   "https://acesse.vc/Xj3TUddBwQxj";
 
+const ELECTROLUX_STORE_URL =
+  "https://electrolux.mais.app/NB2skA";
+
 const NATURA_STORE_URL =
   "https://sovsls.com/c/np365ay?no_js=1";
 
@@ -2665,6 +2668,37 @@ function App() {
                   }
                 >
                   ABRIR ITATIAIA
+                </button>
+              </article>
+
+              <article className="shop-store-card electrolux-store-card">
+                <div
+                  className="shop-store-art electrolux-art"
+                  aria-hidden="true"
+                >
+                  <span className="electrolux-appliance">
+                    <svg viewBox="0 0 64 64" focusable="false">
+                      <rect x="18" y="5" width="28" height="54" rx="5" />
+                      <path d="M18 29h28M39 15v7M39 37v8" />
+                    </svg>
+                  </span>
+                  <b>Electrolux</b>
+                </div>
+
+                <small>VITRINE CREDITI</small>
+                <h2>Eletrodomésticos Electrolux</h2>
+                <p>
+                  Geladeiras, lavadoras, fogões e soluções para sua casa.
+                </p>
+
+                <button
+                  onClick={() =>
+                    openExternal(
+                      ELECTROLUX_STORE_URL
+                    )
+                  }
+                >
+                  ABRIR ELECTROLUX
                 </button>
               </article>
 
