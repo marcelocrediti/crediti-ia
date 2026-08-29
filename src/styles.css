@@ -2510,6 +2510,38 @@ html.splash-active #root {
   background: #0063aa;
 }
 
+.shop-store-art.electrolux-art {
+  background: linear-gradient(135deg, #183a70, #061a3a);
+}
+
+.electrolux-art b {
+  font-size: 25px;
+}
+
+.shop-store-art .electrolux-appliance {
+  width: 66px;
+  height: 66px;
+  display: grid;
+  place-items: center;
+  border-radius: 21px;
+  background: #ffffff;
+  color: #173966;
+}
+
+.electrolux-appliance svg {
+  width: 49px;
+  height: 49px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 3.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.electrolux-store-card > button {
+  background: #173966;
+}
+
 .shop-store-art.natura-art {
   background: linear-gradient(135deg, #f79222, #d85a00);
 }
