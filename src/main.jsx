@@ -43,6 +43,12 @@ const XIAOMI_STORE_URL =
 const ITATIAIA_STORE_URL =
   "https://acesse.vc/Xj3TUddBwQxj";
 
+const NATURA_STORE_URL =
+  "https://sovsls.com/c/np365ay?no_js=1";
+
+const AVON_STORE_URL =
+  "https://sovsls.com/c/q26ywcm?no_js=1";
+
 const PARTNER_PRODUCTS = {
   inss: {
     name: "Consignado INSS",
@@ -2659,6 +2665,70 @@ function App() {
                   }
                 >
                   ABRIR ITATIAIA
+                </button>
+              </article>
+
+              <article className="shop-store-card natura-store-card">
+                <div
+                  className="shop-store-art natura-art"
+                  aria-hidden="true"
+                >
+                  <span className="natura-leaf">
+                    <svg viewBox="0 0 64 64" focusable="false">
+                      <path d="M32 54C18 45 14 32 17 14c15 2 27 10 30 23-2 9-7 14-15 17Z" />
+                      <path d="M22 20c8 8 12 17 10 34" />
+                    </svg>
+                  </span>
+                  <b>Natura</b>
+                </div>
+
+                <small>VITRINE CREDITI</small>
+                <h2>Beleza e cuidados Natura</h2>
+                <p>
+                  Perfumaria, cuidados pessoais e presentes para todos os momentos.
+                </p>
+
+                <button
+                  onClick={() =>
+                    openExternal(
+                      NATURA_STORE_URL
+                    )
+                  }
+                >
+                  ABRIR NATURA
+                </button>
+              </article>
+
+              <article className="shop-store-card avon-store-card">
+                <div
+                  className="shop-store-art avon-art"
+                  aria-hidden="true"
+                >
+                  <span className="avon-beauty">
+                    <svg viewBox="0 0 64 64" focusable="false">
+                      <path d="M25 17h14v12H25z" />
+                      <path d="M28 8h8v9h-8z" />
+                      <path d="M22 29h20v27H22z" />
+                      <path d="M17 15v8M13 19h8M48 9v10M43 14h10" />
+                    </svg>
+                  </span>
+                  <b>AVON</b>
+                </div>
+
+                <small>VITRINE CREDITI</small>
+                <h2>Beleza e ofertas Avon</h2>
+                <p>
+                  Maquiagem, perfumes e cuidados pessoais para você.
+                </p>
+
+                <button
+                  onClick={() =>
+                    openExternal(
+                      AVON_STORE_URL
+                    )
+                  }
+                >
+                  ABRIR AVON
                 </button>
               </article>
             </div>
