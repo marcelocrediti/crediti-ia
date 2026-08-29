@@ -1938,7 +1938,7 @@ function App() {
       >
         <img
           className="app-splash__icon"
-          src="/icon-512.png?v=4"
+          src="/icon-512.png?v=5"
           alt=""
         />
 
@@ -3637,7 +3637,7 @@ function App() {
         </div>
 
         <img
-          src="/icon-192.png?v=4"
+          src="/icon-192.png?v=5"
           alt=""
         />
       </header>
