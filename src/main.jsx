@@ -28,6 +28,9 @@ const MAGALU_STORE_URL =
 const SHEIN_STORE_URL =
   "https://onelink.shein.com/50/609kponu54lj";
 
+const AMAZON_STORE_URL =
+  "https://amzn.to/46trmWP";
+
 const PARTNER_PRODUCTS = {
   inss: {
     name: "Consignado INSS",
@@ -2448,6 +2451,51 @@ function App() {
                   }
                 >
                   ABRIR SHEIN
+                </button>
+              </article>
+
+              <article className="shop-store-card amazon-store-card">
+                <div
+                  className="shop-store-art amazon-art"
+                  aria-hidden="true"
+                >
+                  <span className="amazon-bag">
+                    <svg viewBox="0 0 72 72" focusable="false">
+                      <path
+                        className="amazon-bag-handle"
+                        d="M24 27v-5c0-8 5-13 12-13s12 5 12 13v5"
+                      />
+                      <path
+                        className="amazon-bag-body"
+                        d="M13 24h46l-3 41H16z"
+                      />
+                      <path
+                        className="amazon-bag-smile"
+                        d="M24 47c7 6 17 6 25 0"
+                      />
+                      <path
+                        className="amazon-bag-arrow"
+                        d="m47 46 4 1-2 4"
+                      />
+                    </svg>
+                  </span>
+                  <b>Amazon</b>
+                </div>
+
+                <small>VITRINE CREDITI</small>
+                <h2>Ofertas na Amazon</h2>
+                <p>
+                  Encontre produtos, novidades e ofertas na Amazon.
+                </p>
+
+                <button
+                  onClick={() =>
+                    openExternal(
+                      AMAZON_STORE_URL
+                    )
+                  }
+                >
+                  ABRIR AMAZON
                 </button>
               </article>
             </div>
