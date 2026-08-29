@@ -31,6 +31,12 @@ const SHEIN_STORE_URL =
 const AMAZON_STORE_URL =
   "https://amzn.to/46trmWP";
 
+const BABYSTOCK_STORE_URL =
+  "https://lmdee.link/PXX29qIp80c0";
+
+const KIDY_STORE_URL =
+  "https://acesse.vc/3DTYtW3WGPV3";
+
 const PARTNER_PRODUCTS = {
   inss: {
     name: "Consignado INSS",
@@ -2496,6 +2502,63 @@ function App() {
                   }
                 >
                   ABRIR AMAZON
+                </button>
+              </article>
+
+              <article className="shop-store-card babystock-store-card">
+                <div
+                  className="shop-store-art babystock-art"
+                  aria-hidden="true"
+                >
+                  <span className="babystock-icon">★</span>
+                  <b>Babystock</b>
+                </div>
+
+                <small>VITRINE CREDITI</small>
+                <h2>Achadinhos para os pequenos</h2>
+                <p>
+                  Roupas, acessórios e produtos para bebês e crianças.
+                </p>
+
+                <button
+                  onClick={() =>
+                    openExternal(
+                      BABYSTOCK_STORE_URL
+                    )
+                  }
+                >
+                  ABRIR BABYSTOCK
+                </button>
+              </article>
+
+              <article className="shop-store-card kidy-store-card">
+                <div
+                  className="shop-store-art kidy-art"
+                  aria-hidden="true"
+                >
+                  <span className="kidy-shoe">👟</span>
+                  <b>Kidy</b>
+                </div>
+
+                <small>VITRINE CREDITI</small>
+                <h2>Calçados Kidy</h2>
+                <p>
+                  Escolha o calçado e use o cupom para ganhar desconto.
+                </p>
+
+                <div className="store-coupon">
+                  <span>CUPOM</span>
+                  <strong>AFILIKIDY</strong>
+                </div>
+
+                <button
+                  onClick={() =>
+                    openExternal(
+                      KIDY_STORE_URL
+                    )
+                  }
+                >
+                  ABRIR KIDY
                 </button>
               </article>
             </div>
