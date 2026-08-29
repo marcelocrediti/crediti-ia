@@ -2276,6 +2276,47 @@ html.splash-active #root {
   stroke-linejoin: round;
 }
 
+.shop-store-art.amazon-art {
+  background: linear-gradient(135deg, #172235, #101722);
+}
+
+.amazon-art b {
+  color: #ffffff;
+  font-size: 28px;
+}
+
+.shop-store-art .amazon-bag {
+  width: 70px;
+  height: 70px;
+  display: grid;
+  place-items: center;
+}
+
+.amazon-bag svg {
+  width: 68px;
+  height: 68px;
+  overflow: visible;
+}
+
+.amazon-bag-body {
+  fill: #ffd814;
+}
+
+.amazon-bag-handle,
+.amazon-bag-smile,
+.amazon-bag-arrow {
+  fill: none;
+  stroke: #111820;
+  stroke-width: 4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.amazon-bag-smile,
+.amazon-bag-arrow {
+  stroke-width: 3.3;
+}
+
 .shop-store-card > small {
   margin-top: 17px;
   color: #756100;
@@ -2315,6 +2356,11 @@ html.splash-active #root {
 
 .magalu-store-card > button {
   background: #006bdb;
+}
+
+.amazon-store-card > button {
+  background: #ffd814;
+  color: #111820;
 }
 
 .shop-benefits {
