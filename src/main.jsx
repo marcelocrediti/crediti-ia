@@ -500,6 +500,23 @@ const LEARN_ARTICLES = [
 
 const SERVICE_GROUPS = [
   {
+    title: "Serviços e produtos para lojistas e empresas",
+    items: [
+      {
+        name: "TikTok para Empresas",
+        description: "Crie sua conta de anúncios e divulgue sua loja, serviço ou empresa no TikTok.",
+        url: "https://getstartedtiktok.partnerlinks.io/2bvjzvpuq4hy",
+        action: "COMEÇAR ›"
+      },
+      {
+        name: "Conta PJ Cora",
+        description: "Abra sua conta digital PJ grátis e solicite um cartão de crédito empresarial, sujeito à análise da Cora.",
+        url: "https://conta.cora.com.br/r/conta-digital/?convite=HM74R&i=MjgxMTU0NTQwMDAxMjc=&n=TWFyY2VsaW5v",
+        action: "ABRIR CONTA ›"
+      }
+    ]
+  },
+  {
     title: "Receita Federal",
     items: [
       {
@@ -628,23 +645,6 @@ const SERVICE_GROUPS = [
         name: "Portal do Empreendedor",
         description: "Formalização e serviços oficiais para MEI.",
         url: "https://www.gov.br/empresas-e-negocios/pt-br/empreendedor"
-      }
-    ]
-  },
-  {
-    title: "Serviços e produtos para lojistas e empresas",
-    items: [
-      {
-        name: "TikTok para Empresas",
-        description: "Crie sua conta de anúncios e divulgue sua loja, serviço ou empresa no TikTok.",
-        url: "https://getstartedtiktok.partnerlinks.io/2bvjzvpuq4hy",
-        action: "COMEÇAR ›"
-      },
-      {
-        name: "Conta PJ Cora",
-        description: "Abra sua conta digital PJ grátis e solicite um cartão de crédito empresarial, sujeito à análise da Cora.",
-        url: "https://conta.cora.com.br/r/conta-digital/?convite=HM74R&i=MjgxMTU0NTQwMDAxMjc=&n=TWFyY2VsaW5v",
-        action: "ABRIR CONTA ›"
       }
     ]
   },
