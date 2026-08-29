@@ -2322,6 +2322,9 @@ function App() {
               className="shop-delivery-art"
               src="/creditin-moto-shop.png"
               alt="Creditin em uma moto de entrega da Crediti Shop"
+              loading="eager"
+              fetchPriority="high"
+              decoding="async"
             />
 
             <span className="eyebrow">
