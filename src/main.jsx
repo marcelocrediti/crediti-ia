@@ -52,6 +52,9 @@ const NATURA_STORE_URL =
 const AVON_STORE_URL =
   "https://sovsls.com/c/q26ywcm?no_js=1";
 
+const ESTACIO_URL =
+  "https://estacio.br/selecao?cod_agente=14369444&u=804215&end=1";
+
 const PARTNER_PRODUCTS = {
   inss: {
     name: "Consignado INSS",
@@ -2231,16 +2234,50 @@ function App() {
         <main className="modern-page">
           <section className="page-intro">
             <span className="eyebrow">
-              EDUCAÇÃO FINANCEIRA
+              APRENDA E CRESÇA
             </span>
 
             <h1>
-              Cuide melhor do seu dinheiro
+              Conhecimento para transformar seu futuro
             </h1>
 
             <p>
-              Conteúdos simples sobre crédito, economia e segurança.
+              Formação, carreira e conteúdos simples para cuidar melhor do seu dinheiro.
             </p>
+          </section>
+
+          <section className="career-section">
+            <span className="eyebrow">
+              OPORTUNIDADES DE ESTUDO
+            </span>
+
+            <h2>Formação e carreira</h2>
+
+            <button
+              className="career-card"
+              onClick={() =>
+                window.open(
+                  ESTACIO_URL,
+                  "_blank"
+                )
+              }
+            >
+              <small>ESTÁCIO</small>
+              <strong>
+                Dê o próximo passo na sua carreira
+              </strong>
+              <p>
+                Conheça opções de graduação, pós-graduação e outros cursos.
+              </p>
+              <span>CONHECER CURSOS ›</span>
+            </button>
+          </section>
+
+          <section className="financial-learning-heading">
+            <span className="eyebrow">
+              CONTEÚDOS DA CREDITI
+            </span>
+            <h2>Educação financeira</h2>
           </section>
 
           <div className="article-grid">
