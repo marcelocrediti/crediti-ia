@@ -1,7 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap');
 
 :root {
-  --credi-yellow: #FFD400;
+  --credi-yellow: #FDCE00;
   --credi-black: #111111;
   --credi-white: #FFFFFF;
   --credi-gray: #F5F5F5;
@@ -665,7 +665,7 @@ header small {
   width: 94%;
   max-width: 500px;
   margin-top: 4px;
-  border-color: #e6bd00;
+  border-color: #FDCE00;
   background: #fff7cc;
 }
 
@@ -1050,7 +1050,7 @@ header small {
   position: relative;
   z-index: 1;
   border-radius: 15px;
-  background: #ffd400;
+  background: #FDCE00;
   color: #111111;
   font-size: 20px;
   font-weight: 900;
@@ -1087,7 +1087,7 @@ header small {
 }
 
 .product-visual.product-tone-yellow {
-  background: #ffd400;
+  background: #FDCE00;
 }
 
 .product-modern-copy {
@@ -1198,7 +1198,7 @@ header small {
   position: absolute;
   inset: 0 0 auto;
   height: 6px;
-  background: #ffd400;
+  background: #FDCE00;
 }
 
 .partner-result-label {
@@ -1251,7 +1251,7 @@ header small {
   padding: 12px 14px;
   border: 0;
   border-radius: 14px;
-  background: #ffd400;
+  background: #FDCE00;
   color: #111111;
   font: inherit;
   font-size: 0.82rem;
@@ -1526,7 +1526,7 @@ html.splash-active #root {
 }
 
 .yellow-banner {
-  background: #ffd400;
+  background: #FDCE00;
   color: #111111;
 }
 
@@ -1608,7 +1608,7 @@ html.splash-active #root {
 .quick-card.primary,
 .hub-card.featured {
   background: #fff5bd;
-  border-color: #f0cf19;
+  border-color: #FDCE00;
 }
 
 .quick-card > span,
@@ -1619,7 +1619,7 @@ html.splash-active #root {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: #ffd400;
+  background: #FDCE00;
   border-radius: 12px;
   font-size: 12px;
   font-weight: 900;
@@ -1700,7 +1700,7 @@ html.splash-active #root {
   gap: 14px;
   align-items: center;
   background: #fff5bd;
-  border: 1px solid #f0cf19;
+  border: 1px solid #FDCE00;
 }
 
 .tip-feature > img {
@@ -1745,7 +1745,7 @@ html.splash-active #root {
 
 .useful-feature button {
   min-width: 120px;
-  background: #ffd400;
+  background: #FDCE00;
   color: #111111;
 }
 
@@ -1848,7 +1848,7 @@ html.splash-active #root {
   padding: 12px 15px;
   border: 0;
   border-radius: 14px;
-  background: #ffd400;
+  background: #FDCE00;
   color: #111111;
   font-size: 11px;
   font-weight: 900;
@@ -1956,7 +1956,7 @@ html.splash-active #root {
   margin-bottom: 16px;
   padding: 17px;
   background: #fff5bd;
-  border: 1px solid #f0cf19;
+  border: 1px solid #FDCE00;
   border-radius: 18px;
 }
 
@@ -2078,7 +2078,7 @@ html.splash-active #root {
 }
 
 .bottom-nav button.active span {
-  background: #ffd400;
+  background: #FDCE00;
 }
 
 .shop-feature {
@@ -2147,7 +2147,7 @@ html.splash-active #root {
   justify-content: flex-end;
   overflow: hidden;
   position: relative;
-  background: #ffd400;
+  background: #FDCE00;
   border-radius: 26px;
 }
 
@@ -2892,7 +2892,7 @@ html.splash-active #root {
   gap: 12px;
   border: 0;
   border-radius: 20px;
-  background: linear-gradient(135deg, #ffd400, #ffe66a);
+  background: linear-gradient(135deg, #FDCE00, #ffe66a);
   box-shadow: 0 9px 22px rgba(187, 151, 0, 0.16);
 }
 
@@ -2985,7 +2985,7 @@ html.splash-active #root {
   justify-content: space-between;
   border: 0;
   border-radius: 16px;
-  background: #ffd400;
+  background: #FDCE00;
   color: #111111;
   box-shadow: 0 8px 18px rgba(190, 157, 0, 0.18);
   font-size: 12px;
@@ -3138,9 +3138,9 @@ html.splash-active #root {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  border: 1px solid #e2b900;
+  border: 1px solid #FDCE00;
   border-radius: 24px;
-  background: #ffd400;
+  background: #FDCE00;
   color: #111111;
   text-align: left;
 }
