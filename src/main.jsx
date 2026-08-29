@@ -2248,7 +2248,7 @@ function App() {
 
           <section className="career-section">
             <span className="eyebrow">
-              OPORTUNIDADES DE ESTUDO
+              OPORTUNIDADE DE CRESCIMENTO
             </span>
 
             <h2>Formação e carreira</h2>
@@ -2262,14 +2262,16 @@ function App() {
                 )
               }
             >
-              <small>ESTÁCIO</small>
-              <strong>
-                Dê o próximo passo na sua carreira
-              </strong>
-              <p>
-                Conheça opções de graduação, pós-graduação e outros cursos.
-              </p>
-              <span>CONHECER CURSOS ›</span>
+              <div className="career-brand">
+                <i aria-hidden="true">◇</i>
+                <b>Estácio</b>
+              </div>
+
+              <div className="career-copy">
+                <small>GRADUAÇÃO, PÓS E CURSOS</small>
+                <strong>Escolha seu próximo passo</strong>
+                <span>CONHECER CURSOS ›</span>
+              </div>
             </button>
           </section>
 
