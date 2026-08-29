@@ -37,6 +37,12 @@ const BABYSTOCK_STORE_URL =
 const KIDY_STORE_URL =
   "https://acesse.vc/3DTYtW3WGPV3";
 
+const XIAOMI_STORE_URL =
+  "https://acesse.vc/CU3ka7zhk1gj";
+
+const ITATIAIA_STORE_URL =
+  "https://acesse.vc/Xj3TUddBwQxj";
+
 const PARTNER_PRODUCTS = {
   inss: {
     name: "Consignado INSS",
@@ -2559,6 +2565,74 @@ function App() {
                   }
                 >
                   ABRIR KIDY CALÇADOS
+                </button>
+              </article>
+
+              <article className="shop-store-card xiaomi-store-card">
+                <div
+                  className="shop-store-art xiaomi-art"
+                  aria-hidden="true"
+                >
+                  <span className="xiaomi-device">
+                    <svg viewBox="0 0 64 64" focusable="false">
+                      <rect x="17" y="6" width="30" height="52" rx="7" />
+                      <circle cx="24" cy="15" r="3.5" />
+                      <circle cx="33" cy="15" r="3.5" />
+                      <path d="M27 51h10" />
+                    </svg>
+                  </span>
+                  <b>Xiaomi</b>
+                </div>
+
+                <small>VITRINE CREDITI</small>
+                <h2>Tecnologia Xiaomi</h2>
+                <p>
+                  Smartphones, acessórios e produtos para casa inteligente.
+                </p>
+
+                <button
+                  onClick={() =>
+                    openExternal(
+                      XIAOMI_STORE_URL
+                    )
+                  }
+                >
+                  ABRIR XIAOMI
+                </button>
+              </article>
+
+              <article className="shop-store-card itatiaia-store-card">
+                <div
+                  className="shop-store-art itatiaia-art"
+                  aria-hidden="true"
+                >
+                  <span className="itatiaia-kitchen">
+                    <svg viewBox="0 0 64 64" focusable="false">
+                      <rect x="7" y="8" width="50" height="48" rx="5" />
+                      <path d="M7 31h50M32 8v48" />
+                      <circle cx="27" cy="25" r="2" />
+                      <circle cx="37" cy="25" r="2" />
+                      <circle cx="27" cy="39" r="2" />
+                      <circle cx="37" cy="39" r="2" />
+                    </svg>
+                  </span>
+                  <b>Itatiaia</b>
+                </div>
+
+                <small>VITRINE CREDITI</small>
+                <h2>Cozinhas, móveis e eletros</h2>
+                <p>
+                  Produtos para renovar sua cozinha e deixar a casa completa.
+                </p>
+
+                <button
+                  onClick={() =>
+                    openExternal(
+                      ITATIAIA_STORE_URL
+                    )
+                  }
+                >
+                  ABRIR ITATIAIA
                 </button>
               </article>
             </div>
