@@ -2440,6 +2440,64 @@ html.splash-active #root {
   background: #ef4750;
 }
 
+.shop-store-art.xiaomi-art {
+  background: linear-gradient(135deg, #ff7a1a, #ff5200);
+}
+
+.xiaomi-art b {
+  font-size: 29px;
+}
+
+.shop-store-art .xiaomi-device,
+.shop-store-art .itatiaia-kitchen {
+  width: 66px;
+  height: 66px;
+  display: grid;
+  place-items: center;
+  border-radius: 21px;
+  background: #ffffff;
+}
+
+.xiaomi-device svg {
+  width: 51px;
+  height: 51px;
+  fill: none;
+  stroke: #ff5b00;
+  stroke-width: 3.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.xiaomi-store-card > button {
+  background: #ff5b00;
+}
+
+.shop-store-art.itatiaia-art {
+  background: linear-gradient(135deg, #0067b9, #004887);
+}
+
+.itatiaia-art b {
+  font-size: 28px;
+}
+
+.shop-store-art .itatiaia-kitchen {
+  background: #67d179;
+}
+
+.itatiaia-kitchen svg {
+  width: 50px;
+  height: 50px;
+  fill: none;
+  stroke: #053f73;
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.itatiaia-store-card > button {
+  background: #0063aa;
+}
+
 .shop-benefits {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
