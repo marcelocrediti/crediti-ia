@@ -2511,11 +2511,11 @@ function App() {
                   aria-hidden="true"
                 >
                   <span className="babystock-icon">★</span>
-                  <b>Babystock</b>
+                  <b>BabyStock</b>
                 </div>
 
                 <small>VITRINE CREDITI</small>
-                <h2>Achadinhos para os pequenos</h2>
+                <h2>Ofertas na BabyStock</h2>
                 <p>
                   Roupas, acessórios e produtos para bebês e crianças.
                 </p>
@@ -2537,11 +2537,11 @@ function App() {
                   aria-hidden="true"
                 >
                   <span className="kidy-shoe">👟</span>
-                  <b>Kidy</b>
+                  <b>Kidy Calçados</b>
                 </div>
 
                 <small>VITRINE CREDITI</small>
-                <h2>Calçados Kidy</h2>
+                <h2>Calçados infantis Kidy</h2>
                 <p>
                   Escolha o calçado e use o cupom para ganhar desconto.
                 </p>
@@ -2558,7 +2558,7 @@ function App() {
                     )
                   }
                 >
-                  ABRIR KIDY
+                  ABRIR KIDY CALÇADOS
                 </button>
               </article>
             </div>
