@@ -642,8 +642,9 @@ const SERVICE_GROUPS = [
       },
       {
         name: "Conta PJ Cora",
-        description: "Conta digital pensada para facilitar a rotina financeira da sua empresa.",
-        status: "EM BREVE"
+        description: "Abra sua conta digital PJ grátis e solicite um cartão de crédito empresarial, sujeito à análise da Cora.",
+        url: "https://conta.cora.com.br/r/conta-digital/?convite=HM74R&i=MjgxMTU0NTQwMDAxMjc=&n=TWFyY2VsaW5v",
+        action: "ABRIR CONTA ›"
       }
     ]
   },
