@@ -1941,7 +1941,7 @@ function App() {
       >
         <img
           className="app-splash__icon"
-          src="/icon-512.png?v=5"
+          src="/icon-512.png?v=7"
           alt=""
         />
 
@@ -3539,7 +3539,7 @@ function App() {
                 maxWidth: "480px",
                 boxSizing: "border-box",
                 background: "#fff7cc",
-                border: "2px solid #ffd400",
+                border: "2px solid #FDCE00",
                 borderRadius: "14px",
                 padding: "12px",
                 color: "#171717",
@@ -3676,7 +3676,7 @@ function App() {
         </div>
 
         <img
-          src="/icon-192.png?v=5"
+          src="/icon-192.png?v=7"
           alt=""
         />
       </header>
