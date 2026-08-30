@@ -3395,3 +3395,76 @@ html.splash-active #root {
 .polishop-store-card > button {
   background: #b51f31;
 }
+
+
+/* Padronização dos balões de ícones das lojas parceiras */
+.shopee-store-card .shop-store-art > span,
+.magalu-art > span,
+.shop-store-art .shein-hanger,
+.shop-store-art .amazon-bag,
+.shop-store-art .babystock-icon,
+.shop-store-art .kidy-shoe,
+.shop-store-art .xiaomi-device,
+.shop-store-art .itatiaia-kitchen,
+.shop-store-art .electrolux-appliance,
+.shop-store-art .natura-leaf,
+.shop-store-art .avon-beauty,
+.shop-store-art .cea-logo,
+.shop-store-art .mecanico-tools,
+.shop-store-art .polishop-spark {
+  width: 66px;
+  height: 66px;
+  min-width: 66px;
+  display: grid;
+  place-items: center;
+  flex: 0 0 66px;
+  border-radius: 21px;
+  box-shadow: 0 7px 17px rgba(0, 0, 0, 0.18);
+}
+
+.shopee-store-card .shop-store-art > span {
+  background: #ffffff;
+  font-size: 36px;
+}
+
+.magalu-art > span {
+  background: #ffffff;
+  font-size: 35px;
+}
+
+.shop-store-art .shein-hanger {
+  background: #ffffff;
+  color: #111111;
+}
+
+.shein-hanger svg {
+  width: 48px;
+  height: 48px;
+}
+
+.shop-store-art .amazon-bag {
+  background: #fff7d6;
+}
+
+.amazon-bag svg {
+  width: 54px;
+  height: 54px;
+}
+
+.shop-store-art .babystock-icon {
+  background: #fff4be;
+}
+
+.shop-store-art .itatiaia-kitchen {
+  background: #67d179;
+}
+
+.shop-store-art .mecanico-tools {
+  background: #FDCE00;
+}
+
+.shop-store-art .cea-logo {
+  padding: 0 8px;
+  border-width: 3px;
+  font-size: 21px;
+}
