@@ -3639,3 +3639,95 @@ html.splash-active #root {
 .gazin-art b { font-size: 29px; }
 .gazin-icon { color: #1458a3; background: #f4f8ff !important; }
 .gazin-store-card > button { background: #104d8f; }
+
+
+/* Parceiros adicionais organizados por segmento */
+.hipervarejo-art,
+.komo-art,
+.laluna-art,
+.freeway-art,
+.leloyn-art,
+.malwee-art,
+.mariavalentina-art,
+.fator5-art,
+.promofarma-art {
+  gap: 15px;
+}
+
+.hipervarejo-art b,
+.komo-art b,
+.laluna-art b,
+.freeway-art b,
+.leloyn-art b,
+.malwee-art b,
+.mariavalentina-art b,
+.fator5-art b,
+.promofarma-art b {
+  max-width: 160px;
+  line-height: 1.04;
+  text-align: right;
+  letter-spacing: -0.05em;
+}
+
+.shop-store-art.hipervarejo-art {
+  background: linear-gradient(135deg, #d52c35, #77131d);
+}
+.hipervarejo-art b { font-size: 23px; }
+.hipervarejo-icon { color: #b71f2a; background: #fff5f5 !important; }
+.hipervarejo-store-card > button { background: #ae202a; }
+
+.shop-store-art.komo-art {
+  background: linear-gradient(135deg, #4b9d91, #235d59);
+}
+.komo-art b { font-size: 21px; }
+.komo-icon { color: #327d73; background: #effcf9 !important; }
+.komo-store-card > button { background: #327d73; }
+
+.shop-store-art.laluna-art {
+  background: linear-gradient(135deg, #9a5bc0, #5d2d7b);
+}
+.laluna-art b { font-size: 27px; }
+.laluna-icon { color: #754095; background: #fbf3ff !important; }
+.laluna-store-card > button { background: #754095; }
+
+.shop-store-art.freeway-art {
+  background: linear-gradient(135deg, #a76535, #573018);
+}
+.freeway-art b { font-size: 27px; }
+.freeway-icon { color: #85502b; background: #fff8ef !important; }
+.freeway-store-card > button { background: #7d4927; }
+
+.shop-store-art.leloyn-art {
+  background: linear-gradient(135deg, #2b2824, #090807);
+}
+.leloyn-art b { font-size: 19px; color: #f5d88b; }
+.leloyn-icon { color: #9d7521; background: #fff8e8 !important; }
+.leloyn-store-card > button { background: #1d1a17; }
+
+.shop-store-art.malwee-art {
+  background: linear-gradient(135deg, #3f8b62, #174b35);
+}
+.malwee-art b { font-size: 28px; }
+.malwee-icon { color: #347557; background: #f2fff7 !important; }
+.malwee-store-card > button { background: #2e6f51; }
+
+.shop-store-art.mariavalentina-art {
+  background: linear-gradient(135deg, #c27386, #743744);
+}
+.mariavalentina-art b { font-size: 18px; }
+.mariavalentina-icon { color: #984e60; background: #fff6f8 !important; }
+.mariavalentina-store-card > button { background: #914a5b; }
+
+.shop-store-art.fator5-art {
+  background: linear-gradient(135deg, #7550a7, #35204f);
+}
+.fator5-art b { font-size: 28px; }
+.fator5-icon { color: #6a4695; background: #faf4ff !important; }
+.fator5-store-card > button { background: #60418a; }
+
+.shop-store-art.promofarma-art {
+  background: linear-gradient(135deg, #168fbb, #07527e);
+}
+.promofarma-art b { font-size: 22px; }
+.promofarma-icon { color: #08749b; background: #f0fbff !important; }
+.promofarma-store-card > button { background: #08749b; }
