@@ -55,6 +55,9 @@ const AVON_STORE_URL =
 const CEA_STORE_URL =
   "https://www.cea.com.br/minhacea/creditishop?utm_source=mais&utm_medium=minhacea&utm_campaign=creditisho";
 
+const LOJA_MECANICO_STORE_URL =
+  "https://www.lojadomecanico.com.br/parceiro/lY9lGtc1IvbYBrB5Fby8hQ==?utm_campaign=afiliado-lY9lGtc1IvbYBrB5Fby8hQ==&utm_source=afiliado&utm_medium=site";
+
 const ESTACIO_URL =
   "https://estacio.br/selecao?cod_agente=14369444&u=804215&end=1";
 
@@ -2840,6 +2843,36 @@ function App() {
                   }
                 >
                   ABRIR C&amp;A
+                </button>
+              </article>
+
+              <article className="shop-store-card mecanico-store-card">
+                <div
+                  className="shop-store-art mecanico-art"
+                  aria-hidden="true"
+                >
+                  <span className="mecanico-tools">
+                    <svg viewBox="0 0 64 64" focusable="false">
+                      <path d="M39 9a15 15 0 0 0-12 22L10 48a5 5 0 0 0 7 7l17-17A15 15 0 0 0 55 22l-9 9-8-3-3-8 9-9a15 15 0 0 0-5-2Z" />
+                    </svg>
+                  </span>
+                  <b>Loja do Mecânico</b>
+                </div>
+
+                <small>VITRINE CREDITI</small>
+                <h2>Ferramentas e máquinas</h2>
+                <p>
+                  Equipamentos para oficina, construção, indústria, casa e jardim.
+                </p>
+
+                <button
+                  onClick={() =>
+                    openExternal(
+                      LOJA_MECANICO_STORE_URL
+                    )
+                  }
+                >
+                  ABRIR LOJA DO MECÂNICO
                 </button>
               </article>
             </div>
