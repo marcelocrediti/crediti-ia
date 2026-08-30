@@ -3360,3 +3360,38 @@ html.splash-active #root {
 .mecanico-store-card > button {
   background: #0b4778;
 }
+
+
+/* Polishop no carrossel de parceiros */
+.shop-store-art.polishop-art {
+  background: linear-gradient(135deg, #d7293f, #831422);
+}
+
+.polishop-art b {
+  max-width: 150px;
+  font-size: 29px;
+  line-height: 1;
+  text-align: right;
+  letter-spacing: -0.05em;
+}
+
+.polishop-spark {
+  width: 66px;
+  height: 66px;
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  border-radius: 21px;
+  background: #ffffff;
+}
+
+.polishop-spark svg {
+  width: 48px;
+  height: 48px;
+  fill: #e03a43;
+  stroke: none;
+}
+
+.polishop-store-card > button {
+  background: #b51f31;
+}
