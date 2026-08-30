@@ -2813,8 +2813,12 @@ function App() {
                   className="shop-store-art cea-art"
                   aria-hidden="true"
                 >
-                  <span className="cea-logo">C&amp;A</span>
-                  <b>Moda para você</b>
+                  <span className="cea-fashion">
+                    <svg viewBox="0 0 64 64" focusable="false">
+                      <path d="M21 16 28 10h8l7 6 9 5-6 11-6-3v25H24V29l-6 3-6-11 9-5Z" />
+                    </svg>
+                  </span>
+                  <b>C&amp;A</b>
                 </div>
 
                 <small>VITRINE CREDITI</small>
