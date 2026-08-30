@@ -52,6 +52,9 @@ const NATURA_STORE_URL =
 const AVON_STORE_URL =
   "https://sovsls.com/c/q26ywcm?no_js=1";
 
+const CEA_STORE_URL =
+  "https://www.cea.com.br/minhacea/creditishop?utm_source=mais&utm_medium=minhacea&utm_campaign=creditisho";
+
 const ESTACIO_URL =
   "https://estacio.br/selecao?cod_agente=14369444&u=804215&end=1";
 
@@ -2802,6 +2805,37 @@ function App() {
                   }
                 >
                   ABRIR AVON
+                </button>
+              </article>
+
+              <article className="shop-store-card cea-store-card">
+                <div
+                  className="shop-store-art cea-art"
+                  aria-hidden="true"
+                >
+                  <span className="cea-logo">C&amp;A</span>
+                  <b>Moda para você</b>
+                </div>
+
+                <small>VITRINE CREDITI</small>
+                <h2>Ofertas C&amp;A</h2>
+                <p>
+                  Até 50% de desconto e mais 30% OFF usando o cupom.
+                </p>
+
+                <div className="store-coupon cea-coupon">
+                  <span>CUPOM</span>
+                  <strong>QUERO30</strong>
+                </div>
+
+                <button
+                  onClick={() =>
+                    openExternal(
+                      CEA_STORE_URL
+                    )
+                  }
+                >
+                  ABRIR C&amp;A
                 </button>
               </article>
             </div>
