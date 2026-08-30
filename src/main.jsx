@@ -58,6 +58,9 @@ const CEA_STORE_URL =
 const LOJA_MECANICO_STORE_URL =
   "https://www.lojadomecanico.com.br/parceiro/lY9lGtc1IvbYBrB5Fby8hQ==?utm_campaign=afiliado-lY9lGtc1IvbYBrB5Fby8hQ==&utm_source=afiliado&utm_medium=site";
 
+const POLISHOP_STORE_URL =
+  "https://mais.app/EKkAgs";
+
 const ESTACIO_URL =
   "https://estacio.br/selecao?cod_agente=14369444&u=804215&end=1";
 
@@ -2873,6 +2876,37 @@ function App() {
                   }
                 >
                   ABRIR LOJA DO MECÂNICO
+                </button>
+              </article>
+
+              <article className="shop-store-card polishop-store-card">
+                <div
+                  className="shop-store-art polishop-art"
+                  aria-hidden="true"
+                >
+                  <span className="polishop-spark">
+                    <svg viewBox="0 0 64 64" focusable="false">
+                      <path d="M32 7c2 14 9 21 23 25-14 3-21 10-23 25-3-15-10-22-24-25 14-4 21-11 24-25Z" />
+                      <path d="M49 8c1 6 4 9 10 11-6 1-9 4-10 10-2-6-5-9-11-10 6-2 9-5 11-11Z" />
+                    </svg>
+                  </span>
+                  <b>Polishop</b>
+                </div>
+
+                <small>VITRINE CREDITI</small>
+                <h2>Inovação para o dia a dia</h2>
+                <p>
+                  Produtos para cozinha, casa, beleza, fitness e bem-estar.
+                </p>
+
+                <button
+                  onClick={() =>
+                    openExternal(
+                      POLISHOP_STORE_URL
+                    )
+                  }
+                >
+                  ABRIR POLISHOP
                 </button>
               </article>
             </div>
