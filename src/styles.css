@@ -3516,3 +3516,126 @@ html.splash-active #root {
   border-width: 3px;
   font-size: 21px;
 }
+
+
+/* Novos parceiros do Shop */
+.shop-store-art .partner-icon-bubble {
+  width: 66px;
+  height: 66px;
+  min-width: 66px;
+  display: grid;
+  place-items: center;
+  flex: 0 0 66px;
+  border-radius: 21px;
+  background: #ffffff;
+  box-shadow: 0 7px 17px rgba(0, 0, 0, 0.18);
+}
+
+.partner-icon-bubble svg {
+  width: 48px;
+  height: 48px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.amokarite-art,
+.lojasrede-art,
+.sieno-art,
+.biovittare-art,
+.amakha-art,
+.cacau-art,
+.colombo-art,
+.aliancas-art,
+.cicatrissim-art,
+.gazin-art {
+  gap: 15px;
+}
+
+.amokarite-art b,
+.lojasrede-art b,
+.sieno-art b,
+.biovittare-art b,
+.amakha-art b,
+.cacau-art b,
+.colombo-art b,
+.aliancas-art b,
+.cicatrissim-art b,
+.gazin-art b {
+  max-width: 160px;
+  line-height: 1.04;
+  text-align: right;
+  letter-spacing: -0.05em;
+}
+
+.shop-store-art.amokarite-art {
+  background: linear-gradient(135deg, #b16579, #744252);
+}
+.amokarite-art b { font-size: 25px; }
+.amokarite-icon { color: #7c4050; background: #fff7f1 !important; }
+.amokarite-store-card > button { background: #8d4b5e; }
+
+.shop-store-art.lojasrede-art {
+  background: linear-gradient(135deg, #e92d50, #a80c2b);
+}
+.lojasrede-art b { font-size: 25px; }
+.lojasrede-icon { color: #cf173b; }
+.lojasrede-store-card > button { background: #cf173b; }
+
+.shop-store-art.sieno-art {
+  background: linear-gradient(135deg, #201a1b, #080707);
+}
+.sieno-art b { font-size: 22px; }
+.sieno-icon { color: #9a7428; background: #fff8e7 !important; }
+.sieno-store-card > button { background: #171313; }
+
+.shop-store-art.biovittare-art {
+  background: linear-gradient(135deg, #168c7b, #07584f);
+}
+.biovittare-art b { font-size: 25px; }
+.biovittare-icon { color: #087064; background: #effffb !important; }
+.biovittare-store-card > button { background: #087064; }
+
+.shop-store-art.amakha-art {
+  background: linear-gradient(135deg, #8c183d, #3b071c);
+}
+.amakha-art b { font-size: 23px; }
+.amakha-icon { color: #8c183d; background: #fff5db !important; }
+.amakha-store-card > button { background: #6d1230; }
+
+.shop-store-art.cacau-art {
+  background: linear-gradient(135deg, #6e321b, #35150d);
+}
+.cacau-art b { font-size: 24px; }
+.cacau-icon { color: #6e321b; background: #fff1cf !important; }
+.cacau-store-card > button { background: #592614; }
+
+.shop-store-art.colombo-art {
+  background: linear-gradient(135deg, #173f70, #081d3a);
+}
+.colombo-art b { font-size: 20px; }
+.colombo-icon { color: #173f70; background: #f4f8ff !important; }
+.colombo-store-card > button { background: #12375f; }
+
+.shop-store-art.aliancas-art {
+  background: linear-gradient(135deg, #6d3778, #35183e);
+}
+.aliancas-art b { font-size: 20px; }
+.aliancas-icon { color: #8a6420; background: #fff8df !important; }
+.aliancas-store-card > button { background: #583060; }
+
+.shop-store-art.cicatrissim-art {
+  background: linear-gradient(135deg, #db5d78, #94334d);
+}
+.cicatrissim-art b { font-size: 24px; }
+.cicatrissim-icon { color: #b43d59; background: #fff6f8 !important; }
+.cicatrissim-store-card > button { background: #b33e59; }
+
+.shop-store-art.gazin-art {
+  background: linear-gradient(135deg, #1458a3, #093264);
+}
+.gazin-art b { font-size: 29px; }
+.gazin-icon { color: #1458a3; background: #f4f8ff !important; }
+.gazin-store-card > button { background: #104d8f; }
