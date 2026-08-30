@@ -3256,3 +3256,45 @@ html.splash-active #root {
   color: #173b91;
   font-size: 9px;
 }
+
+
+/* C&A no carrossel de lojas parceiras */
+.shop-store-art.cea-art {
+  background: linear-gradient(135deg, #e30613, #b80010);
+}
+
+.cea-art b {
+  max-width: 130px;
+  font-size: 22px;
+  line-height: 1.05;
+  text-align: right;
+}
+
+.cea-logo {
+  min-width: 76px;
+  height: 52px;
+  padding: 0 12px;
+  box-sizing: border-box;
+  display: grid;
+  place-items: center;
+  border: 4px solid #153c7a;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #e30613;
+  font-size: 25px;
+  font-weight: 900;
+  letter-spacing: -0.08em;
+}
+
+.store-coupon.cea-coupon {
+  border-color: #e30613;
+  background: #fff0f1;
+}
+
+.cea-coupon span {
+  color: #a9000c;
+}
+
+.cea-store-card > button {
+  background: #e30613;
+}
