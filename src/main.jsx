@@ -61,6 +61,9 @@ const LOJA_MECANICO_STORE_URL =
 const POLISHOP_STORE_URL =
   "https://mais.app/EKkAgs";
 
+const TODOVINO_STORE_URL =
+  "https://mais.app/70NJ9j";
+
 const ESTACIO_URL =
   "https://estacio.br/selecao?cod_agente=14369444&u=804215&end=1";
 
@@ -2907,6 +2910,44 @@ function App() {
                   }
                 >
                   ABRIR POLISHOP
+                </button>
+              </article>
+
+              <article className="shop-store-card todovino-store-card">
+                <div
+                  className="shop-store-art todovino-art"
+                  aria-hidden="true"
+                >
+                  <span className="todovino-grapes">
+                    <svg viewBox="0 0 64 64" focusable="false">
+                      <path className="todovino-stem" d="M33 17c5-7 11-9 17-8-2 7-7 11-16 12" />
+                      <path className="todovino-leaf" d="M31 18c-7-7-14-7-19-4 4 7 10 10 19 8" />
+                      <circle cx="27" cy="27" r="7" />
+                      <circle cx="39" cy="27" r="7" />
+                      <circle cx="21" cy="38" r="7" />
+                      <circle cx="33" cy="39" r="7" />
+                      <circle cx="45" cy="38" r="7" />
+                      <circle cx="27" cy="50" r="7" />
+                      <circle cx="39" cy="50" r="7" />
+                    </svg>
+                  </span>
+                  <b>TodoVino</b>
+                </div>
+
+                <small>VITRINE CREDITI</small>
+                <h2>Vinhos para cada ocasião</h2>
+                <p>
+                  Vinhos, espumantes e rótulos selecionados. Venda somente para maiores de 18 anos.
+                </p>
+
+                <button
+                  onClick={() =>
+                    openExternal(
+                      TODOVINO_STORE_URL
+                    )
+                  }
+                >
+                  ABRIR TODOVINO
                 </button>
               </article>
             </div>
