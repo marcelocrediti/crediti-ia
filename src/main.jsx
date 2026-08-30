@@ -94,6 +94,33 @@ const CICATRISSIM_STORE_URL =
 const GAZIN_STORE_URL =
   "https://compre.vc/VaG6z8w2of4n";
 
+const HIPERVAREJO_STORE_URL =
+  "https://compre.vc/EIa6BAdRE5iN";
+
+const KOMO_STORE_URL =
+  "https://compre.vc/zEIrFZlxguEa";
+
+const LALUNA_STORE_URL =
+  "https://compre.vc/Iklt4z7TkZ9J";
+
+const FREEWAY_STORE_URL =
+  "https://compre.vc/YeuMj5D8FEN9";
+
+const LELOYN_STORE_URL =
+  "https://compre.vc/sxyzhqgxYK8N";
+
+const MALWEE_STORE_URL =
+  "https://compre.vc/D3ol81KqIMQU";
+
+const MARIA_VALENTINA_STORE_URL =
+  "https://compre.vc/iwPEuqNJcNix";
+
+const FATOR5_STORE_URL =
+  "https://compre.vc/bhDFUSLisjnF";
+
+const PROMOFARMA_STORE_URL =
+  "https://compre.vc/kXrmMU2SrwYh";
+
 const ESTACIO_URL =
   "https://estacio.br/selecao?cod_agente=14369444&u=804215&end=1";
 
@@ -573,6 +600,12 @@ const SERVICE_GROUPS = [
         description: "Crie seu site, registre seu domínio e tenha um e-mail profissional para sua empresa.",
         url: "https://king.host?ref=79E443DAF29A6",
         action: "CONHECER SOLUÇÕES ›"
+      },
+      {
+        name: "Hostinger",
+        description: "Crie seu site, registre seu domínio, contrate hospedagem e use e-mail profissional.",
+        url: "https://compre.vc/UQB14aWvWkUs",
+        action: "CONHECER HOSTINGER ›"
       }
     ]
   },
@@ -2775,6 +2808,23 @@ function App() {
                 </button>
               </article>
 
+              <article className="shop-store-card hipervarejo-store-card">
+                <div className="shop-store-art hipervarejo-art" aria-hidden="true">
+                  <span className="partner-icon-bubble hipervarejo-icon">
+                    <svg viewBox="0 0 64 64" focusable="false">
+                      <circle cx="32" cy="32" r="22" />
+                      <circle cx="32" cy="32" r="10" />
+                      <path d="M32 10v12M32 42v12M10 32h12M42 32h12M17 17l8 8M39 39l8 8M47 17l-8 8M25 39l-8 8" />
+                    </svg>
+                  </span>
+                  <b>Hipervarejo</b>
+                </div>
+                <small>VITRINE CREDITI</small>
+                <h2>Autopeças e pneus</h2>
+                <p>Peças, pneus e acessórios para carros, motos e caminhões.</p>
+                <button onClick={() => openExternal(HIPERVAREJO_STORE_URL)}>ABRIR HIPERVAREJO</button>
+              </article>
+
               <article className="shop-store-card shein-store-card">
                 <div
                   className="shop-store-art shein-art"
@@ -2858,6 +2908,54 @@ function App() {
                 </button>
               </article>
 
+              <article className="shop-store-card malwee-store-card">
+                <div className="shop-store-art malwee-art" aria-hidden="true">
+                  <span className="partner-icon-bubble malwee-icon">
+                    <svg viewBox="0 0 64 64" focusable="false">
+                      <path d="m22 10 10 7 10-7 12 9-9 12v25H19V31l-9-12 12-9Z" />
+                      <path d="M26 15c2 6 10 6 12 0" />
+                    </svg>
+                  </span>
+                  <b>Malwee</b>
+                </div>
+                <small>VITRINE CREDITI</small>
+                <h2>Moda para toda a família</h2>
+                <p>Roupas femininas, masculinas, infantis e opções plus size.</p>
+                <button onClick={() => openExternal(MALWEE_STORE_URL)}>ABRIR MALWEE</button>
+              </article>
+
+              <article className="shop-store-card mariavalentina-store-card">
+                <div className="shop-store-art mariavalentina-art" aria-hidden="true">
+                  <span className="partner-icon-bubble mariavalentina-icon">
+                    <svg viewBox="0 0 64 64" focusable="false">
+                      <path d="M27 10h10l3 13 11 31H13l11-31 3-13Z" />
+                      <path d="M24 23c5 4 11 4 16 0M32 10v44" />
+                    </svg>
+                  </span>
+                  <b>Maria.Valentina</b>
+                </div>
+                <small>VITRINE CREDITI</small>
+                <h2>Moda feminina sofisticada</h2>
+                <p>Peças elegantes para trabalho, momentos casuais e ocasiões especiais.</p>
+                <button onClick={() => openExternal(MARIA_VALENTINA_STORE_URL)}>ABRIR MARIA.VALENTINA</button>
+              </article>
+
+              <article className="shop-store-card laluna-store-card">
+                <div className="shop-store-art laluna-art" aria-hidden="true">
+                  <span className="partner-icon-bubble laluna-icon">
+                    <svg viewBox="0 0 64 64" focusable="false">
+                      <path d="M42 10c-12 3-19 13-17 25 2 11 12 18 23 17-5 5-12 8-20 6C15 55 7 42 10 29 13 16 27 7 42 10Z" />
+                      <path d="m45 18 2 5 5 2-5 2-2 5-2-5-5-2 5-2 2-5Z" />
+                    </svg>
+                  </span>
+                  <b>La Luna</b>
+                </div>
+                <small>VITRINE CREDITI</small>
+                <h2>Moda infantil</h2>
+                <p>Roupas para meninos, meninas e bebês com estilo e conforto.</p>
+                <button onClick={() => openExternal(LALUNA_STORE_URL)}>ABRIR LA LUNA</button>
+              </article>
+
               <article className="shop-store-card babystock-store-card">
                 <div
                   className="shop-store-art babystock-art"
@@ -2913,6 +3011,22 @@ function App() {
                 >
                   ABRIR KIDY CALÇADOS
                 </button>
+              </article>
+
+              <article className="shop-store-card freeway-store-card">
+                <div className="shop-store-art freeway-art" aria-hidden="true">
+                  <span className="partner-icon-bubble freeway-icon">
+                    <svg viewBox="0 0 64 64" focusable="false">
+                      <path d="M12 40c9 0 15-5 18-17l8 7c4 4 9 6 15 7l2 10c-11 5-29 6-43 1v-8Z" />
+                      <path d="M29 29l8 5M25 35l8 4M16 48h38" />
+                    </svg>
+                  </span>
+                  <b>Freeway</b>
+                </div>
+                <small>VITRINE CREDITI</small>
+                <h2>Calçados com personalidade</h2>
+                <p>Tênis, botas, mocassins, sapatos e sapatênis para diferentes estilos.</p>
+                <button onClick={() => openExternal(FREEWAY_STORE_URL)}>ABRIR FREEWAY</button>
               </article>
 
               <article className="shop-store-card natura-store-card">
@@ -3034,6 +3148,38 @@ function App() {
                 </button>
               </article>
 
+              <article className="shop-store-card leloyn-store-card">
+                <div className="shop-store-art leloyn-art" aria-hidden="true">
+                  <span className="partner-icon-bubble leloyn-icon">
+                    <svg viewBox="0 0 64 64" focusable="false">
+                      <path d="M24 10h16v10H24zM19 25h26v31H19z" />
+                      <path d="M26 39c4-6 8-6 12 0M28 20v5h8v-5" />
+                    </svg>
+                  </span>
+                  <b>Le’Loyn Parfums</b>
+                </div>
+                <small>VITRINE CREDITI</small>
+                <h2>Alta perfumaria e beleza</h2>
+                <p>Perfumes importados, maquiagens e cosméticos de luxo.</p>
+                <button onClick={() => openExternal(LELOYN_STORE_URL)}>ABRIR LE’LOYN</button>
+              </article>
+
+              <article className="shop-store-card fator5-store-card">
+                <div className="shop-store-art fator5-art" aria-hidden="true">
+                  <span className="partner-icon-bubble fator5-icon">
+                    <svg viewBox="0 0 64 64" focusable="false">
+                      <path d="M23 11h18v10H23zM18 25h28v31H18z" />
+                      <path d="m32 32 2 5 6 1-4 4 1 6-5-3-5 3 1-6-4-4 6-1 2-5Z" />
+                    </svg>
+                  </span>
+                  <b>Fator 5</b>
+                </div>
+                <small>VITRINE CREDITI</small>
+                <h2>Perfumes e aromas</h2>
+                <p>Fragrâncias, body splash, hidratantes, aromatizantes e presentes.</p>
+                <button onClick={() => openExternal(FATOR5_STORE_URL)}>ABRIR FATOR 5</button>
+              </article>
+
               <article className="shop-store-card amakha-store-card">
                 <div className="shop-store-art amakha-art" aria-hidden="true">
                   <span className="partner-icon-bubble amakha-icon">
@@ -3069,6 +3215,38 @@ function App() {
                 <button onClick={() => openExternal(BIOVITTARE_STORE_URL)}>
                   ABRIR BIOVITTARE
                 </button>
+              </article>
+
+              <article className="shop-store-card promofarma-store-card">
+                <div className="shop-store-art promofarma-art" aria-hidden="true">
+                  <span className="partner-icon-bubble promofarma-icon">
+                    <svg viewBox="0 0 64 64" focusable="false">
+                      <path d="M25 10h14v15h15v14H39v15H25V39H10V25h15V10Z" />
+                      <path d="M43 12c7 0 11 4 11 10s-4 10-11 10" />
+                    </svg>
+                  </span>
+                  <b>PromoFarma</b>
+                </div>
+                <small>VITRINE CREDITI</small>
+                <h2>Farmácia e cuidados diários</h2>
+                <p>Vitaminas, suplementos, dermocosméticos, higiene e itens de saúde.</p>
+                <button onClick={() => openExternal(PROMOFARMA_STORE_URL)}>ABRIR PROMOFARMA</button>
+              </article>
+
+              <article className="shop-store-card komo-store-card">
+                <div className="shop-store-art komo-art" aria-hidden="true">
+                  <span className="partner-icon-bubble komo-icon">
+                    <svg viewBox="0 0 64 64" focusable="false">
+                      <path d="M32 8c10 13 17 21 17 31a17 17 0 0 1-34 0c0-10 7-18 17-31Z" />
+                      <path d="M25 42c3 4 10 5 14 0M24 31c5-4 11-5 17-2" />
+                    </svg>
+                  </span>
+                  <b>KOMO Wellness</b>
+                </div>
+                <small>VITRINE CREDITI</small>
+                <h2>Cuidado e bem-estar</h2>
+                <p>Produtos e tratamentos voltados aos cuidados com o couro cabeludo.</p>
+                <button onClick={() => openExternal(KOMO_STORE_URL)}>ABRIR KOMO</button>
               </article>
 
               <article className="shop-store-card cicatrissim-store-card">
