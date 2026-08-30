@@ -2526,62 +2526,6 @@ function App() {
                 </button>
               </article>
 
-              <article className="shop-store-card magalu-store-card">
-                <div
-                  className="shop-store-art magalu-art"
-                  aria-hidden="true"
-                >
-                  <span>🛒</span>
-                  <b>magalu</b>
-                </div>
-
-                <small>VITRINE CREDITI</small>
-                <h2>Ofertas no Magalu</h2>
-                <p>
-                  Acesse nossa seleção e compre diretamente no Magalu.
-                </p>
-
-                <button
-                  onClick={() =>
-                    openExternal(
-                      MAGALU_STORE_URL
-                    )
-                  }
-                >
-                  ABRIR MAGALU
-                </button>
-              </article>
-
-              <article className="shop-store-card shein-store-card">
-                <div
-                  className="shop-store-art shein-art"
-                  aria-hidden="true"
-                >
-                  <span className="shein-hanger">
-                    <svg viewBox="0 0 48 48" focusable="false">
-                      <path d="M24 10c0-4 6-4 6 0 0 3-3 4-6 6L7 31c-2 2-1 5 2 5h30c3 0 4-3 2-5L27 19" />
-                    </svg>
-                  </span>
-                  <b>SHEIN</b>
-                </div>
-
-                <small>VITRINE CREDITI</small>
-                <h2>Moda e ofertas na SHEIN</h2>
-                <p>
-                  Acesse nossa seleção e compre diretamente na SHEIN.
-                </p>
-
-                <button
-                  onClick={() =>
-                    openExternal(
-                      SHEIN_STORE_URL
-                    )
-                  }
-                >
-                  ABRIR SHEIN
-                </button>
-              </article>
-
               <article className="shop-store-card amazon-store-card">
                 <div
                   className="shop-store-art amazon-art"
@@ -2627,93 +2571,47 @@ function App() {
                 </button>
               </article>
 
-              <article className="shop-store-card babystock-store-card">
+              <article className="shop-store-card magalu-store-card">
                 <div
-                  className="shop-store-art babystock-art"
+                  className="shop-store-art magalu-art"
                   aria-hidden="true"
                 >
-                  <span className="babystock-icon">★</span>
-                  <b>BabyStock</b>
+                  <span>🛒</span>
+                  <b>magalu</b>
                 </div>
 
                 <small>VITRINE CREDITI</small>
-                <h2>Ofertas na BabyStock</h2>
+                <h2>Ofertas no Magalu</h2>
                 <p>
-                  Roupas, acessórios e produtos para bebês e crianças.
+                  Acesse nossa seleção e compre diretamente no Magalu.
                 </p>
 
                 <button
                   onClick={() =>
                     openExternal(
-                      BABYSTOCK_STORE_URL
+                      MAGALU_STORE_URL
                     )
                   }
                 >
-                  ABRIR BABYSTOCK
+                  ABRIR MAGALU
                 </button>
               </article>
 
-              <article className="shop-store-card kidy-store-card">
-                <div
-                  className="shop-store-art kidy-art"
-                  aria-hidden="true"
-                >
-                  <span className="kidy-shoe">👟</span>
-                  <b>Kidy Calçados</b>
-                </div>
-
-                <small>VITRINE CREDITI</small>
-                <h2>Calçados infantis Kidy</h2>
-                <p>
-                  Escolha o calçado e use o cupom para ganhar desconto.
-                </p>
-
-                <div className="store-coupon">
-                  <span>CUPOM</span>
-                  <strong>AFILIKIDY</strong>
-                </div>
-
-                <button
-                  onClick={() =>
-                    openExternal(
-                      KIDY_STORE_URL
-                    )
-                  }
-                >
-                  ABRIR KIDY CALÇADOS
-                </button>
-              </article>
-
-              <article className="shop-store-card xiaomi-store-card">
-                <div
-                  className="shop-store-art xiaomi-art"
-                  aria-hidden="true"
-                >
-                  <span className="xiaomi-device">
+              <article className="shop-store-card gazin-store-card">
+                <div className="shop-store-art gazin-art" aria-hidden="true">
+                  <span className="partner-icon-bubble gazin-icon">
                     <svg viewBox="0 0 64 64" focusable="false">
-                      <rect x="17" y="6" width="30" height="52" rx="7" />
-                      <circle cx="24" cy="15" r="3.5" />
-                      <circle cx="33" cy="15" r="3.5" />
-                      <path d="M27 51h10" />
+                      <path d="M13 31h38v21H13zM18 31V20h28v11M18 52v5M46 52v5" />
+                      <path d="M22 39h20M32 20v11" />
                     </svg>
                   </span>
-                  <b>Xiaomi</b>
+                  <b>Gazin</b>
                 </div>
-
                 <small>VITRINE CREDITI</small>
-                <h2>Tecnologia Xiaomi</h2>
-                <p>
-                  Smartphones, acessórios e produtos para casa inteligente.
-                </p>
-
-                <button
-                  onClick={() =>
-                    openExternal(
-                      XIAOMI_STORE_URL
-                    )
-                  }
-                >
-                  ABRIR XIAOMI
+                <h2>Casa, móveis e tecnologia</h2>
+                <p>Móveis, eletrodomésticos, celulares e produtos para o dia a dia.</p>
+                <button onClick={() => openExternal(GAZIN_STORE_URL)}>
+                  ABRIR GAZIN
                 </button>
               </article>
 
@@ -2783,6 +2681,240 @@ function App() {
                 </button>
               </article>
 
+              <article className="shop-store-card polishop-store-card">
+                <div
+                  className="shop-store-art polishop-art"
+                  aria-hidden="true"
+                >
+                  <span className="polishop-spark">
+                    <svg viewBox="0 0 64 64" focusable="false">
+                      <path d="M32 7c2 14 9 21 23 25-14 3-21 10-23 25-3-15-10-22-24-25 14-4 21-11 24-25Z" />
+                      <path d="M49 8c1 6 4 9 10 11-6 1-9 4-10 10-2-6-5-9-11-10 6-2 9-5 11-11Z" />
+                    </svg>
+                  </span>
+                  <b>Polishop</b>
+                </div>
+
+                <small>VITRINE CREDITI</small>
+                <h2>Inovação para o dia a dia</h2>
+                <p>
+                  Produtos para cozinha, casa, beleza, fitness e bem-estar.
+                </p>
+
+                <button
+                  onClick={() =>
+                    openExternal(
+                      POLISHOP_STORE_URL
+                    )
+                  }
+                >
+                  ABRIR POLISHOP
+                </button>
+              </article>
+
+              <article className="shop-store-card xiaomi-store-card">
+                <div
+                  className="shop-store-art xiaomi-art"
+                  aria-hidden="true"
+                >
+                  <span className="xiaomi-device">
+                    <svg viewBox="0 0 64 64" focusable="false">
+                      <rect x="17" y="6" width="30" height="52" rx="7" />
+                      <circle cx="24" cy="15" r="3.5" />
+                      <circle cx="33" cy="15" r="3.5" />
+                      <path d="M27 51h10" />
+                    </svg>
+                  </span>
+                  <b>Xiaomi</b>
+                </div>
+
+                <small>VITRINE CREDITI</small>
+                <h2>Tecnologia Xiaomi</h2>
+                <p>
+                  Smartphones, acessórios e produtos para casa inteligente.
+                </p>
+
+                <button
+                  onClick={() =>
+                    openExternal(
+                      XIAOMI_STORE_URL
+                    )
+                  }
+                >
+                  ABRIR XIAOMI
+                </button>
+              </article>
+
+              <article className="shop-store-card mecanico-store-card">
+                <div
+                  className="shop-store-art mecanico-art"
+                  aria-hidden="true"
+                >
+                  <span className="mecanico-tools">
+                    <svg viewBox="0 0 64 64" focusable="false">
+                      <path d="M39 9a15 15 0 0 0-12 22L10 48a5 5 0 0 0 7 7l17-17A15 15 0 0 0 55 22l-9 9-8-3-3-8 9-9a15 15 0 0 0-5-2Z" />
+                    </svg>
+                  </span>
+                  <b>Loja do Mecânico</b>
+                </div>
+
+                <small>VITRINE CREDITI</small>
+                <h2>Ferramentas e máquinas</h2>
+                <p>
+                  Equipamentos para oficina, construção, indústria, casa e jardim.
+                </p>
+
+                <button
+                  onClick={() =>
+                    openExternal(
+                      LOJA_MECANICO_STORE_URL
+                    )
+                  }
+                >
+                  ABRIR LOJA DO MECÂNICO
+                </button>
+              </article>
+
+              <article className="shop-store-card shein-store-card">
+                <div
+                  className="shop-store-art shein-art"
+                  aria-hidden="true"
+                >
+                  <span className="shein-hanger">
+                    <svg viewBox="0 0 48 48" focusable="false">
+                      <path d="M24 10c0-4 6-4 6 0 0 3-3 4-6 6L7 31c-2 2-1 5 2 5h30c3 0 4-3 2-5L27 19" />
+                    </svg>
+                  </span>
+                  <b>SHEIN</b>
+                </div>
+
+                <small>VITRINE CREDITI</small>
+                <h2>Moda e ofertas na SHEIN</h2>
+                <p>
+                  Acesse nossa seleção e compre diretamente na SHEIN.
+                </p>
+
+                <button
+                  onClick={() =>
+                    openExternal(
+                      SHEIN_STORE_URL
+                    )
+                  }
+                >
+                  ABRIR SHEIN
+                </button>
+              </article>
+
+              <article className="shop-store-card cea-store-card">
+                <div
+                  className="shop-store-art cea-art"
+                  aria-hidden="true"
+                >
+                  <span className="cea-fashion">
+                    <svg viewBox="0 0 64 64" focusable="false">
+                      <path d="M21 16 28 10h8l7 6 9 5-6 11-6-3v25H24V29l-6 3-6-11 9-5Z" />
+                    </svg>
+                  </span>
+                  <b>C&amp;A</b>
+                </div>
+
+                <small>VITRINE CREDITI</small>
+                <h2>Ofertas C&amp;A</h2>
+                <p>
+                  Até 50% de desconto e mais 30% OFF usando o cupom.
+                </p>
+
+                <div className="store-coupon cea-coupon">
+                  <span>CUPOM</span>
+                  <strong>QUERO30</strong>
+                </div>
+
+                <button
+                  onClick={() =>
+                    openExternal(
+                      CEA_STORE_URL
+                    )
+                  }
+                >
+                  ABRIR C&amp;A
+                </button>
+              </article>
+
+              <article className="shop-store-card colombo-store-card">
+                <div className="shop-store-art colombo-art" aria-hidden="true">
+                  <span className="partner-icon-bubble colombo-icon">
+                    <svg viewBox="0 0 64 64" focusable="false">
+                      <path d="m22 10 10 7 10-7 11 8-8 12v26H19V30l-8-12 11-8Z" />
+                      <path d="M26 15c1 6 11 6 12 0M32 20v36M28 30h8" />
+                    </svg>
+                  </span>
+                  <b>Camisaria Colombo</b>
+                </div>
+                <small>VITRINE CREDITI</small>
+                <h2>Moda masculina completa</h2>
+                <p>Camisas, polos, calças, ternos, alfaiataria e acessórios masculinos.</p>
+                <button onClick={() => openExternal(COLOMBO_STORE_URL)}>
+                  ABRIR COLOMBO
+                </button>
+              </article>
+
+              <article className="shop-store-card babystock-store-card">
+                <div
+                  className="shop-store-art babystock-art"
+                  aria-hidden="true"
+                >
+                  <span className="babystock-icon">★</span>
+                  <b>BabyStock</b>
+                </div>
+
+                <small>VITRINE CREDITI</small>
+                <h2>Ofertas na BabyStock</h2>
+                <p>
+                  Roupas, acessórios e produtos para bebês e crianças.
+                </p>
+
+                <button
+                  onClick={() =>
+                    openExternal(
+                      BABYSTOCK_STORE_URL
+                    )
+                  }
+                >
+                  ABRIR BABYSTOCK
+                </button>
+              </article>
+
+              <article className="shop-store-card kidy-store-card">
+                <div
+                  className="shop-store-art kidy-art"
+                  aria-hidden="true"
+                >
+                  <span className="kidy-shoe">👟</span>
+                  <b>Kidy Calçados</b>
+                </div>
+
+                <small>VITRINE CREDITI</small>
+                <h2>Calçados infantis Kidy</h2>
+                <p>
+                  Escolha o calçado e use o cupom para ganhar desconto.
+                </p>
+
+                <div className="store-coupon">
+                  <span>CUPOM</span>
+                  <strong>AFILIKIDY</strong>
+                </div>
+
+                <button
+                  onClick={() =>
+                    openExternal(
+                      KIDY_STORE_URL
+                    )
+                  }
+                >
+                  ABRIR KIDY CALÇADOS
+                </button>
+              </article>
+
               <article className="shop-store-card natura-store-card">
                 <div
                   className="shop-store-art natura-art"
@@ -2847,99 +2979,131 @@ function App() {
                 </button>
               </article>
 
-              <article className="shop-store-card cea-store-card">
-                <div
-                  className="shop-store-art cea-art"
-                  aria-hidden="true"
-                >
-                  <span className="cea-fashion">
+              <article className="shop-store-card lojasrede-store-card">
+                <div className="shop-store-art lojasrede-art" aria-hidden="true">
+                  <span className="partner-icon-bubble lojasrede-icon">
                     <svg viewBox="0 0 64 64" focusable="false">
-                      <path d="M21 16 28 10h8l7 6 9 5-6 11-6-3v25H24V29l-6 3-6-11 9-5Z" />
+                      <path d="M24 17h16v10H24zM21 27h22v29H21z" />
+                      <path d="M28 17V9h8v8M27 38h10M27 45h10" />
                     </svg>
                   </span>
-                  <b>C&amp;A</b>
+                  <b>Lojas REDE</b>
                 </div>
-
                 <small>VITRINE CREDITI</small>
-                <h2>Ofertas C&amp;A</h2>
-                <p>
-                  Até 50% de desconto e mais 30% OFF usando o cupom.
-                </p>
-
-                <div className="store-coupon cea-coupon">
-                  <span>CUPOM</span>
-                  <strong>QUERO30</strong>
-                </div>
-
-                <button
-                  onClick={() =>
-                    openExternal(
-                      CEA_STORE_URL
-                    )
-                  }
-                >
-                  ABRIR C&amp;A
+                <h2>Beleza e cuidados pessoais</h2>
+                <p>Cosméticos, perfumaria, higiene e produtos para todos os estilos.</p>
+                <button onClick={() => openExternal(LOJAS_REDE_STORE_URL)}>
+                  ABRIR LOJAS REDE
                 </button>
               </article>
 
-              <article className="shop-store-card mecanico-store-card">
-                <div
-                  className="shop-store-art mecanico-art"
-                  aria-hidden="true"
-                >
-                  <span className="mecanico-tools">
+              <article className="shop-store-card amokarite-store-card">
+                <div className="shop-store-art amokarite-art" aria-hidden="true">
+                  <span className="partner-icon-bubble amokarite-icon">
                     <svg viewBox="0 0 64 64" focusable="false">
-                      <path d="M39 9a15 15 0 0 0-12 22L10 48a5 5 0 0 0 7 7l17-17A15 15 0 0 0 55 22l-9 9-8-3-3-8 9-9a15 15 0 0 0-5-2Z" />
+                      <path d="M15 43c17 2 30-8 35-28-20 2-33 12-35 28Z" />
+                      <path d="M17 44c9-10 18-17 31-25" />
+                      <path d="M26 34c-2-5-5-8-9-10M35 27c0-5-2-9-5-12" />
                     </svg>
                   </span>
-                  <b>Loja do Mecânico</b>
+                  <b>AmoKarité</b>
                 </div>
-
                 <small>VITRINE CREDITI</small>
-                <h2>Ferramentas e máquinas</h2>
-                <p>
-                  Equipamentos para oficina, construção, indústria, casa e jardim.
-                </p>
-
-                <button
-                  onClick={() =>
-                    openExternal(
-                      LOJA_MECANICO_STORE_URL
-                    )
-                  }
-                >
-                  ABRIR LOJA DO MECÂNICO
+                <h2>Beleza limpa e consciente</h2>
+                <p>Maquiagens naturais, veganas e sustentáveis para sua rotina.</p>
+                <button onClick={() => openExternal(AMOKARITE_STORE_URL)}>
+                  ABRIR AMOKARITÉ
                 </button>
               </article>
 
-              <article className="shop-store-card polishop-store-card">
-                <div
-                  className="shop-store-art polishop-art"
-                  aria-hidden="true"
-                >
-                  <span className="polishop-spark">
+              <article className="shop-store-card sieno-store-card">
+                <div className="shop-store-art sieno-art" aria-hidden="true">
+                  <span className="partner-icon-bubble sieno-icon">
                     <svg viewBox="0 0 64 64" focusable="false">
-                      <path d="M32 7c2 14 9 21 23 25-14 3-21 10-23 25-3-15-10-22-24-25 14-4 21-11 24-25Z" />
-                      <path d="M49 8c1 6 4 9 10 11-6 1-9 4-10 10-2-6-5-9-11-10 6-2 9-5 11-11Z" />
+                      <path d="M24 11h16v10H24zM20 25h24v31H20z" />
+                      <path d="M28 21v4h8v-4M27 37c3-4 7-4 10 0" />
                     </svg>
                   </span>
-                  <b>Polishop</b>
+                  <b>Sieno Perfumes</b>
                 </div>
-
                 <small>VITRINE CREDITI</small>
-                <h2>Inovação para o dia a dia</h2>
-                <p>
-                  Produtos para cozinha, casa, beleza, fitness e bem-estar.
-                </p>
+                <h2>Perfumes para marcar presença</h2>
+                <p>Fragrâncias importadas e opções para diferentes estilos e ocasiões.</p>
+                <button onClick={() => openExternal(SIENO_STORE_URL)}>
+                  ABRIR SIENO
+                </button>
+              </article>
 
-                <button
-                  onClick={() =>
-                    openExternal(
-                      POLISHOP_STORE_URL
-                    )
-                  }
-                >
-                  ABRIR POLISHOP
+              <article className="shop-store-card amakha-store-card">
+                <div className="shop-store-art amakha-art" aria-hidden="true">
+                  <span className="partner-icon-bubble amakha-icon">
+                    <svg viewBox="0 0 64 64" focusable="false">
+                      <path d="M24 10h16v10H24zM19 25h26v31H19z" />
+                      <path d="m32 32 7 8-7 8-7-8 7-8Z" />
+                    </svg>
+                  </span>
+                  <b>Amakha Paris</b>
+                </div>
+                <small>VITRINE CREDITI</small>
+                <h2>Perfumes e beleza</h2>
+                <p>Fragrâncias, cuidados com os cabelos, pele e produtos pessoais.</p>
+                <button onClick={() => openExternal(AMAKHA_STORE_URL)}>
+                  ABRIR AMAKHA PARIS
+                </button>
+              </article>
+
+              <article className="shop-store-card biovittare-store-card">
+                <div className="shop-store-art biovittare-art" aria-hidden="true">
+                  <span className="partner-icon-bubble biovittare-icon">
+                    <svg viewBox="0 0 64 64" focusable="false">
+                      <path d="M18 41h28c0 9-5 15-14 15s-14-6-14-15Z" />
+                      <path d="M20 36h24M39 10 25 38M35 8l7 5" />
+                      <path d="M28 22c-7-1-11-5-12-11 7 0 12 4 13 10" />
+                    </svg>
+                  </span>
+                  <b>BioVittare</b>
+                </div>
+                <small>VITRINE CREDITI</small>
+                <h2>Manipulação e bem-estar</h2>
+                <p>Fórmulas manipuladas e cuidados personalizados com orientação farmacêutica.</p>
+                <button onClick={() => openExternal(BIOVITTARE_STORE_URL)}>
+                  ABRIR BIOVITTARE
+                </button>
+              </article>
+
+              <article className="shop-store-card cicatrissim-store-card">
+                <div className="shop-store-art cicatrissim-art" aria-hidden="true">
+                  <span className="partner-icon-bubble cicatrissim-icon">
+                    <svg viewBox="0 0 64 64" focusable="false">
+                      <path d="M22 12h20l4 44H18l4-44Z" />
+                      <path d="M25 12V7h14v5M25 32h14M32 25v14" />
+                    </svg>
+                  </span>
+                  <b>CicatriSSim</b>
+                </div>
+                <small>VITRINE CREDITI</small>
+                <h2>Cuidados com a pele</h2>
+                <p>Cremes para estrias e hidratantes para complementar sua rotina corporal.</p>
+                <button onClick={() => openExternal(CICATRISSIM_STORE_URL)}>
+                  ABRIR CICATRISSIM
+                </button>
+              </article>
+
+              <article className="shop-store-card cacau-store-card">
+                <div className="shop-store-art cacau-art" aria-hidden="true">
+                  <span className="partner-icon-bubble cacau-icon">
+                    <svg viewBox="0 0 64 64" focusable="false">
+                      <path d="M32 8c12 8 18 19 18 30 0 11-8 18-18 18s-18-7-18-18c0-11 6-22 18-30Z" />
+                      <path d="M32 13v38M20 25c7 3 17 3 24 0M17 38c9 4 21 4 30 0" />
+                    </svg>
+                  </span>
+                  <b>Cacau Show</b>
+                </div>
+                <small>VITRINE CREDITI</small>
+                <h2>Chocolates e presentes</h2>
+                <p>Trufas, bombons, tabletes e presentes para momentos especiais.</p>
+                <button onClick={() => openExternal(CACAU_SHOW_STORE_URL)}>
+                  ABRIR CACAU SHOW
                 </button>
               </article>
 
@@ -2981,134 +3145,6 @@ function App() {
                 </button>
               </article>
 
-              <article className="shop-store-card amokarite-store-card">
-                <div className="shop-store-art amokarite-art" aria-hidden="true">
-                  <span className="partner-icon-bubble amokarite-icon">
-                    <svg viewBox="0 0 64 64" focusable="false">
-                      <path d="M15 43c17 2 30-8 35-28-20 2-33 12-35 28Z" />
-                      <path d="M17 44c9-10 18-17 31-25" />
-                      <path d="M26 34c-2-5-5-8-9-10M35 27c0-5-2-9-5-12" />
-                    </svg>
-                  </span>
-                  <b>AmoKarité</b>
-                </div>
-                <small>VITRINE CREDITI</small>
-                <h2>Beleza limpa e consciente</h2>
-                <p>Maquiagens naturais, veganas e sustentáveis para sua rotina.</p>
-                <button onClick={() => openExternal(AMOKARITE_STORE_URL)}>
-                  ABRIR AMOKARITÉ
-                </button>
-              </article>
-
-              <article className="shop-store-card lojasrede-store-card">
-                <div className="shop-store-art lojasrede-art" aria-hidden="true">
-                  <span className="partner-icon-bubble lojasrede-icon">
-                    <svg viewBox="0 0 64 64" focusable="false">
-                      <path d="M24 17h16v10H24zM21 27h22v29H21z" />
-                      <path d="M28 17V9h8v8M27 38h10M27 45h10" />
-                    </svg>
-                  </span>
-                  <b>Lojas REDE</b>
-                </div>
-                <small>VITRINE CREDITI</small>
-                <h2>Beleza e cuidados pessoais</h2>
-                <p>Cosméticos, perfumaria, higiene e produtos para todos os estilos.</p>
-                <button onClick={() => openExternal(LOJAS_REDE_STORE_URL)}>
-                  ABRIR LOJAS REDE
-                </button>
-              </article>
-
-              <article className="shop-store-card sieno-store-card">
-                <div className="shop-store-art sieno-art" aria-hidden="true">
-                  <span className="partner-icon-bubble sieno-icon">
-                    <svg viewBox="0 0 64 64" focusable="false">
-                      <path d="M24 11h16v10H24zM20 25h24v31H20z" />
-                      <path d="M28 21v4h8v-4M27 37c3-4 7-4 10 0" />
-                    </svg>
-                  </span>
-                  <b>Sieno Perfumes</b>
-                </div>
-                <small>VITRINE CREDITI</small>
-                <h2>Perfumes para marcar presença</h2>
-                <p>Fragrâncias importadas e opções para diferentes estilos e ocasiões.</p>
-                <button onClick={() => openExternal(SIENO_STORE_URL)}>
-                  ABRIR SIENO
-                </button>
-              </article>
-
-              <article className="shop-store-card biovittare-store-card">
-                <div className="shop-store-art biovittare-art" aria-hidden="true">
-                  <span className="partner-icon-bubble biovittare-icon">
-                    <svg viewBox="0 0 64 64" focusable="false">
-                      <path d="M18 41h28c0 9-5 15-14 15s-14-6-14-15Z" />
-                      <path d="M20 36h24M39 10 25 38M35 8l7 5" />
-                      <path d="M28 22c-7-1-11-5-12-11 7 0 12 4 13 10" />
-                    </svg>
-                  </span>
-                  <b>BioVittare</b>
-                </div>
-                <small>VITRINE CREDITI</small>
-                <h2>Manipulação e bem-estar</h2>
-                <p>Fórmulas manipuladas e cuidados personalizados com orientação farmacêutica.</p>
-                <button onClick={() => openExternal(BIOVITTARE_STORE_URL)}>
-                  ABRIR BIOVITTARE
-                </button>
-              </article>
-
-              <article className="shop-store-card amakha-store-card">
-                <div className="shop-store-art amakha-art" aria-hidden="true">
-                  <span className="partner-icon-bubble amakha-icon">
-                    <svg viewBox="0 0 64 64" focusable="false">
-                      <path d="M24 10h16v10H24zM19 25h26v31H19z" />
-                      <path d="m32 32 7 8-7 8-7-8 7-8Z" />
-                    </svg>
-                  </span>
-                  <b>Amakha Paris</b>
-                </div>
-                <small>VITRINE CREDITI</small>
-                <h2>Perfumes e beleza</h2>
-                <p>Fragrâncias, cuidados com os cabelos, pele e produtos pessoais.</p>
-                <button onClick={() => openExternal(AMAKHA_STORE_URL)}>
-                  ABRIR AMAKHA PARIS
-                </button>
-              </article>
-
-              <article className="shop-store-card cacau-store-card">
-                <div className="shop-store-art cacau-art" aria-hidden="true">
-                  <span className="partner-icon-bubble cacau-icon">
-                    <svg viewBox="0 0 64 64" focusable="false">
-                      <path d="M32 8c12 8 18 19 18 30 0 11-8 18-18 18s-18-7-18-18c0-11 6-22 18-30Z" />
-                      <path d="M32 13v38M20 25c7 3 17 3 24 0M17 38c9 4 21 4 30 0" />
-                    </svg>
-                  </span>
-                  <b>Cacau Show</b>
-                </div>
-                <small>VITRINE CREDITI</small>
-                <h2>Chocolates e presentes</h2>
-                <p>Trufas, bombons, tabletes e presentes para momentos especiais.</p>
-                <button onClick={() => openExternal(CACAU_SHOW_STORE_URL)}>
-                  ABRIR CACAU SHOW
-                </button>
-              </article>
-
-              <article className="shop-store-card colombo-store-card">
-                <div className="shop-store-art colombo-art" aria-hidden="true">
-                  <span className="partner-icon-bubble colombo-icon">
-                    <svg viewBox="0 0 64 64" focusable="false">
-                      <path d="m22 10 10 7 10-7 11 8-8 12v26H19V30l-8-12 11-8Z" />
-                      <path d="M26 15c1 6 11 6 12 0M32 20v36M28 30h8" />
-                    </svg>
-                  </span>
-                  <b>Camisaria Colombo</b>
-                </div>
-                <small>VITRINE CREDITI</small>
-                <h2>Moda masculina completa</h2>
-                <p>Camisas, polos, calças, ternos, alfaiataria e acessórios masculinos.</p>
-                <button onClick={() => openExternal(COLOMBO_STORE_URL)}>
-                  ABRIR COLOMBO
-                </button>
-              </article>
-
               <article className="shop-store-card aliancas-store-card">
                 <div className="shop-store-art aliancas-art" aria-hidden="true">
                   <span className="partner-icon-bubble aliancas-icon">
@@ -3125,42 +3161,6 @@ function App() {
                 <p>Alianças, anéis, joias e relógios para celebrar histórias especiais.</p>
                 <button onClick={() => openExternal(CASA_ALIANCAS_STORE_URL)}>
                   ABRIR CASA DAS ALIANÇAS
-                </button>
-              </article>
-
-              <article className="shop-store-card cicatrissim-store-card">
-                <div className="shop-store-art cicatrissim-art" aria-hidden="true">
-                  <span className="partner-icon-bubble cicatrissim-icon">
-                    <svg viewBox="0 0 64 64" focusable="false">
-                      <path d="M22 12h20l4 44H18l4-44Z" />
-                      <path d="M25 12V7h14v5M25 32h14M32 25v14" />
-                    </svg>
-                  </span>
-                  <b>CicatriSSim</b>
-                </div>
-                <small>VITRINE CREDITI</small>
-                <h2>Cuidados com a pele</h2>
-                <p>Cremes para estrias e hidratantes para complementar sua rotina corporal.</p>
-                <button onClick={() => openExternal(CICATRISSIM_STORE_URL)}>
-                  ABRIR CICATRISSIM
-                </button>
-              </article>
-
-              <article className="shop-store-card gazin-store-card">
-                <div className="shop-store-art gazin-art" aria-hidden="true">
-                  <span className="partner-icon-bubble gazin-icon">
-                    <svg viewBox="0 0 64 64" focusable="false">
-                      <path d="M13 31h38v21H13zM18 31V20h28v11M18 52v5M46 52v5" />
-                      <path d="M22 39h20M32 20v11" />
-                    </svg>
-                  </span>
-                  <b>Gazin</b>
-                </div>
-                <small>VITRINE CREDITI</small>
-                <h2>Casa, móveis e tecnologia</h2>
-                <p>Móveis, eletrodomésticos, celulares e produtos para o dia a dia.</p>
-                <button onClick={() => openExternal(GAZIN_STORE_URL)}>
-                  ABRIR GAZIN
                 </button>
               </article>
             </div>
