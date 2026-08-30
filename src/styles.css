@@ -3322,3 +3322,41 @@ html.splash-active #root {
 .cea-store-card > button {
   background: #e30613;
 }
+
+
+/* Loja do Mecânico no carrossel de parceiros */
+.shop-store-art.mecanico-art {
+  background: linear-gradient(135deg, #0b5288, #072f55);
+}
+
+.mecanico-art b {
+  max-width: 150px;
+  font-size: 23px;
+  line-height: 1.02;
+  text-align: right;
+  letter-spacing: -0.04em;
+}
+
+.mecanico-tools {
+  width: 66px;
+  height: 66px;
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  border-radius: 21px;
+  background: #FDCE00;
+}
+
+.mecanico-tools svg {
+  width: 49px;
+  height: 49px;
+  fill: none;
+  stroke: #07345e;
+  stroke-width: 3.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.mecanico-store-card > button {
+  background: #0b4778;
+}
