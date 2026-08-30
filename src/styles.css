@@ -3397,6 +3397,53 @@ html.splash-active #root {
 }
 
 
+/* TodoVino no carrossel de parceiros */
+.shop-store-art.todovino-art {
+  background: linear-gradient(135deg, #7b1637, #3d0b22);
+}
+
+.todovino-art b {
+  max-width: 150px;
+  font-size: 28px;
+  line-height: 1;
+  text-align: right;
+  letter-spacing: -0.04em;
+}
+
+.todovino-grapes {
+  width: 66px;
+  height: 66px;
+  display: grid;
+  place-items: center;
+  flex: 0 0 66px;
+  border-radius: 21px;
+  background: #fff7e8;
+  color: #7b1637;
+}
+
+.todovino-grapes svg {
+  width: 50px;
+  height: 50px;
+  fill: currentColor;
+  stroke: none;
+}
+
+.todovino-grapes .todovino-stem {
+  fill: none;
+  stroke: #4f6f35;
+  stroke-width: 3.4;
+  stroke-linecap: round;
+}
+
+.todovino-grapes .todovino-leaf {
+  fill: #6f8d45;
+}
+
+.todovino-store-card > button {
+  background: #68132f;
+}
+
+
 /* Padronização dos balões de ícones das lojas parceiras */
 .shopee-store-card .shop-store-art > span,
 .magalu-art > span,
@@ -3411,7 +3458,8 @@ html.splash-active #root {
 .shop-store-art .avon-beauty,
 .shop-store-art .cea-logo,
 .shop-store-art .mecanico-tools,
-.shop-store-art .polishop-spark {
+.shop-store-art .polishop-spark,
+.shop-store-art .todovino-grapes {
   width: 66px;
   height: 66px;
   min-width: 66px;
