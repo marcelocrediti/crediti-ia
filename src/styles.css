@@ -3757,3 +3757,52 @@ html.splash-active #root {
 .partner-text-logo-bradesco {
   color: #cc092f;
 }
+
+
+/* Sawary Jeans e Toy Mania */
+.sawary-art,
+.toymania-art {
+  gap: 15px;
+}
+
+.sawary-art b,
+.toymania-art b {
+  max-width: 160px;
+  line-height: 1.04;
+  text-align: right;
+  letter-spacing: -0.05em;
+}
+
+.shop-store-art.sawary-art {
+  background: linear-gradient(135deg, #315a9e, #17305f);
+}
+
+.sawary-art b {
+  font-size: 25px;
+}
+
+.sawary-icon {
+  color: #23477f;
+  background: #f3f7ff !important;
+}
+
+.sawary-store-card > button {
+  background: #23477f;
+}
+
+.shop-store-art.toymania-art {
+  background: linear-gradient(135deg, #8b4cc6, #41339b);
+}
+
+.toymania-art b {
+  font-size: 27px;
+}
+
+.toymania-icon {
+  color: #7042b2;
+  background: #fff7d8 !important;
+}
+
+.toymania-store-card > button {
+  background: #6540a2;
+}
