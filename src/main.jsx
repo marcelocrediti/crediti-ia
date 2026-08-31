@@ -194,20 +194,8 @@ const PARTNER_PRODUCTS = {
     button: "CONHECER BRADESCO SAÚDE",
     eyebrow: "SAÚDE EMPRESARIAL",
     heading: "Conheça o plano empresarial",
-    note: "Você será direcionado ao ambiente do Bradesco. Rede, valores, carências, coparticipação e contratação são definidos pela instituição."
+    note: "Você será direcionado ao ambiente do Bradesco. O produto é exclusivo para CNPJ e as condições da contratação são definidas pela instituição."
   },
-
-  "bradesco-empresarial": {
-    name: "Bradesco Seguro Empresarial",
-    partner: "Bradesco Seguros",
-    logoText: "Bradesco Seguros",
-    logoTone: "bradesco",
-    url: "https://acesse.vc/wYzJqgRxYyeV",
-    button: "CONHECER SEGURO EMPRESARIAL",
-    eyebrow: "PROTEÇÃO EMPRESARIAL",
-    heading: "Proteja o patrimônio da empresa",
-    note: "Você será direcionado ao ambiente do Bradesco. Coberturas, assistências, valores e contratação são definidos pela instituição."
-  }
 };
 
 const ANALYSTS = {
@@ -473,31 +461,15 @@ const products = [
     name: "Bradesco Saúde Empresarial",
     typeLabel: "SAÚDE EMPRESARIAL",
     what:
-      "Plano de saúde empresarial com opções de atendimento e cobertura conforme o produto contratado.",
+      "O Bradesco Saúde Empresarial é um plano pensado para atender empresas, com regras e condições próprias do ambiente corporativo.",
     forWho:
-      "Empresas com CNPJ ou CAEPF que desejam oferecer plano de saúde. O site oficial informa contratação a partir de 3 pessoas.",
+      "Exclusivo para empresas com CNPJ, desde pequenos negócios até grandes operações.",
     how:
-      "O botão direciona ao ambiente do Bradesco para conhecer condições e iniciar o atendimento.",
+      "O botão direciona diretamente ao ambiente do Bradesco para conhecer as condições e continuar a solicitação.",
     when:
       "Pode fazer sentido para empresas que desejam oferecer assistência médica aos sócios, funcionários e dependentes elegíveis.",
     tip:
       "Antes de contratar, confira rede credenciada, abrangência, carências, coparticipação e regras para dependentes."
-  },
-
-  {
-    id: "bradesco-empresarial",
-    name: "Bradesco Seguro Empresarial",
-    typeLabel: "PROTEÇÃO EMPRESARIAL",
-    what:
-      "Seguro voltado à proteção do patrimônio da empresa, com coberturas que variam conforme o segmento e a contratação.",
-    forWho:
-      "Estabelecimentos comerciais, empresas industriais e prestadores de serviços que desejam proteger o negócio.",
-    how:
-      "O botão abre diretamente o ambiente do Bradesco para conhecer as opções e continuar a solicitação.",
-    when:
-      "Pode ajudar a reduzir o impacto financeiro de imprevistos que atinjam o estabelecimento ou os bens segurados.",
-    tip:
-      "Confira coberturas, exclusões, franquias, limites e assistências antes de concluir a contratação."
   }
 ];
 
@@ -595,11 +567,6 @@ const PRODUCT_VISUALS = {
   "bradesco-saude": {
     icon: "+",
     label: "Plano de saúde empresarial",
-    tone: "red"
-  },
-  "bradesco-empresarial": {
-    icon: "B",
-    label: "Proteção para o seu negócio",
     tone: "red"
   }
 };
