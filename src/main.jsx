@@ -185,29 +185,6 @@ const PARTNER_PRODUCTS = {
     note: "Você será direcionado ao ambiente do Santander. A abertura da conta está sujeita à análise e aprovação cadastral do banco."
   },
 
-  "santander-pj": {
-    name: "Conta PJ Santander",
-    partner: "Santander Empresas",
-    logoText: "Santander",
-    logoTone: "santander",
-    url: "https://acesse.vc/uAfF2PJlJ2kU",
-    button: "ABRIR CONTA NO SANTANDER",
-    eyebrow: "ABERTURA ONLINE",
-    heading: "Continue diretamente no Santander",
-    note: "Você será direcionado ao ambiente do Santander. A abertura da conta está sujeita à análise e aprovação cadastral do banco."
-  },
-
-  "bradesco-saude": {
-    name: "Bradesco Saúde Empresarial",
-    partner: "Bradesco Saúde",
-    logoText: "Bradesco Saúde",
-    logoTone: "bradesco",
-    url: "https://acesse.vc/hebvpzvVIoLn",
-    button: "CONHECER BRADESCO SAÚDE",
-    eyebrow: "SAÚDE EMPRESARIAL",
-    heading: "Conheça o plano empresarial",
-    note: "Você será direcionado ao ambiente do Bradesco. O produto é exclusivo para CNPJ e as condições da contratação são definidas pela instituição."
-  },
 };
 
 const ANALYSTS = {
@@ -468,37 +445,6 @@ const products = [
       "Antes de concluir, confira as condições, tarifas e serviços incluídos na conta escolhida."
   },
 
-  {
-    id: "santander-pj",
-    name: "Conta PJ Santander",
-    typeLabel: "CONTA EMPRESARIAL",
-    what:
-      "Conta corrente empresarial do Santander para movimentar o dinheiro e acessar serviços financeiros do negócio.",
-    forWho:
-      "Neste link parceiro, a solicitação está disponível para MEI, Empresário Individual (EI), EIRELI e Sociedade Limitada (LTDA).",
-    how:
-      "Toque no botão para preencher o CNPJ diretamente no Santander. A abertura está sujeita à análise e aprovação cadastral do banco.",
-    when:
-      "Pode ajudar a separar as finanças pessoais das movimentações da empresa e organizar o dia a dia do negócio.",
-    tip:
-      "Use a conta da empresa apenas para o negócio. Separar o dinheiro pessoal facilita o controle financeiro."
-  },
-
-  {
-    id: "bradesco-saude",
-    name: "Bradesco Saúde Empresarial",
-    typeLabel: "SAÚDE EMPRESARIAL",
-    what:
-      "O Bradesco Saúde Empresarial é um plano pensado para atender empresas, com regras e condições próprias do ambiente corporativo.",
-    forWho:
-      "Exclusivo para empresas com CNPJ, desde pequenos negócios até grandes operações.",
-    how:
-      "O botão direciona diretamente ao ambiente do Bradesco para conhecer as condições e continuar a solicitação.",
-    when:
-      "Pode fazer sentido para empresas que desejam oferecer assistência médica aos sócios, funcionários e dependentes elegíveis.",
-    tip:
-      "Antes de contratar, confira rede credenciada, abrangência, carências, coparticipação e regras para dependentes."
-  }
 ];
 
 const DIRECT_PRODUCT_KEYS = [
@@ -590,16 +536,6 @@ const PRODUCT_VISUALS = {
   "santander-pf": {
     icon: "PF",
     label: "Conta para pessoa física",
-    tone: "red"
-  },
-  "santander-pj": {
-    icon: "PJ",
-    label: "Conta para sua empresa",
-    tone: "red"
-  },
-  "bradesco-saude": {
-    icon: "+",
-    label: "Plano de saúde empresarial",
     tone: "red"
   }
 };
@@ -694,6 +630,18 @@ const SERVICE_GROUPS = [
         description: "Abra sua conta digital PJ grátis e solicite um cartão de crédito empresarial, sujeito à análise da Cora.",
         url: "https://conta.cora.com.br/r/conta-digital/?convite=HM74R&i=MjgxMTU0NTQwMDAxMjc=&n=TWFyY2VsaW5v",
         action: "ABRIR CONTA ›"
+      },
+      {
+        name: "Conta PJ Santander",
+        description: "Abra sua conta empresarial. Disponível neste link para MEI, EI, EIRELI e LTDA, sujeito à análise do Santander.",
+        url: "https://acesse.vc/uAfF2PJlJ2kU",
+        action: "ABRIR CONTA PJ ›"
+      },
+      {
+        name: "Bradesco Saúde Empresarial",
+        description: "Plano de saúde exclusivo para empresas com CNPJ, de pequenos negócios a grandes operações.",
+        url: "https://acesse.vc/hebvpzvVIoLn",
+        action: "CONHECER O PLANO ›"
       },
       {
         name: "KingHost",
