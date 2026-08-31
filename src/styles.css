@@ -3731,3 +3731,29 @@ html.splash-active #root {
 .promofarma-art b { font-size: 22px; }
 .promofarma-icon { color: #08749b; background: #f0fbff !important; }
 .promofarma-store-card > button { background: #08749b; }
+
+
+/* Produtos empresariais Santander e Bradesco */
+.product-visual.product-tone-red {
+  background: #ffe8e8;
+  color: #b51020;
+}
+
+.partner-text-logo {
+  display: block;
+  max-width: 100%;
+  color: #111111;
+  font-size: 26px;
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: -0.06em;
+  text-align: center;
+}
+
+.partner-text-logo-santander {
+  color: #e30613;
+}
+
+.partner-text-logo-bradesco {
+  color: #cc092f;
+}
