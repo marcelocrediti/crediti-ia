@@ -171,6 +171,42 @@ const PARTNER_PRODUCTS = {
     logo: "/partners/gyroo.png",
     url: "https://crediti.emprestimodisponivel.com.br/?l=EW9XMSWNPMR8&u=uCwu5cFx4n6t",
     button: "SIMULAR SEU CRÉDITO"
+  },
+
+  "santander-pj": {
+    name: "Conta PJ Santander",
+    partner: "Santander Empresas",
+    logoText: "Santander",
+    logoTone: "santander",
+    url: "https://acesse.vc/uAfF2PJlJ2kU",
+    button: "ABRIR CONTA NO SANTANDER",
+    eyebrow: "ABERTURA ONLINE",
+    heading: "Continue diretamente no Santander",
+    note: "Você será direcionado ao ambiente do Santander. A abertura da conta está sujeita à análise e aprovação cadastral do banco."
+  },
+
+  "bradesco-saude": {
+    name: "Bradesco Saúde Empresarial",
+    partner: "Bradesco Saúde",
+    logoText: "Bradesco Saúde",
+    logoTone: "bradesco",
+    url: "https://acesse.vc/hebvpzvVIoLn",
+    button: "CONHECER BRADESCO SAÚDE",
+    eyebrow: "SAÚDE EMPRESARIAL",
+    heading: "Conheça o plano empresarial",
+    note: "Você será direcionado ao ambiente do Bradesco. Rede, valores, carências, coparticipação e contratação são definidos pela instituição."
+  },
+
+  "bradesco-empresarial": {
+    name: "Bradesco Seguro Empresarial",
+    partner: "Bradesco Seguros",
+    logoText: "Bradesco Seguros",
+    logoTone: "bradesco",
+    url: "https://acesse.vc/wYzJqgRxYyeV",
+    button: "CONHECER SEGURO EMPRESARIAL",
+    eyebrow: "PROTEÇÃO EMPRESARIAL",
+    heading: "Proteja o patrimônio da empresa",
+    note: "Você será direcionado ao ambiente do Bradesco. Coberturas, assistências, valores e contratação são definidos pela instituição."
   }
 };
 
@@ -414,6 +450,54 @@ const products = [
       "Pode ajudar em projetos que não precisam ser realizados imediatamente.",
     tip:
       "Defina quanto realmente precisa antes de escolher o valor da carta."
+  },
+
+  {
+    id: "santander-pj",
+    name: "Conta PJ Santander",
+    typeLabel: "CONTA EMPRESARIAL",
+    what:
+      "Conta corrente empresarial do Santander para movimentar o dinheiro e acessar serviços financeiros do negócio.",
+    forWho:
+      "Neste link parceiro, a solicitação está disponível para MEI, Empresário Individual (EI), EIRELI e Sociedade Limitada (LTDA).",
+    how:
+      "Toque no botão para preencher o CNPJ diretamente no Santander. A abertura está sujeita à análise e aprovação cadastral do banco.",
+    when:
+      "Pode ajudar a separar as finanças pessoais das movimentações da empresa e organizar o dia a dia do negócio.",
+    tip:
+      "Use a conta da empresa apenas para o negócio. Separar o dinheiro pessoal facilita o controle financeiro."
+  },
+
+  {
+    id: "bradesco-saude",
+    name: "Bradesco Saúde Empresarial",
+    typeLabel: "SAÚDE EMPRESARIAL",
+    what:
+      "Plano de saúde empresarial com opções de atendimento e cobertura conforme o produto contratado.",
+    forWho:
+      "Empresas com CNPJ ou CAEPF que desejam oferecer plano de saúde. O site oficial informa contratação a partir de 3 pessoas.",
+    how:
+      "O botão direciona ao ambiente do Bradesco para conhecer condições e iniciar o atendimento.",
+    when:
+      "Pode fazer sentido para empresas que desejam oferecer assistência médica aos sócios, funcionários e dependentes elegíveis.",
+    tip:
+      "Antes de contratar, confira rede credenciada, abrangência, carências, coparticipação e regras para dependentes."
+  },
+
+  {
+    id: "bradesco-empresarial",
+    name: "Bradesco Seguro Empresarial",
+    typeLabel: "PROTEÇÃO EMPRESARIAL",
+    what:
+      "Seguro voltado à proteção do patrimônio da empresa, com coberturas que variam conforme o segmento e a contratação.",
+    forWho:
+      "Estabelecimentos comerciais, empresas industriais e prestadores de serviços que desejam proteger o negócio.",
+    how:
+      "O botão abre diretamente o ambiente do Bradesco para conhecer as opções e continuar a solicitação.",
+    when:
+      "Pode ajudar a reduzir o impacto financeiro de imprevistos que atinjam o estabelecimento ou os bens segurados.",
+    tip:
+      "Confira coberturas, exclusões, franquias, limites e assistências antes de concluir a contratação."
   }
 ];
 
@@ -501,6 +585,22 @@ const PRODUCT_VISUALS = {
     icon: "🧰",
     label: "Projetos e serviços",
     tone: "purple"
+  },
+
+  "santander-pj": {
+    icon: "PJ",
+    label: "Conta para sua empresa",
+    tone: "red"
+  },
+  "bradesco-saude": {
+    icon: "+",
+    label: "Plano de saúde empresarial",
+    tone: "red"
+  },
+  "bradesco-empresarial": {
+    icon: "B",
+    label: "Proteção para o seu negócio",
+    tone: "red"
   }
 };
 
@@ -3833,7 +3933,7 @@ function App() {
 
               <div>
                 <small>
-                  OPÇÃO DE CRÉDITO
+                  {selectedProduct.typeLabel || "OPÇÃO DE CRÉDITO"}
                 </small>
 
                 <h2>
@@ -3932,23 +4032,34 @@ function App() {
                 className="simulation-panel"
               >
                 <div className="simulation-heading">
-                  <span>SIMULAÇÃO ONLINE</span>
+                  <span>{selectedPartner.eyebrow || "SIMULAÇÃO ONLINE"}</span>
                   <strong>
-                    Continue com a instituição parceira
+                    {selectedPartner.heading || "Continue com a instituição parceira"}
                   </strong>
                 </div>
 
                 <div
                   className="partner-logo-card"
                 >
-                  <img
-                    src={selectedPartner.logo}
-                    alt={selectedPartner.partner}
-                  />
+                  {selectedPartner.logo ? (
+                    <img
+                      src={selectedPartner.logo}
+                      alt={selectedPartner.partner}
+                    />
+                  ) : (
+                    <strong
+                      className={
+                        "partner-text-logo partner-text-logo-" +
+                        (selectedPartner.logoTone || "default")
+                      }
+                    >
+                      {selectedPartner.logoText || selectedPartner.partner}
+                    </strong>
+                  )}
                 </div>
 
                 <p>
-                  Faça sua simulação no ambiente seguro da instituição. A análise, as condições e a contratação são de responsabilidade dela.
+                  {selectedPartner.note || "Faça sua simulação no ambiente seguro da instituição. A análise, as condições e a contratação são de responsabilidade dela."}
                 </p>
 
                 <button
