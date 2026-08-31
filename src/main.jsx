@@ -34,6 +34,9 @@ const AMAZON_STORE_URL =
 const BABYSTOCK_STORE_URL =
   "https://lmdee.link/PXX29qIp80c0";
 
+const TOY_MANIA_STORE_URL =
+  "https://compre.vc/QKO7qQTkTz5X";
+
 const KIDY_STORE_URL =
   "https://acesse.vc/3DTYtW3WGPV3";
 
@@ -111,6 +114,9 @@ const LELOYN_STORE_URL =
 
 const MALWEE_STORE_URL =
   "https://compre.vc/D3ol81KqIMQU";
+
+const SAWARY_STORE_URL =
+  "https://acesse.vc/4k1A900Oi3Xv";
 
 const MARIA_VALENTINA_STORE_URL =
   "https://compre.vc/iwPEuqNJcNix";
@@ -2989,6 +2995,25 @@ function App() {
                 <button onClick={() => openExternal(MALWEE_STORE_URL)}>ABRIR MALWEE</button>
               </article>
 
+              <article className="shop-store-card sawary-store-card">
+                <div className="shop-store-art sawary-art" aria-hidden="true">
+                  <span className="partner-icon-bubble sawary-icon">
+                    <svg viewBox="0 0 64 64" focusable="false">
+                      <path d="M22 9h20l-2 46H24L22 9Z" />
+                      <path d="M22 20h20M32 20v35M22 10c3 5 17 5 20 0" />
+                      <path d="M32 20 24 55M32 20l8 35" />
+                    </svg>
+                  </span>
+                  <b>Sawary Jeans</b>
+                </div>
+                <small>VITRINE CREDITI</small>
+                <h2>Jeans para todos os estilos</h2>
+                <p>Calças, shorts e outras peças em jeans para renovar o visual.</p>
+                <button onClick={() => openExternal(SAWARY_STORE_URL)}>
+                  ABRIR SAWARY JEANS
+                </button>
+              </article>
+
               <article className="shop-store-card mariavalentina-store-card">
                 <div className="shop-store-art mariavalentina-art" aria-hidden="true">
                   <span className="partner-icon-bubble mariavalentina-icon">
@@ -3044,6 +3069,27 @@ function App() {
                   }
                 >
                   ABRIR BABYSTOCK
+                </button>
+              </article>
+
+              <article className="shop-store-card toymania-store-card">
+                <div className="shop-store-art toymania-art" aria-hidden="true">
+                  <span className="partner-icon-bubble toymania-icon">
+                    <svg viewBox="0 0 64 64" focusable="false">
+                      <rect x="9" y="31" width="22" height="22" rx="4" />
+                      <rect x="33" y="22" width="22" height="31" rx="4" />
+                      <circle cx="16" cy="39" r="2" />
+                      <circle cx="24" cy="39" r="2" />
+                      <path d="M39 30h10M44 25v10M14 47h12" />
+                    </svg>
+                  </span>
+                  <b>Toy Mania</b>
+                </div>
+                <small>VITRINE CREDITI</small>
+                <h2>Diversão para todas as idades</h2>
+                <p>Brinquedos, jogos e opções para presentear crianças.</p>
+                <button onClick={() => openExternal(TOY_MANIA_STORE_URL)}>
+                  ABRIR TOY MANIA
                 </button>
               </article>
 
