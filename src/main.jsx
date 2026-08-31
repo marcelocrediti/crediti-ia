@@ -173,6 +173,18 @@ const PARTNER_PRODUCTS = {
     button: "SIMULAR SEU CRÉDITO"
   },
 
+  "santander-pf": {
+    name: "Conta Santander PF",
+    partner: "Santander",
+    logoText: "Santander",
+    logoTone: "santander",
+    url: "https://acesse.vc/wYzJqgRxYyeV",
+    button: "ABRIR CONTA NO SANTANDER",
+    eyebrow: "ABERTURA ONLINE",
+    heading: "Abra sua conta diretamente no Santander",
+    note: "Você será direcionado ao ambiente do Santander. A abertura da conta está sujeita à análise e aprovação cadastral do banco."
+  },
+
   "santander-pj": {
     name: "Conta PJ Santander",
     partner: "Santander Empresas",
@@ -441,6 +453,22 @@ const products = [
   },
 
   {
+    id: "santander-pf",
+    name: "Conta Santander PF",
+    typeLabel: "CONTA PARA VOCÊ",
+    what:
+      "Abertura de conta para pessoa física no Santander, com acesso aos serviços disponíveis após aprovação do banco.",
+    forWho:
+      "Pessoas físicas que desejam solicitar uma conta Santander.",
+    how:
+      "Toque no botão para continuar diretamente no Santander. A abertura está sujeita à análise e aprovação cadastral do banco.",
+    when:
+      "Pode ajudar a organizar recebimentos, pagamentos e movimentações do dia a dia em uma conta pessoal.",
+    tip:
+      "Antes de concluir, confira as condições, tarifas e serviços incluídos na conta escolhida."
+  },
+
+  {
     id: "santander-pj",
     name: "Conta PJ Santander",
     typeLabel: "CONTA EMPRESARIAL",
@@ -559,6 +587,11 @@ const PRODUCT_VISUALS = {
     tone: "purple"
   },
 
+  "santander-pf": {
+    icon: "PF",
+    label: "Conta para pessoa física",
+    tone: "red"
+  },
   "santander-pj": {
     icon: "PJ",
     label: "Conta para sua empresa",
@@ -673,6 +706,23 @@ const SERVICE_GROUPS = [
         description: "Crie seu site, registre seu domínio, contrate hospedagem e use e-mail profissional.",
         url: "https://compre.vc/UQB14aWvWkUs",
         action: "CONHECER HOSTINGER ›"
+      }
+    ]
+  },
+  {
+    title: "Entretenimento e streaming",
+    items: [
+      {
+        name: "Prime Video",
+        description: "Filmes, séries e produções para assistir quando quiser.",
+        url: "https://acesse.vc/SFSkjNoGG0FM",
+        action: "CONHECER PRIME VIDEO ›"
+      },
+      {
+        name: "Disney+",
+        description: "Filmes, séries e conteúdos Disney, Pixar, Marvel, Star Wars e muito mais.",
+        url: "https://acesse.vc/1zdftKvafBQ8",
+        action: "CONHECER DISNEY+ ›"
       }
     ]
   },
