@@ -3403,6 +3403,15 @@ html.splash-active #root {
   color: #244d87;
 }
 
+.career-card.unifatecie .career-brand {
+  background: linear-gradient(135deg, #102f5c 0%, #174d86 72%, #f29b20 72%, #f29b20 100%);
+}
+
+.career-card.unifatecie .career-copy small,
+.career-card.unifatecie .career-copy span {
+  color: #174d86;
+}
+
 
 /* C&A no carrossel de lojas parceiras */
 .shop-store-art.cea-art {
