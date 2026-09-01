@@ -3412,6 +3412,15 @@ html.splash-active #root {
   color: #174d86;
 }
 
+.career-card.idomed .career-brand {
+  background: linear-gradient(135deg, #083f68 0%, #0c6785 65%, #3cc2ba 65%, #3cc2ba 100%);
+}
+
+.career-card.idomed .career-copy small,
+.career-card.idomed .career-copy span {
+  color: #08677b;
+}
+
 
 /* C&A no carrossel de lojas parceiras */
 .shop-store-art.cea-art {
