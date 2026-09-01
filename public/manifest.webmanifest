@@ -1,7 +1,7 @@
 {
   "name": "Crediti",
   "short_name": "Crediti",
-  "description": "Crédito com responsabilidade",
+  "description": "Crédito com responsabilidade. Código de verificação: a7fd",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
