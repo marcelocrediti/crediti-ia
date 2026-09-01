@@ -130,6 +130,45 @@ const PROMOFARMA_STORE_URL =
 const ESTACIO_URL =
   "https://estacio.br/selecao?cod_agente=14369444&u=804215&end=1";
 
+const EDUCATION_PARTNERS = [
+  {
+    id: "estacio",
+    name: "Estácio",
+    symbol: "◇",
+    category: "GRADUAÇÃO, PÓS E CURSOS",
+    title: "Escolha seu próximo passo",
+    action: "CONHECER CURSOS ›",
+    url: ESTACIO_URL
+  },
+  {
+    id: "wyden",
+    name: "Wyden",
+    symbol: "W",
+    category: "GRADUAÇÃO, PÓS E CURSOS TÉCNICOS",
+    title: "Formação para transformar sua carreira",
+    action: "CONHECER CURSOS ›",
+    url: "https://wyden.com.br/selecao?cod_agente=14369444&u=805310&end=1"
+  },
+  {
+    id: "uninter",
+    name: "Uninter",
+    symbol: "U",
+    category: "PRESENCIAL, SEMIPRESENCIAL E EAD",
+    title: "Estude com flexibilidade onde estiver",
+    action: "VER OPÇÕES DE CURSOS ›",
+    url: "https://fichadeinscricao.uninter.com/Inscricoes/Hash/70DgPqJpvjeEXJznyJXfu44e744BN1zPIXnEKsZszmFvRv1J-jy9YsxcfRbl17W0EpcUpmrhwFI"
+  },
+  {
+    id: "pravaler",
+    name: "Pravaler",
+    symbol: "R$",
+    category: "FINANCIAMENTO ESTUDANTIL",
+    title: "Faculdade com parcelas que cabem no bolso",
+    action: "SIMULAR FINANCIAMENTO ›",
+    url: "https://afiliado.saberemrede.net/checkout-pravaler/313855?sponsor=805324&e=1"
+  }
+];
+
 const PARTNER_PRODUCTS = {
   inss: {
     name: "Consignado INSS",
@@ -2399,26 +2438,36 @@ function App() {
 
             <h2>Formação e carreira</h2>
 
-            <button
-              className="career-card"
-              onClick={() =>
-                window.open(
-                  ESTACIO_URL,
-                  "_blank"
-                )
-              }
-            >
-              <div className="career-brand">
-                <i aria-hidden="true">◇</i>
-                <b>Estácio</b>
-              </div>
+            <div className="education-partner-grid">
+              {EDUCATION_PARTNERS.map(
+                (partner) => (
+                  <button
+                    className={`career-card ${partner.id}`}
+                    key={partner.id}
+                    onClick={() =>
+                      window.open(
+                        partner.url,
+                        "_blank",
+                        "noopener,noreferrer"
+                      )
+                    }
+                  >
+                    <div className="career-brand">
+                      <i aria-hidden="true">
+                        {partner.symbol}
+                      </i>
+                      <b>{partner.name}</b>
+                    </div>
 
-              <div className="career-copy">
-                <small>GRADUAÇÃO, PÓS E CURSOS</small>
-                <strong>Escolha seu próximo passo</strong>
-                <span>CONHECER CURSOS ›</span>
-              </div>
-            </button>
+                    <div className="career-copy">
+                      <small>{partner.category}</small>
+                      <strong>{partner.title}</strong>
+                      <span>{partner.action}</span>
+                    </div>
+                  </button>
+                )
+              )}
+            </div>
           </section>
 
           <section className="financial-learning-heading">
