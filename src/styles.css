@@ -1929,39 +1929,26 @@ html.splash-active #root {
   filter: contrast(1.08) saturate(1.12);
 }
 
-.direct-inss .direct-logo {
+/* Cores fixas por instituição: o mesmo banco usa sempre a mesma identidade */
+.direct-inss .direct-logo,
+.direct-bpc .direct-logo {
   background: linear-gradient(135deg, #d8eaff, #b9d8ff);
 }
 
-.direct-inss .primary-action {
+.direct-inss .primary-action,
+.direct-bpc .primary-action {
   background: #1261a8;
   color: #ffffff;
 }
 
-.direct-bpc .direct-logo {
-  background: linear-gradient(135deg, #e2edff, #c9dafa);
-}
-
-.direct-bpc .primary-action {
-  background: #244b82;
-  color: #ffffff;
-}
-
-.direct-fgts .direct-logo {
+.direct-fgts .direct-logo,
+.direct-clt .direct-logo {
   background: linear-gradient(135deg, #d8f4e2, #bce7cc);
 }
 
-.direct-fgts .primary-action {
-  background: #158447;
-  color: #ffffff;
-}
-
-.direct-clt .direct-logo {
-  background: linear-gradient(135deg, #e5ebff, #ccd8ff);
-}
-
+.direct-fgts .primary-action,
 .direct-clt .primary-action {
-  background: #354d91;
+  background: #158447;
   color: #ffffff;
 }
 
