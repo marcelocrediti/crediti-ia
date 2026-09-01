@@ -157,6 +157,15 @@ const EDUCATION_PARTNERS = [
     title: "Estude com flexibilidade onde estiver",
     action: "VER OPÇÕES DE CURSOS ›",
     url: "https://fichadeinscricao.uninter.com/Inscricoes/Hash/70DgPqJpvjeEXJznyJXfu44e744BN1zPIXnEKsZszmFvRv1J-jy9YsxcfRbl17W0EpcUpmrhwFI"
+  },
+  {
+    id: "unifatecie",
+    name: "UniFatecie",
+    symbol: "UF",
+    category: "GRADUAÇÃO, PÓS E SEGUNDA GRADUAÇÃO",
+    title: "Escolha sua formação presencial ou EAD",
+    action: "CONHECER CURSOS ›",
+    url: "https://afiliado.saberemrede.net/services?type=D&institution=UNIFATECIE%20-%20Consultores&campaign=unifatecie&&buyer=94410&campaign=unifatecie&shared=true"
   }
 ];
 
