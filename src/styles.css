@@ -4026,3 +4026,113 @@ html.splash-active #root {
 .toymania-store-card > button {
   background: #6540a2;
 }
+
+
+/* Créditos em destaque: mesma cor usada pela instituição na simulação */
+.product-strip .product-strip-card {
+  width: 168px;
+  min-width: 168px;
+  min-height: 190px;
+  padding: 12px;
+}
+
+.product-strip-logo {
+  width: 100%;
+  height: 58px;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border-radius: 12px;
+  background: #f3f3f3;
+}
+
+.product-strip-logo img {
+  width: 100%;
+  height: 100%;
+  padding: 7px;
+  box-sizing: border-box;
+  object-fit: contain;
+  border-radius: 0;
+  background: transparent;
+  mix-blend-mode: multiply;
+  filter: contrast(1.08) saturate(1.12);
+}
+
+.product-strip .product-strip-logo .product-strip-brand {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  border-radius: 0;
+  color: inherit;
+  font-size: 18px;
+}
+
+.product-strip .product-strip-card > strong {
+  margin-top: 12px;
+  font-size: 12px;
+}
+
+.product-strip .product-strip-action {
+  width: 100%;
+  min-height: 38px;
+  margin-top: auto;
+  padding: 8px 7px;
+  box-sizing: border-box;
+  display: grid;
+  place-items: center;
+  border-radius: 11px;
+  color: #ffffff;
+  font-size: 9px;
+  line-height: 1;
+  text-align: center;
+}
+
+.product-strip-inss .product-strip-logo,
+.product-strip-bpc .product-strip-logo {
+  background: linear-gradient(135deg, #d8eaff, #b9d8ff);
+}
+
+.product-strip-inss .product-strip-action,
+.product-strip-bpc .product-strip-action {
+  background: #1261a8;
+}
+
+.product-strip-fgts .product-strip-logo,
+.product-strip-clt .product-strip-logo {
+  background: linear-gradient(135deg, #d8f4e2, #bce7cc);
+}
+
+.product-strip-fgts .product-strip-action,
+.product-strip-clt .product-strip-action {
+  background: #158447;
+}
+
+.product-strip-cartao .product-strip-logo {
+  background: linear-gradient(135deg, #eee4ff, #d9c7ff);
+}
+
+.product-strip-cartao .product-strip-action {
+  background: #6944ad;
+}
+
+.product-strip-energia .product-strip-logo {
+  background: linear-gradient(135deg, #fff0c9, #ffdda0);
+}
+
+.product-strip-energia .product-strip-action {
+  background: #e99016;
+  color: #111111;
+}
+
+.product-strip-pravaler .product-strip-logo {
+  background: linear-gradient(135deg, #5522b8, #8546db);
+  color: #ffffff;
+}
+
+.product-strip-pravaler .product-strip-action {
+  background: #FDCE00;
+  color: #111111;
+}
