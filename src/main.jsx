@@ -4632,6 +4632,10 @@ function App() {
               4
             ).map((productKey) => (
               <button
+                className={
+                  "product-strip-card product-strip-" +
+                  productKey
+                }
                 key={productKey}
                 onClick={() =>
                   productKey === "pravaler"
@@ -4639,26 +4643,29 @@ function App() {
                     : setScreen("direct")
                 }
               >
-                {PARTNER_PRODUCTS[
-                  productKey
-                ].logo ? (
-                  <img
-                    src={
-                      PARTNER_PRODUCTS[
-                        productKey
-                      ].logo
-                    }
-                    alt=""
-                  />
-                ) : (
-                  <span className="product-strip-brand pravaler-strip-brand">
-                    {
-                      PARTNER_PRODUCTS[
-                        productKey
-                      ].logoText
-                    }
-                  </span>
-                )}
+                <div className="product-strip-logo">
+                  {PARTNER_PRODUCTS[
+                    productKey
+                  ].logo ? (
+                    <img
+                      src={
+                        PARTNER_PRODUCTS[
+                          productKey
+                        ].logo
+                      }
+                      alt=""
+                    />
+                  ) : (
+                    <span className="product-strip-brand">
+                      {
+                        PARTNER_PRODUCTS[
+                          productKey
+                        ].logoText
+                      }
+                    </span>
+                  )}
+                </div>
+
                 <strong>
                   {
                     PARTNER_PRODUCTS[
@@ -4666,10 +4673,11 @@ function App() {
                     ].name
                   }
                 </strong>
-                <span>
+
+                <span className="product-strip-action">
                   {productKey === "pravaler"
-                    ? "Financiar ›"
-                    : "Simular ›"}
+                    ? "FINANCIAR ›"
+                    : "SIMULAR ›"}
                 </span>
               </button>
             ))}
