@@ -2225,7 +2225,10 @@ function App() {
 
                 return (
                   <article
-                    className="direct-card"
+                    className={
+                      "direct-card direct-" +
+                      productKey
+                    }
                     key={productKey}
                   >
                     <div
