@@ -166,6 +166,15 @@ const EDUCATION_PARTNERS = [
     title: "Escolha sua formação presencial ou EAD",
     action: "CONHECER CURSOS ›",
     url: "https://afiliado.saberemrede.net/services?type=D&institution=UNIFATECIE%20-%20Consultores&campaign=unifatecie&&buyer=94410&campaign=unifatecie&shared=true"
+  },
+  {
+    id: "idomed",
+    name: "IDOMED",
+    symbol: "+",
+    category: "MEDICINA, ODONTOLOGIA E PÓS",
+    title: "Formação para cuidar e transformar vidas",
+    action: "CONHECER CURSOS ›",
+    url: "https://www.idomed.com.br/selecao?cod_agente=14369444&u=805477"
   }
 ];
 
