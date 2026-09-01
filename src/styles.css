@@ -1534,6 +1534,32 @@ html.splash-active #root {
   max-width: 280px;
 }
 
+.pravaler-banner {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, #5522b8 0%, #8546db 100%);
+  color: #ffffff;
+}
+
+.pravaler-banner::after {
+  content: "R$";
+  position: absolute;
+  right: 20px;
+  top: 20px;
+  width: 52px;
+  height: 52px;
+  display: grid;
+  place-items: center;
+  border: 2px solid rgba(255, 255, 255, 0.85);
+  border-radius: 16px;
+  font-size: 16px;
+  font-weight: 900;
+}
+
+.pravaler-banner strong {
+  max-width: 245px;
+}
+
 .dark-banner {
   background: #171717;
   color: #ffffff;
@@ -1828,6 +1854,40 @@ html.splash-active #root {
   max-width: 100%;
   max-height: 58px;
   object-fit: contain;
+}
+
+.direct-logo strong {
+  font-size: 18px;
+  font-weight: 900;
+  letter-spacing: -0.04em;
+}
+
+.direct-logo.pravaler-logo {
+  background: linear-gradient(135deg, #5522b8, #8546db);
+  color: #ffffff;
+}
+
+.partner-text-logo-pravaler {
+  color: #672dcc;
+  font-weight: 900;
+}
+
+.product-strip .product-strip-brand {
+  width: 100%;
+  height: 54px;
+  margin-top: 0;
+  padding: 6px;
+  box-sizing: border-box;
+  display: grid;
+  place-items: center;
+  border-radius: 11px;
+  font-size: 17px;
+  font-weight: 900;
+}
+
+.product-strip .pravaler-strip-brand {
+  background: linear-gradient(135deg, #5522b8, #8546db);
+  color: #ffffff;
 }
 
 .direct-card small {
@@ -3263,53 +3323,62 @@ html.splash-active #root {
   font-size: 9px;
 }
 
-.education-partner-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
+.education-partner-carousel {
+  margin: 0 -16px;
+  padding: 0 16px 8px;
+  display: flex;
+  gap: 14px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
 }
 
-.education-partner-grid .career-card {
-  height: 100%;
-  min-width: 0;
-}
-
-.education-partner-grid .career-brand {
-  min-height: 64px;
-  padding: 11px 13px;
-}
-
-.education-partner-grid .career-brand i {
-  flex: 0 0 auto;
-  transform: none;
-  border-radius: 12px;
-  font-style: normal;
-  font-size: 13px;
-  font-weight: 900;
-}
-
-.education-partner-grid .career-brand i::after {
+.education-partner-carousel::-webkit-scrollbar {
   display: none;
 }
 
-.education-partner-grid .career-brand b {
+.education-partner-carousel .career-card {
+  width: min(82vw, 340px);
+  min-width: min(82vw, 340px);
+  min-height: 205px;
+  scroll-snap-align: start;
+}
+
+.education-partner-carousel .career-brand {
+  min-height: 78px;
+  padding: 14px 18px;
+}
+
+.education-partner-carousel .career-brand i {
+  flex: 0 0 auto;
+  transform: none;
+  border-radius: 13px;
+  font-style: normal;
+  font-size: 14px;
+  font-weight: 900;
+}
+
+.education-partner-carousel .career-brand i::after {
+  display: none;
+}
+
+.education-partner-carousel .career-brand b {
   min-width: 0;
-  font-size: clamp(18px, 5vw, 24px);
-  overflow-wrap: anywhere;
+  font-size: 25px;
 }
 
-.education-partner-grid .career-copy {
-  height: 100%;
+.education-partner-carousel .career-copy {
+  min-height: 102px;
 }
 
-.education-partner-grid .career-copy strong {
-  font-size: 15px;
+.education-partner-carousel .career-copy strong {
+  font-size: 18px;
 }
 
-.education-partner-grid .career-copy span {
-  align-self: end;
+.education-partner-carousel .career-copy span {
   margin-top: auto;
-  padding-top: 8px;
+  padding-top: 10px;
 }
 
 .career-card.estacio .career-brand {
@@ -3332,21 +3401,6 @@ html.splash-active #root {
 .career-card.uninter .career-copy small,
 .career-card.uninter .career-copy span {
   color: #244d87;
-}
-
-.career-card.pravaler .career-brand {
-  background: linear-gradient(135deg, #6226c9 0%, #8b4de0 100%);
-}
-
-.career-card.pravaler .career-copy small,
-.career-card.pravaler .career-copy span {
-  color: #6327bb;
-}
-
-@media (max-width: 360px) {
-  .education-partner-grid {
-    grid-template-columns: 1fr;
-  }
 }
 
 
