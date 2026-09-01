@@ -157,19 +157,22 @@ const EDUCATION_PARTNERS = [
     title: "Estude com flexibilidade onde estiver",
     action: "VER OPÇÕES DE CURSOS ›",
     url: "https://fichadeinscricao.uninter.com/Inscricoes/Hash/70DgPqJpvjeEXJznyJXfu44e744BN1zPIXnEKsZszmFvRv1J-jy9YsxcfRbl17W0EpcUpmrhwFI"
-  },
-  {
-    id: "pravaler",
-    name: "Pravaler",
-    symbol: "R$",
-    category: "FINANCIAMENTO ESTUDANTIL",
-    title: "Faculdade com parcelas que cabem no bolso",
-    action: "SIMULAR FINANCIAMENTO ›",
-    url: "https://afiliado.saberemrede.net/checkout-pravaler/313855?sponsor=805324&e=1"
   }
 ];
 
 const PARTNER_PRODUCTS = {
+  pravaler: {
+    name: "Financiamento estudantil",
+    partner: "Pravaler",
+    logoText: "Pravaler",
+    logoTone: "pravaler",
+    url: "https://afiliado.saberemrede.net/checkout-pravaler/313855?sponsor=805324&e=1",
+    button: "SIMULAR FINANCIAMENTO",
+    eyebrow: "FINANCIAMENTO ESTUDANTIL",
+    heading: "Simule seu financiamento para a faculdade",
+    note: "Você será direcionado ao Pravaler. A análise, as condições e a contratação são de responsabilidade do Pravaler."
+  },
+
   inss: {
     name: "Consignado INSS",
     partner: "Banco BRB",
@@ -247,6 +250,22 @@ const ANALYSTS = {
 };
 
 const products = [
+  {
+    id: "pravaler",
+    name: "Financiamento estudantil Pravaler",
+    typeLabel: "FINANCIAMENTO PARA ESTUDAR",
+    what:
+      "É um financiamento estudantil privado que permite dividir o valor de um semestre da faculdade em mais parcelas.",
+    forWho:
+      "Calouros ou alunos que já estão matriculados em uma instituição participante e precisam reduzir o valor pago por mês.",
+    how:
+      "A pessoa escolhe a faculdade e o curso, faz a simulação online e envia os dados para análise do Pravaler.",
+    when:
+      "Pode ajudar quem deseja começar ou continuar a faculdade e precisa de mais tempo para pagar as mensalidades.",
+    tip:
+      "Antes de contratar, confira o valor total, a taxa, o prazo e se as parcelas continuam cabendo no seu orçamento."
+  },
+
   {
     id: "inss",
     name: "Consignado INSS",
@@ -493,6 +512,7 @@ const products = [
 ];
 
 const DIRECT_PRODUCT_KEYS = [
+  "pravaler",
   "inss",
   "bpc",
   "fgts",
@@ -502,6 +522,11 @@ const DIRECT_PRODUCT_KEYS = [
 ];
 
 const PRODUCT_VISUALS = {
+  pravaler: {
+    icon: "R$",
+    label: "Financiamento para faculdade",
+    tone: "purple"
+  },
   inss: {
     icon: "INSS",
     label: "Aposentados e pensionistas",
@@ -2185,11 +2210,24 @@ function App() {
                     className="direct-card"
                     key={productKey}
                   >
-                    <div className="direct-logo">
-                      <img
-                        src={product.logo}
-                        alt={product.partner}
-                      />
+                    <div
+                      className={
+                        "direct-logo " +
+                        (product.logoTone
+                          ? product.logoTone + "-logo"
+                          : "")
+                      }
+                    >
+                      {product.logo ? (
+                        <img
+                          src={product.logo}
+                          alt={product.partner}
+                        />
+                      ) : (
+                        <strong>
+                          {product.logoText || product.partner}
+                        </strong>
+                      )}
                     </div>
 
                     <div>
@@ -2210,7 +2248,7 @@ function App() {
                         )
                       }
                     >
-                      SIMULAR SEU CRÉDITO
+                      {product.button || "SIMULAR SEU CRÉDITO"}
                     </button>
                   </article>
                 );
@@ -2438,7 +2476,10 @@ function App() {
 
             <h2>Formação e carreira</h2>
 
-            <div className="education-partner-grid">
+            <div
+              className="education-partner-carousel"
+              aria-label="Instituições de ensino parceiras"
+            >
               {EDUCATION_PARTNERS.map(
                 (partner) => (
                   <button
@@ -4426,6 +4467,23 @@ function App() {
           </button>
 
           <button
+            className="home-banner pravaler-banner"
+            onClick={() =>
+              openPartnerLink("pravaler")
+            }
+          >
+            <small>
+              FINANCIAMENTO ESTUDANTIL
+            </small>
+            <strong>
+              Faça sua simulação com o Pravaler
+            </strong>
+            <span>
+              Financie sua faculdade ›
+            </span>
+          </button>
+
+          <button
             className="home-banner dark-banner"
             onClick={() =>
               setScreen("learn")
@@ -4555,17 +4613,31 @@ function App() {
               <button
                 key={productKey}
                 onClick={() =>
-                  setScreen("direct")
+                  productKey === "pravaler"
+                    ? openPartnerLink(productKey)
+                    : setScreen("direct")
                 }
               >
-                <img
-                  src={
-                    PARTNER_PRODUCTS[
-                      productKey
-                    ].logo
-                  }
-                  alt=""
-                />
+                {PARTNER_PRODUCTS[
+                  productKey
+                ].logo ? (
+                  <img
+                    src={
+                      PARTNER_PRODUCTS[
+                        productKey
+                      ].logo
+                    }
+                    alt=""
+                  />
+                ) : (
+                  <span className="product-strip-brand pravaler-strip-brand">
+                    {
+                      PARTNER_PRODUCTS[
+                        productKey
+                      ].logoText
+                    }
+                  </span>
+                )}
                 <strong>
                   {
                     PARTNER_PRODUCTS[
@@ -4573,7 +4645,11 @@ function App() {
                     ].name
                   }
                 </strong>
-                <span>Simular ›</span>
+                <span>
+                  {productKey === "pravaler"
+                    ? "Financiar ›"
+                    : "Simular ›"}
+                </span>
               </button>
             ))}
           </div>
