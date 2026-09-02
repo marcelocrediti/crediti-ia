@@ -991,6 +991,12 @@ const APP_SEARCH_ITEMS = [
     keywords: "aprender dica golpe seguranca fraude orçamento divida faculdade curso estudo educacao economia organizar conta contas"
   },
   {
+    title: "Melhore seu Score",
+    description: "Monte um plano financeiro personalizado de 30, 60 e 90 dias",
+    screen: "scorePlan",
+    keywords: "score pontuacao baixa aumentar melhorar diagnostico plano credito serasa cadastro positivo contas dividas"
+  },
+  {
     title: "Serviços úteis",
     description: "Serviços oficiais e soluções para empresas",
     screen: "services",
@@ -1019,7 +1025,8 @@ const CHAT_ROUTE_LABELS = {
   protect: ["Abrir Crediti Protege", "Veja como evitar golpes"],
   organizer: ["Organizar minhas contas", "Cadastre datas e vencimentos"],
   business: ["Abrir Central do Empresário", "Soluções para empresas e MEI"],
-  debtHelp: ["Renegociar minhas dívidas", "Encontre o canal oficial correto"]
+  debtHelp: ["Renegociar minhas dívidas", "Encontre o canal oficial correto"],
+  scorePlan: ["Melhore seu Score", "Monte um plano de 30, 60 e 90 dias"]
 };
 
 const PRODUCT_VISUALS = {
@@ -1168,6 +1175,140 @@ const LEARN_ARTICLES = [
     ]
   }
 ];
+
+const SCORE_QUESTIONS = [
+  {
+    key: "range",
+    question: "Em qual faixa está seu Score hoje?",
+    help: "Não precisa informar CPF nem o número exato.",
+    options: [
+      ["below300", "Abaixo de 300"],
+      ["300to500", "Entre 300 e 500"],
+      ["501to700", "Entre 501 e 700"],
+      ["above700", "Acima de 700"],
+      ["unknown", "Não sei meu Score"]
+    ]
+  },
+  {
+    key: "debt",
+    question: "Você possui alguma conta ou dívida atrasada?",
+    help: "Essa resposta ajuda a definir a primeira prioridade.",
+    options: [
+      ["yes", "Sim"],
+      ["no", "Não"],
+      ["unknown", "Não sei"]
+    ]
+  },
+  {
+    key: "debtKinds",
+    question: "Quais dívidas mais preocupam você?",
+    help: "Você pode marcar mais de uma opção e depois continuar.",
+    multiple: true,
+    onlyWhenDebt: true,
+    options: [
+      ["card", "Cartão de crédito"],
+      ["loan", "Empréstimo bancário"],
+      ["financing", "Financiamento"],
+      ["utilities", "Água, luz ou telefone"],
+      ["tax", "Impostos ou dívida ativa"],
+      ["education", "Faculdade ou FIES"],
+      ["other", "Outra dívida"]
+    ]
+  },
+  {
+    key: "payments",
+    question: "Como estão os pagamentos das suas contas?",
+    help: "Pense nos últimos meses.",
+    options: [
+      ["always", "Pago no prazo"],
+      ["sometimes", "Às vezes atraso"],
+      ["often", "Atraso com frequência"]
+    ]
+  },
+  {
+    key: "requests",
+    question: "Você pediu crédito várias vezes recentemente?",
+    help: "Por exemplo: cartão, empréstimo ou financiamento.",
+    options: [
+      ["yes", "Sim"],
+      ["no", "Não"],
+      ["unknown", "Não lembro"]
+    ]
+  },
+  {
+    key: "goal",
+    question: "Qual é seu principal objetivo?",
+    help: "O plano será preparado pensando nessa meta.",
+    options: [
+      ["vehicle", "Financiar carro ou moto"],
+      ["college", "Pagar a faculdade"],
+      ["card", "Conseguir um cartão"],
+      ["loan", "Conseguir um empréstimo"],
+      ["home", "Financiar um imóvel"],
+      ["organize", "Organizar minha vida financeira"]
+    ]
+  }
+];
+
+const SCORE_GOAL_LABELS = {
+  vehicle: "financiar um carro ou uma moto",
+  college: "organizar o pagamento da faculdade",
+  card: "buscar um cartão de crédito",
+  loan: "buscar um empréstimo",
+  home: "financiar um imóvel",
+  organize: "organizar a vida financeira"
+};
+
+function getScorePlan(answers) {
+  const first30 = [];
+  const next60 = [];
+  const final90 = [];
+
+  if (answers.range === "unknown") {
+    first30.push("Consulte sua pontuação gratuitamente no aplicativo ou site oficial da Serasa.");
+  }
+
+  if (answers.debt === "yes" || answers.debt === "unknown") {
+    first30.push("Liste as dívidas e verifique propostas somente nos canais oficiais dos credores.");
+    first30.push("Priorize contas essenciais e dívidas com juros mais altos, sem aceitar parcelas que apertem o orçamento.");
+  } else {
+    first30.push("Confira se existem contas esquecidas, dados desatualizados ou registros que você não reconhece.");
+  }
+
+  if (answers.payments !== "always") {
+    first30.push("Organize os vencimentos e ative lembretes para reduzir novos atrasos.");
+    next60.push("Mantenha as contas do mês em dia e acompanhe o orçamento toda semana.");
+  } else {
+    next60.push("Continue pagando as contas no prazo e preserve esse histórico positivo.");
+  }
+
+  if (answers.requests === "yes") {
+    next60.push("Evite fazer vários pedidos de crédito em pouco tempo. Compare antes e solicite apenas quando fizer sentido.");
+  } else {
+    next60.push("Antes de pedir crédito, compare valor total, juros, prazo e impacto da parcela na renda.");
+  }
+
+  next60.push("Mantenha seus dados atualizados nos canais oficiais e acompanhe qualquer mudança no seu histórico.");
+  final90.push("Consulte novamente seu Score e compare com o início do plano.");
+  final90.push(`Revise se o orçamento já comporta seu objetivo de ${SCORE_GOAL_LABELS[answers.goal] || "buscar crédito"}.`);
+  final90.push("Se estiver pronto, faça uma simulação por vez e confira todas as condições antes de continuar.");
+
+  return [
+    { title: "Primeiros 30 dias", items: first30 },
+    { title: "Até 60 dias", items: next60 },
+    { title: "Até 90 dias", items: final90 }
+  ];
+}
+
+const SCORE_DEBT_LABELS = {
+  card: "Cartão de crédito",
+  loan: "Empréstimo bancário",
+  financing: "Financiamento",
+  utilities: "Água, luz ou telefone",
+  tax: "Impostos ou dívida ativa",
+  education: "Faculdade ou FIES",
+  other: "Outra dívida"
+};
 
 const SERVICE_GROUPS = [
   {
@@ -1991,6 +2132,31 @@ function App() {
   });
 
   const [
+    scoreAnswers,
+    setScoreAnswers
+  ] = useState({});
+
+  const [
+    scorePlanStarted,
+    setScorePlanStarted
+  ] = useState(false);
+
+  const [
+    scoreName,
+    setScoreName
+  ] = useState("");
+
+  const [
+    scoreNameDraft,
+    setScoreNameDraft
+  ] = useState("");
+
+  const [
+    scoreMultiDraft,
+    setScoreMultiDraft
+  ] = useState([]);
+
+  const [
     billDraft,
     setBillDraft
   ] = useState({
@@ -2490,6 +2656,26 @@ function App() {
       )
     : [];
 
+  const scoreCurrentQuestion = SCORE_QUESTIONS.find(
+    (question) => {
+      if (question.onlyWhenDebt && scoreAnswers.debt !== "yes") {
+        return false;
+      }
+
+      const answer = scoreAnswers[question.key];
+      return question.multiple
+        ? !scoreAnswers[`${question.key}Confirmed`]
+        : !answer;
+    }
+  );
+
+  const scorePlanReady =
+    scorePlanStarted && Boolean(scoreName) && !scoreCurrentQuestion;
+
+  const scorePlanSections = scorePlanReady
+    ? getScorePlan(scoreAnswers)
+    : [];
+
   const financialRecommendations = useMemo(() => {
     if (!hasFinancialProfile) {
       return [];
@@ -2926,6 +3112,356 @@ function App() {
     window.scrollTo(0, 0);
   }
 
+  function openScorePlan() {
+    setScoreAnswers({});
+    setScoreName("");
+    setScoreNameDraft("");
+    setScoreMultiDraft([]);
+    setScorePlanStarted(false);
+    setScreen("scorePlan");
+    window.scrollTo(0, 0);
+  }
+
+  function startScorePlan() {
+    setScoreAnswers({});
+    setScoreName("");
+    setScoreNameDraft("");
+    setScoreMultiDraft([]);
+    setScorePlanStarted(true);
+    window.scrollTo(0, 0);
+  }
+
+  function answerScoreQuestion(key, value) {
+    setScoreAnswers((current) => ({
+      ...current,
+      [key]: value,
+      ...(key === "debt" && value !== "yes"
+        ? { debtKinds: [], debtKindsConfirmed: false }
+        : {})
+    }));
+  }
+
+  function submitScoreName(event) {
+    event.preventDefault();
+    const cleanName = scoreNameDraft.trim().replace(/\s+/g, " ");
+
+    if (cleanName.length < 2) {
+      showNotice("Digite seu nome para personalizar o plano.");
+      return;
+    }
+
+    setScoreName(cleanName.slice(0, 60));
+  }
+
+  function toggleScoreDebtKind(value) {
+    setScoreMultiDraft((current) =>
+      current.includes(value)
+        ? current.filter((item) => item !== value)
+        : [...current, value]
+    );
+  }
+
+  function confirmScoreDebtKinds() {
+    if (scoreMultiDraft.length === 0) {
+      showNotice("Marque pelo menos um tipo de dívida para continuar.");
+      return;
+    }
+
+    setScoreAnswers((current) => ({
+      ...current,
+      debtKinds: scoreMultiDraft,
+      debtKindsConfirmed: true
+    }));
+  }
+
+  async function downloadScorePlan() {
+    if (!scorePlanReady) {
+      return;
+    }
+
+    const { jsPDF } = await import("jspdf");
+
+    const loadImage = async (url) => {
+      try {
+        const response = await fetch(url);
+        const blob = await response.blob();
+        return await new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result);
+          reader.onerror = reject;
+          reader.readAsDataURL(blob);
+        });
+      } catch {
+        return "";
+      }
+    };
+
+    const creditinImage = await loadImage("/creditin-oficial.png");
+
+    const document = new jsPDF({
+      unit: "mm",
+      format: "a4"
+    });
+    const pageWidth = document.internal.pageSize.getWidth();
+    const pageHeight = document.internal.pageSize.getHeight();
+    const margin = 17;
+    const contentWidth = pageWidth - margin * 2;
+    let y = 0;
+
+    const drawHeader = () => {
+      document.setFillColor(253, 202, 1);
+      document.rect(0, 0, pageWidth, 31, "F");
+      document.setTextColor(17, 17, 17);
+      document.setFont("helvetica", "bold");
+      document.setFontSize(21);
+      document.text("CREDITI", margin, 14);
+      document.setFont("helvetica", "normal");
+      document.setFontSize(10);
+      document.text("Crédito com responsabilidade", margin, 22);
+      y = 42;
+    };
+
+    const ensureSpace = (needed) => {
+      if (y + needed > pageHeight - 18) {
+        document.addPage();
+        drawHeader();
+      }
+    };
+
+    const addWrappedText = (text, size = 10.5, weight = "normal", indent = 0) => {
+      document.setFont("helvetica", weight);
+      document.setFontSize(size);
+      const lines = document.splitTextToSize(text, contentWidth - indent);
+      ensureSpace(lines.length * 5 + 3);
+      document.text(lines, margin + indent, y);
+      y += lines.length * 5 + 3;
+    };
+
+    const drawDebtIcon = (kind, x, top) => {
+      document.setDrawColor(17, 17, 17);
+      document.setLineWidth(0.8);
+      if (kind === "card") {
+        document.roundedRect(x, top, 18, 12, 2, 2);
+        document.line(x, top + 4, x + 18, top + 4);
+        document.line(x + 3, top + 8, x + 8, top + 8);
+      } else if (kind === "loan") {
+        document.line(x + 1, top + 5, x + 9, top);
+        document.line(x + 9, top, x + 17, top + 5);
+        document.line(x + 2, top + 12, x + 16, top + 12);
+        [4, 9, 14].forEach((column) => document.line(x + column, top + 5, x + column, top + 11));
+      } else if (kind === "financing") {
+        document.roundedRect(x + 1, top + 5, 16, 7, 2, 2);
+        document.circle(x + 5, top + 12, 2);
+        document.circle(x + 14, top + 12, 2);
+        document.line(x + 4, top + 5, x + 7, top + 1);
+        document.line(x + 7, top + 1, x + 13, top + 1);
+        document.line(x + 13, top + 1, x + 16, top + 5);
+      } else if (kind === "utilities") {
+        document.circle(x + 9, top + 5, 5);
+        document.line(x + 6, top + 11, x + 12, top + 11);
+        document.line(x + 7, top + 14, x + 11, top + 14);
+      } else if (kind === "education") {
+        document.line(x, top + 5, x + 9, top);
+        document.line(x + 9, top, x + 18, top + 5);
+        document.line(x, top + 5, x + 9, top + 10);
+        document.line(x + 18, top + 5, x + 9, top + 10);
+        document.line(x + 4, top + 8, x + 4, top + 13, x + 14, top + 13, x + 14, top + 8);
+      } else {
+        document.roundedRect(x + 3, top, 12, 15, 1, 1);
+        document.line(x + 6, top + 5, x + 12, top + 5);
+        document.line(x + 6, top + 8, x + 12, top + 8);
+        document.line(x + 6, top + 11, x + 10, top + 11);
+      }
+    };
+
+    // Capa personalizada
+    document.setFillColor(253, 202, 1);
+    document.rect(0, 0, pageWidth, pageHeight, "F");
+    document.setTextColor(17, 17, 17);
+    document.setFont("helvetica", "bold");
+    document.setFontSize(24);
+    document.text("CREDITI", margin, 21);
+    document.setFont("helvetica", "normal");
+    document.setFontSize(10);
+    document.text("Crédito com responsabilidade", margin, 29);
+    document.setFont("helvetica", "bold");
+    document.setFontSize(30);
+    const coverTitle = document.splitTextToSize(`Plano de ${scoreName}`, 118);
+    document.text(coverTitle, margin, 72);
+    const coverBottom = 72 + coverTitle.length * 12;
+    document.setFontSize(19);
+    document.text("Evolução do Score", margin, coverBottom + 7);
+    document.setFont("helvetica", "normal");
+    document.setFontSize(12);
+    document.text(
+      document.splitTextToSize("Um passo a passo de 30, 60 e 90 dias para cuidar da sua vida financeira.", 112),
+      margin,
+      coverBottom + 22
+    );
+    if (creditinImage) {
+      document.addImage(creditinImage, "PNG", 118, 89, 75, 116, undefined, "FAST");
+    }
+    document.setFillColor(17, 17, 17);
+    document.roundedRect(margin, 230, contentWidth, 34, 4, 4, "F");
+    document.setTextColor(255, 255, 255);
+    document.setFont("helvetica", "bold");
+    document.setFontSize(13);
+    document.text("Seu objetivo", margin + 7, 242);
+    document.setFont("helvetica", "normal");
+    document.setFontSize(10.5);
+    document.text(
+      document.splitTextToSize(SCORE_GOAL_LABELS[scoreAnswers.goal] || "organizar a vida financeira", contentWidth - 14),
+      margin + 7,
+      251
+    );
+
+    // Diagnóstico e dívidas citadas
+    document.addPage();
+    drawHeader();
+    document.setFont("helvetica", "bold");
+    document.setFontSize(20);
+    document.text(`Diagnóstico de ${scoreName}`, margin, y);
+    y += 10;
+    document.setTextColor(85, 85, 85);
+    addWrappedText(
+      "Este diagnóstico foi montado com as respostas informadas na conversa com o Creditin.",
+      10
+    );
+    document.setTextColor(17, 17, 17);
+    y += 2;
+
+    const diagnosis = [
+      scoreAnswers.debt === "yes"
+        ? "Sua prioridade é organizar as dívidas antes de assumir uma nova parcela."
+        : scoreAnswers.debt === "unknown"
+          ? "Sua prioridade é verificar se existe alguma dívida ou registro que precisa de atenção."
+          : "Você informou não possuir dívida atrasada. Preserve os pagamentos em dia.",
+      scoreAnswers.payments === "always"
+        ? "O hábito de pagar no prazo é um ponto positivo e deve continuar."
+        : "Os vencimentos precisam de acompanhamento para reduzir novos atrasos.",
+      scoreAnswers.requests === "yes"
+        ? "Evite vários pedidos de crédito em sequência durante o plano."
+        : "Continue comparando antes de solicitar crédito."
+    ];
+
+    diagnosis.forEach((item, index) => {
+      document.setFillColor(index === 0 ? 255 : 247, index === 0 ? 248 : 247, index === 0 ? 207 : 247);
+      const lines = document.splitTextToSize(item, contentWidth - 20);
+      const cardHeight = Math.max(20, lines.length * 5 + 10);
+      document.roundedRect(margin, y, contentWidth, cardHeight, 3, 3, "F");
+      document.setFillColor(253, 202, 1);
+      document.circle(margin + 8, y + cardHeight / 2, 4, "F");
+      document.setFont("helvetica", "bold");
+      document.setFontSize(9);
+      document.text(String(index + 1), margin + 6.8, y + cardHeight / 2 + 1.5);
+      document.setFont("helvetica", "normal");
+      document.setFontSize(10.5);
+      document.text(lines, margin + 16, y + 8);
+      y += cardHeight + 5;
+    });
+
+    const selectedDebts = Array.isArray(scoreAnswers.debtKinds)
+      ? scoreAnswers.debtKinds
+      : [];
+    if (selectedDebts.length > 0) {
+      y += 4;
+      document.setFont("helvetica", "bold");
+      document.setFontSize(15);
+      document.text("Dívidas citadas na conversa", margin, y);
+      y += 9;
+      selectedDebts.forEach((kind) => {
+        ensureSpace(27);
+        document.setFillColor(255, 247, 201);
+        document.roundedRect(margin, y, contentWidth, 23, 3, 3, "F");
+        drawDebtIcon(kind, margin + 7, y + 4);
+        document.setFont("helvetica", "bold");
+        document.setFontSize(11);
+        document.text(SCORE_DEBT_LABELS[kind], margin + 32, y + 10);
+        document.setFont("helvetica", "normal");
+        document.setFontSize(8.5);
+        document.text("Organize valores, vencimentos e o canal oficial responsável.", margin + 32, y + 16);
+        y += 28;
+      });
+    }
+
+    // Passo a passo
+    document.addPage();
+    drawHeader();
+    document.setFont("helvetica", "bold");
+    document.setFontSize(20);
+    document.text("Seu passo a passo", margin, y);
+    y += 12;
+
+    scorePlanSections.forEach((section) => {
+      ensureSpace(28);
+      document.setFillColor(255, 247, 201);
+      document.roundedRect(margin, y - 5, contentWidth, 11, 2, 2, "F");
+      document.setFont("helvetica", "bold");
+      document.setFontSize(13);
+      document.text(section.title, margin + 4, y + 2);
+      y += 12;
+
+      section.items.forEach((item) => {
+        addWrappedText(`• ${item}`, 10.5, "normal", 2);
+      });
+      y += 3;
+    });
+
+    ensureSpace(34);
+    document.setFillColor(17, 17, 17);
+    document.roundedRect(margin, y, contentWidth, 29, 3, 3, "F");
+    document.setTextColor(255, 255, 255);
+    document.setFont("helvetica", "bold");
+    document.setFontSize(11);
+    document.text("Dica do Creditin", margin + 5, y + 8);
+    document.setFont("helvetica", "normal");
+    document.setFontSize(9);
+    document.text(
+      document.splitTextToSize(
+        "Consistência vale mais que pressa. Compare as condições e escolha uma parcela que caiba de verdade no seu orçamento.",
+        contentWidth - 10
+      ),
+      margin + 5,
+      y + 14
+    );
+    y += 37;
+
+    ensureSpace(62);
+    document.setFillColor(253, 202, 1);
+    document.roundedRect(margin, y, contentWidth, 27, 3, 3, "F");
+    document.setTextColor(17, 17, 17);
+    document.setFont("helvetica", "bold");
+    document.setFontSize(11.5);
+    document.text("Gostou deste conteúdo?", margin + 6, y + 9);
+    document.setFont("helvetica", "normal");
+    document.setFontSize(9.5);
+    document.text("Recomende o App Crediti para mais pessoas.", margin + 6, y + 17);
+    document.setFont("helvetica", "bold");
+    document.text("Instagram: @crediti.oficial", margin + 6, y + 23);
+    y += 34;
+
+    document.setDrawColor(17, 17, 17);
+    document.roundedRect(margin, y, contentWidth, 27, 3, 3);
+    document.setFont("helvetica", "bold");
+    document.setFontSize(11.5);
+    document.text("Quer conhecer suas opções de crédito?", margin + 6, y + 10);
+    document.setFont("helvetica", "normal");
+    document.setFontSize(9.5);
+    document.text("Acesse a aba Crédito no App Crediti.", margin + 6, y + 19);
+
+    const totalPages = document.getNumberOfPages();
+    for (let page = 1; page <= totalPages; page += 1) {
+      document.setPage(page);
+      document.setTextColor(85, 85, 85);
+      document.setFont("helvetica", "normal");
+      document.setFontSize(8);
+      document.text(`Plano de ${scoreName} • ${page}/${totalPages}`, margin, pageHeight - 8);
+    }
+
+    document.save(`plano-score-${normalize(scoreName).replace(/\s+/g, "-") || "crediti"}.pdf`);
+    showNotice("Seu plano foi gerado. Confira os downloads do celular.");
+  }
+
   function openChatRoute(route) {
     if (!route?.screen || !CHAT_ROUTE_LABELS[route.screen]) {
       return;
@@ -2938,6 +3474,12 @@ function App() {
     if (route.screen === "debtHelp") {
       setChatRoutes([]);
       openDebtHelp();
+      return;
+    }
+
+    if (route.screen === "scorePlan") {
+      setChatRoutes([]);
+      openScorePlan();
       return;
     }
 
@@ -5013,6 +5555,179 @@ function App() {
     );
   }
 
+  if (screen === "scorePlan") {
+    return (
+      <div className="app app-white app-with-nav">
+        <AppHeader
+          title="Melhore seu Score"
+          subtitle="Plano personalizado sem informar CPF"
+          onBack={() => setScreen("learn")}
+        />
+
+        <main className="modern-page score-plan-page">
+          {!scorePlanStarted ? (
+            <>
+              <section className="score-plan-hero">
+                <div>
+                  <span className="eyebrow">PLANO DE EVOLUÇÃO</span>
+                  <h1>Pequenas ações podem melhorar suas chances de crédito</h1>
+                  <p>O Creditin prepara um caminho prático para você seguir durante 90 dias.</p>
+                </div>
+                <img src="/creditin-oficial.png" alt="Creditin, assistente da Crediti" />
+              </section>
+
+              <section className="score-power-tips">
+                <span className="eyebrow">DICAS MAIS PODEROSAS</span>
+                <h2>O que realmente merece sua atenção</h2>
+                <div>
+                  <article>
+                    <b>1</b>
+                    <p><strong>Contas em dia</strong><small>Evite novos atrasos e organize os vencimentos.</small></p>
+                  </article>
+                  <article>
+                    <b>2</b>
+                    <p><strong>Dívidas organizadas</strong><small>Negocie apenas nos canais oficiais e dentro do seu orçamento.</small></p>
+                  </article>
+                  <article>
+                    <b>3</b>
+                    <p><strong>Menos pedidos</strong><small>Evite solicitar vários créditos em pouco tempo.</small></p>
+                  </article>
+                  <article>
+                    <b>4</b>
+                    <p><strong>Acompanhamento</strong><small>Confira seus dados e observe a evolução com constância.</small></p>
+                  </article>
+                </div>
+              </section>
+
+              <button className="score-start-button" onClick={startScorePlan}>
+                MONTAR MEU PLANO
+              </button>
+
+              <p className="score-disclaimer">
+                A Crediti não consulta seu Score e não promete aumento de pontos. O plano oferece orientação educativa baseada nas suas respostas.
+              </p>
+            </>
+          ) : (
+            <section className="score-conversation" aria-live="polite">
+              <div className="score-chat-intro">
+                <img src="/creditin-oficial.png" alt="" />
+                <div>
+                  <strong>Vamos montar seu plano</strong>
+                  <p>Responda cinco perguntas rápidas. Não vou pedir CPF, documento ou senha.</p>
+                </div>
+              </div>
+
+              <div className="score-chat-history">
+                {SCORE_QUESTIONS.map((question) => {
+                  const selectedValue = scoreAnswers[question.key];
+                  const selectedOption = question.multiple
+                    ? question.options
+                        .filter(([value]) => Array.isArray(selectedValue) && selectedValue.includes(value))
+                        .map(([, label]) => label)
+                        .join(", ")
+                    : question.options.find(([value]) => value === selectedValue)?.[1];
+
+                  if (!selectedOption) {
+                    return null;
+                  }
+
+                  return (
+                      <div className="score-chat-pair" key={question.key}>
+                        <div className="score-assistant-bubble">{question.question}</div>
+                        <div className="score-user-bubble">{selectedOption}</div>
+                      </div>
+                  );
+                })}
+              </div>
+
+              {!scoreName && (
+                <form className="score-name-question" onSubmit={submitScoreName}>
+                  <div className="score-question-copy">
+                    <img src="/creditin-oficial.png" alt="" />
+                    <div>
+                      <strong>Como você quer que seu nome apareça no PDF?</strong>
+                      <small>Usaremos o nome somente para personalizar o plano baixado.</small>
+                    </div>
+                  </div>
+                  <input
+                    value={scoreNameDraft}
+                    onChange={(event) => setScoreNameDraft(event.target.value)}
+                    placeholder="Digite seu nome"
+                    maxLength={60}
+                    autoComplete="name"
+                  />
+                  <button type="submit">CONTINUAR</button>
+                </form>
+              )}
+
+              {scoreName && scoreCurrentQuestion && (
+                <div className="score-current-question">
+                  <div className="score-question-copy">
+                    <img src="/creditin-oficial.png" alt="" />
+                    <div>
+                      <strong>{scoreCurrentQuestion.question}</strong>
+                      <small>{scoreCurrentQuestion.help}</small>
+                    </div>
+                  </div>
+                  <div className="score-answer-options">
+                    {scoreCurrentQuestion.options.map(([value, label]) => (
+                      <button
+                        key={value}
+                        className={
+                          scoreCurrentQuestion.multiple && scoreMultiDraft.includes(value)
+                            ? "selected"
+                            : ""
+                        }
+                        onClick={() =>
+                          scoreCurrentQuestion.multiple
+                            ? toggleScoreDebtKind(value)
+                            : answerScoreQuestion(scoreCurrentQuestion.key, value)
+                        }
+                      >
+                        {label}
+                      </button>
+                    ))}
+                  </div>
+                  {scoreCurrentQuestion.multiple && (
+                    <button className="score-multi-confirm" onClick={confirmScoreDebtKinds}>
+                      CONTINUAR
+                    </button>
+                  )}
+                </div>
+              )}
+
+              {scorePlanReady && (
+                <div className="score-plan-result">
+                  <span className="score-result-check" aria-hidden="true"><UiIcon name="shield" /></span>
+                  <span className="eyebrow">PLANO PRONTO</span>
+                  <h1>Seu caminho de 90 dias foi montado</h1>
+                  <p>Ele considera sua situação atual e o objetivo de {SCORE_GOAL_LABELS[scoreAnswers.goal]}.</p>
+
+                  <div className="score-plan-preview">
+                    {scorePlanSections.map((section) => (
+                      <article key={section.title}>
+                        <strong>{section.title}</strong>
+                        <ul>
+                          {section.items.map((item) => <li key={item}>{item}</li>)}
+                        </ul>
+                      </article>
+                    ))}
+                  </div>
+
+                  <button onClick={downloadScorePlan}>BAIXAR MEU PLANO EM PDF</button>
+                  <button className="score-restart-button" onClick={startScorePlan}>REFAZER AS PERGUNTAS</button>
+                  <small>A pontuação pode aumentar, permanecer igual ou variar. Não existe garantia de aprovação.</small>
+                </div>
+              )}
+            </section>
+          )}
+        </main>
+
+        <BottomNav active="learn" onNavigate={navigateMain} />
+      </div>
+    );
+  }
+
   if (screen === "learn") {
     return (
       <div className="app app-white app-with-nav">
@@ -5034,6 +5749,16 @@ function App() {
             <p>
               Formação, carreira e conteúdos simples para cuidar melhor do seu dinheiro.
             </p>
+          </section>
+
+          <section className="score-feature-card">
+            <img src="/creditin-oficial.png" alt="Creditin, assistente da Crediti" />
+            <div>
+              <span className="eyebrow">NOVO NA CREDITI</span>
+              <h2>Plano para melhorar suas chances de crédito</h2>
+              <p>Receba orientações para os próximos 30, 60 e 90 dias.</p>
+              <button onClick={openScorePlan}>MELHORE SEU SCORE</button>
+            </div>
           </section>
 
           <section className="career-section">
@@ -6534,7 +7259,7 @@ function App() {
                     key={`${route.screen}-${route.category || "geral"}-${index}`}
                     onClick={() => openChatRoute(route)}
                   >
-                    <span><UiIcon name={route.screen === "shop" ? "shop" : route.screen === "learn" ? "education" : route.screen === "partner" ? "partner" : route.screen === "protect" ? "shield" : route.screen === "organizer" ? "calendar" : route.screen === "business" ? "business" : "services"} /></span>
+                    <span><UiIcon name={route.screen === "shop" ? "shop" : route.screen === "learn" ? "education" : route.screen === "scorePlan" ? "star" : route.screen === "partner" ? "partner" : route.screen === "protect" ? "shield" : route.screen === "organizer" ? "calendar" : route.screen === "business" ? "business" : "services"} /></span>
                     <div>
                       <strong>{labels[0]}</strong>
                       <small>{labels[1]}</small>

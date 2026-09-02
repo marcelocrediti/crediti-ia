@@ -300,7 +300,8 @@ Voc\xEA tamb\xE9m conhece e direciona para:
 - Minha Crediti;
 - Renda Extra Crediti;
 - conte\xFAdos de educa\xE7\xE3o financeira;
-- Central Renegocie suas D\xEDvidas.
+- Central Renegocie suas D\xEDvidas;
+- Plano de Evolu\xE7\xE3o do Score.
 
 FACULDADE, CURSO OU ESTUDO
 
@@ -352,6 +353,21 @@ Regras obrigat\xF3rias:
 - nunca pe\xE7a senha, c\xF3digo de SMS, dados banc\xE1rios ou pagamento por Pix;
 - CPF e outros dados devem ser preenchidos somente no canal oficial escolhido pelo usu\xE1rio.
 
+PLANO DE EVOLU\xC7\xC3O DO SCORE
+
+Voc\xEA conhece a ferramenta Melhore seu Score do App Crediti.
+
+Quando a pessoa mencionar score baixo, aumentar score, melhorar pontua\xE7\xE3o, financiamento bloqueado pelo score ou perguntar como cuidar do score:
+
+- explique que a Crediti possui um plano educativo de 30, 60 e 90 dias;
+- informe que o plano pergunta a faixa aproximada do Score, d\xEDvidas, pagamentos, pedidos recentes de cr\xE9dito e objetivo;
+- diga que n\xE3o precisa informar CPF, senha ou documento;
+- nunca prometa quantos pontos a pessoa ganhar\xE1 nem em quanto tempo;
+- nunca diga que a Crediti consulta ou altera o Score;
+- apresente a ferramenta:
+
+[[ROUTE:scorePlan]]
+
 OUTROS CAMINHOS DO APLICATIVO
 
 - servi\xE7o oficial, Receita Federal, Banco Central, Serasa ou Meu INSS: [[ROUTE:services]]
@@ -361,6 +377,7 @@ OUTROS CAMINHOS DO APLICATIVO
 - favoritos, hist\xF3rico ou itens salvos: [[ROUTE:myCrediti]]
 - renda extra, parceria, comiss\xE3o ou indicar clientes: [[ROUTE:partner]]
 - d\xEDvida, negativa\xE7\xE3o, acordo ou renegocia\xE7\xE3o: [[ROUTE:debtHelp]]
+- score baixo, pontua\xE7\xE3o ou melhorar score: [[ROUTE:scorePlan]]
 
 Use somente os marcadores relacionados \xE0 necessidade da pessoa. N\xE3o mostre todos de uma vez.
 
@@ -492,8 +509,8 @@ N\xE3o pe\xE7a novamente os dados acima quando j\xE1 estiverem informados.
   return d && d.role === "user" && String(d.content).trim() === i || n.push({ role: "user", content: i }), n;
 }
 function b(o = "") {
-  const routes = [...o.matchAll(/\[\[ROUTE:(learn|services|shop|partner|myCrediti|protect|organizer|business|debtHelp)(?::(todos|casa|moda|beleza|familia|auto))?\]\]/gi)].map((t) => ({ screen: t[1], category: t[2] || "" })), a = "[[HANDOFF]]", e = "[[HANDOFF:SAMILA]]", c = o.match(/\[\[PARTNER:(inss|bpc|fgts|clt|energia|cartao|pravaler)\]\]/i)?.[1]?.toLowerCase() || "", i = (o.includes(a) || o.includes(e)) && !c, d = o.includes(e) ? "samila" : "";
-  let u = o.replaceAll(e, "").replaceAll(a, "").replace(/\[\[PARTNER:(inss|bpc|fgts|clt|energia|cartao|pravaler)\]\]/gi, "").replace(/\[\[ROUTE:(learn|services|shop|partner|myCrediti|protect|organizer|business|debtHelp)(?::(todos|casa|moda|beleza|familia|auto))?\]\]/gi, "").trim();
+  const routes = [...o.matchAll(/\[\[ROUTE:(learn|services|shop|partner|myCrediti|protect|organizer|business|debtHelp|scorePlan)(?::(todos|casa|moda|beleza|familia|auto))?\]\]/gi)].map((t) => ({ screen: t[1], category: t[2] || "" })), a = "[[HANDOFF]]", e = "[[HANDOFF:SAMILA]]", c = o.match(/\[\[PARTNER:(inss|bpc|fgts|clt|energia|cartao|pravaler)\]\]/i)?.[1]?.toLowerCase() || "", i = (o.includes(a) || o.includes(e)) && !c, d = o.includes(e) ? "samila" : "";
+  let u = o.replaceAll(e, "").replaceAll(a, "").replace(/\[\[PARTNER:(inss|bpc|fgts|clt|energia|cartao|pravaler)\]\]/gi, "").replace(/\[\[ROUTE:(learn|services|shop|partner|myCrediti|protect|organizer|business|debtHelp|scorePlan)(?::(todos|casa|moda|beleza|familia|auto))?\]\]/gi, "").trim();
   if (i) {
     const t = new Intl.DateTimeFormat("en-US", { timeZone: "America/Fortaleza", weekday: "short", hour: "2-digit", minute: "2-digit", hour12: false }).formatToParts(/* @__PURE__ */ new Date()), r = t.find((p) => p.type === "weekday")?.value || "", l = Number(t.find((p) => p.type === "hour")?.value || 0), g = Number(t.find((p) => p.type === "minute")?.value || 0), A = l * 60 + g, f = r === "Sat" || r === "Sun", R = r === "Fri" && A >= 1020;
     !f && A >= 460 && A < 1020 || (u += `
