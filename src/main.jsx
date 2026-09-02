@@ -651,6 +651,45 @@ const isSearchWordClose = (
   return true;
 };
 
+const SHOP_SEARCH_URLS = {
+  Shopee: SHOPEE_STORE_URL,
+  Amazon: AMAZON_STORE_URL,
+  Magalu: MAGALU_STORE_URL,
+  Gazin: GAZIN_STORE_URL,
+  Itatiaia: ITATIAIA_STORE_URL,
+  Electrolux: ELECTROLUX_STORE_URL,
+  Polishop: POLISHOP_STORE_URL,
+  Xiaomi: XIAOMI_STORE_URL,
+  "Loja do Mecânico": LOJA_MECANICO_STORE_URL,
+  Hipervarejo: HIPERVAREJO_STORE_URL,
+  SHEIN: SHEIN_STORE_URL,
+  "C&A": CEA_STORE_URL,
+  "Camisaria Colombo": COLOMBO_STORE_URL,
+  Malwee: MALWEE_STORE_URL,
+  "Sawary Jeans": SAWARY_STORE_URL,
+  "Maria Valentina": MARIA_VALENTINA_STORE_URL,
+  "La Luna": LALUNA_STORE_URL,
+  BabyStock: BABYSTOCK_STORE_URL,
+  "Toy Mania": TOY_MANIA_STORE_URL,
+  "Kidy Calçados": KIDY_STORE_URL,
+  Freeway: FREEWAY_STORE_URL,
+  Natura: NATURA_STORE_URL,
+  Avon: AVON_STORE_URL,
+  "Lojas Rede": LOJAS_REDE_STORE_URL,
+  Amokarité: AMOKARITE_STORE_URL,
+  "Sieno Perfumes": SIENO_STORE_URL,
+  "Le Loyn Parfums": LELOYN_STORE_URL,
+  "Fator 5": FATOR5_STORE_URL,
+  "Amakha Paris": AMAKHA_STORE_URL,
+  Biovittare: BIOVITTARE_STORE_URL,
+  Promofarma: PROMOFARMA_STORE_URL,
+  "Komo Wellness": KOMO_STORE_URL,
+  Cicatrissim: CICATRISSIM_STORE_URL,
+  "Cacau Show": CACAU_SHOW_STORE_URL,
+  TodoVino: TODOVINO_STORE_URL,
+  "Casa das Alianças": CASA_ALIANCAS_STORE_URL
+};
+
 const SHOP_SEARCH_ITEMS = [
   ["Shopee", ".shopee-store-card", "achadinhos compras ofertas"],
   ["Amazon", ".amazon-store-card", "produtos compras ofertas"],
@@ -691,7 +730,8 @@ const SHOP_SEARCH_ITEMS = [
 ].map(([title, targetSelector, keywords]) => ({
   title,
   targetSelector,
-  keywords
+  keywords,
+  externalUrl: SHOP_SEARCH_URLS[title]
 }));
 
 const APP_SEARCH_ITEMS = [
@@ -1640,6 +1680,7 @@ function App() {
           " · " +
           partner.category,
         screen: "learn",
+        externalUrl: partner.url,
         targetSelector:
           `[data-search-key="${makeSearchKey("education", partner.name)}"]`,
         keywords:
@@ -1669,6 +1710,7 @@ function App() {
             item.description ||
             group.title,
           screen: "services",
+          serviceItem: item,
           targetSelector:
             `[data-search-key="${makeSearchKey("service", item.name)}"]`,
           keywords:
@@ -1891,13 +1933,16 @@ function App() {
       setSearchTarget(null);
       openChat();
     } else if (item.directProductKey) {
-      setCreditFilter("todos");
-      setSearchTarget({
-        screen: "direct",
-        targetSelector:
-          `.direct-${item.directProductKey}`
-      });
-      setScreen("direct");
+      setSearchTarget(null);
+      openPartnerLink(
+        item.directProductKey
+      );
+    } else if (item.serviceItem) {
+      setSearchTarget(null);
+      openService(item.serviceItem);
+    } else if (item.externalUrl) {
+      setSearchTarget(null);
+      openExternal(item.externalUrl);
     } else if (item.product) {
       setSearchTarget(null);
       setSelectedProduct(item.product);
