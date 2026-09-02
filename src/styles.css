@@ -1273,6 +1273,300 @@ header small {
   }
 }
 
+/* Central Renegocie suas Dívidas */
+.debt-help-entry {
+  width: 100%;
+  min-height: 112px;
+  padding: 17px;
+  display: grid;
+  grid-template-columns: 54px minmax(0, 1fr) 14px;
+  align-items: center;
+  gap: 14px;
+  border: 1.5px solid #ddb900;
+  border-radius: 22px;
+  background: #FDCA01;
+  color: #111111;
+  text-align: left;
+}
+
+.debt-help-entry > span {
+  width: 54px;
+  height: 54px;
+  display: grid;
+  place-items: center;
+  border-radius: 16px;
+  background: #fff4b6;
+}
+
+.debt-help-entry .ui-icon {
+  width: 27px;
+  height: 27px;
+}
+
+.debt-help-entry > div {
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+}
+
+.debt-help-entry small {
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: .06em;
+}
+
+.debt-help-entry strong {
+  font-size: 18px;
+  line-height: 1.15;
+}
+
+.debt-help-entry p {
+  margin: 0;
+  font-size: 11px;
+  line-height: 1.35;
+}
+
+.debt-help-entry > b {
+  font-size: 23px;
+}
+
+.debt-help-page {
+  display: grid;
+  gap: 18px;
+}
+
+.debt-help-hero {
+  padding: 19px;
+  display: grid;
+  grid-template-columns: 56px minmax(0, 1fr);
+  align-items: center;
+  gap: 15px;
+  border-radius: 22px;
+  background: #111111;
+  color: #ffffff;
+}
+
+.debt-help-hero > span {
+  width: 56px;
+  height: 56px;
+  display: grid;
+  place-items: center;
+  border-radius: 17px;
+  background: #FDCA01;
+  color: #111111;
+}
+
+.debt-help-hero .ui-icon {
+  width: 28px;
+  height: 28px;
+}
+
+.debt-help-hero small {
+  color: #FDCA01;
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: .06em;
+}
+
+.debt-help-hero h1 {
+  margin: 4px 0 6px;
+  font-size: 24px;
+  line-height: 1.08;
+}
+
+.debt-help-hero p {
+  margin: 0;
+  color: #dddddd;
+  font-size: 11px;
+  line-height: 1.42;
+}
+
+.debt-question-section,
+.debt-results-section {
+  padding: 18px;
+  border: 1px solid #dddddd;
+  border-radius: 22px;
+  background: #ffffff;
+}
+
+.debt-question-title {
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr);
+  align-items: center;
+  gap: 11px;
+  margin-bottom: 14px;
+}
+
+.debt-question-title > span {
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  border-radius: 13px;
+  background: #FDCA01;
+  color: #111111;
+  font-size: 16px;
+  font-weight: 900;
+}
+
+.debt-question-title .ui-icon {
+  width: 21px;
+  height: 21px;
+}
+
+.debt-question-title small {
+  color: #756100;
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: .05em;
+}
+
+.debt-question-title h2 {
+  margin: 3px 0 0;
+  font-size: 18px;
+  line-height: 1.15;
+}
+
+.debt-choice-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.debt-choice-grid button {
+  min-height: 100px;
+  padding: 14px;
+  display: grid;
+  align-content: center;
+  gap: 6px;
+  border: 1.5px solid #dddddd;
+  border-radius: 16px;
+  background: #f8f8f8;
+  color: #111111;
+  text-align: left;
+}
+
+.debt-choice-grid button.selected,
+.debt-origin-list button.selected {
+  border-color: #d8b500;
+  background: #fff5bd;
+}
+
+.debt-choice-grid strong {
+  font-size: 14px;
+  line-height: 1.2;
+}
+
+.debt-choice-grid small {
+  color: #6d6d6d;
+  font-size: 10px;
+  line-height: 1.35;
+}
+
+.debt-origin-list,
+.debt-channel-list {
+  display: grid;
+  gap: 9px;
+}
+
+.debt-origin-list button {
+  width: 100%;
+  min-height: 52px;
+  padding: 0 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  border: 1.5px solid #dddddd;
+  border-radius: 14px;
+  background: #fafafa;
+  color: #111111;
+  font-size: 12px;
+  font-weight: 800;
+  text-align: left;
+}
+
+.debt-origin-list b {
+  font-size: 20px;
+}
+
+.debt-result-intro {
+  margin: 0 0 14px;
+  color: #646464;
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.debt-channel-list button {
+  width: 100%;
+  min-height: 92px;
+  padding: 14px;
+  display: grid;
+  gap: 9px;
+  border: 1px solid #dddddd;
+  border-radius: 16px;
+  background: #f8f8f8;
+  color: #111111;
+  text-align: left;
+}
+
+.debt-channel-list button > div {
+  display: grid;
+  gap: 4px;
+}
+
+.debt-channel-list strong {
+  font-size: 14px;
+}
+
+.debt-channel-list small {
+  color: #696969;
+  font-size: 10px;
+  line-height: 1.4;
+}
+
+.debt-channel-list button > span {
+  color: #725f00;
+  font-size: 9px;
+  font-weight: 900;
+}
+
+.debt-fraud-warning {
+  margin-top: 14px;
+  padding: 14px;
+  border: 1.5px solid #ddb900;
+  border-radius: 15px;
+  background: #fff7c9;
+}
+
+.debt-fraud-warning strong {
+  font-size: 13px;
+}
+
+.debt-fraud-warning p {
+  margin: 5px 0 0;
+  color: #5f5f5f;
+  font-size: 10px;
+  line-height: 1.42;
+}
+
+.debt-restart {
+  width: 100%;
+  min-height: 48px;
+  margin-top: 12px;
+  border-radius: 14px;
+  background: #111111;
+  color: #ffffff;
+  font-size: 10px;
+  font-weight: 900;
+}
+
+@media (max-width: 420px) {
+  .debt-choice-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 .app-splash {
   position: fixed;
   inset: 0;
