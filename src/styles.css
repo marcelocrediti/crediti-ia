@@ -6212,3 +6212,84 @@ button:disabled {
 .shop-store-art .kidy-shoe {
   color: #ef5b20 !important;
 }
+
+/* Cards de produtos com o nome como elemento principal. */
+.product-modern-card {
+  min-height: 154px;
+  padding: 12px;
+}
+
+.product-modern-card .product-visual {
+  width: 100%;
+  min-width: 0;
+  height: 76px;
+  padding: 12px 14px;
+  justify-content: flex-start;
+  border-radius: 16px;
+  white-space: normal;
+  font-size: 14px;
+  line-height: 1.15;
+}
+
+.product-modern-copy {
+  min-height: 38px;
+  margin-top: 12px;
+  padding: 0 30px 0 2px;
+  align-content: center;
+}
+
+.product-modern-copy small {
+  font-size: 10px;
+  line-height: 1.32;
+}
+
+.handshake-emoji {
+  display: block;
+  font-size: 27px;
+  line-height: 1;
+}
+
+/* Cada filtro exibe somente suas lojas e sempre começa no primeiro card. */
+.shop-page.shop-filter-casa :is(.amazon-store-card, .magalu-store-card, .gazin-store-card, .itatiaia-store-card, .electrolux-store-card, .polishop-store-card, .xiaomi-store-card),
+.shop-page.shop-filter-moda :is(.shein-store-card, .cea-store-card, .colombo-store-card, .malwee-store-card, .sawary-store-card, .mariavalentina-store-card, .laluna-store-card, .kidy-store-card, .freeway-store-card),
+.shop-page.shop-filter-beleza :is(.natura-store-card, .avon-store-card, .lojasrede-store-card, .amokarite-store-card, .sieno-store-card, .leloyn-store-card, .fator5-store-card, .amakha-store-card, .biovittare-store-card, .promofarma-store-card, .komo-store-card, .cicatrissim-store-card),
+.shop-page.shop-filter-familia :is(.shopee-store-card, .babystock-store-card, .toymania-store-card, .cacau-store-card, .todovino-store-card, .aliancas-store-card),
+.shop-page.shop-filter-auto :is(.mecanico-store-card, .hipervarejo-store-card) {
+  display: flex;
+}
+
+/* Todos os cards da vitrine ocupam a mesma altura, sem faixa vazia abaixo. */
+.shop-store-carousel {
+  height: 358px;
+  min-height: 358px;
+  padding-bottom: 8px;
+}
+
+.shop-store-card {
+  height: 350px !important;
+  min-height: 350px;
+  max-height: 350px;
+}
+
+.shop-store-card > h2,
+.shop-store-card > p {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+}
+
+.shop-store-card > h2 {
+  -webkit-line-clamp: 2;
+}
+
+.shop-store-card > p {
+  -webkit-line-clamp: 2;
+}
+
+.shop-store-card > button {
+  margin-top: auto;
+}
+
+.shop-benefits {
+  margin-top: 0;
+}

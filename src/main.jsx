@@ -890,89 +890,72 @@ const APP_SEARCH_ITEMS = [
 
 const PRODUCT_VISUALS = {
   pravaler: {
-    icon: "R$",
-    label: "Financiamento para faculdade",
+    label: "Financie sua faculdade com parcelas que cabem no orçamento.",
     tone: "purple"
   },
   inss: {
-    icon: "INSS",
-    label: "Aposentados e pensionistas",
+    label: "Crédito consignado para aposentados e pensionistas.",
     tone: "yellow"
   },
   bpc: {
-    icon: "BPC",
-    label: "Beneficiários BPC/LOAS",
+    label: "Opção de crédito para beneficiários BPC/LOAS.",
     tone: "soft-yellow"
   },
   clt: {
-    icon: "CLT",
-    label: "Trabalhador com carteira",
+    label: "Crédito para quem trabalha com carteira assinada.",
     tone: "blue"
   },
   bolsa: {
-    icon: "BF",
-    label: "Beneficiário do programa",
+    label: "Conheça a opção disponível para beneficiários do programa.",
     tone: "green"
   },
   fgts: {
-    icon: "FGTS",
-    label: "Antecipação de saldo",
+    label: "Antecipe parcelas do seu saque-aniversário.",
     tone: "green"
   },
   cartao: {
-    icon: "R$",
-    label: "Limite do cartão",
+    label: "Transforme o limite do cartão em crédito.",
     tone: "purple"
   },
   energia: {
-    icon: "LUZ",
-    label: "Crédito pela conta de luz",
+    label: "Crédito com pagamento pela conta de energia.",
     tone: "yellow"
   },
   garantia: {
-    icon: "AUTO",
-    label: "Carro ou moto em garantia",
+    label: "Use seu carro ou sua moto como garantia.",
     tone: "blue"
   },
   "financiamento-carro": {
-    icon: "CARRO",
-    label: "Compre seu carro",
+    label: "Financie seu carro com taxas e parcelas acessíveis agora.",
     tone: "yellow"
   },
   "financiamento-moto": {
-    icon: "MOTO",
-    label: "Compre sua moto",
+    label: "Financie sua moto com taxas e parcelas acessíveis agora.",
     tone: "orange"
   },
   seguro: {
-    icon: "SEG",
-    label: "Proteção para carro e moto",
+    label: "Proteja seu carro ou sua moto de forma simples.",
     tone: "blue"
   },
   "consorcio-carro": {
-    icon: "CARRO",
-    label: "Planeje seu próximo carro",
+    label: "Planeje a compra do seu próximo carro.",
     tone: "soft-yellow"
   },
   "consorcio-moto": {
-    icon: "MOTO",
-    label: "Planeje sua próxima moto",
+    label: "Planeje a compra da sua próxima moto.",
     tone: "orange"
   },
   "consorcio-pesado": {
-    icon: "PESADO",
-    label: "Caminhões e pesados",
+    label: "Consórcio para caminhões e veículos pesados.",
     tone: "blue"
   },
   "consorcio-servicos": {
-    icon: "SERV",
-    label: "Projetos e serviços",
+    label: "Planeje projetos e serviços com consórcio.",
     tone: "purple"
   },
 
   "santander-pf": {
-    icon: "PF",
-    label: "Conta para pessoa física",
+    label: "Abra sua conta Santander para pessoa física.",
     tone: "red"
   }
 };
@@ -4555,7 +4538,12 @@ function App() {
                 <button
                   key={id}
                   className={shopFilter === id ? "active" : ""}
-                  onClick={() => setShopFilter(id)}
+                  onClick={() => {
+                    setShopFilter(id);
+                    window.requestAnimationFrame(() => {
+                      document.querySelector(".shop-store-carousel")?.scrollTo({ left: 0, behavior: "smooth" });
+                    });
+                  }}
                   aria-pressed={shopFilter === id}
                 >
                   {label}
@@ -5801,15 +5789,11 @@ function App() {
                       "product-visual product-tone-" +
                       visual.tone
                     }
-                    aria-hidden="true"
                   >
-                    {visual.icon}
+                    {product.name}
                   </span>
 
                   <span className="product-modern-copy">
-                    <strong>
-                      {product.name}
-                    </strong>
                     <small>
                       {visual.label}
                     </small>
@@ -5899,7 +5883,7 @@ function App() {
                 }
                 aria-hidden="true"
               >
-                {selectedVisual.icon}
+                <UiIcon name="credit" />
               </span>
 
               <div>
@@ -6252,7 +6236,7 @@ function App() {
               openExternal(RENDA_EXTRA_URL)
             }
           >
-            <span className="simple-action-icon" aria-hidden="true"><UiIcon name="userPlus" /></span>
+            <span className="simple-action-icon"><span className="handshake-emoji" role="img" aria-label="Duas mãos se cumprimentando">🤝</span></span>
             <span className="simple-action-copy">
               <strong>Quero me cadastrar</strong>
               <small>Abrir a plataforma Renda Extra Crediti</small>
@@ -6530,7 +6514,7 @@ function App() {
                 setScreen("partner")
               }
             >
-              <span aria-hidden="true"><UiIcon name="partner" /></span>
+              <span><span className="handshake-emoji" role="img" aria-label="Duas mãos se cumprimentando">🤝</span></span>
               <strong>
                 Quero ser parceiro
               </strong>
