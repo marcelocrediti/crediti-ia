@@ -1,5 +1,6 @@
 import React, {
   useEffect,
+  useMemo,
   useRef,
   useState
 } from "react";
@@ -18,6 +19,52 @@ const SUPABASE_KEY =
 
 const RENDA_EXTRA_URL =
   "https://crediti.startcapital.app/signIn";
+
+const LOCAL_KEYS = {
+  bills: "crediti_local_bills_v1",
+  favorites: "crediti_local_favorites_v1",
+  recent: "crediti_local_recent_v1",
+  comparisons: "crediti_local_comparisons_v1"
+};
+
+function readLocalList(key) {
+  try {
+    const value = JSON.parse(
+      window.localStorage.getItem(key) || "[]"
+    );
+
+    return Array.isArray(value) ? value : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveLocalList(key, value) {
+  try {
+    window.localStorage.setItem(
+      key,
+      JSON.stringify(value)
+    );
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function daysUntil(dateValue) {
+  if (!dateValue) {
+    return null;
+  }
+
+  const due = new Date(`${dateValue}T12:00:00`);
+  const today = new Date();
+  today.setHours(12, 0, 0, 0);
+
+  return Math.ceil(
+    (due.getTime() - today.getTime()) /
+      86400000
+  );
+}
 
 const SHOPEE_STORE_URL =
   "https://collshp.com/marceloachou?view=storefront";
@@ -735,6 +782,36 @@ const SHOP_SEARCH_ITEMS = [
 }));
 
 const APP_SEARCH_ITEMS = [
+  {
+    title: "Minha Crediti",
+    description: "Favoritos, histórico, comparações e contas salvas neste aparelho",
+    screen: "myCrediti",
+    keywords: "minha crediti favorito favoritos historico recente continue comparação comparacoes salvos"
+  },
+  {
+    title: "Organizador de contas",
+    description: "Crie lembretes locais para datas de vencimento",
+    screen: "organizer",
+    keywords: "conta contas organizar vencimento vencimentos pagar pagamento lembrete alerta boleto aluguel energia internet"
+  },
+  {
+    title: "Crediti Protege",
+    description: "Aprenda a reconhecer golpes e acessar canais oficiais",
+    screen: "protect",
+    keywords: "seguranca golpe golpes fraude pix senha proteger proteção antecipado oficial"
+  },
+  {
+    title: "Caminhos Crediti",
+    description: "Crédito, educação, empresas, serviços e compras conectados",
+    screen: "journeys",
+    keywords: "caminho caminhos necessidade resolver carro moto aposentado faculdade estudar empresa loja comprar"
+  },
+  {
+    title: "Central do Empresário",
+    description: "Conta PJ, saúde empresarial, site e divulgação",
+    screen: "business",
+    keywords: "empresa empresario negócio negocios mei pj lojista loja cnpj conta empresarial divulgar hospedagem site"
+  },
   {
     title: "Converse com a Crediti IA",
     description: "Tire dúvidas e encontre o caminho certo dentro do aplicativo",
@@ -1521,8 +1598,39 @@ function AppHeader({
   );
 }
 
+class AppErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <main className="app-error-screen">
+          <span aria-hidden="true">!</span>
+          <h1>Algo não carregou como deveria</h1>
+          <p>Seus dados locais continuam protegidos. Toque abaixo para tentar novamente.</p>
+          <button onClick={() => window.location.reload()}>
+            TENTAR NOVAMENTE
+          </button>
+        </main>
+      );
+    }
+
+    return this.props.children;
+  }
+}
+
 function App() {
-  const serviceNotice = getServiceNotice();
+  const serviceNotice = useMemo(
+    () => getServiceNotice(),
+    []
+  );
 
   const [
     showSplash,
@@ -1621,7 +1729,13 @@ function App() {
   const [
     compareKeys,
     setCompareKeys
-  ] = useState([]);
+  ] = useState(() =>
+    readLocalList(
+      LOCAL_KEYS.comparisons
+    ).filter((key) =>
+      DIRECT_PRODUCT_KEYS.includes(key)
+    ).slice(0, 3)
+  );
 
   const [
     showComparison,
@@ -1638,7 +1752,52 @@ function App() {
     setExternalReturnScreen
   ] = useState("direct");
 
-  const appSearchCatalog = [
+  const [
+    appNotice,
+    setAppNotice
+  ] = useState("");
+
+  const [
+    isOnline,
+    setIsOnline
+  ] = useState(navigator.onLine);
+
+  const [
+    favoriteKeys,
+    setFavoriteKeys
+  ] = useState(() =>
+    readLocalList(LOCAL_KEYS.favorites)
+  );
+
+  const [
+    recentItems,
+    setRecentItems
+  ] = useState(() =>
+    readLocalList(LOCAL_KEYS.recent)
+  );
+
+  const [
+    localBills,
+    setLocalBills
+  ] = useState(() =>
+    readLocalList(LOCAL_KEYS.bills)
+  );
+
+  const [
+    billDraft,
+    setBillDraft
+  ] = useState({
+    title: "",
+    dueDate: "",
+    value: ""
+  });
+
+  const [
+    shopFilter,
+    setShopFilter
+  ] = useState("todos");
+
+  const appSearchCatalog = useMemo(() => [
     ...APP_SEARCH_ITEMS,
     ...products.map((product) => ({
       title: product.name,
@@ -1729,7 +1888,7 @@ function App() {
         screen: "shop"
       })
     )
-  ];
+  ], []);
 
   const normalizedSearch =
     normalizeAppSearch(homeSearch);
@@ -1842,6 +2001,87 @@ function App() {
           )
         ].filter(Boolean)
       : matchedSearchResults;
+
+  useEffect(() => {
+    const handleOnline = () => {
+      setIsOnline(true);
+      setAppNotice("Conexão restabelecida.");
+    };
+
+    const handleOffline = () => {
+      setIsOnline(false);
+      setAppNotice(
+        "Você está sem internet. Seus favoritos e contas continuam disponíveis neste aparelho."
+      );
+    };
+
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
+
+    return () => {
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
+    };
+  }, []);
+
+  useEffect(() => {
+    let notice = document.getElementById(
+      "crediti-global-notice"
+    );
+
+    if (!notice) {
+      notice = document.createElement("div");
+      notice.id = "crediti-global-notice";
+      notice.setAttribute("role", "status");
+      document.body.appendChild(notice);
+    }
+
+    notice.textContent = appNotice;
+    notice.className = appNotice
+      ? `global-notice visible${
+          isOnline ? "" : " offline"
+        }`
+      : "global-notice";
+
+    if (!appNotice || !isOnline) {
+      return undefined;
+    }
+
+    const timer = window.setTimeout(
+      () => setAppNotice(""),
+      3200
+    );
+
+    return () => window.clearTimeout(timer);
+  }, [appNotice, isOnline]);
+
+  useEffect(() => {
+    saveLocalList(
+      LOCAL_KEYS.favorites,
+      favoriteKeys
+    );
+  }, [favoriteKeys]);
+
+  useEffect(() => {
+    saveLocalList(
+      LOCAL_KEYS.recent,
+      recentItems
+    );
+  }, [recentItems]);
+
+  useEffect(() => {
+    saveLocalList(
+      LOCAL_KEYS.bills,
+      localBills
+    );
+  }, [localBills]);
+
+  useEffect(() => {
+    saveLocalList(
+      LOCAL_KEYS.comparisons,
+      compareKeys
+    );
+  }, [compareKeys]);
 
   useEffect(() => {
     if (
@@ -1973,6 +2213,23 @@ function App() {
               ?.category === creditFilter
         );
 
+  const upcomingBills = useMemo(
+    () =>
+      localBills
+        .map((bill) => ({
+          ...bill,
+          days: daysUntil(bill.dueDate)
+        }))
+        .filter(
+          (bill) =>
+            bill.days !== null &&
+            bill.days >= 0 &&
+            bill.days <= 7
+        )
+        .sort((a, b) => a.days - b.days),
+    [localBills]
+  );
+
   function toggleCompare(productKey) {
     setCompareKeys((current) => {
       if (current.includes(productKey)) {
@@ -2021,7 +2278,7 @@ function App() {
             "#FFFFFF"
           );
         },
-        1600
+        750
       );
 
     return () => {
@@ -2271,15 +2528,130 @@ function App() {
     window.scrollTo(0, 0);
   }
 
-  function openExternal(url) {
-    window.open(
-      url,
-      "_blank",
-      "noopener,noreferrer"
+  function showNotice(message) {
+    setAppNotice(message);
+  }
+
+  function rememberItem(item) {
+    if (!item?.key || !item?.title) {
+      return;
+    }
+
+    setRecentItems((current) => [
+      {
+        ...item,
+        viewedAt: Date.now()
+      },
+      ...current.filter(
+        (saved) => saved.key !== item.key
+      )
+    ].slice(0, 12));
+  }
+
+  function toggleFavorite(productKey) {
+    setFavoriteKeys((current) =>
+      current.includes(productKey)
+        ? current.filter(
+            (key) => key !== productKey
+          )
+        : [...current, productKey]
     );
   }
 
+  function openSavedProduct(productKey) {
+    if (!PARTNER_PRODUCTS[productKey]) {
+      return;
+    }
+
+    setCreditFilter("todos");
+    setSearchTarget({
+      screen: "direct",
+      targetSelector:
+        `.direct-${productKey}`
+    });
+    setScreen("direct");
+  }
+
+  function addLocalBill(event) {
+    event.preventDefault();
+
+    if (
+      !billDraft.title.trim() ||
+      !billDraft.dueDate
+    ) {
+      showNotice(
+        "Informe o nome da conta e a data de vencimento."
+      );
+      return;
+    }
+
+    const nextBill = {
+      id:
+        typeof crypto !== "undefined" &&
+        crypto.randomUUID
+          ? crypto.randomUUID()
+          : String(Date.now()),
+      title: billDraft.title.trim(),
+      dueDate: billDraft.dueDate,
+      value: billDraft.value.trim()
+    };
+
+    setLocalBills((current) =>
+      [...current, nextBill].sort(
+        (a, b) =>
+          a.dueDate.localeCompare(
+            b.dueDate
+          )
+      )
+    );
+    setBillDraft({
+      title: "",
+      dueDate: "",
+      value: ""
+    });
+    showNotice(
+      "Conta salva somente neste aparelho."
+    );
+  }
+
+  function removeLocalBill(id) {
+    setLocalBills((current) =>
+      current.filter(
+        (bill) => bill.id !== id
+      )
+    );
+    showNotice("Conta removida.");
+  }
+
+  function openExternal(url) {
+    if (!isOnline) {
+      showNotice(
+        "Sem internet no momento. Tente novamente quando a conexão voltar."
+      );
+      return;
+    }
+
+    try {
+      window.open(
+        url,
+        "_blank",
+        "noopener,noreferrer"
+      );
+    } catch {
+      showNotice(
+        "Não foi possível abrir este endereço. Tente novamente."
+      );
+    }
+  }
+
   function openService(item) {
+    if (!item?.url) {
+      showNotice(
+        "Este serviço está temporariamente indisponível."
+      );
+      return;
+    }
+
     const userAgent =
       navigator.userAgent || "";
 
@@ -2824,8 +3196,18 @@ function App() {
       ];
 
     if (!product?.url) {
+      showNotice(
+        "Esta opção está temporariamente indisponível."
+      );
       return;
     }
+
+    rememberItem({
+      key: productKey,
+      title: product.name,
+      partner: product.partner,
+      type: "credit"
+    });
 
     setExternalProduct(productKey);
     setExternalReturnScreen(
@@ -2946,11 +3328,7 @@ function App() {
           <button
             className="partner-notice-continue"
             onClick={() => {
-              window.open(
-                product.url,
-                "_blank",
-                "noopener,noreferrer"
-              );
+              openExternal(product.url);
 
               setScreen(
                 externalReturnScreen || "direct"
@@ -2971,6 +3349,432 @@ function App() {
             VOLTAR SEM ACESSAR
           </button>
         </main>
+      </div>
+    );
+  }
+
+  if (screen === "myCrediti") {
+    return (
+      <div className="app app-white app-with-nav">
+        <AppHeader
+          title="Minha Crediti"
+          subtitle="Organização salva neste aparelho"
+          onBack={() => setScreen("home")}
+        />
+
+        <main className="modern-page local-hub-page">
+          <section className="local-privacy-card">
+            <span aria-hidden="true">✓</span>
+            <div>
+              <strong>Sem cadastro e sem CPF</strong>
+              <p>
+                Favoritos, histórico e contas ficam somente neste aparelho. A Crediti não recebe essas informações.
+              </p>
+            </div>
+          </section>
+
+          <div className="local-hub-actions">
+            <button onClick={() => setScreen("organizer")}>
+              <span aria-hidden="true">▣</span>
+              <strong>Organizar contas</strong>
+              <small>Cadastre datas e receba avisos locais.</small>
+            </button>
+            <button onClick={() => setScreen("protect")}>
+              <span aria-hidden="true">✓</span>
+              <strong>Crediti Protege</strong>
+              <small>Confira sinais de golpe antes de continuar.</small>
+            </button>
+          </div>
+
+          {upcomingBills.length > 0 && (
+            <section className="local-section due-alert-section">
+              <div className="local-section-title">
+                <div>
+                  <small>ATENÇÃO</small>
+                  <h2>Vencimentos próximos</h2>
+                </div>
+                <button onClick={() => setScreen("organizer")}>Ver contas</button>
+              </div>
+              <div className="local-list">
+                {upcomingBills.map((bill) => (
+                  <article key={bill.id}>
+                    <div>
+                      <strong>{bill.title}</strong>
+                      <small>
+                        {bill.days === 0
+                          ? "Vence hoje"
+                          : `Vence em ${bill.days} dia${bill.days === 1 ? "" : "s"}`}
+                      </small>
+                    </div>
+                    {bill.value && <b>{bill.value}</b>}
+                  </article>
+                ))}
+              </div>
+            </section>
+          )}
+
+          <section className="local-section">
+            <div className="local-section-title">
+              <div>
+                <small>GUARDADOS POR VOCÊ</small>
+                <h2>Favoritos</h2>
+              </div>
+            </div>
+            {favoriteKeys.length ? (
+              <div className="saved-product-grid">
+                {favoriteKeys.map((productKey) => {
+                  const product = PARTNER_PRODUCTS[productKey];
+                  if (!product) return null;
+                  return (
+                    <article key={productKey}>
+                      <small>{product.partner}</small>
+                      <strong>{product.name}</strong>
+                      <div>
+                        <button onClick={() => openSavedProduct(productKey)}>
+                          VER PRODUTO
+                        </button>
+                        <button
+                          className="remove-saved"
+                          onClick={() => toggleFavorite(productKey)}
+                          aria-label={`Remover ${product.name} dos favoritos`}
+                        >
+                          REMOVER
+                        </button>
+                      </div>
+                    </article>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="friendly-empty">
+                <strong>Nenhum favorito ainda</strong>
+                <p>Na tela de crédito, toque em “Salvar” no produto que deseja acompanhar.</p>
+                <button onClick={() => setScreen("direct")}>VER CRÉDITOS</button>
+              </div>
+            )}
+          </section>
+
+          <section className="local-section">
+            <div className="local-section-title">
+              <div>
+                <small>CONTINUE DE ONDE PAROU</small>
+                <h2>Vistos recentemente</h2>
+              </div>
+            </div>
+            {recentItems.length ? (
+              <div className="recent-list">
+                {recentItems.slice(0, 6).map((item) => (
+                  <button
+                    key={item.key}
+                    onClick={() => openSavedProduct(item.key)}
+                  >
+                    <span>
+                      <strong>{item.title}</strong>
+                      <small>{item.partner || "Crediti"}</small>
+                    </span>
+                    <b aria-hidden="true">›</b>
+                  </button>
+                ))}
+              </div>
+            ) : (
+              <div className="friendly-empty compact">
+                <p>Os produtos que você abrir aparecerão aqui.</p>
+              </div>
+            )}
+          </section>
+        </main>
+
+        <BottomNav active="home" onNavigate={navigateMain} />
+      </div>
+    );
+  }
+
+  if (screen === "organizer") {
+    return (
+      <div className="app app-white app-with-nav">
+        <AppHeader
+          title="Organizador de contas"
+          subtitle="Lembretes salvos somente neste aparelho"
+          onBack={() => setScreen("myCrediti")}
+        />
+
+        <main className="modern-page organizer-page">
+          <section className="organizer-intro">
+            <span aria-hidden="true">▣</span>
+            <div>
+              <h1>Não deixe uma conta passar</h1>
+              <p>Informe apenas um nome e a data. Não coloque número de cartão, conta bancária, CPF ou senha.</p>
+            </div>
+          </section>
+
+          <form className="bill-form" onSubmit={addLocalBill}>
+            <label>
+              Nome da conta
+              <input
+                value={billDraft.title}
+                onChange={(event) =>
+                  setBillDraft((current) => ({
+                    ...current,
+                    title: event.target.value
+                  }))
+                }
+                placeholder="Ex.: energia, internet, aluguel"
+                maxLength="40"
+              />
+            </label>
+            <div className="bill-form-row">
+              <label>
+                Vencimento
+                <input
+                  type="date"
+                  value={billDraft.dueDate}
+                  onChange={(event) =>
+                    setBillDraft((current) => ({
+                      ...current,
+                      dueDate: event.target.value
+                    }))
+                  }
+                />
+              </label>
+              <label>
+                Valor opcional
+                <input
+                  inputMode="decimal"
+                  value={billDraft.value}
+                  onChange={(event) =>
+                    setBillDraft((current) => ({
+                      ...current,
+                      value: event.target.value
+                    }))
+                  }
+                  placeholder="Ex.: R$ 120"
+                  maxLength="20"
+                />
+              </label>
+            </div>
+            <button type="submit">SALVAR LEMBRETE</button>
+          </form>
+
+          <section className="local-section">
+            <div className="local-section-title">
+              <div>
+                <small>NO SEU APARELHO</small>
+                <h2>Minhas contas</h2>
+              </div>
+              <b>{localBills.length}</b>
+            </div>
+            {localBills.length ? (
+              <div className="bill-list">
+                {localBills.map((bill) => {
+                  const days = daysUntil(bill.dueDate);
+                  return (
+                    <article key={bill.id} className={days !== null && days <= 3 && days >= 0 ? "urgent" : ""}>
+                      <div>
+                        <strong>{bill.title}</strong>
+                        <small>
+                          {new Intl.DateTimeFormat("pt-BR").format(
+                            new Date(`${bill.dueDate}T12:00:00`)
+                          )}
+                          {days === 0 ? " · vence hoje" : days > 0 ? ` · em ${days} dias` : " · vencida"}
+                        </small>
+                      </div>
+                      {bill.value && <b>{bill.value}</b>}
+                      <button onClick={() => removeLocalBill(bill.id)}>REMOVER</button>
+                    </article>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="friendly-empty">
+                <strong>Nenhuma conta cadastrada</strong>
+                <p>Use o formulário acima para criar seu primeiro lembrete.</p>
+              </div>
+            )}
+          </section>
+        </main>
+
+        <BottomNav active="home" onNavigate={navigateMain} />
+      </div>
+    );
+  }
+
+  if (screen === "protect") {
+    return (
+      <div className="app app-white app-with-nav">
+        <AppHeader
+          title="Crediti Protege"
+          subtitle="Informação simples contra golpes"
+          onBack={() => setScreen("myCrediti")}
+        />
+
+        <main className="modern-page protect-page">
+          <section className="protect-hero">
+            <span aria-hidden="true">✓</span>
+            <div>
+              <small>SEGURANÇA PRIMEIRO</small>
+              <h1>Desconfie antes de pagar</h1>
+              <p>Nenhum parceiro deve cobrar depósito antecipado para liberar crédito.</p>
+            </div>
+          </section>
+
+          <section className="warning-grid">
+            {[
+              ["Cobrança antecipada", "Promessa de liberação após Pix ou depósito é sinal de perigo."],
+              ["Aprovação garantida", "A análise sempre pertence à instituição. Ninguém pode garantir aprovação."],
+              ["Pedido de senha", "Nunca informe senha, código recebido por SMS ou acesso ao aplicativo do banco."],
+              ["Pressa e ameaça", "Golpistas tentam impedir que você confira as informações com calma."]
+            ].map(([title, copy], index) => (
+              <article key={title}>
+                <span>{String(index + 1).padStart(2, "0")}</span>
+                <strong>{title}</strong>
+                <p>{copy}</p>
+              </article>
+            ))}
+          </section>
+
+          <section className="official-check-card">
+            <small>ANTES DE CONTINUAR</small>
+            <h2>Confira o endereço do parceiro</h2>
+            <p>A Crediti mostra uma tela de segurança antes de abrir qualquer produto de crédito. Leia o nome da instituição e continue somente se reconhecer o serviço.</p>
+            <button onClick={() => setScreen("services")}>ACESSAR SERVIÇOS OFICIAIS</button>
+          </section>
+
+          <button className="protect-help" onClick={() => openChat("Quero orientação para evitar golpes") }>
+            CONVERSAR COM A CREDITI IA
+          </button>
+        </main>
+
+        <BottomNav active="learn" onNavigate={navigateMain} />
+      </div>
+    );
+  }
+
+  if (screen === "journeys") {
+    const journeys = [
+      {
+        id: "vehicle",
+        icon: "🚗",
+        title: "Carro ou moto",
+        copy: "Financiamento, garantia, seguro, consórcio e orientação antes de decidir.",
+        actions: [
+          ["Conhecer as opções", () => {
+            const item = products.find((product) => product.id === "financiamento-carro");
+            setSelectedProduct(item || null);
+            setScreen("productDetail");
+          }],
+          ["Conversar com a IA", () => openChat("Quero comprar ou usar um veículo")]
+        ]
+      },
+      {
+        id: "retired",
+        icon: "INSS",
+        title: "Aposentado ou pensionista",
+        copy: "Consignado INSS, BPC/LOAS, serviços oficiais e cuidados contra golpes.",
+        actions: [
+          ["Ver consignado INSS", () => openSavedProduct("inss")],
+          ["Acessar Meu INSS", () => openService(SERVICE_GROUPS.flatMap((group) => group.items).find((item) => item.name === "Meu INSS"))]
+        ]
+      },
+      {
+        id: "education",
+        icon: "🎓",
+        title: "Estudar e financiar",
+        copy: "Faculdades parceiras, Pravaler, orientação de orçamento e segurança educacional.",
+        actions: [
+          ["Ver faculdades", () => setScreen("learn")],
+          ["Simular Pravaler", () => openPartnerLink("pravaler")]
+        ]
+      },
+      {
+        id: "business",
+        icon: "PJ",
+        title: "Empresa e loja",
+        copy: "Conta PJ, saúde empresarial, site, divulgação e serviços oficiais.",
+        actions: [
+          ["Abrir Central do Empresário", () => setScreen("business")],
+          ["Quero ser parceiro", () => setScreen("partner")]
+        ]
+      },
+      {
+        id: "shopping",
+        icon: "S",
+        title: "Comprar e economizar",
+        copy: "Lojas parceiras organizadas por categoria, ofertas e cupons.",
+        actions: [
+          ["Abrir Crediti Shop", () => setScreen("shop")],
+          ["Ver dicas de orçamento", () => setScreen("learn")]
+        ]
+      }
+    ];
+
+    return (
+      <div className="app app-white app-with-nav">
+        <AppHeader
+          title="Caminhos Crediti"
+          subtitle="Tudo ligado à sua necessidade"
+          onBack={() => setScreen("home")}
+        />
+        <main className="modern-page journeys-page">
+          <section className="page-intro compact">
+            <span className="eyebrow">ESCOLHA SEU OBJETIVO</span>
+            <h1>O que você precisa resolver?</h1>
+            <p>Encontre crédito, conteúdo, serviço e parceiro no mesmo caminho.</p>
+          </section>
+          <div className="journey-grid">
+            {journeys.map((journey) => (
+              <article key={journey.id} className={`journey-card ${journey.id}`}>
+                <span aria-hidden="true">{journey.icon}</span>
+                <h2>{journey.title}</h2>
+                <p>{journey.copy}</p>
+                <div>
+                  {journey.actions.map(([label, action]) => (
+                    <button key={label} onClick={action}>{label}</button>
+                  ))}
+                </div>
+              </article>
+            ))}
+          </div>
+        </main>
+        <BottomNav active="home" onNavigate={navigateMain} />
+      </div>
+    );
+  }
+
+  if (screen === "business") {
+    const businessGroup = SERVICE_GROUPS[0];
+    return (
+      <div className="app app-white app-with-nav">
+        <AppHeader
+          title="Central do Empresário"
+          subtitle="Soluções para MEI, empresas e lojistas"
+          onBack={() => setScreen("journeys")}
+        />
+        <main className="modern-page business-page">
+          <section className="business-hero">
+            <small>NEGÓCIO EM MOVIMENTO</small>
+            <h1>Da conta PJ à divulgação da sua loja</h1>
+            <p>Escolha o que sua empresa precisa e continue no site responsável.</p>
+          </section>
+          <div className="business-grid">
+            {businessGroup.items.map((item) => (
+              <button key={item.name} onClick={() => openService(item)}>
+                <span aria-hidden="true">PJ</span>
+                <strong>{item.name}</strong>
+                <small>{item.description}</small>
+                <b>{item.action || "ACESSAR ›"}</b>
+              </button>
+            ))}
+          </div>
+          <section className="business-partner-callout">
+            <div>
+              <small>RENDA EXTRA CREDITI</small>
+              <h2>Também quer indicar clientes?</h2>
+              <p>Conheça os produtos, faça indicações e acompanhe suas oportunidades.</p>
+            </div>
+            <button onClick={() => setScreen("partner")}>QUERO SER PARCEIRO</button>
+          </section>
+        </main>
+        <BottomNav active="services" onNavigate={navigateMain} />
       </div>
     );
   }
@@ -3056,6 +3860,24 @@ function App() {
                     }
                     key={productKey}
                   >
+                    <button
+                      className="favorite-toggle"
+                      onClick={() =>
+                        toggleFavorite(productKey)
+                      }
+                      aria-pressed={favoriteKeys.includes(
+                        productKey
+                      )}
+                      aria-label={
+                        favoriteKeys.includes(productKey)
+                          ? "Remover dos favoritos"
+                          : "Salvar nos favoritos"
+                      }
+                    >
+                      {favoriteKeys.includes(productKey)
+                        ? "★ SALVO"
+                        : "☆ SALVAR"}
+                    </button>
                     <div
                       className={
                         "direct-logo " +
@@ -3402,11 +4224,7 @@ function App() {
                       partner.name
                     )}
                     onClick={() =>
-                      window.open(
-                        partner.url,
-                        "_blank",
-                        "noopener,noreferrer"
-                      )
+                      openExternal(partner.url)
                     }
                   >
                     <div className="career-brand">
@@ -3424,6 +4242,18 @@ function App() {
                   </button>
                 )
               )}
+            </div>
+          </section>
+
+          <section className="education-connected-card">
+            <div>
+              <small>JORNADA DE ESTUDO</small>
+              <h2>Curso, financiamento e planejamento no mesmo lugar</h2>
+              <p>Conheça as faculdades, simule com o Pravaler e veja dicas para organizar a mensalidade.</p>
+            </div>
+            <div>
+              <button onClick={() => openPartnerLink("pravaler")}>SIMULAR PRAVALER</button>
+              <button onClick={() => openChat("Quero estudar e preciso de orientação")}>CONVERSAR COM A IA</button>
             </div>
           </section>
 
@@ -3561,7 +4391,7 @@ function App() {
           subtitle="Achadinhos escolhidos para você"
         />
 
-        <main className="modern-page shop-page">
+        <main className={`modern-page shop-page shop-filter-${shopFilter}`}>
           <section className="shop-hero">
             <img
               className="shop-delivery-art"
@@ -3611,6 +4441,26 @@ function App() {
                 </span>
                 <h2>Lojas parceiras</h2>
               </div>
+            </div>
+
+            <div className="shop-category-filter" aria-label="Filtrar lojas por categoria">
+              {[
+                ["todos", "Todas"],
+                ["casa", "Casa e eletrônicos"],
+                ["moda", "Moda"],
+                ["beleza", "Beleza e saúde"],
+                ["familia", "Família e presentes"],
+                ["auto", "Auto e ferramentas"]
+              ].map(([id, label]) => (
+                <button
+                  key={id}
+                  className={shopFilter === id ? "active" : ""}
+                  onClick={() => setShopFilter(id)}
+                  aria-pressed={shopFilter === id}
+                >
+                  {label}
+                </button>
+              ))}
             </div>
 
             <div className="shop-store-carousel">
@@ -5316,13 +6166,10 @@ function App() {
           <button
             className="partner-register-modern"
             onClick={() =>
-              window.open(
-                RENDA_EXTRA_URL,
-                "_blank"
-              )
+              openExternal(RENDA_EXTRA_URL)
             }
           >
-            <span className="simple-action-icon" aria-hidden="true">C</span>
+            <span className="simple-action-icon" aria-hidden="true">🤝</span>
             <span className="simple-action-copy">
               <strong>Quero me cadastrar</strong>
               <small>Abrir a plataforma Renda Extra Crediti</small>
@@ -5438,6 +6285,29 @@ function App() {
           </div>
         </section>
 
+        <section className="home-personal-tools" aria-label="Ferramentas pessoais">
+          <button onClick={() => setScreen("myCrediti")}>
+            <span aria-hidden="true">★</span>
+            <div>
+              <strong>Minha Crediti</strong>
+              <small>
+                {upcomingBills.length
+                  ? `${upcomingBills.length} vencimento${upcomingBills.length === 1 ? "" : "s"} próximo${upcomingBills.length === 1 ? "" : "s"}`
+                  : "Favoritos, histórico e minhas contas"}
+              </small>
+            </div>
+            <b aria-hidden="true">›</b>
+          </button>
+          <button onClick={() => setScreen("journeys")}>
+            <span aria-hidden="true">⌕</span>
+            <div>
+              <strong>Caminhos Crediti</strong>
+              <small>Crédito, estudo, empresa e compras conectados</small>
+            </div>
+            <b aria-hidden="true">›</b>
+          </button>
+        </section>
+
         <div className="home-banners">
           <button
             className="home-banner yellow-banner"
@@ -5478,7 +6348,7 @@ function App() {
           <button
             className="home-banner dark-banner"
             onClick={() =>
-              setScreen("learn")
+              setScreen("protect")
             }
           >
             <HomeBannerVisual type="security" />
@@ -5713,4 +6583,8 @@ createRoot(
   document.getElementById(
     "root"
   )
-).render(<App />);
+).render(
+  <AppErrorBoundary>
+    <App />
+  </AppErrorBoundary>
+);
