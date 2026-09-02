@@ -6265,6 +6265,10 @@ function App() {
       </header>
 
       <main className="modern-home">
+        <p className="home-privacy-line">
+          A Crediti não consulta CPF. As simulações acontecem no ambiente do banco parceiro.
+        </p>
+
         <section className="home-welcome">
           <div>
             <span className="eyebrow">
@@ -6280,11 +6284,6 @@ function App() {
             src="/creditin-oficial.png"
             alt="Creditin"
           />
-        </section>
-
-        <section className="home-privacy-note" aria-label="Privacidade e segurança">
-          <UiIcon name="shield" />
-          <p><strong>Privacidade primeiro.</strong> A Crediti não usa CPF para consultas. Toda simulação de crédito ocorre dentro do banco parceiro.</p>
         </section>
 
         <section className="home-smart-search" aria-label="Buscar no aplicativo">
