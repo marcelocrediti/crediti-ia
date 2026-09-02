@@ -592,6 +592,14 @@ const normalizeAppSearch = (value) =>
     .replace(/[\u0300-\u036f]/g, "")
     .trim();
 
+const makeSearchKey = (type, value) =>
+  "search-" +
+  type +
+  "-" +
+  normalizeAppSearch(value)
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "");
+
 const isSearchWordClose = (
   first,
   second
@@ -643,6 +651,49 @@ const isSearchWordClose = (
   return true;
 };
 
+const SHOP_SEARCH_ITEMS = [
+  ["Shopee", ".shopee-store-card", "achadinhos compras ofertas"],
+  ["Amazon", ".amazon-store-card", "produtos compras ofertas"],
+  ["Magalu", ".magalu-store-card", "magazine luiza eletrodomésticos eletrônicos"],
+  ["Gazin", ".gazin-store-card", "móveis eletrodomésticos casa"],
+  ["Itatiaia", ".itatiaia-store-card", "móveis cozinhas armários casa"],
+  ["Electrolux", ".electrolux-store-card", "eletrodomésticos geladeira fogão lavadora"],
+  ["Polishop", ".polishop-store-card", "casa cozinha beleza saúde"],
+  ["Xiaomi", ".xiaomi-store-card", "celular smartphone eletrônicos"],
+  ["Loja do Mecânico", ".mecanico-store-card", "ferramentas oficina equipamentos"],
+  ["Hipervarejo", ".hipervarejo-store-card", "autopeças pneus carro moto"],
+  ["SHEIN", ".shein-store-card", "roupas moda acessórios"],
+  ["C&A", ".cea-store-card", "roupas moda cupom"],
+  ["Camisaria Colombo", ".colombo-store-card", "roupas moda masculina"],
+  ["Malwee", ".malwee-store-card", "roupas moda"],
+  ["Sawary Jeans", ".sawary-store-card", "roupas jeans moda"],
+  ["Maria Valentina", ".mariavalentina-store-card", "roupas moda feminina"],
+  ["La Luna", ".laluna-store-card", "roupas moda feminina"],
+  ["BabyStock", ".babystock-store-card", "bebê infantil roupas"],
+  ["Toy Mania", ".toymania-store-card", "brinquedos crianças"],
+  ["Kidy Calçados", ".kidy-store-card", "calçados sapatos infantil cupom"],
+  ["Freeway", ".freeway-store-card", "calçados sapatos"],
+  ["Natura", ".natura-store-card", "perfumes cosméticos beleza"],
+  ["Avon", ".avon-store-card", "perfumes cosméticos beleza"],
+  ["Lojas Rede", ".lojasrede-store-card", "perfumes cosméticos beleza"],
+  ["Amokarité", ".amokarite-store-card", "perfumes cosméticos beleza"],
+  ["Sieno Perfumes", ".sieno-store-card", "perfumes fragrâncias"],
+  ["Le Loyn Parfums", ".leloyn-store-card", "perfumes fragrâncias"],
+  ["Fator 5", ".fator5-store-card", "perfumes cosméticos beleza"],
+  ["Amakha Paris", ".amakha-store-card", "perfumes cosméticos beleza"],
+  ["Biovittare", ".biovittare-store-card", "farmácia manipulação saúde"],
+  ["Promofarma", ".promofarma-store-card", "farmácia medicamentos saúde"],
+  ["Komo Wellness", ".komo-store-card", "saúde bem estar wellness"],
+  ["Cicatrissim", ".cicatrissim-store-card", "pele beleza cuidados"],
+  ["Cacau Show", ".cacau-store-card", "chocolate presentes"],
+  ["TodoVino", ".todovino-store-card", "vinhos bebidas"],
+  ["Casa das Alianças", ".aliancas-store-card", "alianças joias presentes"]
+].map(([title, targetSelector, keywords]) => ({
+  title,
+  targetSelector,
+  keywords
+}));
+
 const APP_SEARCH_ITEMS = [
   {
     title: "Converse com a Crediti IA",
@@ -667,6 +718,7 @@ const APP_SEARCH_ITEMS = [
     title: "Crédito para aposentados",
     description: "Consignado INSS e opções para beneficiários BPC/LOAS",
     screen: "direct",
+    directProductKey: "inss",
     keywords: "aposentado aposentados pensionista pensionistas idoso idosos inss beneficio beneficiario bpc loas consignado"
   },
   {
@@ -1517,6 +1569,11 @@ function App() {
   ] = useState("");
 
   const [
+    searchTarget,
+    setSearchTarget
+  ] = useState(null);
+
+  const [
     creditFilter,
     setCreditFilter
   ] = useState("todos");
@@ -1548,8 +1605,18 @@ function App() {
       description:
         product.what ||
         "Conheça esta opção da Crediti",
-      screen: "productDetail",
+      screen: DIRECT_PRODUCT_KEYS.includes(
+        product.id
+      )
+        ? "direct"
+        : "productDetail",
       product,
+      directProductKey:
+        DIRECT_PRODUCT_KEYS.includes(
+          product.id
+        )
+          ? product.id
+          : "",
       searchPriority:
         product.id === "financiamento-carro" ||
         product.id === "financiamento-moto"
@@ -1573,6 +1640,8 @@ function App() {
           " · " +
           partner.category,
         screen: "learn",
+        targetSelector:
+          `[data-search-key="${makeSearchKey("education", partner.name)}"]`,
         keywords:
           "faculdade curso estudar estudo educação " +
           partner.name +
@@ -1600,6 +1669,8 @@ function App() {
             item.description ||
             group.title,
           screen: "services",
+          targetSelector:
+            `[data-search-key="${makeSearchKey("service", item.name)}"]`,
           keywords:
             group.title +
             " " +
@@ -1607,6 +1678,14 @@ function App() {
             " " +
             (item.description || "")
         }))
+    ),
+    ...SHOP_SEARCH_ITEMS.map(
+      (item) => ({
+        ...item,
+        description:
+          "Encontre esta loja parceira no Crediti Shop",
+        screen: "shop"
+      })
     )
   ];
 
@@ -1722,20 +1801,122 @@ function App() {
         ].filter(Boolean)
       : matchedSearchResults;
 
+  useEffect(() => {
+    if (
+      !searchTarget ||
+      searchTarget.screen !== screen
+    ) {
+      return undefined;
+    }
+
+    let highlightTimer;
+
+    const positionTimer = window.setTimeout(
+      () => {
+        document
+          .querySelectorAll(
+            ".search-target-active"
+          )
+          .forEach((element) =>
+            element.classList.remove(
+              "search-target-active"
+            )
+          );
+
+        const target =
+          document.querySelector(
+            searchTarget.targetSelector
+          );
+
+        if (!target) {
+          return;
+        }
+
+        target.classList.add(
+          "search-target-active"
+        );
+
+        target.scrollIntoView({
+          behavior: window.matchMedia(
+            "(prefers-reduced-motion: reduce)"
+          ).matches
+            ? "auto"
+            : "smooth",
+          block: "center",
+          inline: "center"
+        });
+
+        const action = target.matches(
+          "button"
+        )
+          ? target
+          : target.querySelector("button");
+
+        window.setTimeout(() => {
+          action?.focus({
+            preventScroll: true
+          });
+        }, 350);
+
+        highlightTimer =
+          window.setTimeout(() => {
+            target.classList.remove(
+              "search-target-active"
+            );
+            setSearchTarget(
+              (current) =>
+                current === searchTarget
+                  ? null
+                  : current
+            );
+          }, 2800);
+      },
+      80
+    );
+
+    return () => {
+      window.clearTimeout(
+        positionTimer
+      );
+      window.clearTimeout(
+        highlightTimer
+      );
+    };
+  }, [screen, searchTarget]);
+
   function navigateSearchItem(item) {
+    setHomeSearch("");
+
     if (item.action === "chat") {
+      setSearchTarget(null);
       openChat();
+    } else if (item.directProductKey) {
+      setCreditFilter("todos");
+      setSearchTarget({
+        screen: "direct",
+        targetSelector:
+          `.direct-${item.directProductKey}`
+      });
+      setScreen("direct");
     } else if (item.product) {
+      setSearchTarget(null);
       setSelectedProduct(item.product);
       setScreen("productDetail");
     } else if (item.article) {
+      setSearchTarget(null);
       setSelectedArticle(item.article);
       setScreen("learnDetail");
+    } else if (item.targetSelector) {
+      setSearchTarget({
+        screen: item.screen,
+        targetSelector:
+          item.targetSelector
+      });
+      setScreen(item.screen);
     } else {
+      setSearchTarget(null);
       setScreen(item.screen);
     }
-
-    setHomeSearch("");
   }
 
   const filteredDirectKeys =
@@ -3171,6 +3352,10 @@ function App() {
                   <button
                     className={`career-card ${partner.id}`}
                     key={partner.id}
+                    data-search-key={makeSearchKey(
+                      "education",
+                      partner.name
+                    )}
                     onClick={() =>
                       window.open(
                         partner.url,
@@ -3285,6 +3470,10 @@ function App() {
                         <button
                           className={`service-card${item.status ? " service-card-disabled" : ""}`}
                           key={item.name}
+                          data-search-key={makeSearchKey(
+                            "service",
+                            item.name
+                          )}
                           onClick={() => {
                             if (!item.status) {
                               openService(item);

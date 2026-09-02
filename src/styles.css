@@ -4316,6 +4316,33 @@ html.splash-active #root {
   font-weight: 700;
 }
 
+.search-target-active {
+  position: relative;
+  z-index: 2;
+  outline: 4px solid #FDCA01 !important;
+  outline-offset: 4px;
+  box-shadow: 0 0 0 9px rgba(253, 202, 1, 0.22),
+    0 18px 36px rgba(17, 17, 17, 0.18) !important;
+  animation: search-target-pulse 0.7s ease-out 2;
+}
+
+@keyframes search-target-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.025);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .search-target-active {
+    animation: none;
+  }
+}
+
 .home-search-shortcuts {
   margin-top: 10px;
   display: flex;
