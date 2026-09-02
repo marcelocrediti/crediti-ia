@@ -4154,6 +4154,23 @@ html.splash-active #root {
   box-shadow: 0 10px 28px rgba(17, 17, 17, 0.08);
 }
 
+.home-search-copy {
+  margin-bottom: 11px;
+  display: grid;
+  gap: 2px;
+}
+
+.home-search-copy strong {
+  color: #111111;
+  font-size: 17px;
+  line-height: 1.2;
+}
+
+.home-search-copy small {
+  color: #666666;
+  font-size: 13px;
+}
+
 .home-smart-search form {
   min-height: 52px;
   display: grid;
@@ -4209,7 +4226,7 @@ html.splash-active #root {
 
 .home-search-results {
   position: absolute;
-  top: 76px;
+  top: 119px;
   right: 0;
   left: 0;
   z-index: 10;
@@ -4264,6 +4281,15 @@ html.splash-active #root {
   color: #5f5f5f;
   font-size: 14px;
   line-height: 1.4;
+}
+
+.home-search-results .search-fallback-message {
+  margin: 0 0 4px;
+  padding: 11px 12px;
+  border-radius: 11px;
+  background: #fff6bd;
+  color: #4f4619;
+  font-weight: 700;
 }
 
 .home-search-shortcuts {
@@ -4547,7 +4573,7 @@ html.splash-active #root {
   }
 
   .home-search-results {
-    top: 118px;
+    top: 161px;
   }
 
   .compare-columns {
@@ -4667,4 +4693,3 @@ html.splash-active #root {
   background: #ffffff;
   color: #333333;
 }
-
