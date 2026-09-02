@@ -1490,10 +1490,12 @@ html.splash-active #root {
 }
 
 .home-banner {
+  position: relative;
+  overflow: hidden;
   width: 100%;
   min-width: 100%;
   min-height: 160px;
-  padding: 24px 22px 30px;
+  padding: 24px 104px 30px 22px;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -1519,10 +1521,49 @@ html.splash-active #root {
   letter-spacing: -0.8px;
 }
 
-.home-banner span {
+.home-banner-cta {
   margin-top: 12px;
   font-size: 11px;
   font-weight: 800;
+}
+
+.home-banner-visual {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  width: 62px;
+  height: 62px;
+  display: grid;
+  place-items: center;
+  border-radius: 18px;
+}
+
+.home-banner-visual svg {
+  width: 40px;
+  height: 40px;
+}
+
+.home-banner-visual.credit {
+  color: #111111;
+  background: rgba(255, 255, 255, 0.55);
+}
+
+.home-banner-visual.education {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.16);
+  border: 2px solid rgba(255, 255, 255, 0.74);
+}
+
+.home-banner-visual.security {
+  color: #FDCE00;
+  background: rgba(253, 206, 0, 0.12);
+  border: 1px solid rgba(253, 206, 0, 0.42);
+}
+
+.home-banner-visual.services {
+  color: #111111;
+  background: #ffffff;
+  border: 1px solid rgba(17, 17, 17, 0.1);
 }
 
 .yellow-banner {
@@ -1535,25 +1576,8 @@ html.splash-active #root {
 }
 
 .pravaler-banner {
-  position: relative;
-  overflow: hidden;
   background: linear-gradient(135deg, #5522b8 0%, #8546db 100%);
   color: #ffffff;
-}
-
-.pravaler-banner::after {
-  content: "R$";
-  position: absolute;
-  right: 20px;
-  top: 20px;
-  width: 52px;
-  height: 52px;
-  display: grid;
-  place-items: center;
-  border: 2px solid rgba(255, 255, 255, 0.85);
-  border-radius: 16px;
-  font-size: 16px;
-  font-weight: 900;
 }
 
 .pravaler-banner strong {
