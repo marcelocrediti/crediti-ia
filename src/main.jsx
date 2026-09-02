@@ -1485,7 +1485,9 @@ function UiIcon({ name }) {
       {name === "shop" && <><path d="M6 8h12l1 13H5L6 8Z" /><path d="M9 9V6a3 3 0 0 1 6 0v3" /></>}
       {name === "chat" && <><path d="M4 5h16v11H9l-5 4V5Z" /><path d="M8 9h8M8 12h5" /></>}
       {name === "products" && <><rect x="4" y="4" width="6" height="6" rx="1" /><rect x="14" y="4" width="6" height="6" rx="1" /><rect x="4" y="14" width="6" height="6" rx="1" /><path d="M17 14v6M14 17h6" /></>}
-      {name === "partner" && <><path d="M8.5 12.5 11 15a2 2 0 0 0 3 0l4.5-4.5" /><path d="m3 10 4-4 4 3-5 6-3-5ZM21 10l-4-4-3.5 2.5M8 17l2 2M12 17l1 1" /></>}
+      {name === "partner" && <><path d="m3 8 4-3 4 3-5 6-3-3V8Z" /><path d="m21 8-4-3-3 2M8 15l3.5 3.5a1.5 1.5 0 0 0 2.1-2.1l-2.8-2.8" /><path d="m12.5 11.5 3.9 3.9a1.5 1.5 0 0 0 2.1-2.1L14 8.8a2 2 0 0 0-2.8 0L9.5 10.5a1.8 1.8 0 0 1-2.5 0" /></>}
+      {name === "userPlus" && <><circle cx="10" cy="8" r="4" /><path d="M3 21v-2a6 6 0 0 1 12 0v2M19 8v6M16 11h6" /></>}
+      {name === "headset" && <><path d="M4 13v-2a8 8 0 0 1 16 0v2" /><path d="M4 13h3v6H5a1 1 0 0 1-1-1v-5ZM20 13h-3v6h2a1 1 0 0 0 1-1v-5ZM17 19c0 2-2 2-4 2" /></>}
       {name === "star" && <path d="m12 3 2.7 5.5 6.1.9-4.4 4.3 1 6.1-5.4-2.9-5.4 2.9 1-6.1-4.4-4.3 6.1-.9L12 3Z" />}
       {name === "search" && <><circle cx="11" cy="11" r="6" /><path d="m16 16 4 4" /></>}
       {name === "shield" && <><path d="M12 3 20 6v6c0 5-3 8-8 10-5-2-8-5-8-10V6l8-3Z" /><path d="m8.5 12 2.2 2.2 4.8-5" /></>}
@@ -3475,16 +3477,6 @@ function App() {
         />
 
         <main className="modern-page local-hub-page">
-          <section className="local-privacy-card">
-            <span aria-hidden="true"><UiIcon name="shield" /></span>
-            <div>
-              <strong>Sem cadastro e sem CPF</strong>
-              <p>
-                Favoritos, histórico e contas ficam somente neste aparelho. A Crediti não recebe essas informações.
-              </p>
-            </div>
-          </section>
-
           <div className="local-hub-actions">
             <button onClick={() => setScreen("organizer")}>
               <span aria-hidden="true"><UiIcon name="calendar" /></span>
@@ -3931,16 +3923,6 @@ function App() {
             </p>
           </section>
 
-          <section className="privacy-first-note" aria-label="Privacidade na Crediti">
-            <span aria-hidden="true"><UiIcon name="shield" /></span>
-            <div>
-              <strong>Compare sem informar dados pessoais</strong>
-              <p>
-                A Crediti não solicita CPF, documentos, renda ou dados bancários. Você só informa dados no ambiente oficial da instituição escolhida.
-              </p>
-            </div>
-          </section>
-
           <div className="credit-filter-bar" aria-label="Filtrar opções de crédito">
             {CREDIT_FILTERS.map((filter) => (
               <button
@@ -4159,9 +4141,7 @@ function App() {
                 setScreen("direct")
               }
             >
-              <span className="hub-icon">
-                R$
-              </span>
+              <span className="hub-icon"><UiIcon name="credit" /></span>
               <strong>
                 Quero simular agora
               </strong>
@@ -4176,9 +4156,7 @@ function App() {
                 openChat()
               }
             >
-              <span className="hub-icon">
-                IA
-              </span>
+              <span className="hub-icon"><UiIcon name="chat" /></span>
               <strong>
                 Converse com a Crediti IA
               </strong>
@@ -4193,9 +4171,7 @@ function App() {
                 setScreen("products")
               }
             >
-              <span className="hub-icon">
-                +
-              </span>
+              <span className="hub-icon"><UiIcon name="products" /></span>
               <strong>
                 Conheça nossos produtos
               </strong>
@@ -4210,9 +4186,7 @@ function App() {
                 setScreen("human")
               }
             >
-              <span className="hub-icon">
-                C
-              </span>
+              <span className="hub-icon"><UiIcon name="headset" /></span>
               <strong>
                 Atendimento com analista
               </strong>
@@ -4379,7 +4353,7 @@ function App() {
             </div>
             <div>
               <button onClick={() => openPartnerLink("pravaler")}>SIMULAR PRAVALER</button>
-              <button onClick={() => openChat("Quero estudar e preciso de orientação")}>CONVERSAR COM A IA</button>
+              <button onClick={() => openChat("Quero estudar e preciso de orientação")}>FALAR COM A IA</button>
             </div>
           </section>
 
@@ -6204,7 +6178,7 @@ function App() {
               className="simple-action-card"
               onClick={() => openAnalystWhatsApp("samila")}
             >
-              <span className="simple-action-icon" aria-hidden="true">S</span>
+              <span className="simple-action-icon" aria-hidden="true"><UiIcon name="chat" /></span>
               <span className="simple-action-copy">
                 <strong>Samila</strong>
                 <small>Falar com a analista pelo WhatsApp</small>
@@ -6216,7 +6190,7 @@ function App() {
               className="simple-action-card"
               onClick={() => openAnalystWhatsApp("marcelino")}
             >
-              <span className="simple-action-icon" aria-hidden="true">M</span>
+              <span className="simple-action-icon" aria-hidden="true"><UiIcon name="chat" /></span>
               <span className="simple-action-copy">
                 <strong>Marcelino</strong>
                 <small>Falar com o analista pelo WhatsApp</small>
@@ -6269,25 +6243,8 @@ function App() {
           </h2>
 
           <p>
-            É o programa de parceria da Crediti para quem quer trabalhar indicando oportunidades de crédito e ganhar comissões.
+            Cadastre-se, indique clientes e acompanhe suas oportunidades de crédito em um só lugar.
           </p>
-
-          <p>
-            Você se cadastra na plataforma, conhece os produtos disponíveis, encontra clientes e acompanha suas oportunidades.
-          </p>
-
-          <div
-            className=
-              "partner-tip"
-          >
-            <strong>
-              Dica do Creditin
-            </strong>
-
-            <p>
-              Trabalhe sempre com informação clara e responsabilidade. Nunca prometa aprovação para o cliente.
-            </p>
-          </div>
 
           <button
             className="partner-register-modern"
@@ -6295,7 +6252,7 @@ function App() {
               openExternal(RENDA_EXTRA_URL)
             }
           >
-            <span className="simple-action-icon" aria-hidden="true"><UiIcon name="partner" /></span>
+            <span className="simple-action-icon" aria-hidden="true"><UiIcon name="userPlus" /></span>
             <span className="simple-action-copy">
               <strong>Quero me cadastrar</strong>
               <small>Abrir a plataforma Renda Extra Crediti</small>
@@ -6339,6 +6296,11 @@ function App() {
             src="/creditin-oficial.png"
             alt="Creditin"
           />
+        </section>
+
+        <section className="home-privacy-note" aria-label="Privacidade e segurança">
+          <UiIcon name="shield" />
+          <p><strong>Privacidade primeiro.</strong> A Crediti não usa CPF para consultas. Toda simulação de crédito ocorre dentro do banco parceiro.</p>
         </section>
 
         <section className="home-smart-search" aria-label="Buscar no aplicativo">
