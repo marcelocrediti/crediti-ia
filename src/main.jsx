@@ -1360,6 +1360,54 @@ function BottomNav({
   );
 }
 
+function HomeBannerVisual({ type }) {
+  const iconProps = {
+    viewBox: "0 0 64 64",
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: 4,
+    strokeLinecap: "round",
+    strokeLinejoin: "round"
+  };
+
+  return (
+    <span
+      className={`home-banner-visual ${type}`}
+      aria-hidden="true"
+    >
+      {type === "credit" && (
+        <svg {...iconProps}>
+          <rect x="8" y="16" width="48" height="34" rx="7" />
+          <path d="M8 27h48M16 41h13" />
+          <circle cx="45" cy="39" r="5" />
+        </svg>
+      )}
+
+      {type === "education" && (
+        <svg {...iconProps}>
+          <path d="m7 25 25-12 25 12-25 12L7 25Z" />
+          <path d="M17 31v12c8 7 22 7 30 0V31M55 28v16" />
+          <circle cx="55" cy="48" r="3" />
+        </svg>
+      )}
+
+      {type === "security" && (
+        <svg {...iconProps}>
+          <path d="M32 7 53 15v15c0 13-8 23-21 28C19 53 11 43 11 30V15l21-8Z" />
+          <path d="m22 32 7 7 14-15" />
+        </svg>
+      )}
+
+      {type === "services" && (
+        <svg {...iconProps}>
+          <path d="M8 25 32 10l24 15H8ZM13 49h38M8 56h48" />
+          <path d="M16 25v24M27 25v24M37 25v24M48 25v24" />
+        </svg>
+      )}
+    </span>
+  );
+}
+
 function AppHeader({
   title,
   subtitle,
@@ -5138,13 +5186,14 @@ function App() {
               setScreen("direct")
             }
           >
+            <HomeBannerVisual type="credit" />
             <small>
               SIMULAÇÃO ONLINE
             </small>
             <strong>
               Encontre opções de crédito
             </strong>
-            <span>
+            <span className="home-banner-cta">
               Escolha e simule com segurança ›
             </span>
           </button>
@@ -5155,13 +5204,14 @@ function App() {
               openPartnerLink("pravaler")
             }
           >
+            <HomeBannerVisual type="education" />
             <small>
               FINANCIAMENTO ESTUDANTIL
             </small>
             <strong>
               Faça sua simulação com o Pravaler
             </strong>
-            <span>
+            <span className="home-banner-cta">
               Financie sua faculdade ›
             </span>
           </button>
@@ -5172,13 +5222,14 @@ function App() {
               setScreen("learn")
             }
           >
+            <HomeBannerVisual type="security" />
             <small>
               DICA DO CREDITIN
             </small>
             <strong>
               Nunca pague para liberar crédito
             </strong>
-            <span>
+            <span className="home-banner-cta">
               Veja como evitar golpes ›
             </span>
           </button>
@@ -5189,13 +5240,14 @@ function App() {
               setScreen("services")
             }
           >
+            <HomeBannerVisual type="services" />
             <small>
               SERVIÇOS OFICIAIS
             </small>
             <strong>
               Receita, Banco Central e Serasa
             </strong>
-            <span>
+            <span className="home-banner-cta">
               Acesse serviços úteis ›
             </span>
           </button>
