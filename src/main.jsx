@@ -11,6 +11,18 @@ import "./styles.css";
 const API_URL =
   "https://crediti-ia-api.onrender.com";
 
+const AI_REQUEST_TIMEOUT_MS =
+  60000;
+
+function warmAiServer() {
+  fetch(`${API_URL}/health`, {
+    method: "GET",
+    cache: "no-store"
+  }).catch(() => {
+    // O envio da mensagem continua funcionando mesmo se o aquecimento falhar.
+  });
+}
+
 const SUPABASE_URL =
   "https://vgdtywdpywezrwlrsawq.supabase.co/rest/v1";
 
@@ -2040,6 +2052,8 @@ function App() {
       : matchedSearchResults;
 
   useEffect(() => {
+    warmAiServer();
+
     const handleOnline = () => {
       setIsOnline(true);
       setAppNotice("Conexão restabelecida.");
@@ -2786,6 +2800,8 @@ function App() {
   function openChat(
     firstMessage = ""
   ) {
+    warmAiServer();
+
     const greeting =
       getGreeting();
 
@@ -3086,7 +3102,7 @@ function App() {
     const requestTimer =
       window.setTimeout(
         () => controller.abort(),
-        20000
+        AI_REQUEST_TIMEOUT_MS
       );
 
     try {
