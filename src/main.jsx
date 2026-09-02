@@ -585,18 +585,125 @@ const CREDIT_META = {
   }
 };
 
+const normalizeAppSearch = (value) =>
+  value
+    .toLocaleLowerCase("pt-BR")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .trim();
+
+const isSearchWordClose = (
+  first,
+  second
+) => {
+  if (first === second) {
+    return true;
+  }
+
+  if (
+    Math.abs(
+      first.length - second.length
+    ) > 1
+  ) {
+    return false;
+  }
+
+  let left = 0;
+  let right = 0;
+  let changes = 0;
+
+  while (
+    left < first.length &&
+    right < second.length
+  ) {
+    if (first[left] === second[right]) {
+      left += 1;
+      right += 1;
+      continue;
+    }
+
+    changes += 1;
+
+    if (changes > 1) {
+      return false;
+    }
+
+    if (first.length > second.length) {
+      left += 1;
+    } else if (
+      second.length > first.length
+    ) {
+      right += 1;
+    } else {
+      left += 1;
+      right += 1;
+    }
+  }
+
+  return true;
+};
+
 const APP_SEARCH_ITEMS = [
+  {
+    title: "Converse com a Crediti IA",
+    description: "Tire dúvidas e encontre o caminho certo dentro do aplicativo",
+    screen: "credit",
+    action: "chat",
+    keywords: "ia inteligencia artificial conversar conversa falar duvida ajuda orientação atendimento"
+  },
+  {
+    title: "Atendimento com a Crediti",
+    description: "Fale com um analista da equipe pelo WhatsApp",
+    screen: "human",
+    keywords: "atendimento atendente analista humano pessoa whatsapp falar ajuda samila marcelino"
+  },
+  {
+    title: "Renda Extra Crediti",
+    description: "Conheça o programa para parceiros da Crediti",
+    screen: "partner",
+    keywords: "parceiro parceria renda extra indicar indicação comissão trabalhar cadastro"
+  },
+  {
+    title: "Financiamento de carro ou moto",
+    description: "Financiamento, refinanciamento, garantia, seguro e consórcio",
+    screen: "products",
+    keywords: "carro carros moto motos veiculo veiculos automovel automoveis financiar financiamento refinanciar refinanciamento garantia seguro consorcio comprar trocar"
+  },
+  {
+    title: "Crédito para aposentados",
+    description: "Consignado INSS e opções para beneficiários BPC/LOAS",
+    screen: "direct",
+    keywords: "aposentado aposentados pensionista pensionistas idoso idosos inss beneficio beneficiario bpc loas consignado"
+  },
+  {
+    title: "Crédito para trabalhador",
+    description: "CLT, antecipação do FGTS, cartão e conta de energia",
+    screen: "direct",
+    keywords: "trabalhador trabalhadores empregado carteira assinada clt fgts saque aniversario cartao energia conta luz"
+  },
+  {
+    title: "Faculdade e financiamento estudantil",
+    description: "Faculdades parceiras, cursos e Pravaler",
+    screen: "learn",
+    keywords: "faculdade faculdades curso cursos estudar estudo estudante vestibular graduacao pravaler estacio uninter wyden idomed unifatecie"
+  },
+  {
+    title: "Soluções para empresas",
+    description: "Conta PJ, divulgação, hospedagem e serviços empresariais",
+    screen: "services",
+    keywords: "empresa empresas empresario empresarios lojista lojistas mei cnpj pj negócio negocios cora santander hostinger kinghost tiktok"
+  },
   {
     title: "Simular crédito",
     description: "INSS, BPC, CLT, FGTS, cartão, energia e estudante",
     screen: "direct",
-    keywords: "credito empréstimo simular inss aposentado pensionista bpc loas clt trabalhador fgts cartao energia pravaler estudante faculdade"
+    keywords: "credito emprestimo dinheiro simular inss aposentado pensionista bpc loas clt trabalhador fgts cartao energia pravaler estudante faculdade"
   },
   {
     title: "Aprenda com a Crediti",
     description: "Educação financeira, segurança e oportunidades de estudo",
     screen: "learn",
-    keywords: "aprender dica golpe segurança orçamento dívida faculdade curso estudo educação"
+    keywords: "aprender dica golpe seguranca fraude orçamento divida faculdade curso estudo educacao economia organizar conta contas"
   },
   {
     title: "Serviços úteis",
@@ -608,13 +715,13 @@ const APP_SEARCH_ITEMS = [
     title: "Crediti Shop",
     description: "Lojas, produtos, categorias, cupons e parceiros",
     screen: "shop",
-    keywords: "loja comprar shop cupom desconto roupa perfume beleza eletrodoméstico geladeira brinquedo ferramenta"
+    keywords: "loja lojas comprar compra shop cupom desconto oferta shopee magalu shein amazon babystock toy mania kidy xiaomi itatiaia electrolux natura avon cea loja do mecanico polishop todovino amokarite lojas rede sieno biovittare amakha cacau show colombo casa das aliancas cicatrissim gazin hipervarejo komo wellness laluna freeway le loyn malwee sawary maria valentina fator 5 promofarma roupa moda calcado sapato perfume beleza cosmetico eletrodomestico geladeira fogao brinquedo ferramenta vinho chocolate"
   },
   {
     title: "Conheça nossos produtos",
     description: "Entenda regras e cuidados antes de decidir",
     screen: "products",
-    keywords: "produto regra condição como funciona crédito financiamento seguro consórcio"
+    keywords: "produto produtos regra condicao como funciona credito financiamento refinanciamento seguro consorcio carro moto veiculo"
   }
 ];
 
@@ -1392,24 +1499,171 @@ function App() {
     setExternalReturnScreen
   ] = useState("direct");
 
+  const appSearchCatalog = [
+    ...APP_SEARCH_ITEMS,
+    ...products.map((product) => ({
+      title: product.name,
+      description:
+        product.what ||
+        "Conheça esta opção da Crediti",
+      screen: "productDetail",
+      product,
+      keywords: [
+        product.typeLabel,
+        product.forWho,
+        product.how,
+        product.when,
+        product.tip
+      ]
+        .filter(Boolean)
+        .join(" ")
+    })),
+    ...EDUCATION_PARTNERS.map(
+      (partner) => ({
+        title: partner.name,
+        description:
+          partner.title +
+          " · " +
+          partner.category,
+        screen: "learn",
+        keywords:
+          "faculdade curso estudar estudo educação " +
+          partner.name +
+          " " +
+          partner.category
+      })
+    ),
+    ...LEARN_ARTICLES.map(
+      (article) => ({
+        title: article.title,
+        description: article.summary,
+        screen: "learnDetail",
+        article,
+        keywords:
+          article.category +
+          " " +
+          article.points.join(" ")
+      })
+    ),
+    ...SERVICE_GROUPS.flatMap(
+      (group) =>
+        group.items.map((item) => ({
+          title: item.name,
+          description:
+            item.description ||
+            group.title,
+          screen: "services",
+          keywords:
+            group.title +
+            " " +
+            item.name +
+            " " +
+            (item.description || "")
+        }))
+    )
+  ];
+
   const normalizedSearch =
-    homeSearch
-      .trim()
-      .toLocaleLowerCase("pt-BR");
+    normalizeAppSearch(homeSearch);
+
+  const searchTokens =
+    normalizedSearch
+      .split(/\s+/)
+      .filter(Boolean)
+      .slice(0, 4);
+
+  const matchedSearchResults =
+    normalizedSearch
+      ? appSearchCatalog.map((item) => {
+          const haystack =
+            normalizeAppSearch(
+              item.title +
+                " " +
+                item.description +
+                " " +
+                item.keywords
+            );
+
+          const haystackWords =
+            haystack
+              .split(/\s+/)
+              .filter(Boolean);
+
+          const score =
+            searchTokens.reduce(
+              (total, token) => {
+                const exact =
+                  haystack.includes(token);
+
+                const approximate =
+                  token.length >= 4 &&
+                  haystackWords.some(
+                    (word) =>
+                      isSearchWordClose(
+                        word,
+                        token
+                      )
+                  );
+
+                return (
+                  total +
+                  (exact
+                    ? 2
+                    : approximate
+                      ? 1
+                      : 0)
+                );
+              },
+              0
+            );
+
+          return { ...item, score };
+        })
+          .filter((item) => item.score > 0)
+          .sort((a, b) => b.score - a.score)
+          .slice(0, 5)
+      : [];
+
+  const isSearchFallback =
+    Boolean(normalizedSearch) &&
+    matchedSearchResults.length === 0;
 
   const homeSearchResults =
-    normalizedSearch
-      ? APP_SEARCH_ITEMS.filter(
-          (item) =>
-            (item.title +
-              " " +
-              item.description +
-              " " +
-              item.keywords)
-              .toLocaleLowerCase("pt-BR")
-              .includes(normalizedSearch)
-        ).slice(0, 5)
-      : [];
+    isSearchFallback
+      ? [
+          APP_SEARCH_ITEMS.find(
+            (item) =>
+              item.title ===
+              "Conheça nossos produtos"
+          ),
+          APP_SEARCH_ITEMS.find(
+            (item) =>
+              item.title ===
+              "Serviços úteis"
+          ),
+          APP_SEARCH_ITEMS.find(
+            (item) =>
+              item.title ===
+              "Crediti Shop"
+          )
+        ].filter(Boolean)
+      : matchedSearchResults;
+
+  function navigateSearchItem(item) {
+    if (item.action === "chat") {
+      openChat();
+    } else if (item.product) {
+      setSelectedProduct(item.product);
+      setScreen("productDetail");
+    } else if (item.article) {
+      setSelectedArticle(item.article);
+      setScreen("learnDetail");
+    } else {
+      setScreen(item.screen);
+    }
+
+    setHomeSearch("");
+  }
 
   const filteredDirectKeys =
     creditFilter === "todos"
@@ -4808,13 +5062,19 @@ function App() {
         </section>
 
         <section className="home-smart-search" aria-label="Buscar no aplicativo">
+          <div className="home-search-copy">
+            <strong>Me conte o que você precisa</strong>
+            <small>Busque usando uma ou duas palavras.</small>
+          </div>
+
           <form
             onSubmit={(event) => {
               event.preventDefault();
 
               if (homeSearchResults[0]) {
-                setScreen(homeSearchResults[0].screen);
-                setHomeSearch("");
+                navigateSearchItem(
+                  homeSearchResults[0]
+                );
               }
             }}
           >
@@ -4823,24 +5083,33 @@ function App() {
               type="search"
               value={homeSearch}
               onChange={(event) => setHomeSearch(event.target.value)}
-              placeholder="O que você precisa encontrar?"
-              aria-label="Buscar crédito, serviço, faculdade ou loja"
+              placeholder="Ex.: carro, moto, faculdade..."
+              aria-label="Conte o que precisa ou busque usando uma ou duas palavras"
             />
-            <button type="submit" disabled={!homeSearchResults.length}>
+            <button type="submit" disabled={!normalizedSearch}>
               BUSCAR
             </button>
           </form>
 
           {normalizedSearch && (
             <div className="home-search-results">
+              {isSearchFallback && (
+                <p className="search-fallback-message">
+                  Não achei exatamente esse nome, mas estes caminhos podem ajudar:
+                </p>
+              )}
+
               {homeSearchResults.length ? (
                 homeSearchResults.map((item) => (
                   <button
-                    key={item.title}
-                    onClick={() => {
-                      setScreen(item.screen);
-                      setHomeSearch("");
-                    }}
+                    key={
+                      item.screen +
+                      "-" +
+                      item.title
+                    }
+                    onClick={() =>
+                      navigateSearchItem(item)
+                    }
                   >
                     <span>
                       <strong>{item.title}</strong>
@@ -4849,19 +5118,16 @@ function App() {
                     <b aria-hidden="true">›</b>
                   </button>
                 ))
-              ) : (
-                <p>
-                  Não encontramos esse termo. Tente crédito, faculdade, empresa ou loja.
-                </p>
-              )}
+              ) : null}
             </div>
           )}
 
           <div className="home-search-shortcuts">
-            <button onClick={() => setScreen("direct")}>Crédito</button>
-            <button onClick={() => setScreen("learn")}>Estudos</button>
-            <button onClick={() => setScreen("services")}>Empresas</button>
-            <button onClick={() => setScreen("shop")}>Lojas</button>
+            <button onClick={() => setHomeSearch("carro")}>Carro</button>
+            <button onClick={() => setHomeSearch("moto")}>Moto</button>
+            <button onClick={() => setHomeSearch("aposentado")}>Aposentado</button>
+            <button onClick={() => setHomeSearch("faculdade")}>Faculdade</button>
+            <button onClick={() => setHomeSearch("empresa")}>Empresa</button>
           </div>
         </section>
 
@@ -5137,4 +5403,3 @@ createRoot(
     "root"
   )
 ).render(<App />);
-
