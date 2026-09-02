@@ -1,7 +1,7 @@
 {
   "name": "Crediti",
   "short_name": "Crediti",
-  "description": "Crédito com responsabilidade. Código de verificação: a7fd",
+  "description": "Encontre opções de crédito, serviços, estudos e lojas com orientação e segurança.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
