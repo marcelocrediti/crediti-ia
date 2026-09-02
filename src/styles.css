@@ -1180,6 +1180,7 @@ header small {
     scroll-behavior: auto !important;
   }
 }
+
 .partner-result-card {
   position: relative;
   width: min(100%, 360px);
@@ -6372,5 +6373,314 @@ button:disabled {
 @media (max-width: 480px) {
   .chat-route-options {
     width: calc(100% - 46px);
+  }
+}
+
+/* Minha Crediti Inteligente */
+.smart-profile-card {
+  display: grid;
+  grid-template-columns: 54px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 14px;
+  padding: 18px;
+  border: 1.5px solid #e4c100;
+  border-radius: 22px;
+  background: #fff7c9;
+}
+
+.smart-profile-card > span {
+  width: 54px;
+  height: 54px;
+  display: grid;
+  place-items: center;
+  border-radius: 16px;
+  background: #FDCA01;
+}
+
+.smart-profile-card .ui-icon {
+  width: 27px;
+  height: 27px;
+}
+
+.smart-profile-card > div {
+  min-width: 0;
+  display: grid;
+  gap: 4px;
+}
+
+.smart-profile-card small {
+  color: #756100;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: .05em;
+}
+
+.smart-profile-card strong {
+  font-size: 17px;
+  line-height: 1.18;
+}
+
+.smart-profile-card p {
+  margin: 0;
+  color: #676767;
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.smart-profile-card > button {
+  min-height: 42px;
+  padding: 0 14px;
+  border-radius: 13px;
+  background: #111111;
+  color: #ffffff;
+  font-size: 10px;
+  font-weight: 900;
+}
+
+.smart-recommendations {
+  padding: 18px;
+  border-radius: 22px;
+  background: #f7f7f7;
+}
+
+.recommendation-list,
+.activity-list {
+  display: grid;
+  gap: 9px;
+}
+
+.recommendation-list > button {
+  width: 100%;
+  min-height: 76px;
+  padding: 12px;
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr) 12px;
+  align-items: center;
+  gap: 11px;
+  border: 1px solid #dedede;
+  border-radius: 16px;
+  background: #ffffff;
+  text-align: left;
+}
+
+.recommendation-list > button > span {
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  background: #FDCA01;
+}
+
+.recommendation-list .ui-icon {
+  width: 21px;
+  height: 21px;
+}
+
+.recommendation-list > button > div {
+  display: grid;
+  gap: 3px;
+}
+
+.recommendation-list strong {
+  color: #111111;
+  font-size: 13px;
+  line-height: 1.25;
+}
+
+.recommendation-list small {
+  color: #6b6b6b;
+  font-size: 10px;
+  line-height: 1.35;
+}
+
+.recommendation-list b {
+  font-size: 20px;
+}
+
+.recommendation-disclaimer {
+  margin: 11px 2px 0;
+  color: #777777;
+  font-size: 9px;
+  line-height: 1.4;
+}
+
+.activity-list > button {
+  width: 100%;
+  min-height: 66px;
+  padding: 13px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border: 1px solid #dedede;
+  border-radius: 15px;
+  background: #ffffff;
+  color: #111111;
+  text-align: left;
+}
+
+.activity-list > button > span {
+  min-width: 0;
+  display: grid;
+  gap: 4px;
+}
+
+.activity-list strong {
+  font-size: 13px;
+  line-height: 1.25;
+}
+
+.activity-list small {
+  color: #707070;
+  font-size: 10px;
+  line-height: 1.3;
+}
+
+.activity-list > button > b {
+  flex: 0 0 auto;
+  color: #725f00;
+  font-size: 9px;
+}
+
+.financial-profile-page {
+  display: grid;
+  gap: 18px;
+}
+
+.profile-safe-note {
+  padding: 16px;
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr);
+  align-items: center;
+  gap: 13px;
+  border: 1.5px solid #e4c100;
+  border-radius: 20px;
+  background: #fff7c9;
+}
+
+.profile-safe-note > span {
+  width: 48px;
+  height: 48px;
+  display: grid;
+  place-items: center;
+  border-radius: 14px;
+  background: #FDCA01;
+}
+
+.profile-safe-note .ui-icon {
+  width: 24px;
+  height: 24px;
+}
+
+.profile-safe-note div {
+  display: grid;
+  gap: 4px;
+}
+
+.profile-safe-note strong {
+  font-size: 15px;
+}
+
+.profile-safe-note p {
+  margin: 0;
+  color: #676767;
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.financial-profile-form {
+  padding: 19px;
+  display: grid;
+  gap: 16px;
+  border: 1px solid #dddddd;
+  border-radius: 22px;
+  background: #ffffff;
+}
+
+.financial-profile-form label,
+.financial-profile-form fieldset {
+  display: grid;
+  gap: 7px;
+  color: #111111;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.financial-profile-form fieldset {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.financial-profile-form legend {
+  margin-bottom: 7px;
+}
+
+.financial-profile-form input,
+.financial-profile-form select {
+  width: 100%;
+  min-height: 50px;
+  box-sizing: border-box;
+  padding: 0 14px;
+  border: 1.5px solid #d8d8d8;
+  border-radius: 14px;
+  background: #fafafa;
+  color: #111111;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.profile-choice-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.profile-choice-row button {
+  min-height: 48px;
+  border: 1.5px solid #d8d8d8;
+  border-radius: 14px;
+  background: #ffffff;
+  color: #111111;
+  font-weight: 900;
+}
+
+.profile-choice-row button.selected {
+  border-color: #d9b500;
+  background: #FDCA01;
+}
+
+.profile-save-button {
+  min-height: 54px;
+  border-radius: 15px;
+  background: #FDCA01;
+  color: #111111;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.profile-clear-button {
+  min-height: 42px;
+  background: transparent;
+  color: #777777;
+  font-size: 9px;
+  font-weight: 800;
+}
+
+@media (max-width: 520px) {
+  .smart-profile-card {
+    grid-template-columns: 48px minmax(0, 1fr);
+  }
+
+  .smart-profile-card > span {
+    width: 48px;
+    height: 48px;
+  }
+
+  .smart-profile-card > button {
+    grid-column: 1 / -1;
+    width: 100%;
   }
 }

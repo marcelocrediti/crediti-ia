@@ -36,7 +36,10 @@ const LOCAL_KEYS = {
   bills: "crediti_local_bills_v1",
   favorites: "crediti_local_favorites_v1",
   recent: "crediti_local_recent_v1",
-  comparisons: "crediti_local_comparisons_v1"
+  comparisons: "crediti_local_comparisons_v1",
+  profile: "crediti_financial_profile_v1",
+  simulations: "crediti_simulations_v1",
+  serviceRequests: "crediti_service_requests_v1"
 };
 
 function readLocalList(key) {
@@ -48,6 +51,20 @@ function readLocalList(key) {
     return Array.isArray(value) ? value : [];
   } catch {
     return [];
+  }
+}
+
+function readLocalObject(key, fallback) {
+  try {
+    const value = JSON.parse(
+      window.localStorage.getItem(key) || "null"
+    );
+
+    return value && typeof value === "object" && !Array.isArray(value)
+      ? value
+      : fallback;
+  } catch {
+    return fallback;
   }
 }
 
@@ -1832,6 +1849,45 @@ function App() {
     readLocalList(LOCAL_KEYS.bills)
   );
 
+  const emptyFinancialProfile = {
+    firstName: "",
+    city: "",
+    incomeType: "",
+    goal: "",
+    ownsVehicle: ""
+  };
+
+  const [
+    financialProfile,
+    setFinancialProfile
+  ] = useState(() =>
+    readLocalObject(
+      LOCAL_KEYS.profile,
+      emptyFinancialProfile
+    )
+  );
+
+  const [
+    profileDraft,
+    setProfileDraft
+  ] = useState(() => ({
+    ...financialProfile
+  }));
+
+  const [
+    simulations,
+    setSimulations
+  ] = useState(() =>
+    readLocalList(LOCAL_KEYS.simulations)
+  );
+
+  const [
+    serviceRequests,
+    setServiceRequests
+  ] = useState(() =>
+    readLocalList(LOCAL_KEYS.serviceRequests)
+  );
+
   const [
     billDraft,
     setBillDraft
@@ -2128,6 +2184,31 @@ function App() {
   }, [localBills]);
 
   useEffect(() => {
+    try {
+      window.localStorage.setItem(
+        LOCAL_KEYS.profile,
+        JSON.stringify(financialProfile)
+      );
+    } catch {
+      // O restante do aplicativo continua disponível se o navegador bloquear o armazenamento.
+    }
+  }, [financialProfile]);
+
+  useEffect(() => {
+    saveLocalList(
+      LOCAL_KEYS.simulations,
+      simulations
+    );
+  }, [simulations]);
+
+  useEffect(() => {
+    saveLocalList(
+      LOCAL_KEYS.serviceRequests,
+      serviceRequests
+    );
+  }, [serviceRequests]);
+
+  useEffect(() => {
     saveLocalList(
       LOCAL_KEYS.comparisons,
       compareKeys
@@ -2281,6 +2362,133 @@ function App() {
         .sort((a, b) => a.days - b.days),
     [localBills]
   );
+
+  const hasFinancialProfile =
+    Boolean(
+      financialProfile.firstName &&
+      financialProfile.city &&
+      financialProfile.incomeType &&
+      financialProfile.goal
+    );
+
+  const financialRecommendations = useMemo(() => {
+    if (!hasFinancialProfile) {
+      return [];
+    }
+
+    const options = [];
+    const add = (item) => {
+      if (!options.some((saved) => saved.key === item.key)) {
+        options.push(item);
+      }
+    };
+
+    const incomeRecommendations = {
+      aposentado: {
+        key: "product-inss",
+        title: "Consignado INSS",
+        description: "Confira as condições para aposentados e pensionistas.",
+        productKey: "inss"
+      },
+      bpc: {
+        key: "product-bpc",
+        title: "Consignado BPC / LOAS",
+        description: "Veja a opção disponível para beneficiários.",
+        productKey: "bpc"
+      },
+      clt: {
+        key: "product-clt",
+        title: "Crédito para trabalhador CLT",
+        description: "Confira as regras antes de simular.",
+        productKey: "clt"
+      },
+      estudante: {
+        key: "product-student",
+        title: "Financiamento estudantil",
+        description: "Uma opção para começar ou continuar a faculdade.",
+        productKey: "pravaler"
+      },
+      autonomo: {
+        key: "all-products",
+        title: "Opções para seu perfil",
+        description: "Conheça os produtos e veja as exigências de cada um.",
+        screen: "products"
+      },
+      outro: {
+        key: "all-credit",
+        title: "Encontre uma opção de crédito",
+        description: "Veja os produtos com simulação disponível.",
+        screen: "direct"
+      }
+    };
+
+    if (incomeRecommendations[financialProfile.incomeType]) {
+      add(incomeRecommendations[financialProfile.incomeType]);
+    }
+
+    if (financialProfile.incomeType === "clt") {
+      add({
+        key: "product-fgts",
+        title: "Antecipação do FGTS",
+        description: "Para quem possui saldo e saque-aniversário ativo.",
+        productKey: "fgts"
+      });
+    }
+
+    const goalRecommendations = {
+      credito: {
+        key: "credit-options",
+        title: "Créditos para simular",
+        description: "Compare as opções disponíveis no aplicativo.",
+        screen: "direct"
+      },
+      estudar: {
+        key: "product-student",
+        title: "Financiamento estudantil",
+        description: "Uma opção para começar ou continuar a faculdade.",
+        productKey: "pravaler"
+      },
+      veiculo: {
+        key: "vehicle-products",
+        title: "Crédito para carro ou moto",
+        description: "Conheça financiamento, garantia, seguro e consórcio.",
+        screen: "products"
+      },
+      organizar: {
+        key: "organizer",
+        title: "Organizador de contas",
+        description: "Cadastre vencimentos e acompanhe suas contas.",
+        screen: "organizer"
+      },
+      empresa: {
+        key: "business",
+        title: "Central do Empresário",
+        description: "Serviços e oportunidades para seu negócio.",
+        screen: "business"
+      },
+      compras: {
+        key: "shop",
+        title: "Crediti Shop",
+        description: "Encontre lojas e produtos por categoria.",
+        screen: "shop"
+      }
+    };
+
+    if (goalRecommendations[financialProfile.goal]) {
+      add(goalRecommendations[financialProfile.goal]);
+    }
+
+    if (financialProfile.ownsVehicle === "sim") {
+      add({
+        key: "vehicle-guarantee",
+        title: "Crédito com garantia",
+        description: "Entenda como funciona usando carro ou moto.",
+        productId: "garantia"
+      });
+    }
+
+    return options.slice(0, 3);
+  }, [financialProfile, hasFinancialProfile]);
 
   function toggleCompare(productKey) {
     if (
@@ -2621,6 +2829,114 @@ function App() {
         (saved) => saved.key !== item.key
       )
     ].slice(0, 12));
+  }
+
+  function openFinancialProfile() {
+    setProfileDraft({
+      ...financialProfile
+    });
+    setScreen("financialProfile");
+    window.scrollTo(0, 0);
+  }
+
+  function saveFinancialProfile(event) {
+    event.preventDefault();
+
+    const nextProfile = {
+      ...profileDraft,
+      firstName: profileDraft.firstName.trim(),
+      city: profileDraft.city.trim()
+    };
+
+    if (
+      !nextProfile.firstName ||
+      !nextProfile.city ||
+      !nextProfile.incomeType ||
+      !nextProfile.goal
+    ) {
+      showNotice("Preencha os campos obrigatórios para concluir seu perfil.");
+      return;
+    }
+
+    setFinancialProfile(nextProfile);
+    setScreen("myCrediti");
+    window.scrollTo(0, 0);
+    showNotice("Perfil salvo somente neste aparelho.");
+  }
+
+  function clearFinancialProfile() {
+    setFinancialProfile({
+      ...emptyFinancialProfile
+    });
+    setProfileDraft({
+      ...emptyFinancialProfile
+    });
+    showNotice("Perfil removido deste aparelho.");
+  }
+
+  function navigateRecommendation(item) {
+    if (item.productKey) {
+      openPartnerLink(item.productKey);
+      return;
+    }
+
+    if (item.productId) {
+      const product = products.find(
+        (saved) => saved.id === item.productId
+      );
+
+      if (product) {
+        setSelectedProduct(product);
+        setScreen("productDetail");
+        window.scrollTo(0, 0);
+      }
+      return;
+    }
+
+    if (item.screen) {
+      navigateMain(item.screen);
+    }
+  }
+
+  function recordSimulation(productKey) {
+    const product = PARTNER_PRODUCTS[productKey];
+
+    if (!product) {
+      return;
+    }
+
+    setSimulations((current) => [
+      {
+        key: productKey,
+        title: product.name,
+        partner: product.partner,
+        initiatedAt: Date.now()
+      },
+      ...current.filter((item) => item.key !== productKey)
+    ].slice(0, 10));
+  }
+
+  function recordServiceRequest(analystKey, productName) {
+    const analyst = ANALYSTS[analystKey];
+
+    if (!analyst) {
+      return;
+    }
+
+    const requestKey =
+      analystKey + "-" + (productName || "atendimento");
+
+    setServiceRequests((current) => [
+      {
+        key: requestKey,
+        analystKey,
+        analyst: analyst.name,
+        product: productName || "Atendimento com a Crediti",
+        requestedAt: Date.now(),
+        status: "Atendimento solicitado"
+      },
+      ...current.filter((item) => item.key !== requestKey)
+    ].slice(0, 10));
   }
 
   function toggleFavorite(productKey) {
@@ -3336,6 +3652,11 @@ function App() {
       "?text=" +
       encodeURIComponent(message);
 
+    recordServiceRequest(
+      analystKey,
+      productName || customerData?.interest || ""
+    );
+
     window.open(url, "_blank");
   }
 
@@ -3481,6 +3802,7 @@ function App() {
             className="partner-notice-continue"
             onClick={() => {
               if (openExternal(product.url)) {
+                recordSimulation(externalProduct);
                 setScreen(
                   externalReturnScreen || "direct"
                 );
@@ -3505,6 +3827,140 @@ function App() {
     );
   }
 
+  if (screen === "financialProfile") {
+    return (
+      <div className="app app-white app-with-nav">
+        <AppHeader
+          title="Meu perfil financeiro"
+          subtitle="Sem CPF, documentos ou senha"
+          onBack={() => setScreen("myCrediti")}
+        />
+
+        <main className="modern-page financial-profile-page">
+          <section className="profile-safe-note">
+            <span aria-hidden="true"><UiIcon name="shield" /></span>
+            <div>
+              <strong>Seu perfil fica neste aparelho</strong>
+              <p>Usamos somente estas respostas para organizar recomendações. Elas não são enviadas aos bancos.</p>
+            </div>
+          </section>
+
+          <form className="financial-profile-form" onSubmit={saveFinancialProfile}>
+            <label>
+              Como podemos chamar você?
+              <input
+                value={profileDraft.firstName}
+                onChange={(event) =>
+                  setProfileDraft((current) => ({
+                    ...current,
+                    firstName: event.target.value
+                  }))
+                }
+                placeholder="Seu primeiro nome"
+                maxLength="40"
+                autoComplete="given-name"
+              />
+            </label>
+
+            <label>
+              Sua cidade
+              <input
+                value={profileDraft.city}
+                onChange={(event) =>
+                  setProfileDraft((current) => ({
+                    ...current,
+                    city: event.target.value
+                  }))
+                }
+                placeholder="Ex.: Itapajé"
+                maxLength="60"
+                autoComplete="address-level2"
+              />
+            </label>
+
+            <label>
+              Qual opção mais combina com você?
+              <select
+                value={profileDraft.incomeType}
+                onChange={(event) =>
+                  setProfileDraft((current) => ({
+                    ...current,
+                    incomeType: event.target.value
+                  }))
+                }
+              >
+                <option value="">Selecione</option>
+                <option value="aposentado">Aposentado ou pensionista</option>
+                <option value="bpc">Recebo BPC / LOAS</option>
+                <option value="clt">Trabalho com carteira assinada</option>
+                <option value="autonomo">Sou autônomo ou empresário</option>
+                <option value="estudante">Sou estudante</option>
+                <option value="outro">Outra situação</option>
+              </select>
+            </label>
+
+            <label>
+              O que você procura agora?
+              <select
+                value={profileDraft.goal}
+                onChange={(event) =>
+                  setProfileDraft((current) => ({
+                    ...current,
+                    goal: event.target.value
+                  }))
+                }
+              >
+                <option value="">Selecione</option>
+                <option value="credito">Uma opção de crédito</option>
+                <option value="veiculo">Comprar ou usar um veículo</option>
+                <option value="estudar">Faculdade ou financiamento estudantil</option>
+                <option value="organizar">Organizar minhas contas</option>
+                <option value="empresa">Serviços para meu negócio</option>
+                <option value="compras">Comprar produtos</option>
+              </select>
+            </label>
+
+            <fieldset>
+              <legend>Você possui carro ou moto?</legend>
+              <div className="profile-choice-row">
+                <button
+                  type="button"
+                  className={profileDraft.ownsVehicle === "sim" ? "selected" : ""}
+                  onClick={() => setProfileDraft((current) => ({ ...current, ownsVehicle: "sim" }))}
+                >
+                  Sim
+                </button>
+                <button
+                  type="button"
+                  className={profileDraft.ownsVehicle === "nao" ? "selected" : ""}
+                  onClick={() => setProfileDraft((current) => ({ ...current, ownsVehicle: "nao" }))}
+                >
+                  Não
+                </button>
+              </div>
+            </fieldset>
+
+            <button className="profile-save-button" type="submit">
+              SALVAR MEU PERFIL
+            </button>
+
+            {hasFinancialProfile && (
+              <button
+                className="profile-clear-button"
+                type="button"
+                onClick={clearFinancialProfile}
+              >
+                APAGAR PERFIL DESTE APARELHO
+              </button>
+            )}
+          </form>
+        </main>
+
+        <BottomNav active="home" onNavigate={navigateMain} />
+      </div>
+    );
+  }
+
   if (screen === "myCrediti") {
     return (
       <div className="app app-white app-with-nav">
@@ -3515,6 +3971,52 @@ function App() {
         />
 
         <main className="modern-page local-hub-page">
+          <section className={"smart-profile-card" + (hasFinancialProfile ? " ready" : "")}>
+            <span aria-hidden="true"><UiIcon name="userPlus" /></span>
+            <div>
+              <small>{hasFinancialProfile ? "PERFIL ATIVO" : "RECOMENDAÇÕES PARA VOCÊ"}</small>
+              <strong>
+                {hasFinancialProfile
+                  ? `${financialProfile.firstName}, seu perfil está pronto`
+                  : "Crie seu perfil financeiro"}
+              </strong>
+              <p>
+                {hasFinancialProfile
+                  ? `${financialProfile.city} · Informações salvas somente neste aparelho.`
+                  : "Responda algumas perguntas simples, sem informar CPF ou documentos."}
+              </p>
+            </div>
+            <button onClick={openFinancialProfile}>
+              {hasFinancialProfile ? "EDITAR" : "CRIAR PERFIL"}
+            </button>
+          </section>
+
+          {financialRecommendations.length > 0 && (
+            <section className="local-section smart-recommendations">
+              <div className="local-section-title">
+                <div>
+                  <small>COM BASE NO SEU PERFIL</small>
+                  <h2>Recomendados para você</h2>
+                </div>
+              </div>
+              <div className="recommendation-list">
+                {financialRecommendations.map((item) => (
+                  <button key={item.key} onClick={() => navigateRecommendation(item)}>
+                    <span aria-hidden="true"><UiIcon name={item.productKey ? "credit" : "search"} /></span>
+                    <div>
+                      <strong>{item.title}</strong>
+                      <small>{item.description}</small>
+                    </div>
+                    <b aria-hidden="true">›</b>
+                  </button>
+                ))}
+              </div>
+              <p className="recommendation-disclaimer">
+                São caminhos informativos. Aprovação e condições dependem da instituição responsável.
+              </p>
+            </section>
+          )}
+
           <div className="local-hub-actions">
             <button onClick={() => setScreen("organizer")}>
               <span aria-hidden="true"><UiIcon name="calendar" /></span>
@@ -3554,6 +4056,65 @@ function App() {
               </div>
             </section>
           )}
+
+          <section className="local-section">
+            <div className="local-section-title">
+              <div>
+                <small>ACESSOS AOS PARCEIROS</small>
+                <h2>Simulações iniciadas</h2>
+              </div>
+              <b>{simulations.length}</b>
+            </div>
+            {simulations.length ? (
+              <div className="activity-list">
+                {simulations.slice(0, 5).map((item) => (
+                  <button key={item.key} onClick={() => openSavedProduct(item.key)}>
+                    <span>
+                      <strong>{item.title}</strong>
+                      <small>
+                        {item.partner} · acessado em {new Intl.DateTimeFormat("pt-BR", { day: "2-digit", month: "2-digit" }).format(new Date(item.initiatedAt))}
+                      </small>
+                    </span>
+                    <b>CONTINUAR</b>
+                  </button>
+                ))}
+              </div>
+            ) : (
+              <div className="friendly-empty compact">
+                <p>Os produtos que você abrir no site do parceiro aparecerão aqui.</p>
+              </div>
+            )}
+          </section>
+
+          <section className="local-section">
+            <div className="local-section-title">
+              <div>
+                <small>CONTATO COM A CREDITI</small>
+                <h2>Solicitações e atendimentos</h2>
+              </div>
+              <b>{serviceRequests.length}</b>
+            </div>
+            {serviceRequests.length ? (
+              <div className="activity-list request-list">
+                {serviceRequests.slice(0, 5).map((item) => (
+                  <button
+                    key={item.key}
+                    onClick={() => openAnalystWhatsApp(item.analystKey, item.product)}
+                  >
+                    <span>
+                      <strong>{item.product}</strong>
+                      <small>{item.status} com {item.analyst}</small>
+                    </span>
+                    <b>CONTINUAR</b>
+                  </button>
+                ))}
+              </div>
+            ) : (
+              <div className="friendly-empty compact">
+                <p>Quando você chamar um analista, o atendimento ficará registrado aqui.</p>
+              </div>
+            )}
+          </section>
 
           <section className="local-section">
             <div className="local-section-title">
