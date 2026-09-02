@@ -539,6 +539,85 @@ const DIRECT_PRODUCT_KEYS = [
   "energia"
 ];
 
+const CREDIT_FILTERS = [
+  { id: "todos", label: "Todos" },
+  { id: "beneficio", label: "Benefícios" },
+  { id: "trabalhador", label: "Trabalhador" },
+  { id: "estudante", label: "Estudante" },
+  { id: "outros", label: "Outras opções" }
+];
+
+const CREDIT_META = {
+  pravaler: {
+    category: "estudante",
+    audience: "Para quem quer iniciar ou continuar uma faculdade.",
+    detail: "Financiamento estudantil contratado no ambiente do Pravaler."
+  },
+  inss: {
+    category: "beneficio",
+    audience: "Aposentados e pensionistas do INSS.",
+    detail: "Consignado com análise e contratação no Banco BRB."
+  },
+  bpc: {
+    category: "beneficio",
+    audience: "Pessoas que recebem BPC/LOAS.",
+    detail: "Consignado sujeito às regras e análise do Banco BRB."
+  },
+  fgts: {
+    category: "trabalhador",
+    audience: "Trabalhadores com saldo disponível no FGTS.",
+    detail: "Antecipação do saque-aniversário pelo Grandino Bank."
+  },
+  clt: {
+    category: "trabalhador",
+    audience: "Trabalhadores com carteira assinada.",
+    detail: "Crédito sujeito às regras e análise do Grandino Bank."
+  },
+  cartao: {
+    category: "outros",
+    audience: "Pessoas que possuem limite disponível no cartão.",
+    detail: "Operação realizada pela plataforma GYROO SaaS."
+  },
+  energia: {
+    category: "outros",
+    audience: "Titulares de conta de energia elegíveis.",
+    detail: "Crédito analisado e contratado no ambiente da Crefaz."
+  }
+};
+
+const APP_SEARCH_ITEMS = [
+  {
+    title: "Simular crédito",
+    description: "INSS, BPC, CLT, FGTS, cartão, energia e estudante",
+    screen: "direct",
+    keywords: "credito empréstimo simular inss aposentado pensionista bpc loas clt trabalhador fgts cartao energia pravaler estudante faculdade"
+  },
+  {
+    title: "Aprenda com a Crediti",
+    description: "Educação financeira, segurança e oportunidades de estudo",
+    screen: "learn",
+    keywords: "aprender dica golpe segurança orçamento dívida faculdade curso estudo educação"
+  },
+  {
+    title: "Serviços úteis",
+    description: "Serviços oficiais e soluções para empresas",
+    screen: "services",
+    keywords: "serviço receita federal banco central gov inss fgts detran empresa mei pj cora santander hostinger kinghost tiktok"
+  },
+  {
+    title: "Crediti Shop",
+    description: "Lojas, produtos, categorias, cupons e parceiros",
+    screen: "shop",
+    keywords: "loja comprar shop cupom desconto roupa perfume beleza eletrodoméstico geladeira brinquedo ferramenta"
+  },
+  {
+    title: "Conheça nossos produtos",
+    description: "Entenda regras e cuidados antes de decidir",
+    screen: "products",
+    keywords: "produto regra condição como funciona crédito financiamento seguro consórcio"
+  }
+];
+
 const PRODUCT_VISUALS = {
   pravaler: {
     icon: "R$",
@@ -1282,6 +1361,80 @@ function App() {
     partnerProduct,
     setPartnerProduct
   ] = useState("");
+
+  const [
+    homeSearch,
+    setHomeSearch
+  ] = useState("");
+
+  const [
+    creditFilter,
+    setCreditFilter
+  ] = useState("todos");
+
+  const [
+    compareKeys,
+    setCompareKeys
+  ] = useState([]);
+
+  const [
+    showComparison,
+    setShowComparison
+  ] = useState(false);
+
+  const [
+    externalProduct,
+    setExternalProduct
+  ] = useState("");
+
+  const [
+    externalReturnScreen,
+    setExternalReturnScreen
+  ] = useState("direct");
+
+  const normalizedSearch =
+    homeSearch
+      .trim()
+      .toLocaleLowerCase("pt-BR");
+
+  const homeSearchResults =
+    normalizedSearch
+      ? APP_SEARCH_ITEMS.filter(
+          (item) =>
+            (item.title +
+              " " +
+              item.description +
+              " " +
+              item.keywords)
+              .toLocaleLowerCase("pt-BR")
+              .includes(normalizedSearch)
+        ).slice(0, 5)
+      : [];
+
+  const filteredDirectKeys =
+    creditFilter === "todos"
+      ? DIRECT_PRODUCT_KEYS
+      : DIRECT_PRODUCT_KEYS.filter(
+          (productKey) =>
+            CREDIT_META[productKey]
+              ?.category === creditFilter
+        );
+
+  function toggleCompare(productKey) {
+    setCompareKeys((current) => {
+      if (current.includes(productKey)) {
+        return current.filter(
+          (key) => key !== productKey
+        );
+      }
+
+      if (current.length >= 3) {
+        return current;
+      }
+
+      return [...current, productKey];
+    });
+  }
 
   const chatRef =
     useRef(null);
@@ -2121,11 +2274,13 @@ function App() {
       return;
     }
 
-    window.open(
-      product.url,
-      "_blank",
-      "noopener,noreferrer"
+    setExternalProduct(productKey);
+    setExternalReturnScreen(
+      screen === "partnerNotice"
+        ? "direct"
+        : screen
     );
+    setScreen("partnerNotice");
   }
 
   function chooseAnalyst(
@@ -2189,6 +2344,84 @@ function App() {
     );
   }
 
+  if (
+    screen === "partnerNotice" &&
+    externalProduct &&
+    PARTNER_PRODUCTS[externalProduct]
+  ) {
+    const product =
+      PARTNER_PRODUCTS[externalProduct];
+
+    return (
+      <div className="app app-white">
+        <AppHeader
+          title="Antes de continuar"
+          subtitle="Você será direcionado ao parceiro"
+          onBack={() =>
+            setScreen(
+              externalReturnScreen || "direct"
+            )
+          }
+        />
+
+        <main className="modern-page partner-notice-page">
+          <section className="partner-notice-brand">
+            <small>AMBIENTE EXTERNO</small>
+            <h1>{product.name}</h1>
+            <p>{product.partner}</p>
+          </section>
+
+          <section className="partner-notice-safe">
+            <span aria-hidden="true">✓</span>
+            <div>
+              <h2>Seus dados ficam com a instituição</h2>
+              <p>
+                A Crediti não pede nem armazena CPF, documentos, renda, dados bancários ou senhas. Se desejar continuar, preencha as informações somente no site oficial do parceiro.
+              </p>
+            </div>
+          </section>
+
+          <section className="partner-notice-rules">
+            <h2>Antes de abrir</h2>
+            <ul>
+              <li>A análise e as condições são definidas pela instituição.</li>
+              <li>Não existe garantia de aprovação.</li>
+              <li>Nunca pague antecipadamente para liberar crédito.</li>
+            </ul>
+          </section>
+
+          <button
+            className="partner-notice-continue"
+            onClick={() => {
+              window.open(
+                product.url,
+                "_blank",
+                "noopener,noreferrer"
+              );
+
+              setScreen(
+                externalReturnScreen || "direct"
+              );
+            }}
+          >
+            CONTINUAR NO SITE OFICIAL
+          </button>
+
+          <button
+            className="partner-notice-cancel"
+            onClick={() =>
+              setScreen(
+                externalReturnScreen || "direct"
+              )
+            }
+          >
+            VOLTAR SEM ACESSAR
+          </button>
+        </main>
+      </div>
+    );
+  }
+
   if (screen === "direct") {
     return (
       <div className="app app-white app-with-nav">
@@ -2215,8 +2448,47 @@ function App() {
             </p>
           </section>
 
+          <section className="privacy-first-note" aria-label="Privacidade na Crediti">
+            <span aria-hidden="true">✓</span>
+            <div>
+              <strong>Compare sem informar dados pessoais</strong>
+              <p>
+                A Crediti não solicita CPF, documentos, renda ou dados bancários. Você só informa dados no ambiente oficial da instituição escolhida.
+              </p>
+            </div>
+          </section>
+
+          <div className="credit-filter-bar" aria-label="Filtrar opções de crédito">
+            {CREDIT_FILTERS.map((filter) => (
+              <button
+                className={creditFilter === filter.id ? "active" : ""}
+                key={filter.id}
+                onClick={() => setCreditFilter(filter.id)}
+              >
+                {filter.label}
+              </button>
+            ))}
+          </div>
+
+          <section className="compare-tray" aria-live="polite">
+            <div>
+              <strong>Comparar produtos</strong>
+              <small>
+                {compareKeys.length
+                  ? compareKeys.length + " de 3 selecionados"
+                  : "Escolha até 3 opções"}
+              </small>
+            </div>
+            <button
+              disabled={compareKeys.length < 2}
+              onClick={() => setShowComparison(true)}
+            >
+              COMPARAR
+            </button>
+          </section>
+
           <div className="direct-grid">
-            {DIRECT_PRODUCT_KEYS.map(
+            {filteredDirectKeys.map(
               (productKey) => {
                 const product =
                   PARTNER_PRODUCTS[
@@ -2262,6 +2534,21 @@ function App() {
                     </div>
 
                     <button
+                      className={
+                        "compare-select " +
+                        (compareKeys.includes(productKey)
+                          ? "selected"
+                          : "")
+                      }
+                      onClick={() => toggleCompare(productKey)}
+                      aria-pressed={compareKeys.includes(productKey)}
+                    >
+                      {compareKeys.includes(productKey)
+                        ? "✓ SELECIONADO"
+                        : "+ COMPARAR"}
+                    </button>
+
+                    <button
                       className="primary-action"
                       onClick={() =>
                         openPartnerLink(
@@ -2281,6 +2568,57 @@ function App() {
             A análise, as condições e a contratação são de responsabilidade da instituição escolhida. A Crediti não garante aprovação.
           </p>
         </main>
+
+        {showComparison && (
+          <div
+            className="compare-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Comparação de produtos"
+          >
+            <div className="compare-modal-card">
+              <div className="compare-modal-head">
+                <div>
+                  <small>COMPARAÇÃO CLARA</small>
+                  <h2>Compare antes de escolher</h2>
+                </div>
+                <button
+                  onClick={() => setShowComparison(false)}
+                  aria-label="Fechar comparação"
+                >
+                  ×
+                </button>
+              </div>
+
+              <div className="compare-columns">
+                {compareKeys.map((productKey) => {
+                  const product = PARTNER_PRODUCTS[productKey];
+                  const meta = CREDIT_META[productKey];
+
+                  return (
+                    <article key={productKey}>
+                      <small>{product.partner}</small>
+                      <h3>{product.name}</h3>
+                      <b>Para quem é</b>
+                      <p>{meta.audience}</p>
+                      <b>Como funciona</b>
+                      <p>{meta.detail}</p>
+                      <button
+                        onClick={() => openPartnerLink(productKey)}
+                      >
+                        {product.button || "SIMULAR"}
+                      </button>
+                    </article>
+                  );
+                })}
+              </div>
+
+              <p className="compare-disclaimer">
+                Condições e aprovação são definidas pela instituição responsável. A Crediti apenas orienta e direciona.
+              </p>
+            </div>
+          </div>
+        )}
 
         <BottomNav
           active="credit"
@@ -4469,6 +4807,64 @@ function App() {
           />
         </section>
 
+        <section className="home-smart-search" aria-label="Buscar no aplicativo">
+          <form
+            onSubmit={(event) => {
+              event.preventDefault();
+
+              if (homeSearchResults[0]) {
+                setScreen(homeSearchResults[0].screen);
+                setHomeSearch("");
+              }
+            }}
+          >
+            <span aria-hidden="true">⌕</span>
+            <input
+              type="search"
+              value={homeSearch}
+              onChange={(event) => setHomeSearch(event.target.value)}
+              placeholder="O que você precisa encontrar?"
+              aria-label="Buscar crédito, serviço, faculdade ou loja"
+            />
+            <button type="submit" disabled={!homeSearchResults.length}>
+              BUSCAR
+            </button>
+          </form>
+
+          {normalizedSearch && (
+            <div className="home-search-results">
+              {homeSearchResults.length ? (
+                homeSearchResults.map((item) => (
+                  <button
+                    key={item.title}
+                    onClick={() => {
+                      setScreen(item.screen);
+                      setHomeSearch("");
+                    }}
+                  >
+                    <span>
+                      <strong>{item.title}</strong>
+                      <small>{item.description}</small>
+                    </span>
+                    <b aria-hidden="true">›</b>
+                  </button>
+                ))
+              ) : (
+                <p>
+                  Não encontramos esse termo. Tente crédito, faculdade, empresa ou loja.
+                </p>
+              )}
+            </div>
+          )}
+
+          <div className="home-search-shortcuts">
+            <button onClick={() => setScreen("direct")}>Crédito</button>
+            <button onClick={() => setScreen("learn")}>Estudos</button>
+            <button onClick={() => setScreen("services")}>Empresas</button>
+            <button onClick={() => setScreen("shop")}>Lojas</button>
+          </div>
+        </section>
+
         <div className="home-banners">
           <button
             className="home-banner yellow-banner"
@@ -4741,3 +5137,4 @@ createRoot(
     "root"
   )
 ).render(<App />);
+
