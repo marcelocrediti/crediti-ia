@@ -810,6 +810,93 @@ const SHOP_SEARCH_ITEMS = [
   externalUrl: SHOP_SEARCH_URLS[title]
 }));
 
+const DEBT_OFFICIAL_CHANNELS = {
+  serasa: {
+    name: "Serasa Limpa Nome",
+    description: "Consulte se existe uma oferta de negociação disponível para seu CPF.",
+    url: "https://www.serasa.com.br/limpa-nome-online/"
+  },
+  consumidor: {
+    name: "Consumidor.gov.br",
+    description: "Fale diretamente com empresas participantes para buscar uma solução.",
+    url: "https://www.consumidor.gov.br/"
+  },
+  regularize: {
+    name: "Regularize PGFN",
+    description: "Consulte e negocie débitos inscritos na dívida ativa da União.",
+    url: "https://www.regularize.pgfn.gov.br/"
+  },
+  fies: {
+    name: "Renegociação do FIES",
+    description: "Confira as regras e os canais oficiais para contratos do FIES.",
+    url: "https://www.gov.br/pt-br/servicos/negociar-dividas-com-o-desenrola-fies"
+  },
+  business: {
+    name: "Renegociação para empresas",
+    description: "Confira as regras atuais para micro e pequenas empresas.",
+    url: "https://www.gov.br/pt-br/servicos/negociar-dividas-com-o-programa-novo-desenrola-brasil-2013-pessoa-juridica"
+  },
+  mei: {
+    name: "Desenrola MEI",
+    description: "Veja orientações oficiais para regularização de dívidas do MEI.",
+    url: "https://www.gov.br/memp/pt-br/pacotes-de-medidas-para-o-emprendedorismo/desenrola-mei"
+  },
+  registrato: {
+    name: "Registrato",
+    description: "Consulte gratuitamente empréstimos e relacionamentos bancários em seu nome.",
+    url: "https://registrato.bcb.gov.br/registrato/login/"
+  }
+};
+
+const DEBT_TYPE_OPTIONS = [
+  ["personal", "Dívida pessoal", "Banco, cartão, financiamento ou conta"],
+  ["business", "Dívida da empresa", "Débito bancário ou obrigação do CNPJ"],
+  ["mei", "Dívida do MEI", "Banco, DAS ou dívida ativa"],
+  ["fies", "Dívida do FIES", "Financiamento estudantil público"]
+];
+
+const DEBT_ORIGIN_OPTIONS = {
+  personal: [
+    ["bank", "Banco ou empréstimo"],
+    ["card", "Cartão de crédito"],
+    ["financing", "Financiamento"],
+    ["utility", "Água, energia ou telefone"],
+    ["unknown", "Não sei ou quero consultar"]
+  ],
+  business: [
+    ["bank", "Banco ou empréstimo empresarial"],
+    ["tax", "Impostos ou dívida ativa"],
+    ["unknown", "Não sei ou quero consultar"]
+  ],
+  mei: [
+    ["bank", "Banco ou empréstimo"],
+    ["tax", "DAS, imposto ou dívida ativa"],
+    ["unknown", "Não sei ou quero consultar"]
+  ]
+};
+
+function getDebtChannelKeys(type, origin) {
+  if (type === "fies") {
+    return ["fies"];
+  }
+
+  if (type === "mei" && origin === "tax") {
+    return ["regularize", "mei"];
+  }
+
+  if (type === "mei" || type === "business") {
+    return origin === "tax"
+      ? ["regularize", "business"]
+      : ["business", "registrato"];
+  }
+
+  if (origin === "utility") {
+    return ["consumidor", "serasa"];
+  }
+
+  return ["serasa", "consumidor", "registrato"];
+}
+
 const APP_SEARCH_ITEMS = [
   {
     title: "Minha Crediti",
@@ -828,6 +915,12 @@ const APP_SEARCH_ITEMS = [
     description: "Aprenda a reconhecer golpes e acessar canais oficiais",
     screen: "protect",
     keywords: "seguranca golpe golpes fraude pix senha proteger proteção antecipado oficial"
+  },
+  {
+    title: "Renegocie suas dívidas",
+    description: "Encontre o canal oficial para sua dívida pessoal, empresarial, MEI ou FIES",
+    screen: "debtHelp",
+    keywords: "divida dividas devendo atraso atrasada negativado renegociar negociação desenrola serasa limpa nome fies mei banco cartao financiamento acordo"
   },
   {
     title: "Caminhos Crediti",
@@ -925,7 +1018,8 @@ const CHAT_ROUTE_LABELS = {
   myCrediti: ["Abrir Minha Crediti", "Favoritos, histórico e contas"],
   protect: ["Abrir Crediti Protege", "Veja como evitar golpes"],
   organizer: ["Organizar minhas contas", "Cadastre datas e vencimentos"],
-  business: ["Abrir Central do Empresário", "Soluções para empresas e MEI"]
+  business: ["Abrir Central do Empresário", "Soluções para empresas e MEI"],
+  debtHelp: ["Renegociar minhas dívidas", "Encontre o canal oficial correto"]
 };
 
 const PRODUCT_VISUALS = {
@@ -1889,6 +1983,14 @@ function App() {
   );
 
   const [
+    debtAnswers,
+    setDebtAnswers
+  ] = useState({
+    type: "",
+    origin: ""
+  });
+
+  const [
     billDraft,
     setBillDraft
   ] = useState({
@@ -2301,7 +2403,10 @@ function App() {
   function navigateSearchItem(item) {
     setHomeSearch("");
 
-    if (item.action === "chat") {
+    if (item.screen === "debtHelp") {
+      setSearchTarget(null);
+      openDebtHelp();
+    } else if (item.action === "chat") {
       setSearchTarget(null);
       openChat();
     } else if (item.directProductKey) {
@@ -2370,6 +2475,20 @@ function App() {
       financialProfile.incomeType &&
       financialProfile.goal
     );
+
+  const debtOriginOptions =
+    DEBT_ORIGIN_OPTIONS[debtAnswers.type] || [];
+
+  const debtGuidanceReady =
+    debtAnswers.type === "fies" ||
+    Boolean(debtAnswers.type && debtAnswers.origin);
+
+  const debtChannelKeys = debtGuidanceReady
+    ? getDebtChannelKeys(
+        debtAnswers.type,
+        debtAnswers.origin
+      )
+    : [];
 
   const financialRecommendations = useMemo(() => {
     if (!hasFinancialProfile) {
@@ -2798,6 +2917,15 @@ function App() {
     window.scrollTo(0, 0);
   }
 
+  function openDebtHelp() {
+    setDebtAnswers({
+      type: "",
+      origin: ""
+    });
+    setScreen("debtHelp");
+    window.scrollTo(0, 0);
+  }
+
   function openChatRoute(route) {
     if (!route?.screen || !CHAT_ROUTE_LABELS[route.screen]) {
       return;
@@ -2805,6 +2933,12 @@ function App() {
 
     if (route.screen === "shop") {
       setShopFilter(route.category || "todos");
+    }
+
+    if (route.screen === "debtHelp") {
+      setChatRoutes([]);
+      openDebtHelp();
+      return;
     }
 
     setChatRoutes([]);
@@ -5006,6 +5140,129 @@ function App() {
     );
   }
 
+  if (screen === "debtHelp") {
+    return (
+      <div className="app app-white app-with-nav">
+        <AppHeader
+          title="Renegocie suas dívidas"
+          subtitle="Orientação para encontrar o canal oficial"
+          onBack={() => setScreen("services")}
+        />
+
+        <main className="modern-page debt-help-page">
+          <section className="debt-help-hero">
+            <span aria-hidden="true"><UiIcon name="shield" /></span>
+            <div>
+              <small>CAMINHO SEGURO</small>
+              <h1>Vamos identificar sua dívida</h1>
+              <p>A Crediti orienta e direciona. Não recebemos pagamentos e não fazemos acordos dentro do aplicativo.</p>
+            </div>
+          </section>
+
+          <section className="debt-question-section">
+            <div className="debt-question-title">
+              <span>1</span>
+              <div>
+                <small>PRIMEIRA PERGUNTA</small>
+                <h2>Que tipo de dívida você possui?</h2>
+              </div>
+            </div>
+
+            <div className="debt-choice-grid">
+              {DEBT_TYPE_OPTIONS.map(([value, title, description]) => (
+                <button
+                  key={value}
+                  className={debtAnswers.type === value ? "selected" : ""}
+                  onClick={() =>
+                    setDebtAnswers({
+                      type: value,
+                      origin: ""
+                    })
+                  }
+                >
+                  <strong>{title}</strong>
+                  <small>{description}</small>
+                </button>
+              ))}
+            </div>
+          </section>
+
+          {debtOriginOptions.length > 0 && (
+            <section className="debt-question-section">
+              <div className="debt-question-title">
+                <span>2</span>
+                <div>
+                  <small>SEGUNDA PERGUNTA</small>
+                  <h2>Com quem ou sobre o que é a dívida?</h2>
+                </div>
+              </div>
+
+              <div className="debt-origin-list">
+                {debtOriginOptions.map(([value, label]) => (
+                  <button
+                    key={value}
+                    className={debtAnswers.origin === value ? "selected" : ""}
+                    onClick={() =>
+                      setDebtAnswers((current) => ({
+                        ...current,
+                        origin: value
+                      }))
+                    }
+                  >
+                    <span>{label}</span>
+                    <b aria-hidden="true">›</b>
+                  </button>
+                ))}
+              </div>
+            </section>
+          )}
+
+          {debtGuidanceReady && (
+            <section className="debt-results-section">
+              <div className="debt-question-title">
+                <span><UiIcon name="search" /></span>
+                <div>
+                  <small>CANAIS CONFIÁVEIS</small>
+                  <h2>Veja onde continuar</h2>
+                </div>
+              </div>
+
+              <p className="debt-result-intro">
+                Confira primeiro as regras no canal oficial. A existência de acordo, desconto ou parcelamento depende da instituição responsável.
+              </p>
+
+              <div className="debt-channel-list">
+                {debtChannelKeys.map((channelKey) => {
+                  const channel = DEBT_OFFICIAL_CHANNELS[channelKey];
+                  return (
+                    <button key={channelKey} onClick={() => openExternal(channel.url)}>
+                      <div>
+                        <strong>{channel.name}</strong>
+                        <small>{channel.description}</small>
+                      </div>
+                      <span>ABRIR SITE OFICIAL ›</span>
+                    </button>
+                  );
+                })}
+              </div>
+
+              <div className="debt-fraud-warning">
+                <strong>Cuidado com golpes</strong>
+                <p>Não faça Pix para liberar desconto ou acordo. Digite CPF e dados bancários somente no site oficial que você decidiu acessar.</p>
+              </div>
+
+              <button className="debt-restart" onClick={openDebtHelp}>
+                RECOMEÇAR AS PERGUNTAS
+              </button>
+            </section>
+          )}
+        </main>
+
+        <BottomNav active="services" onNavigate={navigateMain} />
+      </div>
+    );
+  }
+
   if (screen === "services") {
     return (
       <div className="app app-white app-with-nav">
@@ -5028,6 +5285,16 @@ function App() {
               A Crediti apenas direciona. Seus dados serão preenchidos nos sites oficiais escolhidos.
             </p>
           </section>
+
+          <button className="debt-help-entry" onClick={openDebtHelp}>
+            <span aria-hidden="true"><UiIcon name="shield" /></span>
+            <div>
+              <small>NOVO NA CREDITI</small>
+              <strong>Renegocie suas dívidas</strong>
+              <p>Responda duas perguntas e encontre o canal oficial correto.</p>
+            </div>
+            <b aria-hidden="true">›</b>
+          </button>
 
           <div className="service-groups">
             {SERVICE_GROUPS.map(
