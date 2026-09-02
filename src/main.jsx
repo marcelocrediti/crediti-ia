@@ -317,14 +317,14 @@ const ANALYSTS = {
 const products = [
   {
     id: "pravaler",
-    name: "Financiamento estudantil Pravaler",
+    name: "Financiamento estudantil",
     typeLabel: "FINANCIAMENTO PARA ESTUDAR",
     what:
       "É um financiamento estudantil privado que permite dividir o valor de um semestre da faculdade em mais parcelas.",
     forWho:
       "Calouros ou alunos que já estão matriculados em uma instituição participante e precisam reduzir o valor pago por mês.",
     how:
-      "A pessoa escolhe a faculdade e o curso, faz a simulação online e envia os dados para análise do Pravaler.",
+      "A pessoa escolhe a faculdade e o curso, faz a simulação online e envia os dados para análise da instituição parceira.",
     when:
       "Pode ajudar quem deseja começar ou continuar a faculdade e precisa de mais tempo para pagar as mensalidades.",
     tip:
@@ -598,7 +598,7 @@ const CREDIT_META = {
   pravaler: {
     category: "estudante",
     audience: "Para quem quer iniciar ou continuar uma faculdade.",
-    detail: "Financiamento estudantil contratado no ambiente do Pravaler."
+    detail: "Financiamento estudantil contratado no ambiente da instituição parceira."
   },
   inss: {
     category: "beneficio",
@@ -846,7 +846,7 @@ const APP_SEARCH_ITEMS = [
   },
   {
     title: "Faculdade e financiamento estudantil",
-    description: "Faculdades parceiras, cursos e Pravaler",
+    description: "Faculdades, cursos e financiamento estudantil",
     screen: "learn",
     keywords: "faculdade faculdades curso cursos estudar estudo estudante vestibular graduacao pravaler estacio uninter wyden idomed unifatecie"
   },
@@ -887,6 +887,17 @@ const APP_SEARCH_ITEMS = [
     keywords: "produto produtos regra condicao como funciona credito financiamento refinanciamento seguro consorcio carro moto veiculo"
   }
 ];
+
+const CHAT_ROUTE_LABELS = {
+  learn: ["Ver faculdades e cursos", "Conheça opções de estudo"],
+  services: ["Abrir serviços", "Acesse serviços úteis"],
+  shop: ["Abrir Crediti Shop", "Veja lojas e produtos"],
+  partner: ["Conhecer Renda Extra", "Cadastre-se como parceiro"],
+  myCrediti: ["Abrir Minha Crediti", "Favoritos, histórico e contas"],
+  protect: ["Abrir Crediti Protege", "Veja como evitar golpes"],
+  organizer: ["Organizar minhas contas", "Cadastre datas e vencimentos"],
+  business: ["Abrir Central do Empresário", "Soluções para empresas e MEI"]
+};
 
 const PRODUCT_VISUALS = {
   pravaler: {
@@ -1733,6 +1744,11 @@ function App() {
   ] = useState("");
 
   const [
+    chatRoutes,
+    setChatRoutes
+  ] = useState([]);
+
+  const [
     homeSearch,
     setHomeSearch
   ] = useState("");
@@ -2560,6 +2576,19 @@ function App() {
     window.scrollTo(0, 0);
   }
 
+  function openChatRoute(route) {
+    if (!route?.screen || !CHAT_ROUTE_LABELS[route.screen]) {
+      return;
+    }
+
+    if (route.screen === "shop") {
+      setShopFilter(route.category || "todos");
+    }
+
+    setChatRoutes([]);
+    navigateMain(route.screen);
+  }
+
   function showNotice(message) {
     setAppNotice(message);
   }
@@ -2799,6 +2828,8 @@ function App() {
 
     setPartnerProduct("");
 
+    setChatRoutes([]);
+
     setPendingMessage(
       firstMessage || ""
     );
@@ -3033,6 +3064,8 @@ function App() {
 
     setBusy(true);
 
+    setChatRoutes([]);
+
     const updatedCustomer =
       {
         ...customerData,
@@ -3151,6 +3184,12 @@ function App() {
           data.partnerProduct
         );
       }
+
+      setChatRoutes(
+        Array.isArray(data.routes)
+          ? data.routes.filter((route) => CHAT_ROUTE_LABELS[route?.screen])
+          : []
+      );
 
       saveLead(
         updatedCustomer,
@@ -3780,10 +3819,10 @@ function App() {
         id: "education",
         icon: "education",
         title: "Estudar e financiar",
-        copy: "Faculdades parceiras, Pravaler, orientação de orçamento e segurança educacional.",
+        copy: "Faculdades, financiamento estudantil, orientação de orçamento e segurança educacional.",
         actions: [
           ["Ver faculdades", () => setScreen("learn")],
-          ["Simular Pravaler", () => openPartnerLink("pravaler")]
+          ["Simular financiamento estudantil", () => openPartnerLink("pravaler")]
         ]
       },
       {
@@ -4332,10 +4371,10 @@ function App() {
             <div>
               <small>JORNADA DE ESTUDO</small>
               <h2>Curso, financiamento e planejamento no mesmo lugar</h2>
-              <p>Conheça as faculdades, simule com o Pravaler e veja dicas para organizar a mensalidade.</p>
+              <p>Conheça as faculdades, simule o financiamento estudantil e veja dicas para organizar a mensalidade.</p>
             </div>
             <div>
-              <button onClick={() => openPartnerLink("pravaler")}>SIMULAR PRAVALER</button>
+              <button onClick={() => openPartnerLink("pravaler")}>SIMULAR FINANCIAMENTO</button>
               <button onClick={() => openChat("Quero estudar e preciso de orientação")}>FALAR COM A IA</button>
             </div>
           </section>
@@ -5600,18 +5639,16 @@ function App() {
                 </span>
 
                 <div className="partner-logo-box">
-                  <img
-                    src={
-                      PARTNER_PRODUCTS[
-                        partnerProduct
-                      ].logo
-                    }
-                    alt={
-                      PARTNER_PRODUCTS[
-                        partnerProduct
-                      ].partner
-                    }
-                  />
+                  {PARTNER_PRODUCTS[partnerProduct].logo ? (
+                    <img
+                      src={PARTNER_PRODUCTS[partnerProduct].logo}
+                      alt={PARTNER_PRODUCTS[partnerProduct].partner}
+                    />
+                  ) : (
+                    <span className={`partner-text-logo ${PARTNER_PRODUCTS[partnerProduct].logoTone || ""}`}>
+                      {PARTNER_PRODUCTS[partnerProduct].logoText || PARTNER_PRODUCTS[partnerProduct].partner}
+                    </span>
+                  )}
                 </div>
 
                 <strong className="partner-product-name">
@@ -5642,6 +5679,28 @@ function App() {
                 </button>
               </div>
             )}
+
+          {chatRoutes.length > 0 && (
+            <div className="chat-route-options" aria-label="Caminhos encontrados pela Crediti IA">
+              {chatRoutes.map((route, index) => {
+                const labels = CHAT_ROUTE_LABELS[route.screen];
+
+                return (
+                  <button
+                    key={`${route.screen}-${route.category || "geral"}-${index}`}
+                    onClick={() => openChatRoute(route)}
+                  >
+                    <span><UiIcon name={route.screen === "shop" ? "shop" : route.screen === "learn" ? "education" : route.screen === "partner" ? "partner" : route.screen === "protect" ? "shield" : route.screen === "organizer" ? "calendar" : route.screen === "business" ? "business" : "services"} /></span>
+                    <div>
+                      <strong>{labels[0]}</strong>
+                      <small>{labels[1]}</small>
+                    </div>
+                    <b aria-hidden="true">›</b>
+                  </button>
+                );
+              })}
+            </div>
+          )}
 
           {busy && (
             <div
@@ -6405,7 +6464,7 @@ function App() {
               FINANCIAMENTO ESTUDANTIL
             </small>
             <strong>
-              Faça sua simulação com o Pravaler
+              Simule seu financiamento estudantil
             </strong>
             <span className="home-banner-cta">
               Financie sua faculdade ›

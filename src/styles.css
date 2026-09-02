@@ -6302,3 +6302,75 @@ button:disabled {
 .home-privacy-line {
   display: none;
 }
+
+/* Atalhos que a Crediti IA oferece dentro da conversa. */
+.chat-route-options {
+  width: min(100%, 390px);
+  margin: 10px 0 18px 46px;
+  display: grid;
+  gap: 9px;
+}
+
+.chat-route-options button {
+  width: 100%;
+  min-height: 72px;
+  padding: 12px;
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr) 14px;
+  align-items: center;
+  gap: 11px;
+  border: 1px solid #e0c000;
+  border-radius: 17px;
+  background: #fff8cf;
+  color: #111111;
+  text-align: left;
+}
+
+.chat-route-options button > span {
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  background: #FDCA01;
+}
+
+.chat-route-options .ui-icon {
+  width: 22px;
+  height: 22px;
+}
+
+.chat-route-options button > div {
+  display: grid;
+  gap: 3px;
+}
+
+.chat-route-options strong {
+  font-size: 12px;
+  line-height: 1.2;
+}
+
+.chat-route-options small {
+  color: #666666;
+  font-size: 9px;
+  line-height: 1.3;
+}
+
+.chat-route-options b {
+  font-size: 20px;
+}
+
+.partner-logo-box .partner-text-logo {
+  padding: 12px 18px;
+  border-radius: 14px;
+  background: #6d31d7;
+  color: #ffffff;
+  font-size: 20px;
+  font-weight: 900;
+}
+
+@media (max-width: 480px) {
+  .chat-route-options {
+    width: calc(100% - 46px);
+  }
+}

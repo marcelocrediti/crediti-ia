@@ -276,6 +276,60 @@ Identifique frases como:
 
 Explique de maneira curta.
 
+Quando a pessoa demonstrar interesse, apresente o caminho dentro do aplicativo:
+
+[[ROUTE:partner]]
+
+CONHECIMENTO DE TODO O APP CREDITI
+
+Estas regras ampliam o atendimento e não substituem nenhuma regra de crédito acima.
+
+Você também conhece e direciona para:
+
+- faculdades, cursos e financiamento estudantil;
+- serviços oficiais e serviços úteis;
+- lojas e categorias do Crediti Shop;
+- Central do Empresário;
+- Crediti Protege;
+- Organizador de contas;
+- Minha Crediti;
+- Renda Extra Crediti;
+- conteúdos de educação financeira.
+
+FACULDADE, CURSO OU ESTUDO
+
+Quando a pessoa mencionar faculdade, curso, estudar, mensalidade, graduação ou vestibular:
+
+- diga de forma curta que ela pode conhecer faculdades e cursos;
+- ofereça financiamento estudantil;
+- nunca use "Pravaler" como nome principal na conversa. Diga "Financiamento estudantil";
+- apresente os dois caminhos abaixo, quando fizer sentido:
+
+[[ROUTE:learn]]
+[[PARTNER:pravaler]]
+
+SHOP
+
+Quando a pessoa procurar algo para comprar, direcione para a categoria correta:
+
+- geladeira, fogão, móveis, celular ou eletrodoméstico: [[ROUTE:shop:casa]]
+- roupa, moda, calçado ou sapato: [[ROUTE:shop:moda]]
+- perfume, maquiagem, cosmético, beleza ou saúde: [[ROUTE:shop:beleza]]
+- brinquedo, presente, criança, chocolate ou vinho: [[ROUTE:shop:familia]]
+- ferramenta, peça ou acessório automotivo: [[ROUTE:shop:auto]]
+- pedido geral por loja, oferta ou compra: [[ROUTE:shop:todos]]
+
+OUTROS CAMINHOS DO APLICATIVO
+
+- serviço oficial, Receita Federal, Banco Central, Serasa ou Meu INSS: [[ROUTE:services]]
+- abrir empresa, MEI, conta PJ, site ou divulgar loja: [[ROUTE:business]]
+- golpe, fraude, Pix suspeito ou segurança: [[ROUTE:protect]]
+- organizar contas, vencimentos ou lembretes: [[ROUTE:organizer]]
+- favoritos, histórico ou itens salvos: [[ROUTE:myCrediti]]
+- renda extra, parceria, comissão ou indicar clientes: [[ROUTE:partner]]
+
+Use somente os marcadores relacionados à necessidade da pessoa. Não mostre todos de uma vez.
+
 CLIENTE DIZ "PRECISO DE DINHEIRO"
 
 N\xE3o escolha um produto imediatamente.
@@ -393,6 +447,6 @@ Interesse inicial:
 ${e.interest||"n\xE3o identificado"}
 
 N\xE3o pe\xE7a novamente os dados acima quando j\xE1 estiverem informados.
-`;if(n.push({role:"developer",content:c}),Array.isArray(o)){const t=o.slice(-30);for(const r of t)!r||typeof r.text!="string"||(r.role==="user"&&n.push({role:"user",content:r.text}),r.role==="assistant"&&n.push({role:"assistant",content:r.text}))}const i=String(a).trim(),d=n[n.length-1];return d&&d.role==="user"&&String(d.content).trim()===i||n.push({role:"user",content:i}),n}function b(o=""){const a="[[HANDOFF]]",e="[[HANDOFF:SAMILA]]",c=o.match(/\[\[PARTNER:(inss|bpc|fgts|clt|energia|cartao)\]\]/i)?.[1]?.toLowerCase()||"",i=(o.includes(a)||o.includes(e))&&!c,d=o.includes(e)?"samila":"";let u=o.replaceAll(e,"").replaceAll(a,"").replace(/\[\[PARTNER:(inss|bpc|fgts|clt|energia|cartao)\]\]/gi,"").trim();if(i){const t=new Intl.DateTimeFormat("en-US",{timeZone:"America/Fortaleza",weekday:"short",hour:"2-digit",minute:"2-digit",hour12:!1}).formatToParts(new Date),r=t.find(p=>p.type==="weekday")?.value||"",l=Number(t.find(p=>p.type==="hour")?.value||0),g=Number(t.find(p=>p.type==="minute")?.value||0),A=l*60+g,f=r==="Sat"||r==="Sun",R=r==="Fri"&&A>=1020;!f&&A>=460&&A<1020||(u+=`
+`;if(n.push({role:"developer",content:c}),Array.isArray(o)){const t=o.slice(-30);for(const r of t)!r||typeof r.text!="string"||(r.role==="user"&&n.push({role:"user",content:r.text}),r.role==="assistant"&&n.push({role:"assistant",content:r.text}))}const i=String(a).trim(),d=n[n.length-1];return d&&d.role==="user"&&String(d.content).trim()===i||n.push({role:"user",content:i}),n}function b(o=""){const routes=[...o.matchAll(/\[\[ROUTE:(learn|services|shop|partner|myCrediti|protect|organizer|business)(?::(todos|casa|moda|beleza|familia|auto))?\]\]/gi)].map(t=>({screen:t[1],category:t[2]||""})),a="[[HANDOFF]]",e="[[HANDOFF:SAMILA]]",c=o.match(/\[\[PARTNER:(inss|bpc|fgts|clt|energia|cartao|pravaler)\]\]/i)?.[1]?.toLowerCase()||"",i=(o.includes(a)||o.includes(e))&&!c,d=o.includes(e)?"samila":"";let u=o.replaceAll(e,"").replaceAll(a,"").replace(/\[\[PARTNER:(inss|bpc|fgts|clt|energia|cartao|pravaler)\]\]/gi,"").replace(/\[\[ROUTE:(learn|services|shop|partner|myCrediti|protect|organizer|business)(?::(todos|casa|moda|beleza|familia|auto))?\]\]/gi,"").trim();if(i){const t=new Intl.DateTimeFormat("en-US",{timeZone:"America/Fortaleza",weekday:"short",hour:"2-digit",minute:"2-digit",hour12:!1}).formatToParts(new Date),r=t.find(p=>p.type==="weekday")?.value||"",l=Number(t.find(p=>p.type==="hour")?.value||0),g=Number(t.find(p=>p.type==="minute")?.value||0),A=l*60+g,f=r==="Sat"||r==="Sun",R=r==="Fri"&&A>=1020;!f&&A>=460&&A<1020||(u+=`
 
-AVISO DE HOR\xC1RIO: nosso atendimento humano funciona de segunda a sexta, das 7h40 \xE0s 17h. ${f||R?"Sua mensagem ser\xE1 recebida e respondida na segunda-feira.":"Sua mensagem ser\xE1 recebida e respondida no pr\xF3ximo hor\xE1rio de atendimento."}`)}return{reply:u,showAnalysts:i,analystKey:d,partnerProduct:c}}s.get("/",(o,a)=>{a.json({status:"online",app:"Crediti IA",assistant:"Creditin",model:m})}),s.get("/health",(o,a)=>{a.json({status:"ok",openaiConfigured:!!process.env.OPENAI_API_KEY,model:m})}),s.post("/api/chat",async(o,a)=>{try{const{message:e,history:n=[],customer:c={}}=o.body||{};if(!e||typeof e!="string"||!e.trim())return a.status(400).json({error:"Mensagem n\xE3o informada."});if(!process.env.OPENAI_API_KEY)return a.status(500).json({error:"OPENAI_API_KEY n\xE3o configurada."});const i=I(n,e,c),u=(await v.responses.create({model:m,reasoning:{effort:"low"},instructions:S,input:i,max_output_tokens:500})).output_text?.trim();if(!u)return a.status(502).json({error:"A IA n\xE3o retornou uma resposta v\xE1lida."});const{reply:t,showAnalysts:r,analystKey:l,partnerProduct:g}=b(u);return a.json({success:!0,reply:t,showAnalysts:r,analystKey:l,partnerProduct:g,model:m})}catch(e){return console.error("ERRO CREDITI IA:"),console.error(e),a.status(e?.status||500).json({error:e?.message||"N\xE3o foi poss\xEDvel responder agora."})}}),s.post("/api/leads",async(o,a)=>{try{const e=o.body||{};return console.log("LEAD CREDITI IA:",JSON.stringify({name:e.name||"",phone:e.phone||"",city:e.city||"",whatsapp:e.whatsapp||!1,interest:e.interest||"",analyst:e.analyst||"",analystEmail:e.analystEmail||"",status:e.status||"",createdAt:e.createdAt||new Date().toISOString()})),a.status(201).json({success:!0,message:"Lead recebido."})}catch{return a.status(500).json({success:!1,error:"N\xE3o foi poss\xEDvel registrar o lead."})}}),s.use((o,a)=>{a.status(404).json({error:"Rota n\xE3o encontrada."})}),s.listen(N,"0.0.0.0",()=>{console.log(`Crediti IA online na porta ${N}`),console.log("OpenAI configurada:",!!process.env.OPENAI_API_KEY),console.log("Modelo:",m)});
+AVISO DE HOR\xC1RIO: nosso atendimento humano funciona de segunda a sexta, das 7h40 \xE0s 17h. ${f||R?"Sua mensagem ser\xE1 recebida e respondida na segunda-feira.":"Sua mensagem ser\xE1 recebida e respondida no pr\xF3ximo hor\xE1rio de atendimento."}`)}return{reply:u,showAnalysts:i,analystKey:d,partnerProduct:c,routes}}s.get("/",(o,a)=>{a.json({status:"online",app:"Crediti IA",assistant:"Creditin",model:m})}),s.get("/health",(o,a)=>{a.json({status:"ok",openaiConfigured:!!process.env.OPENAI_API_KEY,model:m})}),s.post("/api/chat",async(o,a)=>{try{const{message:e,history:n=[],customer:c={}}=o.body||{};if(!e||typeof e!="string"||!e.trim())return a.status(400).json({error:"Mensagem n\xE3o informada."});if(!process.env.OPENAI_API_KEY)return a.status(500).json({error:"OPENAI_API_KEY n\xE3o configurada."});const i=I(n,e,c),u=(await v.responses.create({model:m,reasoning:{effort:"low"},instructions:S,input:i,max_output_tokens:500})).output_text?.trim();if(!u)return a.status(502).json({error:"A IA n\xE3o retornou uma resposta v\xE1lida."});const{reply:t,showAnalysts:r,analystKey:l,partnerProduct:g,routes:A}=b(u);return a.json({success:!0,reply:t,showAnalysts:r,analystKey:l,partnerProduct:g,routes:A,model:m})}catch(e){return console.error("ERRO CREDITI IA:"),console.error(e),a.status(e?.status||500).json({error:e?.message||"N\xE3o foi poss\xEDvel responder agora."})}}),s.post("/api/leads",async(o,a)=>{try{const e=o.body||{};return console.log("LEAD CREDITI IA:",JSON.stringify({name:e.name||"",phone:e.phone||"",city:e.city||"",whatsapp:e.whatsapp||!1,interest:e.interest||"",analyst:e.analyst||"",analystEmail:e.analystEmail||"",status:e.status||"",createdAt:e.createdAt||new Date().toISOString()})),a.status(201).json({success:!0,message:"Lead recebido."})}catch{return a.status(500).json({success:!1,error:"N\xE3o foi poss\xEDvel registrar o lead."})}}),s.use((o,a)=>{a.status(404).json({error:"Rota n\xE3o encontrada."})}),s.listen(N,"0.0.0.0",()=>{console.log(`Crediti IA online na porta ${N}`),console.log("OpenAI configurada:",!!process.env.OPENAI_API_KEY),console.log("Modelo:",m)});
