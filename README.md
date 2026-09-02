@@ -1,6 +1,6 @@
-# Crediti IA
+# App Crediti
 
-Aplicativo em desenvolvimento da Crediti.
+Aplicativo oficial da Crediti. O nome histórico do repositório foi mantido para não interromper a publicação atual.
 
 ## Identidade
 Amarelo + preto + branco. Sem roxo. CREDITI em uma única cor. Creditin grande na home e menor no chat.
@@ -9,7 +9,7 @@ Amarelo + preto + branco. Sem roxo. CREDITI em uma única cor. Creditin grande n
 npm install
 npm run dev
 
-## Configurar IA
+## Recurso de conversa
 Copie .env.example para .env e preencha OPENAI_API_KEY no ambiente do servidor.
 
 Nunca coloque a chave da OpenAI no frontend.
