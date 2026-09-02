@@ -6115,3 +6115,100 @@ button:disabled {
     grid-template-columns: 1fr;
   }
 }
+
+/* Refinamento de uso: informação clara, menos repetição e ícones reconhecíveis. */
+.home-privacy-note {
+  margin: 0;
+  padding: 10px 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid #e2c000;
+  border-radius: 14px;
+  background: #fff8cf;
+}
+
+.home-privacy-note .ui-icon {
+  width: 20px;
+  height: 20px;
+  flex: 0 0 20px;
+}
+
+.home-privacy-note p {
+  margin: 0;
+  color: #4f4724;
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.home-privacy-note strong {
+  color: #111111;
+}
+
+.hub-icon .ui-icon,
+.simple-action-icon .ui-icon {
+  width: 24px;
+  height: 24px;
+}
+
+.education-connected-card {
+  margin-bottom: 24px;
+  padding: 16px;
+  gap: 12px;
+}
+
+.education-connected-card h2 {
+  margin: 6px 0;
+  font-size: 20px;
+}
+
+.education-connected-card p {
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+@media (max-width: 560px) {
+  .education-connected-card > div:last-child {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.education-connected-card button {
+  min-height: 44px;
+  padding: 8px;
+  font-size: 9px;
+  line-height: 1.2;
+}
+
+.financial-learning-heading {
+  margin: 0 0 14px;
+}
+
+.shop-store-carousel {
+  align-items: flex-start;
+}
+
+.shop-store-card {
+  height: auto !important;
+  align-self: flex-start;
+}
+
+.shop-store-art .partner-icon-bubble {
+  color: #111111 !important;
+}
+
+.shop-store-art .shopee-icon {
+  color: #ee4d2d !important;
+}
+
+.shop-store-art .magalu-icon {
+  color: #006bdb !important;
+}
+
+.shop-store-art .babystock-icon {
+  color: #8b5a00 !important;
+}
+
+.shop-store-art .kidy-shoe {
+  color: #ef5b20 !important;
+}
