@@ -5595,3 +5595,523 @@ button:disabled {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* Auditoria visual 2026-09: régua única para todo o aplicativo */
+:root {
+  --ui-space-1: 6px;
+  --ui-space-2: 10px;
+  --ui-space-3: 14px;
+  --ui-space-4: 18px;
+  --ui-radius-card: 20px;
+  --ui-radius-control: 14px;
+  --ui-icon-box: 44px;
+  --ui-icon-size: 24px;
+  --ui-card-title: 16px;
+  --ui-card-copy: 13px;
+}
+
+.ui-icon {
+  width: var(--ui-icon-size);
+  height: var(--ui-icon-size);
+  display: block;
+  flex: 0 0 auto;
+}
+
+/* Evita alturas incorretas e sobreposição no Safari do iPhone. */
+.modern-home > section,
+.modern-page > section,
+.shop-store-card,
+.service-group,
+.direct-card {
+  content-visibility: visible !important;
+  contain: none !important;
+  contain-intrinsic-size: none !important;
+}
+
+.modern-home,
+.modern-page {
+  padding-left: 16px;
+  padding-right: 16px;
+}
+
+.eyebrow,
+.section-title-row small,
+.local-section-title small,
+.shop-store-card > small,
+.article-card small {
+  font-size: 10px;
+  line-height: 1.2;
+  letter-spacing: 0.07em;
+}
+
+.section-title-row h2,
+.financial-learning-heading h2,
+.career-section h2,
+.local-section-title h2 {
+  font-size: 24px;
+  line-height: 1.08;
+  letter-spacing: -0.7px;
+}
+
+/* Navegação inferior com cinco ícones da mesma família e do mesmo tamanho. */
+.bottom-nav {
+  min-height: calc(82px + env(safe-area-inset-bottom));
+  padding: 7px 6px calc(7px + env(safe-area-inset-bottom));
+}
+
+.bottom-nav button {
+  min-height: 66px;
+  gap: 5px;
+  border-radius: var(--ui-radius-control);
+}
+
+.bottom-nav span,
+.bottom-nav button:first-child span {
+  width: var(--ui-icon-box);
+  min-width: var(--ui-icon-box);
+  height: var(--ui-icon-box);
+  padding: 0;
+  border-radius: var(--ui-radius-control);
+  font-size: inherit;
+}
+
+.bottom-nav span .ui-icon {
+  width: 24px;
+  height: 24px;
+}
+
+.bottom-nav small {
+  font-size: 10px;
+  line-height: 1.1;
+}
+
+/* Home: atalhos proporcionais, alinhados e sem mistura de emojis. */
+.quick-grid {
+  align-items: stretch;
+}
+
+.quick-card {
+  min-height: 148px;
+  padding: 16px;
+  border-radius: var(--ui-radius-card);
+}
+
+.quick-card > span,
+.hub-icon {
+  width: var(--ui-icon-box);
+  min-width: var(--ui-icon-box);
+  height: var(--ui-icon-box);
+  padding: 0;
+  border-radius: var(--ui-radius-control);
+}
+
+.quick-card > span .ui-icon,
+.home-personal-tools > button > span .ui-icon,
+.local-hub-actions span .ui-icon,
+.local-privacy-card > span .ui-icon,
+.organizer-intro > span .ui-icon,
+.journey-card > span .ui-icon,
+.simple-action-icon .ui-icon,
+.privacy-first-note > span .ui-icon,
+.protect-hero > span .ui-icon {
+  width: 24px;
+  height: 24px;
+}
+
+.quick-card strong {
+  min-height: 38px;
+  margin-top: 16px;
+  font-size: var(--ui-card-title);
+  line-height: 1.18;
+}
+
+.quick-card small {
+  margin-top: 6px;
+  font-size: var(--ui-card-copy);
+  line-height: 1.35;
+}
+
+.home-personal-tools {
+  gap: 12px;
+}
+
+.home-personal-tools > button {
+  min-height: 92px;
+  padding: 16px;
+  grid-template-columns: var(--ui-icon-box) minmax(0, 1fr) 16px;
+  gap: 12px;
+  border-radius: var(--ui-radius-card);
+}
+
+.home-personal-tools > button > span {
+  width: var(--ui-icon-box);
+  height: var(--ui-icon-box);
+  border-radius: var(--ui-radius-control);
+}
+
+.home-personal-tools strong {
+  font-size: var(--ui-card-title);
+}
+
+.home-personal-tools small {
+  margin-top: 4px;
+  font-size: var(--ui-card-copy);
+  line-height: 1.3;
+}
+
+.home-personal-tools b {
+  font-size: 22px;
+}
+
+/* Minha Crediti e ferramentas locais. */
+.local-hub-page,
+.organizer-page,
+.protect-page,
+.journeys-page,
+.business-page {
+  gap: 20px;
+}
+
+.local-privacy-card,
+.organizer-intro {
+  padding: 18px;
+  grid-template-columns: 48px minmax(0, 1fr);
+  gap: 14px;
+  border-radius: var(--ui-radius-card);
+}
+
+.local-privacy-card > span,
+.organizer-intro > span {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--ui-radius-control);
+  font-size: inherit;
+}
+
+.local-privacy-card strong,
+.organizer-intro h1 {
+  font-size: 20px;
+  line-height: 1.15;
+}
+
+.local-privacy-card p,
+.organizer-intro p {
+  margin-top: 6px;
+  font-size: 14px;
+  line-height: 1.42;
+}
+
+.local-hub-actions {
+  gap: 12px;
+}
+
+.local-hub-actions button {
+  min-height: 104px;
+  padding: 16px;
+  display: grid;
+  grid-template-columns: var(--ui-icon-box) minmax(0, 1fr);
+  grid-template-rows: auto auto;
+  align-items: center;
+  column-gap: 14px;
+  row-gap: 4px;
+  border-radius: var(--ui-radius-card);
+}
+
+.local-hub-actions span {
+  width: var(--ui-icon-box);
+  height: var(--ui-icon-box);
+  grid-row: 1 / 3;
+  border-radius: var(--ui-radius-control);
+}
+
+.local-hub-actions strong {
+  align-self: end;
+  font-size: var(--ui-card-title);
+}
+
+.local-hub-actions small {
+  align-self: start;
+  font-size: var(--ui-card-copy);
+  line-height: 1.3;
+}
+
+.friendly-empty {
+  padding: 22px 18px;
+  border-radius: var(--ui-radius-card);
+}
+
+.friendly-empty strong {
+  font-size: 17px;
+}
+
+.friendly-empty p {
+  font-size: 14px;
+}
+
+.journey-card > span,
+.business-grid button > span,
+.protect-hero > span {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--ui-radius-control);
+}
+
+/* Aprenda: cards inteiros, escala única e nenhum bloco sobreposto. */
+.education-partner-carousel {
+  width: 100%;
+  margin: 0;
+  padding: 0 2px 8px;
+  scroll-padding-inline: 2px;
+  gap: 12px;
+}
+
+.education-partner-carousel .career-card {
+  width: 100%;
+  min-width: 100%;
+  min-height: 0;
+  padding: 14px;
+  overflow: hidden;
+  border-radius: var(--ui-radius-card);
+  scroll-snap-stop: always;
+}
+
+.education-partner-carousel .career-brand {
+  min-height: 72px;
+  padding: 14px 16px;
+  border-radius: 15px;
+}
+
+.education-partner-carousel .career-brand i {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+}
+
+.education-partner-carousel .career-brand b {
+  font-size: 22px;
+}
+
+.education-partner-carousel .career-copy {
+  min-height: 0;
+  padding: 14px 4px 2px;
+  gap: 7px;
+}
+
+.education-partner-carousel .career-copy strong {
+  font-size: 18px;
+}
+
+.education-partner-carousel .career-copy span {
+  margin-top: 8px;
+  padding-top: 0;
+}
+
+.education-connected-card {
+  padding: 20px;
+  gap: 16px;
+  overflow: visible;
+  border-radius: var(--ui-radius-card);
+}
+
+.education-connected-card h2 {
+  font-size: 23px;
+}
+
+.education-connected-card p {
+  font-size: 14px;
+}
+
+.education-connected-card > div:last-child {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.education-connected-card button {
+  min-height: 48px;
+  padding: 10px 12px;
+  border-radius: var(--ui-radius-control);
+  font-size: 11px;
+}
+
+.financial-learning-heading {
+  margin: 4px 0 14px;
+  gap: 6px;
+}
+
+.article-card {
+  min-height: 178px;
+  padding: 16px;
+  border-radius: var(--ui-radius-card);
+}
+
+.article-card strong {
+  margin-top: 12px;
+  font-size: 15px;
+}
+
+.article-card p {
+  margin-top: 7px;
+  font-size: 11px;
+}
+
+.article-card span {
+  font-size: 10px;
+}
+
+/* Shop: um card completo, conteúdo junto e filtros sem cortes. */
+.shop-page {
+  gap: 18px;
+}
+
+.shop-category-filter {
+  margin: 14px 0 18px;
+  padding: 0;
+  flex-wrap: wrap;
+  overflow: visible;
+  gap: 8px;
+}
+
+.shop-category-filter button {
+  min-height: 42px;
+  padding: 0 14px;
+  border-radius: 999px;
+  font-size: 12px;
+}
+
+.shop-store-carousel {
+  width: 100%;
+  padding: 0 2px 8px;
+  gap: 12px;
+  scroll-padding-inline: 2px;
+}
+
+.shop-store-card {
+  width: 100%;
+  min-width: 100%;
+  min-height: 0;
+  padding: 16px;
+  overflow: hidden;
+  border-radius: var(--ui-radius-card);
+  scroll-snap-stop: always;
+}
+
+.shop-store-art {
+  min-height: 120px;
+  padding: 18px;
+  border-radius: 16px;
+}
+
+.shop-store-art > span,
+.shop-store-art .partner-icon-bubble,
+.shop-store-art .babystock-icon,
+.shop-store-art .kidy-shoe,
+.shop-store-art .amazon-bag,
+.shop-store-art .shein-hanger,
+.shop-store-art .xiaomi-device,
+.shop-store-art .itatiaia-kitchen,
+.shop-store-art .electrolux-appliance,
+.shop-store-art .natura-leaf,
+.shop-store-art .avon-beauty {
+  width: 60px;
+  height: 60px;
+  min-width: 60px;
+  display: grid;
+  place-items: center;
+  border-radius: 18px;
+  font-size: inherit;
+  transform: none;
+}
+
+.shop-store-art .ui-icon,
+.shop-store-art .partner-icon-bubble svg {
+  width: 34px;
+  height: 34px;
+}
+
+.shop-store-art b,
+.amazon-art b,
+.magalu-art b,
+.shein-art b,
+.babystock-art b,
+.kidy-art b,
+.xiaomi-art b,
+.itatiaia-art b,
+.natura-art b,
+.avon-art b {
+  max-width: calc(100% - 76px);
+  font-size: 25px;
+  line-height: 1.05;
+  text-align: right;
+}
+
+.shop-store-card > small {
+  margin-top: 14px;
+}
+
+.shop-store-card > h2 {
+  margin-top: 5px;
+  font-size: 20px;
+  line-height: 1.12;
+}
+
+.shop-store-card > p {
+  margin-top: 7px;
+  font-size: var(--ui-card-copy);
+  line-height: 1.4;
+}
+
+.shop-store-card > button {
+  min-height: 48px;
+  margin-top: 16px;
+  padding: 11px 14px;
+  border-radius: var(--ui-radius-control);
+  font-size: 11px;
+}
+
+.shop-benefits {
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+
+.shop-benefits article {
+  min-height: 0;
+  padding: 16px;
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr);
+  gap: 4px 12px;
+  border-radius: var(--ui-radius-card);
+}
+
+.shop-benefits span {
+  grid-row: 1 / 3;
+  font-size: 11px;
+}
+
+.shop-benefits strong {
+  margin-top: 0;
+  font-size: 15px;
+}
+
+.shop-benefits p {
+  margin-top: 2px;
+  font-size: 12px;
+}
+
+.affiliate-notice {
+  border-radius: var(--ui-radius-card);
+}
+
+.affiliate-notice p {
+  font-size: 12px;
+}
+
+@media (max-width: 560px) {
+  .home-personal-tools,
+  .local-hub-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .education-connected-card > div:last-child {
+    grid-template-columns: 1fr;
+  }
+}

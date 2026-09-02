@@ -900,17 +900,17 @@ const PRODUCT_VISUALS = {
     tone: "yellow"
   },
   bpc: {
-    icon: "🤝",
+    icon: "BPC",
     label: "Beneficiários BPC/LOAS",
     tone: "soft-yellow"
   },
   clt: {
-    icon: "👷",
+    icon: "CLT",
     label: "Trabalhador com carteira",
     tone: "blue"
   },
   bolsa: {
-    icon: "👨‍👩‍👧",
+    icon: "BF",
     label: "Beneficiário do programa",
     tone: "green"
   },
@@ -920,52 +920,52 @@ const PRODUCT_VISUALS = {
     tone: "green"
   },
   cartao: {
-    icon: "💳",
+    icon: "R$",
     label: "Limite do cartão",
     tone: "purple"
   },
   energia: {
-    icon: "💡",
+    icon: "LUZ",
     label: "Crédito pela conta de luz",
     tone: "yellow"
   },
   garantia: {
-    icon: "🔑",
+    icon: "AUTO",
     label: "Carro ou moto em garantia",
     tone: "blue"
   },
   "financiamento-carro": {
-    icon: "🚗",
+    icon: "CARRO",
     label: "Compre seu carro",
     tone: "yellow"
   },
   "financiamento-moto": {
-    icon: "🏍",
+    icon: "MOTO",
     label: "Compre sua moto",
     tone: "orange"
   },
   seguro: {
-    icon: "🛡",
+    icon: "SEG",
     label: "Proteção para carro e moto",
     tone: "blue"
   },
   "consorcio-carro": {
-    icon: "🚘",
+    icon: "CARRO",
     label: "Planeje seu próximo carro",
     tone: "soft-yellow"
   },
   "consorcio-moto": {
-    icon: "🛵",
+    icon: "MOTO",
     label: "Planeje sua próxima moto",
     tone: "orange"
   },
   "consorcio-pesado": {
-    icon: "🚛",
+    icon: "PESADO",
     label: "Caminhões e pesados",
     tone: "blue"
   },
   "consorcio-servicos": {
-    icon: "🧰",
+    icon: "SERV",
     label: "Projetos e serviços",
     tone: "purple"
   },
@@ -1463,6 +1463,42 @@ function isValidCustomerName(value) {
   return true;
 }
 
+function UiIcon({ name }) {
+  const props = {
+    className: "ui-icon",
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: 1.9,
+    strokeLinecap: "round",
+    strokeLinejoin: "round",
+    focusable: "false",
+    "aria-hidden": "true"
+  };
+
+  return (
+    <svg {...props}>
+      {name === "home" && <><path d="m3 11 9-8 9 8" /><path d="M5 10v11h14V10M9 21v-7h6v7" /></>}
+      {name === "credit" && <><rect x="3" y="5" width="18" height="14" rx="3" /><path d="M3 9h18M7 15h4" /></>}
+      {name === "learn" && <><path d="M4 5.5A3.5 3.5 0 0 1 7.5 4H11v16H7.5A3.5 3.5 0 0 0 4 21.5v-16Z" /><path d="M20 5.5A3.5 3.5 0 0 0 16.5 4H13v16h3.5a3.5 3.5 0 0 1 3.5 1.5v-16Z" /></>}
+      {name === "services" && <><rect x="4" y="4" width="6" height="6" rx="1" /><rect x="14" y="4" width="6" height="6" rx="1" /><rect x="4" y="14" width="6" height="6" rx="1" /><rect x="14" y="14" width="6" height="6" rx="1" /></>}
+      {name === "shop" && <><path d="M6 8h12l1 13H5L6 8Z" /><path d="M9 9V6a3 3 0 0 1 6 0v3" /></>}
+      {name === "chat" && <><path d="M4 5h16v11H9l-5 4V5Z" /><path d="M8 9h8M8 12h5" /></>}
+      {name === "products" && <><rect x="4" y="4" width="6" height="6" rx="1" /><rect x="14" y="4" width="6" height="6" rx="1" /><rect x="4" y="14" width="6" height="6" rx="1" /><path d="M17 14v6M14 17h6" /></>}
+      {name === "partner" && <><path d="M8.5 12.5 11 15a2 2 0 0 0 3 0l4.5-4.5" /><path d="m3 10 4-4 4 3-5 6-3-5ZM21 10l-4-4-3.5 2.5M8 17l2 2M12 17l1 1" /></>}
+      {name === "star" && <path d="m12 3 2.7 5.5 6.1.9-4.4 4.3 1 6.1-5.4-2.9-5.4 2.9 1-6.1-4.4-4.3 6.1-.9L12 3Z" />}
+      {name === "search" && <><circle cx="11" cy="11" r="6" /><path d="m16 16 4 4" /></>}
+      {name === "shield" && <><path d="M12 3 20 6v6c0 5-3 8-8 10-5-2-8-5-8-10V6l8-3Z" /><path d="m8.5 12 2.2 2.2 4.8-5" /></>}
+      {name === "calendar" && <><rect x="4" y="5" width="16" height="15" rx="2" /><path d="M8 3v4M16 3v4M4 10h16M8 14h2M14 14h2" /></>}
+      {name === "car" && <><path d="m5 10 2-4h10l2 4 2 2v6h-2M3 18v-6l2-2h14" /><path d="M7 18h10M7 15h.01M17 15h.01" /></>}
+      {name === "education" && <><path d="m3 9 9-5 9 5-9 5-9-5Z" /><path d="M6 12v5c3 3 9 3 12 0v-5M21 10v6" /></>}
+      {name === "business" && <><rect x="4" y="8" width="16" height="12" rx="2" /><path d="M9 8V4h6v4M4 13h16M10 13v2h4v-2" /></>}
+      {name === "gift" && <><rect x="4" y="9" width="16" height="11" rx="2" /><path d="M12 9v11M4 13h16M8 9c-3 0-3-4 0-4 2 0 4 4 4 4s2-4 4-4c3 0 3 4 0 4" /></>}
+      {name === "shoe" && <><path d="M5 15c3 0 5-2 6-7l3 3c2 2 4 3 6 3l1 4c-5 2-12 2-16 0v-3Z" /><path d="M10 12l3 2M8 14l3 2" /></>}
+    </svg>
+  );
+}
+
 function BottomNav({
   active,
   onNavigate
@@ -1470,27 +1506,27 @@ function BottomNav({
   const items = [
     {
       id: "home",
-      icon: "⌂",
+      icon: "home",
       label: "Início"
     },
     {
       id: "credit",
-      icon: "R$",
+      icon: "credit",
       label: "Crédito"
     },
     {
       id: "learn",
-      icon: "✓",
+      icon: "learn",
       label: "Aprenda"
     },
     {
       id: "services",
-      icon: "▦",
+      icon: "services",
       label: "Serviços"
     },
     {
       id: "shop",
-      icon: "S",
+      icon: "shop",
       label: "Shop"
     }
   ];
@@ -1513,7 +1549,7 @@ function BottomNav({
           }
         >
           <span aria-hidden="true">
-            {item.icon}
+            <UiIcon name={item.icon} />
           </span>
 
           <small>{item.label}</small>
@@ -3383,7 +3419,7 @@ function App() {
           </section>
 
           <section className="partner-notice-safe">
-            <span aria-hidden="true">✓</span>
+            <span aria-hidden="true"><UiIcon name="shield" /></span>
             <div>
               <h2>Seus dados ficam com a instituição</h2>
               <p>
@@ -3440,7 +3476,7 @@ function App() {
 
         <main className="modern-page local-hub-page">
           <section className="local-privacy-card">
-            <span aria-hidden="true">✓</span>
+            <span aria-hidden="true"><UiIcon name="shield" /></span>
             <div>
               <strong>Sem cadastro e sem CPF</strong>
               <p>
@@ -3451,12 +3487,12 @@ function App() {
 
           <div className="local-hub-actions">
             <button onClick={() => setScreen("organizer")}>
-              <span aria-hidden="true">▣</span>
+              <span aria-hidden="true"><UiIcon name="calendar" /></span>
               <strong>Organizar contas</strong>
               <small>Cadastre datas e receba avisos locais.</small>
             </button>
             <button onClick={() => setScreen("protect")}>
-              <span aria-hidden="true">✓</span>
+              <span aria-hidden="true"><UiIcon name="shield" /></span>
               <strong>Crediti Protege</strong>
               <small>Confira sinais de golpe antes de continuar.</small>
             </button>
@@ -3576,7 +3612,7 @@ function App() {
 
         <main className="modern-page organizer-page">
           <section className="organizer-intro">
-            <span aria-hidden="true">▣</span>
+            <span aria-hidden="true"><UiIcon name="calendar" /></span>
             <div>
               <h1>Não deixe uma conta passar</h1>
               <p>Informe apenas um nome e a data. Não coloque número de cartão, conta bancária, CPF ou senha.</p>
@@ -3699,7 +3735,7 @@ function App() {
 
         <main className="modern-page protect-page">
           <section className="protect-hero">
-            <span aria-hidden="true">✓</span>
+            <span aria-hidden="true"><UiIcon name="shield" /></span>
             <div>
               <small>SEGURANÇA PRIMEIRO</small>
               <h1>Desconfie antes de pagar</h1>
@@ -3743,7 +3779,7 @@ function App() {
     const journeys = [
       {
         id: "vehicle",
-        icon: "🚗",
+        icon: "car",
         title: "Carro ou moto",
         copy: "Financiamento, garantia, seguro, consórcio e orientação antes de decidir.",
         actions: [
@@ -3757,7 +3793,7 @@ function App() {
       },
       {
         id: "retired",
-        icon: "INSS",
+        icon: "credit",
         title: "Aposentado ou pensionista",
         copy: "Consignado INSS, BPC/LOAS, serviços oficiais e cuidados contra golpes.",
         actions: [
@@ -3767,7 +3803,7 @@ function App() {
       },
       {
         id: "education",
-        icon: "🎓",
+        icon: "education",
         title: "Estudar e financiar",
         copy: "Faculdades parceiras, Pravaler, orientação de orçamento e segurança educacional.",
         actions: [
@@ -3777,7 +3813,7 @@ function App() {
       },
       {
         id: "business",
-        icon: "PJ",
+        icon: "business",
         title: "Empresa e loja",
         copy: "Conta PJ, saúde empresarial, site, divulgação e serviços oficiais.",
         actions: [
@@ -3787,7 +3823,7 @@ function App() {
       },
       {
         id: "shopping",
-        icon: "S",
+        icon: "shop",
         title: "Comprar e economizar",
         copy: "Lojas parceiras organizadas por categoria, ofertas e cupons.",
         actions: [
@@ -3813,7 +3849,7 @@ function App() {
           <div className="journey-grid">
             {journeys.map((journey) => (
               <article key={journey.id} className={`journey-card ${journey.id}`}>
-                <span aria-hidden="true">{journey.icon}</span>
+                <span aria-hidden="true"><UiIcon name={journey.icon} /></span>
                 <h2>{journey.title}</h2>
                 <p>{journey.copy}</p>
                 <div>
@@ -3896,7 +3932,7 @@ function App() {
           </section>
 
           <section className="privacy-first-note" aria-label="Privacidade na Crediti">
-            <span aria-hidden="true">✓</span>
+            <span aria-hidden="true"><UiIcon name="shield" /></span>
             <div>
               <strong>Compare sem informar dados pessoais</strong>
               <p>
@@ -4559,7 +4595,7 @@ function App() {
                   className="shop-store-art"
                   aria-hidden="true"
                 >
-                  <span>🛍️</span>
+                <span className="partner-icon-bubble shopee-icon"><UiIcon name="shop" /></span>
                   <b>Shopee</b>
                 </div>
 
@@ -4630,7 +4666,7 @@ function App() {
                   className="shop-store-art magalu-art"
                   aria-hidden="true"
                 >
-                  <span>🛒</span>
+                  <span className="partner-icon-bubble magalu-icon"><UiIcon name="shop" /></span>
                   <b>magalu</b>
                 </div>
 
@@ -5001,7 +5037,7 @@ function App() {
                   className="shop-store-art babystock-art"
                   aria-hidden="true"
                 >
-                  <span className="babystock-icon">★</span>
+                  <span className="partner-icon-bubble babystock-icon"><UiIcon name="gift" /></span>
                   <b>BabyStock</b>
                 </div>
 
@@ -5048,7 +5084,7 @@ function App() {
                   className="shop-store-art kidy-art"
                   aria-hidden="true"
                 >
-                  <span className="kidy-shoe">👟</span>
+                  <span className="partner-icon-bubble kidy-shoe"><UiIcon name="shoe" /></span>
                   <b>Kidy Calçados</b>
                 </div>
 
@@ -6259,7 +6295,7 @@ function App() {
               openExternal(RENDA_EXTRA_URL)
             }
           >
-            <span className="simple-action-icon" aria-hidden="true">🤝</span>
+            <span className="simple-action-icon" aria-hidden="true"><UiIcon name="partner" /></span>
             <span className="simple-action-copy">
               <strong>Quero me cadastrar</strong>
               <small>Abrir a plataforma Renda Extra Crediti</small>
@@ -6322,7 +6358,7 @@ function App() {
               }
             }}
           >
-            <span aria-hidden="true">⌕</span>
+            <span aria-hidden="true"><UiIcon name="search" /></span>
             <input
               type="search"
               value={homeSearch}
@@ -6377,7 +6413,7 @@ function App() {
 
         <section className="home-personal-tools" aria-label="Ferramentas pessoais">
           <button onClick={() => setScreen("myCrediti")}>
-            <span aria-hidden="true">★</span>
+            <span aria-hidden="true"><UiIcon name="star" /></span>
             <div>
               <strong>Minha Crediti</strong>
               <small>
@@ -6389,7 +6425,7 @@ function App() {
             <b aria-hidden="true">›</b>
           </button>
           <button onClick={() => setScreen("journeys")}>
-            <span aria-hidden="true">⌕</span>
+            <span aria-hidden="true"><UiIcon name="search" /></span>
             <div>
               <strong>Caminhos Crediti</strong>
               <small>Crédito, estudo, empresa e compras conectados</small>
@@ -6487,7 +6523,7 @@ function App() {
                 setScreen("direct")
               }
             >
-              <span>R$</span>
+              <span><UiIcon name="credit" /></span>
               <strong>
                 Quero simular agora
               </strong>
@@ -6502,7 +6538,7 @@ function App() {
                 openChat()
               }
             >
-              <span>IA</span>
+              <span><UiIcon name="chat" /></span>
               <strong>
                 Converse com a Crediti IA
               </strong>
@@ -6517,7 +6553,7 @@ function App() {
                 setScreen("products")
               }
             >
-              <span>+</span>
+              <span><UiIcon name="products" /></span>
               <strong>
                 Conheça nossos produtos
               </strong>
@@ -6532,7 +6568,7 @@ function App() {
                 setScreen("partner")
               }
             >
-              <span aria-hidden="true">🤝</span>
+              <span aria-hidden="true"><UiIcon name="partner" /></span>
               <strong>
                 Quero ser parceiro
               </strong>
