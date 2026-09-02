@@ -664,12 +664,6 @@ const APP_SEARCH_ITEMS = [
     keywords: "parceiro parceria renda extra indicar indicação comissão trabalhar cadastro"
   },
   {
-    title: "Financiamento de carro ou moto",
-    description: "Financiamento, refinanciamento, garantia, seguro e consórcio",
-    screen: "products",
-    keywords: "carro carros moto motos veiculo veiculos automovel automoveis financiar financiamento refinanciar refinanciamento garantia seguro consorcio comprar trocar"
-  },
-  {
     title: "Crédito para aposentados",
     description: "Consignado INSS e opções para beneficiários BPC/LOAS",
     screen: "direct",
@@ -1556,6 +1550,11 @@ function App() {
         "Conheça esta opção da Crediti",
       screen: "productDetail",
       product,
+      searchPriority:
+        product.id === "financiamento-carro" ||
+        product.id === "financiamento-moto"
+          ? 2
+          : 0,
       keywords: [
         product.typeLabel,
         product.forWho,
@@ -1623,14 +1622,25 @@ function App() {
   const matchedSearchResults =
     normalizedSearch
       ? appSearchCatalog.map((item) => {
-          const haystack =
+          const normalizedTitle =
+            normalizeAppSearch(item.title);
+
+          const normalizedDescription =
             normalizeAppSearch(
-              item.title +
-                " " +
-                item.description +
-                " " +
-                item.keywords
+              item.description || ""
             );
+
+          const normalizedKeywords =
+            normalizeAppSearch(
+              item.keywords || ""
+            );
+
+          const haystack =
+            normalizedTitle +
+            " " +
+            normalizedDescription +
+            " " +
+            normalizedKeywords;
 
           const haystackWords =
             haystack
@@ -1640,8 +1650,14 @@ function App() {
           const score =
             searchTokens.reduce(
               (total, token) => {
-                const exact =
-                  haystack.includes(token);
+                const titleMatch =
+                  normalizedTitle.includes(token);
+
+                const descriptionMatch =
+                  normalizedDescription.includes(token);
+
+                const keywordMatch =
+                  normalizedKeywords.includes(token);
 
                 const approximate =
                   token.length >= 4 &&
@@ -1655,8 +1671,12 @@ function App() {
 
                 return (
                   total +
-                  (exact
-                    ? 2
+                  (titleMatch
+                    ? 6
+                    : descriptionMatch
+                      ? 3
+                      : keywordMatch
+                        ? 2
                     : approximate
                       ? 1
                       : 0)
@@ -1668,7 +1688,12 @@ function App() {
           return { ...item, score };
         })
           .filter((item) => item.score > 0)
-          .sort((a, b) => b.score - a.score)
+          .sort(
+            (a, b) =>
+              b.score - a.score ||
+              (b.searchPriority || 0) -
+                (a.searchPriority || 0)
+          )
           .slice(0, 5)
       : [];
 
@@ -5313,12 +5338,12 @@ function App() {
                 setScreen("partner")
               }
             >
-              <span>C</span>
+              <span aria-hidden="true">🤝</span>
               <strong>
                 Quero ser parceiro
               </strong>
               <small>
-                Conheça o Renda Extra Crediti.
+                Indique clientes e ganhe.
               </small>
             </button>
           </div>
