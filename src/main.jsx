@@ -6265,10 +6265,6 @@ function App() {
       </header>
 
       <main className="modern-home">
-        <p className="home-privacy-line">
-          A Crediti não consulta CPF. As simulações acontecem no ambiente do banco parceiro.
-        </p>
-
         <section className="home-welcome">
           <div>
             <span className="eyebrow">
