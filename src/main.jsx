@@ -2222,6 +2222,7 @@ function App() {
         }))
         .filter(
           (bill) =>
+            !bill.paid &&
             bill.days !== null &&
             bill.days >= 0 &&
             bill.days <= 7
@@ -2231,6 +2232,16 @@ function App() {
   );
 
   function toggleCompare(productKey) {
+    if (
+      !compareKeys.includes(productKey) &&
+      compareKeys.length >= 3
+    ) {
+      showNotice(
+        "Você pode comparar até 3 produtos por vez."
+      );
+      return;
+    }
+
     setCompareKeys((current) => {
       if (current.includes(productKey)) {
         return current.filter(
@@ -2556,20 +2567,23 @@ function App() {
           )
         : [...current, productKey]
     );
+
+    showNotice(
+      favoriteKeys.includes(productKey)
+        ? "Produto removido dos favoritos."
+        : "Produto salvo nos favoritos deste aparelho."
+    );
   }
 
   function openSavedProduct(productKey) {
     if (!PARTNER_PRODUCTS[productKey]) {
+      showNotice(
+        "Este produto não está disponível no momento."
+      );
       return;
     }
 
-    setCreditFilter("todos");
-    setSearchTarget({
-      screen: "direct",
-      targetSelector:
-        `.direct-${productKey}`
-    });
-    setScreen("direct");
+    openPartnerLink(productKey);
   }
 
   function addLocalBill(event) {
@@ -2593,7 +2607,8 @@ function App() {
           : String(Date.now()),
       title: billDraft.title.trim(),
       dueDate: billDraft.dueDate,
-      value: billDraft.value.trim()
+      value: billDraft.value.trim(),
+      paid: false
     };
 
     setLocalBills((current) =>
@@ -2623,24 +2638,68 @@ function App() {
     showNotice("Conta removida.");
   }
 
+  function toggleLocalBillPaid(id) {
+    const currentBill =
+      localBills.find(
+        (bill) => bill.id === id
+      );
+
+    if (!currentBill) {
+      return;
+    }
+
+    const isNowPaid =
+      !currentBill.paid;
+
+    setLocalBills((current) =>
+      current.map((bill) => {
+        if (bill.id !== id) {
+          return bill;
+        }
+
+        return {
+          ...bill,
+          paid: isNowPaid
+        };
+      })
+    );
+
+    showNotice(
+      isNowPaid
+        ? "Conta marcada como paga."
+        : "Conta reaberta."
+    );
+  }
+
   function openExternal(url) {
     if (!isOnline) {
       showNotice(
         "Sem internet no momento. Tente novamente quando a conexão voltar."
       );
-      return;
+      return false;
     }
 
     try {
-      window.open(
+      const openedWindow = window.open(
         url,
-        "_blank",
-        "noopener,noreferrer"
+        "_blank"
       );
+
+      if (!openedWindow) {
+        showNotice(
+          "O navegador bloqueou a abertura. Permita novas janelas e tente novamente."
+        );
+        return false;
+      }
+
+      openedWindow.opener = null;
+
+      return true;
     } catch {
       showNotice(
         "Não foi possível abrir este endereço. Tente novamente."
       );
+      return false;
     }
   }
 
@@ -2967,6 +3026,15 @@ function App() {
       updatedCustomer
     );
 
+    const controller =
+      new AbortController();
+
+    const requestTimer =
+      window.setTimeout(
+        () => controller.abort(),
+        20000
+      );
+
     try {
       const response =
         await fetch(
@@ -2979,6 +3047,9 @@ function App() {
               "Content-Type":
                 "application/json"
             },
+
+            signal:
+              controller.signal,
 
             body:
               JSON.stringify({
@@ -3067,9 +3138,14 @@ function App() {
     } catch (error) {
       addMessage(
         "assistant",
-        "Não consegui responder agora. Tente novamente em alguns segundos."
+        error?.name === "AbortError"
+          ? "A resposta demorou mais que o esperado. Toque em enviar para tentar novamente."
+          : "Não consegui responder agora. Confira sua internet e tente novamente."
       );
     } finally {
+      window.clearTimeout(
+        requestTimer
+      );
       setBusy(false);
     }
   }
@@ -3328,11 +3404,11 @@ function App() {
           <button
             className="partner-notice-continue"
             onClick={() => {
-              openExternal(product.url);
-
-              setScreen(
-                externalReturnScreen || "direct"
-              );
+              if (openExternal(product.url)) {
+                setScreen(
+                  externalReturnScreen || "direct"
+                );
+              }
             }}
           >
             CONTINUAR NO SITE OFICIAL
@@ -3568,7 +3644,16 @@ function App() {
                 {localBills.map((bill) => {
                   const days = daysUntil(bill.dueDate);
                   return (
-                    <article key={bill.id} className={days !== null && days <= 3 && days >= 0 ? "urgent" : ""}>
+                    <article
+                      key={bill.id}
+                      className={
+                        bill.paid
+                          ? "paid"
+                          : days !== null && days <= 3 && days >= 0
+                            ? "urgent"
+                            : ""
+                      }
+                    >
                       <div>
                         <strong>{bill.title}</strong>
                         <small>
@@ -3579,7 +3664,12 @@ function App() {
                         </small>
                       </div>
                       {bill.value && <b>{bill.value}</b>}
-                      <button onClick={() => removeLocalBill(bill.id)}>REMOVER</button>
+                      <div className="bill-actions">
+                        <button onClick={() => toggleLocalBillPaid(bill.id)}>
+                          {bill.paid ? "REABRIR" : "MARCAR COMO PAGA"}
+                        </button>
+                        <button onClick={() => removeLocalBill(bill.id)}>REMOVER</button>
+                      </div>
                     </article>
                   );
                 })}
@@ -6058,7 +6148,7 @@ function App() {
                 maxWidth: "480px",
                 boxSizing: "border-box",
                 background: "#fff7cc",
-                border: "2px solid #FDCE00",
+                border: "2px solid #FDCA01",
                 borderRadius: "14px",
                 padding: "12px",
                 color: "#171717",
@@ -6481,9 +6571,7 @@ function App() {
                 }
                 key={productKey}
                 onClick={() =>
-                  productKey === "pravaler"
-                    ? openPartnerLink(productKey)
-                    : setScreen("direct")
+                  openPartnerLink(productKey)
                 }
               >
                 <div className="product-strip-logo">
