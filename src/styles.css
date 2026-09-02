@@ -5201,8 +5201,6 @@ button:disabled {
 }
 
 .bill-list article button {
-  grid-column: 1 / -1;
-  justify-self: start;
   min-height: 38px;
   padding: 0 12px;
   border: 1px solid #ddd;
@@ -5211,6 +5209,31 @@ button:disabled {
   color: #6b6b6b;
   font-size: 12px;
   font-weight: 900;
+}
+
+.bill-list article.paid {
+  border-color: #c9c9c9;
+  background: #f4f4f4;
+}
+
+.bill-list article.paid strong,
+.bill-list article.paid small,
+.bill-list article.paid > b {
+  color: #777;
+  text-decoration: line-through;
+}
+
+.bill-actions {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.bill-actions button:first-child {
+  border-color: #111;
+  background: #111;
+  color: #fff;
 }
 
 .protect-hero,
