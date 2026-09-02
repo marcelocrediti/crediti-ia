@@ -6293,3 +6293,17 @@ button:disabled {
 .shop-benefits {
   margin-top: 0;
 }
+
+/* Aviso inicial discreto, sem competir com a apresentação principal. */
+.home-privacy-note {
+  display: none;
+}
+
+.home-privacy-line {
+  margin: 0 4px 2px;
+  color: #666666;
+  font-size: 9.5px;
+  font-weight: 600;
+  line-height: 1.35;
+  text-align: center;
+}
