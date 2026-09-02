@@ -1274,6 +1274,7 @@ header small {
 /* Plano de evolução do Score */
 .score-feature-card {
   min-height: 190px;
+  margin-bottom: 32px;
   padding: 18px;
   display: grid;
   grid-template-columns: 108px minmax(0, 1fr);
@@ -1283,6 +1284,11 @@ header small {
   border: 1.5px solid #e1bd00;
   border-radius: 22px;
   background: #FDCA01;
+}
+
+/* Mantém uma área de respiro obrigatória antes da seção seguinte. */
+.score-feature-card + .career-section {
+  margin-top: 0;
 }
 
 .score-feature-card > img {
