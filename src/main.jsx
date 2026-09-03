@@ -3031,7 +3031,7 @@ function App() {
 
     themeColor?.setAttribute(
       "content",
-      "#FFFDF7"
+      "#FDCA01"
     );
 
     setShowSplash(false);
@@ -8014,6 +8014,7 @@ function App() {
           <img
             src="/creditin-oficial.png"
             alt="Creditin"
+            fetchPriority="high"
           />
 
           <h2>
@@ -8452,6 +8453,8 @@ function App() {
                         ].logo
                       }
                       alt=""
+                      loading="lazy"
+                      decoding="async"
                     />
                   ) : (
                     <span className="product-strip-brand">
@@ -8486,6 +8489,8 @@ function App() {
           <img
             src="/creditin-oficial.png"
             alt=""
+            loading="lazy"
+            decoding="async"
           />
           <div>
             <small>DICA DO CREDITIN</small>
