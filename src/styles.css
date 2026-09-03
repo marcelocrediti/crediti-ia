@@ -1628,6 +1628,16 @@ header small {
   line-height: 1.4;
 }
 
+.score-plan-result > .score-plan-validity {
+  margin: 0 0 15px;
+  padding: 11px 12px;
+  border-radius: 13px;
+  background: #ffffff;
+  color: #514a2f;
+  font-size: 10.5px;
+  line-height: 1.45;
+}
+
 .score-plan-preview {
   display: grid;
   gap: 10px;
@@ -2163,8 +2173,8 @@ html.splash-active #root {
 }
 
 .home-welcome {
-  min-height: 132px;
-  padding: 20px;
+  min-height: 116px;
+  padding: 16px 18px;
   display: grid;
   grid-template-columns: 1fr 98px;
   align-items: center;
@@ -2177,21 +2187,21 @@ html.splash-active #root {
 
 .home-welcome h1 {
   max-width: 430px;
-  font-size: clamp(24px, 6.5vw, 36px);
+  font-size: clamp(23px, 5.9vw, 33px);
   font-weight: 900;
-  line-height: 1.08;
+  line-height: 1.05;
   letter-spacing: -1.3px;
 }
 
 .home-welcome img {
-  width: 112px;
-  height: 112px;
+  width: 100px;
+  height: 100px;
   object-fit: contain;
   padding: 0;
   border-radius: 0;
   background: transparent;
   align-self: end;
-  transform: translate(9px, 16px);
+  transform: translate(8px, 14px);
 }
 
 .home-banners,
@@ -3580,12 +3590,13 @@ html.splash-active #root {
 
   .home-welcome {
     grid-template-columns: 1fr 78px;
-    padding: 17px;
+    min-height: 108px;
+    padding: 14px 15px;
   }
 
   .home-welcome img {
-    width: 92px;
-    height: 100px;
+    width: 86px;
+    height: 92px;
   }
 
   .quick-card,

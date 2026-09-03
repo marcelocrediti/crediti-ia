@@ -39,8 +39,11 @@ const LOCAL_KEYS = {
   comparisons: "crediti_local_comparisons_v1",
   profile: "crediti_financial_profile_v1",
   simulations: "crediti_simulations_v1",
-  serviceRequests: "crediti_service_requests_v1"
+  serviceRequests: "crediti_service_requests_v1",
+  scorePlans: "crediti_score_plans_v1"
 };
+
+const SCORE_PLAN_VALIDITY_MS = 90 * 24 * 60 * 60 * 1000;
 
 function readLocalList(key) {
   try {
@@ -78,6 +81,132 @@ function saveLocalList(key, value) {
   } catch {
     return false;
   }
+}
+
+function saveLocalObject(key, value) {
+  try {
+    window.localStorage.setItem(key, JSON.stringify(value));
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function parseCurrencyBR(value) {
+  if (typeof value === "number") {
+    return Number.isFinite(value) ? value : null;
+  }
+
+  const clean = String(value || "")
+    .replace(/R\$/gi, "")
+    .replace(/\s/g, "")
+    .trim();
+
+  if (!clean) {
+    return null;
+  }
+
+  const normalized = clean.includes(",")
+    ? clean.replace(/\./g, "").replace(",", ".")
+    : clean;
+  const number = Number(normalized);
+  return Number.isFinite(number) ? number : null;
+}
+
+function formatCurrencyBR(value) {
+  const number = parseCurrencyBR(value);
+
+  if (number === null) {
+    return "";
+  }
+
+  return new Intl.NumberFormat("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  }).format(number);
+}
+
+function maskCurrencyBR(value) {
+  const digits = String(value || "").replace(/\D/g, "").slice(0, 12);
+
+  if (!digits) {
+    return "";
+  }
+
+  return formatCurrencyBR(Number(digits) / 100);
+}
+
+function hashText(value) {
+  let hash = 2166136261;
+
+  for (let index = 0; index < value.length; index += 1) {
+    hash ^= value.charCodeAt(index);
+    hash = Math.imul(hash, 16777619);
+  }
+
+  return hash >>> 0;
+}
+
+function getScorePlanKey(name, answers) {
+  const signature = JSON.stringify({
+    name: normalize(name),
+    range: answers.range || "",
+    debt: answers.debt || "",
+    debtKinds: [...(answers.debtKinds || [])].sort(),
+    payments: answers.payments || "",
+    requests: answers.requests || "",
+    goal: answers.goal || ""
+  });
+
+  return String(hashText(signature));
+}
+
+function getOrCreateScorePlanMeta(name, answers) {
+  const plans = readLocalObject(LOCAL_KEYS.scorePlans, {});
+  const key = getScorePlanKey(name, answers);
+  const now = Date.now();
+  const saved = plans[key];
+
+  if (
+    saved?.seed &&
+    saved?.generatedAt &&
+    now - saved.generatedAt < SCORE_PLAN_VALIDITY_MS
+  ) {
+    return saved;
+  }
+
+  const next = {
+    seed: hashText(`${key}|${now}|${Math.random()}`) || 1,
+    generatedAt: now
+  };
+  const recentPlans = Object.fromEntries(
+    Object.entries(plans)
+      .filter(([, plan]) => now - Number(plan?.generatedAt || 0) < SCORE_PLAN_VALIDITY_MS)
+      .slice(-19)
+  );
+
+  saveLocalObject(LOCAL_KEYS.scorePlans, {
+    ...recentPlans,
+    [key]: next
+  });
+
+  return next;
+}
+
+function chooseScoreAdvice(seed, key, options) {
+  return options[hashText(`${seed}|${key}`) % options.length];
+}
+
+function shuffleScoreAdvice(seed, key, items) {
+  return [...items]
+    .map((item, index) => ({
+      item,
+      order: hashText(`${seed}|${key}|${index}|${item}`)
+    }))
+    .sort((a, b) => a.order - b.order)
+    .map(({ item }) => item);
 }
 
 function daysUntil(dateValue) {
@@ -1259,44 +1388,97 @@ const SCORE_GOAL_LABELS = {
   organize: "organizar a vida financeira"
 };
 
-function getScorePlan(answers) {
+function getScorePlan(answers, seed) {
   const first30 = [];
   const next60 = [];
   const final90 = [];
+  const pick = (key, options) => chooseScoreAdvice(seed, key, options);
 
   if (answers.range === "unknown") {
-    first30.push("Consulte sua pontuação gratuitamente no aplicativo ou site oficial da Serasa.");
+    first30.push(pick("unknown-score", [
+      "Consulte sua pontuação gratuitamente no aplicativo ou site oficial da Serasa e anote a data para comparar depois.",
+      "Descubra sua faixa de Score em um canal oficial e guarde esse ponto de partida para acompanhar a evolução.",
+      "Antes de iniciar, confira seu Score gratuitamente em um canal oficial. Você não precisa informar esse número à Crediti."
+    ]));
   }
 
   if (answers.debt === "yes" || answers.debt === "unknown") {
-    first30.push("Liste as dívidas e verifique propostas somente nos canais oficiais dos credores.");
-    first30.push("Priorize contas essenciais e dívidas com juros mais altos, sem aceitar parcelas que apertem o orçamento.");
+    first30.push(pick("map-debts", [
+      "Liste cada dívida com valor, vencimento e credor. Consulte propostas somente nos canais oficiais.",
+      "Monte uma lista simples das pendências, começando pelo credor, valor e atraso de cada uma.",
+      "Separe as dívidas por tipo e confirme os valores diretamente com os credores antes de negociar."
+    ]));
+    first30.push(pick("debt-priority", [
+      "Priorize contas essenciais e dívidas com juros mais altos, sem aceitar parcelas que apertem o orçamento.",
+      "Comece pelo que ameaça serviços essenciais ou cresce mais rápido com juros. Negocie uma parcela possível.",
+      "Defina uma ordem de negociação: primeiro contas essenciais, depois as pendências mais caras."
+    ]));
   } else {
-    first30.push("Confira se existem contas esquecidas, dados desatualizados ou registros que você não reconhece.");
+    first30.push(pick("no-debt-check", [
+      "Confira se existem contas esquecidas, dados desatualizados ou registros que você não reconhece.",
+      "Revise seus compromissos atuais e confirme se todos os pagamentos foram registrados corretamente.",
+      "Faça uma conferência preventiva nos canais oficiais para identificar cobranças ou dados que precisam de correção."
+    ]));
   }
 
   if (answers.payments !== "always") {
-    first30.push("Organize os vencimentos e ative lembretes para reduzir novos atrasos.");
-    next60.push("Mantenha as contas do mês em dia e acompanhe o orçamento toda semana.");
+    first30.push(pick("late-payments", [
+      "Organize os vencimentos e ative lembretes para reduzir novos atrasos.",
+      "Aproxime os vencimentos da data em que recebe e use lembretes para não perder os prazos.",
+      "Registre as contas fixas por data e reserve primeiro o dinheiro das despesas essenciais."
+    ]));
+    next60.push(pick("payment-routine", [
+      "Mantenha as contas do mês em dia e acompanhe o orçamento toda semana.",
+      "Escolha um dia da semana para revisar pagamentos, saldo e próximos vencimentos.",
+      "Durante o segundo mês, confira os vencimentos duas vezes por semana e corrija rapidamente qualquer atraso."
+    ]));
   } else {
-    next60.push("Continue pagando as contas no prazo e preserve esse histórico positivo.");
+    next60.push(pick("on-time", [
+      "Continue pagando as contas no prazo e preserve esse histórico positivo.",
+      "Mantenha a rotina que já funciona e evite assumir parcelas que possam comprometer os próximos meses.",
+      "Proteja seu bom hábito de pagamento reservando o valor das contas antes de outros gastos."
+    ]));
   }
 
   if (answers.requests === "yes") {
-    next60.push("Evite fazer vários pedidos de crédito em pouco tempo. Compare antes e solicite apenas quando fizer sentido.");
+    next60.push(pick("many-requests", [
+      "Evite fazer vários pedidos de crédito em pouco tempo. Compare antes e solicite apenas quando fizer sentido.",
+      "Faça uma pausa em novas solicitações e use esse período para comparar condições e organizar o orçamento.",
+      "Não envie propostas para várias instituições ao mesmo tempo. Escolha primeiro a opção mais adequada."
+    ]));
   } else {
-    next60.push("Antes de pedir crédito, compare valor total, juros, prazo e impacto da parcela na renda.");
+    next60.push(pick("compare-credit", [
+      "Antes de pedir crédito, compare valor total, juros, prazo e impacto da parcela na renda.",
+      "Quando precisar de crédito, avalie o custo total e não apenas o valor da parcela.",
+      "Compare propostas usando o mesmo valor e prazo para entender qual realmente custa menos."
+    ]));
   }
 
-  next60.push("Mantenha seus dados atualizados nos canais oficiais e acompanhe qualquer mudança no seu histórico.");
-  final90.push("Consulte novamente seu Score e compare com o início do plano.");
-  final90.push(`Revise se o orçamento já comporta seu objetivo de ${SCORE_GOAL_LABELS[answers.goal] || "buscar crédito"}.`);
-  final90.push("Se estiver pronto, faça uma simulação por vez e confira todas as condições antes de continuar.");
+  next60.push(pick("official-data", [
+    "Mantenha seus dados atualizados nos canais oficiais e acompanhe qualquer mudança no seu histórico.",
+    "Confira se telefone, endereço e renda estão atualizados diretamente nas instituições com que você se relaciona.",
+    "Acompanhe seu histórico apenas por canais confiáveis e conteste informações que você não reconhecer."
+  ]));
+  final90.push(pick("review-score", [
+    "Consulte novamente seu Score e compare com o início do plano.",
+    "Ao completar 90 dias, faça uma nova consulta oficial e observe o que mudou desde o começo.",
+    "No fim do período, compare sua situação atual com o diagnóstico inicial, sem esperar uma pontuação garantida."
+  ]));
+  final90.push(pick("goal-review", [
+    `Revise se o orçamento já comporta seu objetivo de ${SCORE_GOAL_LABELS[answers.goal] || "buscar crédito"}.`,
+    `Calcule quanto pode comprometer por mês antes de avançar com o objetivo de ${SCORE_GOAL_LABELS[answers.goal] || "buscar crédito"}.`,
+    `Confira se sua renda, despesas e reserva já permitem seguir com segurança para ${SCORE_GOAL_LABELS[answers.goal] || "buscar crédito"}.`
+  ]));
+  final90.push(pick("one-simulation", [
+    "Se estiver pronto, faça uma simulação por vez e confira todas as condições antes de continuar.",
+    "Caso o orçamento esteja preparado, escolha uma opção e leia juros, prazo e custo total antes de simular.",
+    "Avance sem pressa: teste primeiro a alternativa que melhor cabe no orçamento e confira todas as condições."
+  ]));
 
   return [
-    { title: "Primeiros 30 dias", items: first30 },
-    { title: "Até 60 dias", items: next60 },
-    { title: "Até 90 dias", items: final90 }
+    { title: "Primeiros 30 dias", items: shuffleScoreAdvice(seed, "30", first30) },
+    { title: "Até 60 dias", items: shuffleScoreAdvice(seed, "60", next60) },
+    { title: "Até 90 dias", items: shuffleScoreAdvice(seed, "90", final90) }
   ];
 }
 
@@ -1931,7 +2113,7 @@ function App() {
   const [
     showSplash,
     setShowSplash
-  ] = useState(true);
+  ] = useState(false);
 
   const [
     screen,
@@ -2155,6 +2337,16 @@ function App() {
     scoreMultiDraft,
     setScoreMultiDraft
   ] = useState([]);
+
+  const [
+    scorePlanMeta,
+    setScorePlanMeta
+  ] = useState(null);
+
+  const [
+    isGeneratingScorePdf,
+    setIsGeneratingScorePdf
+  ] = useState(false);
 
   const [
     billDraft,
@@ -2670,11 +2862,15 @@ function App() {
   );
 
   const scorePlanReady =
-    scorePlanStarted && Boolean(scoreName) && !scoreCurrentQuestion;
+    scorePlanStarted && Boolean(scoreName) && !scoreCurrentQuestion && Boolean(scorePlanMeta);
 
   const scorePlanSections = scorePlanReady
-    ? getScorePlan(scoreAnswers)
+    ? getScorePlan(scoreAnswers, scorePlanMeta.seed)
     : [];
+
+  const scorePlanRenewalDate = scorePlanMeta?.generatedAt
+    ? new Date(scorePlanMeta.generatedAt + SCORE_PLAN_VALIDITY_MS)
+    : null;
 
   const financialRecommendations = useMemo(() => {
     if (!hasFinancialProfile) {
@@ -2838,29 +3034,11 @@ function App() {
       "#FFFDF7"
     );
 
-    const splashTimer =
-      window.setTimeout(
-        () => {
-          setShowSplash(false);
-
-          document.documentElement
-            .classList.remove(
-              "splash-active"
-            );
-
-          themeColor?.setAttribute(
-            "content",
-            "#FFFFFF"
-          );
-        },
-        750
-      );
+    setShowSplash(false);
+    document.documentElement.classList.remove("splash-active");
+    themeColor?.setAttribute("content", "#FFFFFF");
 
     return () => {
-      window.clearTimeout(
-        splashTimer
-      );
-
       document.documentElement
         .classList.remove(
           "splash-active"
@@ -2877,6 +3055,14 @@ function App() {
     messagesRef.current =
       messages;
   }, [messages]);
+
+  useEffect(() => {
+    if (screen === "scorePlan" && scorePlanStarted) {
+      import("jspdf").catch(() => {
+        // O botão exibirá uma mensagem clara caso o recurso continue indisponível.
+      });
+    }
+  }, [screen, scorePlanStarted]);
 
   useEffect(() => {
     if (
@@ -3117,6 +3303,8 @@ function App() {
     setScoreName("");
     setScoreNameDraft("");
     setScoreMultiDraft([]);
+    setScorePlanMeta(null);
+    setIsGeneratingScorePdf(false);
     setScorePlanStarted(false);
     setScreen("scorePlan");
     window.scrollTo(0, 0);
@@ -3127,18 +3315,26 @@ function App() {
     setScoreName("");
     setScoreNameDraft("");
     setScoreMultiDraft([]);
+    setScorePlanMeta(null);
+    setIsGeneratingScorePdf(false);
     setScorePlanStarted(true);
     window.scrollTo(0, 0);
   }
 
   function answerScoreQuestion(key, value) {
-    setScoreAnswers((current) => ({
-      ...current,
+    const nextAnswers = {
+      ...scoreAnswers,
       [key]: value,
       ...(key === "debt" && value !== "yes"
         ? { debtKinds: [], debtKindsConfirmed: false }
         : {})
-    }));
+    };
+
+    setScoreAnswers(nextAnswers);
+
+    if (key === "goal" && scoreName) {
+      setScorePlanMeta(getOrCreateScorePlanMeta(scoreName, nextAnswers));
+    }
   }
 
   function submitScoreName(event) {
@@ -3175,11 +3371,15 @@ function App() {
   }
 
   async function downloadScorePlan() {
-    if (!scorePlanReady) {
+    if (!scorePlanReady || isGeneratingScorePdf) {
       return;
     }
 
-    const { jsPDF } = await import("jspdf");
+    setIsGeneratingScorePdf(true);
+    showNotice("Preparando seu PDF...");
+
+    try {
+      const { jsPDF } = await import("jspdf");
 
     const loadImage = async (url) => {
       try {
@@ -3265,7 +3465,9 @@ function App() {
         document.line(x + 9, top, x + 18, top + 5);
         document.line(x, top + 5, x + 9, top + 10);
         document.line(x + 18, top + 5, x + 9, top + 10);
-        document.line(x + 4, top + 8, x + 4, top + 13, x + 14, top + 13, x + 14, top + 8);
+        document.line(x + 4, top + 8, x + 4, top + 13);
+        document.line(x + 4, top + 13, x + 14, top + 13);
+        document.line(x + 14, top + 13, x + 14, top + 8);
       } else {
         document.roundedRect(x + 3, top, 12, 15, 1, 1);
         document.line(x + 6, top + 5, x + 12, top + 5);
@@ -3327,6 +3529,13 @@ function App() {
       "Este diagnóstico foi montado com as respostas informadas na conversa com o Creditin.",
       10
     );
+    if (scorePlanRenewalDate) {
+      addWrappedText(
+        `Este plano permanece válido por 90 dias. Refaça o diagnóstico a partir de ${new Intl.DateTimeFormat("pt-BR").format(scorePlanRenewalDate)} para receber orientações atualizadas.`,
+        9.5,
+        "bold"
+      );
+    }
     document.setTextColor(17, 17, 17);
     y += 2;
 
@@ -3458,8 +3667,42 @@ function App() {
       document.text(`Plano de ${scoreName} • ${page}/${totalPages}`, margin, pageHeight - 8);
     }
 
-    document.save(`plano-score-${normalize(scoreName).replace(/\s+/g, "-") || "crediti"}.pdf`);
-    showNotice("Seu plano foi gerado. Confira os downloads do celular.");
+      const fileName = `plano-score-${normalize(scoreName).replace(/\s+/g, "-") || "crediti"}.pdf`;
+      const pdfBlob = document.output("blob");
+      const pdfFile = new File([pdfBlob], fileName, { type: "application/pdf" });
+      const isAppleMobile = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+
+      if (
+        isAppleMobile &&
+        navigator.canShare?.({ files: [pdfFile] }) &&
+        typeof navigator.share === "function"
+      ) {
+        await navigator.share({
+          title: `Plano de ${scoreName}`,
+          text: "Meu plano de 90 dias da Crediti",
+          files: [pdfFile]
+        });
+        showNotice("PDF pronto. Escolha onde deseja salvar.");
+      } else {
+        const objectUrl = URL.createObjectURL(pdfBlob);
+        const link = window.document.createElement("a");
+        link.href = objectUrl;
+        link.download = fileName;
+        link.rel = "noopener";
+        window.document.body.appendChild(link);
+        link.click();
+        link.remove();
+        window.setTimeout(() => URL.revokeObjectURL(objectUrl), 30000);
+        showNotice("PDF baixado. Confira os arquivos do celular.");
+      }
+    } catch (error) {
+      if (error?.name !== "AbortError") {
+        console.error("Falha ao gerar o plano em PDF:", error);
+        showNotice("Não foi possível gerar o PDF agora. Tente novamente.");
+      }
+    } finally {
+      setIsGeneratingScorePdf(false);
+    }
   }
 
   function openChatRoute(route) {
@@ -3645,6 +3888,8 @@ function App() {
   function addLocalBill(event) {
     event.preventDefault();
 
+    const numericValue = parseCurrencyBR(billDraft.value);
+
     if (
       !billDraft.title.trim() ||
       !billDraft.dueDate
@@ -3663,7 +3908,7 @@ function App() {
           : String(Date.now()),
       title: billDraft.title.trim(),
       dueDate: billDraft.dueDate,
-      value: billDraft.value.trim(),
+      value: numericValue,
       paid: false
     };
 
@@ -4726,7 +4971,9 @@ function App() {
                           : `Vence em ${bill.days} dia${bill.days === 1 ? "" : "s"}`}
                       </small>
                     </div>
-                    {bill.value && <b>{bill.value}</b>}
+                    {bill.value !== "" && bill.value !== null && bill.value !== undefined && (
+                      <b>{formatCurrencyBR(bill.value)}</b>
+                    )}
                   </article>
                 ))}
               </div>
@@ -4918,15 +5165,15 @@ function App() {
               <label>
                 Valor opcional
                 <input
-                  inputMode="decimal"
+                  inputMode="numeric"
                   value={billDraft.value}
                   onChange={(event) =>
                     setBillDraft((current) => ({
                       ...current,
-                      value: event.target.value
+                      value: maskCurrencyBR(event.target.value)
                     }))
                   }
-                  placeholder="Ex.: R$ 120"
+                  placeholder="R$ 0,00"
                   maxLength="20"
                 />
               </label>
@@ -4966,7 +5213,9 @@ function App() {
                           {days === 0 ? " · vence hoje" : days > 0 ? ` · em ${days} dias` : " · vencida"}
                         </small>
                       </div>
-                      {bill.value && <b>{bill.value}</b>}
+                      {bill.value !== "" && bill.value !== null && bill.value !== undefined && (
+                        <b>{formatCurrencyBR(bill.value)}</b>
+                      )}
                       <div className="bill-actions">
                         <button onClick={() => toggleLocalBillPaid(bill.id)}>
                           {bill.paid ? "REABRIR" : "MARCAR COMO PAGA"}
@@ -5703,6 +5952,13 @@ function App() {
                   <h1>Seu caminho de 90 dias foi montado</h1>
                   <p>Ele considera sua situação atual e o objetivo de {SCORE_GOAL_LABELS[scoreAnswers.goal]}.</p>
 
+                  <p className="score-plan-validity">
+                    Este plano fica salvo por 90 dias para você acompanhar sem receber orientações diferentes a cada acesso.
+                    {scorePlanRenewalDate && (
+                      <> Uma nova versão poderá ser criada a partir de <strong>{new Intl.DateTimeFormat("pt-BR").format(scorePlanRenewalDate)}</strong>.</>
+                    )}
+                  </p>
+
                   <div className="score-plan-preview">
                     {scorePlanSections.map((section) => (
                       <article key={section.title}>
@@ -5714,7 +5970,13 @@ function App() {
                     ))}
                   </div>
 
-                  <button onClick={downloadScorePlan}>BAIXAR MEU PLANO EM PDF</button>
+                  <button
+                    onClick={downloadScorePlan}
+                    disabled={isGeneratingScorePdf}
+                    aria-busy={isGeneratingScorePdf}
+                  >
+                    {isGeneratingScorePdf ? "PREPARANDO SEU PDF..." : "BAIXAR MEU PLANO EM PDF"}
+                  </button>
                   <button className="score-restart-button" onClick={startScorePlan}>REFAZER AS PERGUNTAS</button>
                   <small>A pontuação pode aumentar, permanecer igual ou variar. Não existe garantia de aprovação.</small>
                 </div>
