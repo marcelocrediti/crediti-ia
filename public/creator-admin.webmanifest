@@ -1,9 +1,9 @@
 {
-  "name": "Crediti creator",
-  "short_name": "Crediti creator",
+  "name": "Crediti Ads",
+  "short_name": "Crediti Ads",
   "description": "Painel administrativo do Creator Ads Crediti.",
   "start_url": "/creator-admin.html",
-  "scope": "/",
+  "scope": "/creator-admin.html",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#ff0a78",
