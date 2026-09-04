@@ -1,0 +1,64 @@
+(() => {
+  const list = document.getElementById('campaignsList');
+  if (!list) return;
+
+  const style = document.createElement('style');
+  style.textContent = `
+    #campaignsList .item-card{cursor:pointer;transition:transform .15s ease,box-shadow .15s ease}
+    #campaignsList .item-card:hover{transform:translateY(-1px);box-shadow:0 8px 24px rgba(0,0,0,.06)}
+    #creatorCampaignDetailDialog{width:min(920px,94vw);max-width:94vw;border:0;border-radius:22px;padding:0;overflow:hidden;background:#fff;color:#111;font-family:Montserrat,Arial,sans-serif}
+    #creatorCampaignDetailDialog::backdrop{background:rgba(0,0,0,.55)}
+    #creatorCampaignDetailDialog .detail-head{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;padding:22px;background:#FDCA01}
+    #creatorCampaignDetailDialog .detail-head h2{margin:4px 0 0;font-size:26px;line-height:1.08}
+    #creatorCampaignDetailDialog .detail-close{width:42px;height:42px;border:1px solid #111;border-radius:12px;background:#fff;font-size:25px;cursor:pointer}
+    #creatorCampaignDetailDialog .detail-body{padding:22px;display:grid;gap:16px;max-height:75vh;overflow:auto}
+    #creatorCampaignDetailDialog .detail-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+    #creatorCampaignDetailDialog .detail-box{padding:14px;border:1px solid #e4e4e4;border-radius:14px;background:#fafafa}
+    #creatorCampaignDetailDialog .detail-box strong{display:block;margin-bottom:5px;font-size:12px;text-transform:uppercase;letter-spacing:.04em}
+    #creatorCampaignDetailDialog .detail-text{white-space:pre-wrap;line-height:1.55}
+    @media(max-width:620px){#creatorCampaignDetailDialog{width:100vw;max-width:100vw;height:100dvh;max-height:100dvh;border-radius:0}#creatorCampaignDetailDialog .detail-body{max-height:calc(100dvh - 110px)}#creatorCampaignDetailDialog .detail-grid{grid-template-columns:1fr}}
+  `;
+  document.head.appendChild(style);
+
+  const dialog = document.createElement('dialog');
+  dialog.id = 'creatorCampaignDetailDialog';
+  dialog.innerHTML = '<div id="creatorCampaignDetailContent"></div>';
+  document.body.appendChild(dialog);
+
+  const safe = (v) => typeof esc === 'function' ? esc(v) : String(v ?? '');
+  const cash = (v) => typeof money === 'function' ? money(v) : Number(v || 0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+  const date = (v) => typeof fmtDate === 'function' ? fmtDate(v) : new Date(v).toLocaleString('pt-BR');
+  const label = (v) => typeof statusLabel === 'function' ? statusLabel(v) : v;
+
+  function openDetail(c) {
+    if (!c) return;
+    const bonus = c.bonus_ativo
+      ? `<div class="detail-box"><strong>Bônus</strong>${cash(c.bonus_valor)} por ${Number(c.bonus_meta_views||0).toLocaleString('pt-BR')} visualizações${c.bonus_prazo?`<br>Prazo: ${safe(date(c.bonus_prazo))}`:''}</div>`
+      : '<div class="detail-box"><strong>Bônus</strong>Não ativado nesta campanha</div>';
+    document.getElementById('creatorCampaignDetailContent').innerHTML = `
+      <div class="detail-head"><div><small>CAMPANHA</small><h2>${safe(c.titulo)}</h2></div><button class="detail-close" type="button" aria-label="Fechar">×</button></div>
+      <div class="detail-body">
+        <div class="detail-grid">
+          <div class="detail-box"><strong>Status</strong>${safe(label(c.status))}</div>
+          <div class="detail-box"><strong>Prêmio</strong>${cash(c.premio)}</div>
+          <div class="detail-box"><strong>Vencedores</strong>${Number(c.numero_vencedores||1)}</div>
+          <div class="detail-box"><strong>Período</strong>${safe(date(c.inicio))}<br>até ${safe(date(c.fim))}</div>
+          ${bonus}
+        </div>
+        <div class="detail-box"><strong>Descrição</strong><div class="detail-text">${safe(c.descricao || 'Sem descrição.')}</div></div>
+        <div class="detail-box"><strong>Briefing completo</strong><div class="detail-text">${safe(c.briefing || 'Sem briefing.')}</div></div>
+      </div>`;
+    dialog.querySelector('.detail-close').addEventListener('click',()=>dialog.close(),{once:true});
+    dialog.showModal();
+  }
+
+  list.addEventListener('click', (event) => {
+    if (event.target.closest('button')) return;
+    const card = event.target.closest('.item-card');
+    if (!card) return;
+    const cards = [...list.querySelectorAll('.item-card')];
+    const index = cards.indexOf(card);
+    if (index < 0 || !Array.isArray(campaigns)) return;
+    openDetail(campaigns[index]);
+  });
+})();
