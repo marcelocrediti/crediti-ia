@@ -42,8 +42,8 @@
       const meta=await videoMeta(file);
       begin=await rpc('creator_ads_begin_upload',{p_token:token(),p_campaign:campaign,p_video_nome:file.name,p_video_mime:file.type||'video/mp4',p_video_tamanho:file.size,p_video_largura:meta.width,p_video_altura:meta.height,p_video_duracao:meta.duration});
       progress.textContent='Enviando: transferindo arquivo original...';
-      const up=await fetch(`${STORAGE}/creator-ads-videos/${begin.path.split('/').map(encodeURIComponent).join('/')}`,{method:'POST',headers:headers({'Content-Type':file.type||'application/octet-stream','x-upsert':'true'}),body:file});
-      if(!up.ok)throw new Error('O arquivo não chegou ao armazenamento. Tente novamente.');
+      const up=await fetch(`${STORAGE}/creator-ads-videos/${begin.path.split('/').map(encodeURIComponent).join('/')}`,{method:'POST',headers:headers({'Content-Type':file.type||'application/octet-stream'}),body:file});
+      if(!up.ok){const text=await up.text();let msg='O arquivo não chegou ao armazenamento. Tente novamente.';try{const j=JSON.parse(text);msg=j.message||j.error||msg}catch{if(text)msg=text}throw new Error(msg);}
       await rpc('creator_ads_finish_upload',{p_token:token(),p_submission:begin.submission_id,p_upload_token:begin.upload_token,p_video_path:begin.path,p_ok:true,p_error:null});
       progress.innerHTML='<span style="color:#176b2c">Enviado ✓ Agora aguarde a análise da equipe Crediti.</span>';
       btn.textContent='Vídeo enviado ✓';
