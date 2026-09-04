@@ -41,6 +41,7 @@
 #${PAGE_ID} .creator-meta span{display:block;margin-bottom:4px;color:#747474;font-size:9px;font-weight:900;letter-spacing:.05em;text-transform:uppercase}
 #${PAGE_ID} .creator-meta strong{display:block;color:#151515;font-size:13px;line-height:1.3;word-break:break-word}
 #${PAGE_ID} .creator-meta.prize{background:#fff7d7;border-color:#efd77b}
+#${PAGE_ID} .creator-meta.total{background:#f7f7f5}
 #${PAGE_ID} .creator-info{padding:14px;border:1px solid #e8e8e3;border-radius:16px;background:#fff}
 #${PAGE_ID} .creator-info h4{margin:0 0 7px;color:#151515;font-size:13px;line-height:1.2}
 #${PAGE_ID} .creator-info p{margin:0!important;color:#565656!important;font-size:13px!important;line-height:1.58!important;white-space:pre-wrap}
@@ -86,6 +87,8 @@
     if (!upload) return;
 
     const winners = Math.max(1, Number(campaign.numero_vencedores || 1));
+    const prizePerWinner = Number(campaign.premio || 0);
+    const totalPrize = prizePerWinner * winners;
     const winnerLabel = winners === 1 ? '1 vencedor' : `${winners} vencedores`;
     const period = `${dateOnly(campaign.inicio)} até ${dateOnly(campaign.fim)}`;
     const bonus = campaign.bonus_ativo
@@ -109,8 +112,9 @@
       <div class="creator-campaign-body">
         <div class="creator-campaign-meta">
           ${meta('Período', period)}
-          ${meta('Prêmio', money(campaign.premio), 'prize')}
+          ${meta('Prêmio por vencedor', money(prizePerWinner), 'prize')}
           ${meta('Vencedores', winnerLabel)}
+          ${winners > 1 ? meta('Total da premiação', money(totalPrize), 'total') : ''}
           ${bonus}
         </div>
         ${description}
