@@ -1,0 +1,17 @@
+{
+  "name": "Creator Ads Crediti",
+  "short_name": "Creator Ads",
+  "start_url": "/creator-admin.html",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#ff006f",
+  "theme_color": "#ff006f",
+  "icons": [
+    {
+      "src": "https://vgdtywdpywezrwlrsawq.supabase.co/functions/v1/creator-ca-icon?v=2",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}
