@@ -1,0 +1,19 @@
+{
+  "name": "Crediti creator",
+  "short_name": "Crediti creator",
+  "description": "Painel administrativo do Creator Ads Crediti.",
+  "start_url": "/creator-admin.html",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#ff0a78",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/creator-ca-icon.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
