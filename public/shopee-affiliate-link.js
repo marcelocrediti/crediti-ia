@@ -1,5 +1,5 @@
 (() => {
-  const SHOPEE_AFFILIATE_URL = 'https://s.shopee.com.br/1BM5bJUfXF';
+  const SHOPEE_AFFILIATE_URL = 'https://s.shopee.com.br/AKaKWjPdBj';
 
   function bindShopeeLink() {
     const card = document.querySelector('.shopee-store-card');
