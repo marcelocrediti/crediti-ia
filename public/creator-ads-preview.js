@@ -1,151 +1,41 @@
 (() => {
-  const CARD_ID = "crediti-creator-ads-card";
-  const OVERLAY_ID = "crediti-creator-ads-overlay";
-  const STYLE_ID = "crediti-creator-ads-style";
-  const STORAGE_KEY = "crediti_creator_ads_v1";
-
-  const rules = [
-    "Ter 18 anos ou mais.",
-    "Informar nome completo e WhatsApp.",
-    "Participar com perfil público no Instagram, TikTok ou Kwai.",
-    "Ter no mínimo 2.000 seguidores no perfil informado.",
-    "Manter o perfil público enquanto estiver ativo como Creator Ads.",
-    "Enviar somente vídeos reais, originais e produzidos pelo próprio participante.",
-    "Não usar músicas, imagens ou outros conteúdos protegidos sem autorização.",
-    "Respeitar o tema, o prazo e as regras específicas de cada campanha.",
-    "O envio do vídeo não garante seleção, prêmio ou publicação.",
-    "Cada campanha terá prêmio e condições próprios. Bônus por visualizações só aparece quando estiver ativado pela Crediti.",
-    "Somente a Crediti cria, altera, encerra campanhas e escolhe o vencedor.",
-    "O pagamento é feito pela chave Pix cadastrada após a confirmação do resultado."
+  const CARD_ID='crediti-creator-ads-card';
+  const OVERLAY_ID='crediti-creator-ads-overlay';
+  const STYLE_ID='crediti-creator-ads-style';
+  const TOKEN_KEY='crediti_creator_ads_public_token_v1';
+  const BASE='https://vgdtywdpywezrwlrsawq.supabase.co';
+  const REST=`${BASE}/rest/v1`;
+  const STORAGE=`${BASE}/storage/v1/object`;
+  const KEY='sb_publishable_dmoTPKmglghAohv0MrRA9A_2zlUYhER';
+  const rules=[
+    'Ter 18 anos ou mais.','Informar nome completo e WhatsApp.','Participar com perfil público no Instagram, TikTok ou Kwai.','Ter no mínimo 2.000 seguidores no perfil informado.','Manter o perfil público enquanto estiver ativo como Creator Ads.','Enviar somente vídeos reais, originais e produzidos pelo próprio participante.','Não usar músicas, imagens ou outros conteúdos protegidos sem autorização.','Respeitar o tema, o prazo e as regras específicas de cada campanha.','O envio do vídeo não garante seleção, prêmio ou publicação.','Cada campanha terá prêmio e condições próprios. Bônus por visualizações só aparece quando estiver ativado pela Crediti.','Somente a Crediti cria, altera, encerra campanhas e escolhe o vencedor.','O pagamento é feito pela chave Pix cadastrada após a confirmação do resultado.'
   ];
+  const headers=(extra={})=>({apikey:KEY,Authorization:`Bearer ${KEY}`,...extra});
+  const esc=v=>String(v??'').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'",'&#039;');
+  const money=v=>Number(v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+  const statusLabel=s=>({em_analise:'Em análise',aprovado:'Aprovado',nao_elegivel:'Não elegível',perfil_privado:'Perfil privado',excluido_perfil_privado:'Excluído por perfil privado'}[s]||s||'-');
+  function token(){return localStorage.getItem(TOKEN_KEY)||''}
+  function saveToken(v){localStorage.setItem(TOKEN_KEY,v)}
+  async function rpc(name,body){const r=await fetch(`${REST}/rpc/${name}`,{method:'POST',headers:headers({'Content-Type':'application/json'}),body:JSON.stringify(body)});const text=await r.text();if(!r.ok)throw new Error(text||'Não foi possível concluir agora.');return text?JSON.parse(text):null}
+  async function getMe(){const t=token();if(!t)return null;try{return await rpc('creator_ads_get_me',{p_token:t})}catch{return null}}
 
-  function readProfile() {
-    try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || "null"); } catch { return null; }
-  }
-  function saveProfile(value) { localStorage.setItem(STORAGE_KEY, JSON.stringify(value)); }
+  function injectStyles(){if(document.getElementById(STYLE_ID))return;const s=document.createElement('style');s.id=STYLE_ID;s.textContent=`
+#${CARD_ID}{width:100%;border:0;border-radius:22px;padding:18px;margin:16px 0 4px;background:#111;color:#fff;font:inherit;text-align:left;cursor:pointer;display:grid;gap:8px;box-sizing:border-box}#${CARD_ID}:focus-visible{outline:3px solid #FDCA01;outline-offset:3px}#${CARD_ID} .k{display:inline-flex;width:fit-content;padding:5px 9px;border-radius:999px;background:#FDCA01;color:#111;font-size:11px;font-weight:800;text-transform:uppercase}#${CARD_ID} strong{font-size:clamp(18px,5vw,22px);line-height:1.12;font-weight:900}#${CARD_ID} small{color:rgba(255,255,255,.82);font-size:13px;line-height:1.4}#${CARD_ID} .a{color:#FDCA01;font-size:13px;font-weight:800}
+#${OVERLAY_ID}{position:fixed;inset:0;z-index:99999;display:none;align-items:flex-end;justify-content:center;padding:12px;background:rgba(0,0,0,.58);box-sizing:border-box}#${OVERLAY_ID}[data-open="true"]{display:flex}#${OVERLAY_ID} .sheet{width:min(100%,580px);max-height:calc(100dvh - 24px);overflow:auto;border-radius:26px 26px 18px 18px;background:#fff;color:#111;font-family:Montserrat,Arial,sans-serif}#${OVERLAY_ID} .head{position:sticky;top:0;z-index:2;padding:18px;background:#FDCA01;border-radius:26px 26px 0 0}#${OVERLAY_ID} .headrow{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}#${OVERLAY_ID} h2{margin:0;font-size:22px}#${OVERLAY_ID} .head p{margin:6px 0 0;font-size:13px;line-height:1.4;font-weight:600}#${OVERLAY_ID} .close{width:42px;height:42px;border:0;border-radius:50%;background:#111;color:#fff;font-size:24px}#${OVERLAY_ID} .body{padding:18px}#${OVERLAY_ID} .tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:15px}#${OVERLAY_ID} .tabs button{min-height:42px;border:1px solid #ddd;border-radius:11px;background:#fff;font:inherit;font-size:11px;font-weight:800}#${OVERLAY_ID} .tabs button[data-active="true"]{background:#111;color:#fff;border-color:#111}#${OVERLAY_ID} .panel{display:none}#${OVERLAY_ID} .panel[data-active="true"]{display:block}#${OVERLAY_ID} .rules{list-style:none;padding:0;margin:0;display:grid;gap:8px}#${OVERLAY_ID} .rules li{position:relative;padding:11px 11px 11px 37px;border:1px solid #e8e8e8;border-radius:13px;background:#fafafa;font-size:12px;line-height:1.42}#${OVERLAY_ID} .rules li:before{content:'✓';position:absolute;left:11px;top:10px;width:18px;height:18px;border-radius:50%;display:grid;place-items:center;background:#FDCA01;font-size:11px;font-weight:900}#${OVERLAY_ID} label{display:block;margin:10px 0 5px;font-size:12px;font-weight:800}#${OVERLAY_ID} input,#${OVERLAY_ID} select{width:100%;min-height:44px;border:1px solid #d7d7d7;border-radius:12px;padding:10px 12px;box-sizing:border-box;font:inherit;font-size:16px;background:#fff}#${OVERLAY_ID} .check{display:flex;gap:9px;align-items:flex-start;margin:11px 0;font-size:12px;line-height:1.4}#${OVERLAY_ID} .check input{width:20px;min-height:20px;margin-top:1px}#${OVERLAY_ID} .primary{width:100%;min-height:46px;border:0;border-radius:13px;background:#FDCA01;color:#111;font:inherit;font-weight:900;margin-top:10px}#${OVERLAY_ID} .status,#${OVERLAY_ID} .notice{padding:13px;border-radius:13px;background:#fff8d7;font-size:12px;line-height:1.5}#${OVERLAY_ID} .term{white-space:pre-line;padding:14px;border:1px solid #e6e6e6;border-radius:14px;background:#fafafa;font-size:12px;line-height:1.55}#${OVERLAY_ID} .campaign{border:1px solid #e5e5e5;border-radius:15px;padding:14px;margin-bottom:10px}#${OVERLAY_ID} .campaign h3{margin:0 0 6px;font-size:16px}#${OVERLAY_ID} .campaign p{font-size:12px;line-height:1.45;margin:6px 0;color:#444}#${OVERLAY_ID} .campaign b{font-size:12px}#${OVERLAY_ID} .uploadchecks{margin-top:12px}#${OVERLAY_ID} .message{margin-top:10px;padding:11px;border-radius:11px;background:#111;color:#fff;font-size:12px;line-height:1.4}@media(max-width:420px){#${OVERLAY_ID} .tabs{grid-template-columns:1fr 1fr}}@media(min-width:640px){#${OVERLAY_ID}{align-items:center}#${OVERLAY_ID} .sheet{border-radius:24px}#${OVERLAY_ID} .head{border-radius:24px 24px 0 0}}
+`;document.head.appendChild(s)}
 
-  function injectStyles() {
-    if (document.getElementById(STYLE_ID)) return;
-    const style = document.createElement("style");
-    style.id = STYLE_ID;
-    style.textContent = `
-      #${CARD_ID}{width:100%;border:0;border-radius:22px;padding:18px;margin:16px 0 4px;background:#111;color:#fff;font:inherit;text-align:left;cursor:pointer;box-sizing:border-box;display:grid;gap:8px}
-      #${CARD_ID}:focus-visible{outline:3px solid #FDCA01;outline-offset:3px}
-      #${CARD_ID} .creator-kicker{display:inline-flex;width:fit-content;padding:5px 9px;border-radius:999px;background:#FDCA01;color:#111;font-size:11px;font-weight:800;text-transform:uppercase}
-      #${CARD_ID} strong{display:block;font-size:clamp(18px,5vw,22px);line-height:1.12;font-weight:900}
-      #${CARD_ID} small{display:block;color:rgba(255,255,255,.82);font-size:13px;line-height:1.4}
-      #${CARD_ID} .creator-action{margin-top:4px;color:#FDCA01;font-size:13px;font-weight:800}
-      #${OVERLAY_ID}{position:fixed;inset:0;z-index:99999;display:none;align-items:flex-end;justify-content:center;padding:12px;background:rgba(0,0,0,.58);box-sizing:border-box}
-      #${OVERLAY_ID}[data-open="true"]{display:flex}
-      #${OVERLAY_ID} .creator-sheet{width:min(100%,560px);max-height:calc(100dvh - 24px);overflow:auto;border-radius:26px 26px 18px 18px;background:#fff;color:#111;font-family:Montserrat,Arial,sans-serif;box-sizing:border-box;-webkit-overflow-scrolling:touch}
-      #${OVERLAY_ID} .creator-head{position:sticky;top:0;z-index:2;padding:18px;background:#FDCA01;border-radius:26px 26px 0 0}
-      #${OVERLAY_ID} .creator-head-row{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
-      #${OVERLAY_ID} h2{margin:0;font-size:22px;line-height:1.05;font-weight:900}
-      #${OVERLAY_ID} .creator-head p{margin:7px 0 0;font-size:13px;line-height:1.4;font-weight:600}
-      #${OVERLAY_ID} .creator-close{width:42px;height:42px;border:0;border-radius:50%;background:#111;color:#fff;font-size:24px;cursor:pointer}
-      #${OVERLAY_ID} .creator-body{padding:18px}
-      #${OVERLAY_ID} .creator-tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px}
-      #${OVERLAY_ID} .creator-tabs button{min-height:42px;border:1px solid #ddd;border-radius:12px;background:#fff;font:inherit;font-size:12px;font-weight:800}
-      #${OVERLAY_ID} .creator-tabs button[data-active="true"]{background:#111;color:#fff;border-color:#111}
-      #${OVERLAY_ID} .creator-panel{display:none}
-      #${OVERLAY_ID} .creator-panel[data-active="true"]{display:block}
-      #${OVERLAY_ID} .creator-rules{list-style:none;padding:0;margin:0;display:grid;gap:9px}
-      #${OVERLAY_ID} .creator-rules li{position:relative;padding:12px 12px 12px 38px;border:1px solid #e8e8e8;border-radius:14px;background:#fafafa;font-size:13px;line-height:1.42}
-      #${OVERLAY_ID} .creator-rules li::before{content:"✓";position:absolute;left:12px;top:11px;width:18px;height:18px;border-radius:50%;display:grid;place-items:center;background:#FDCA01;font-size:11px;font-weight:900}
-      #${OVERLAY_ID} label{display:block;margin:10px 0 5px;font-size:12px;font-weight:800}
-      #${OVERLAY_ID} input,#${OVERLAY_ID} select{width:100%;min-height:44px;border:1px solid #d7d7d7;border-radius:12px;padding:10px 12px;box-sizing:border-box;font:inherit;font-size:16px;background:#fff}
-      #${OVERLAY_ID} .creator-check{display:flex;gap:10px;align-items:flex-start;margin:12px 0;font-size:12px;line-height:1.4}
-      #${OVERLAY_ID} .creator-check input{width:20px;min-height:20px;margin-top:1px}
-      #${OVERLAY_ID} .creator-primary{width:100%;min-height:46px;border:0;border-radius:13px;background:#FDCA01;color:#111;font:inherit;font-weight:900;cursor:pointer;margin-top:10px}
-      #${OVERLAY_ID} .creator-status{padding:14px;border-radius:14px;background:#fff8d7;font-size:13px;line-height:1.45}
-      #${OVERLAY_ID} .creator-term{padding:14px;border:1px solid #e6e6e6;border-radius:14px;background:#fafafa;font-size:12px;line-height:1.55;white-space:pre-line}
-      #${OVERLAY_ID} .creator-success{padding:12px;border-radius:12px;background:#111;color:#fff;font-size:12px;line-height:1.45;margin-top:12px}
-      @media(min-width:640px){#${OVERLAY_ID}{align-items:center}#${OVERLAY_ID} .creator-sheet{border-radius:24px}#${OVERLAY_ID} .creator-head{border-radius:24px 24px 0 0}}
-    `;
-    document.head.appendChild(style);
+  function createOverlay(){if(document.getElementById(OVERLAY_ID))return;const o=document.createElement('div');o.id=OVERLAY_ID;o.dataset.open='false';o.setAttribute('role','dialog');o.setAttribute('aria-modal','true');o.innerHTML=`<section class="sheet"><header class="head"><div class="headrow"><div><h2>Creator Ads Crediti</h2><p>Envie seu vídeo, participe de campanhas e ganhe se for o escolhido.</p></div><button class="close" type="button" aria-label="Fechar">×</button></div></header><div class="body"><div class="tabs"><button data-tab="rules" data-active="true" type="button">Regras</button><button data-tab="register" type="button">Cadastro</button><button data-tab="campaigns" type="button">Campanhas</button><button data-tab="term" type="button">Meu termo</button></div><section class="panel" data-panel="rules" data-active="true"><ul class="rules">${rules.map(r=>`<li>${r}</li>`).join('')}</ul></section><section class="panel" data-panel="register"><div id="creator-status" class="status">Carregando...</div><form id="creator-form"><label>Nome completo</label><input name="name" required autocomplete="name"><label>WhatsApp</label><input name="whatsapp" required inputmode="tel" autocomplete="tel"><label>Plataforma</label><select name="platform" required><option value="">Escolha</option><option>Instagram</option><option>TikTok</option><option>Kwai</option></select><label>@perfil ou link oficial</label><input name="profile" required autocapitalize="none"><label>Chave Pix</label><input name="pix" required><label>Tipo da chave Pix</label><select name="pixType" required><option value="">Escolha</option><option>Telefone</option><option>E-mail</option><option>Chave aleatória</option><option>Outro</option></select><label>Banco ou instituição da conta Pix</label><input name="bank" required><label class="check"><input type="checkbox" name="adult" required><span>Declaro que tenho 18 anos ou mais.</span></label><label class="check"><input type="checkbox" name="publicProfile" required><span>Confirmo que meu perfil está público e permanecerá público enquanto eu participar do Creator Ads Crediti.</span></label><label class="check"><input type="checkbox" name="imageConsent" required><span>Autorizo a Crediti a utilizar minha imagem, voz, nome e o vídeo enviado, conforme as condições deste termo.</span></label><label class="check"><input type="checkbox" name="dataConsent" required><span>Li e concordo com o tratamento dos meus dados para participação nesta campanha.</span></label><button class="primary" type="submit">Enviar cadastro para análise</button></form><div id="creator-message"></div></section><section class="panel" data-panel="campaigns"><div id="creator-campaigns" class="notice">Faça seu cadastro e aguarde aprovação para acessar campanhas.</div></section><section class="panel" data-panel="term"><div id="creator-term" class="term">Você ainda não possui termo aceito.</div></section></div></section>`;document.body.appendChild(o);
+    const close=()=>{o.dataset.open='false';document.documentElement.style.overflow=''};o.querySelector('.close').addEventListener('click',close);o.addEventListener('click',e=>{if(e.target===o)close()});document.addEventListener('keydown',e=>{if(e.key==='Escape'&&o.dataset.open==='true')close()});
+    o.querySelectorAll('[data-tab]').forEach(btn=>btn.addEventListener('click',()=>{o.querySelectorAll('[data-tab]').forEach(b=>b.dataset.active=String(b===btn));o.querySelectorAll('[data-panel]').forEach(p=>p.dataset.active=String(p.dataset.panel===btn.dataset.tab));refresh()}));
+    o.querySelector('#creator-form').addEventListener('submit',async e=>{e.preventDefault();const f=new FormData(e.currentTarget);const name=String(f.get('name')||'').trim();if(!name.includes(' ')){alert('Informe nome e sobrenome.');return}const btn=e.currentTarget.querySelector('button[type="submit"]');btn.disabled=true;btn.textContent='Enviando...';try{const d=await rpc('creator_ads_register',{p_nome:name,p_whatsapp:String(f.get('whatsapp')||'').trim(),p_plataforma:String(f.get('platform')||''),p_perfil:String(f.get('profile')||'').trim(),p_pix_chave:String(f.get('pix')||'').trim(),p_pix_tipo:String(f.get('pixType')||''),p_banco:String(f.get('bank')||'').trim(),p_adulto:!!f.get('adult'),p_perfil_publico:!!f.get('publicProfile'),p_uso_imagem:!!f.get('imageConsent'),p_tratamento_dados:!!f.get('dataConsent')});saveToken(d.public_token);o.querySelector('#creator-message').innerHTML='<div class="message">Cadastro enviado. Status: <b>Em análise</b>. A Crediti verificará manualmente seu perfil e seguidores.</div>';e.currentTarget.reset();await refresh()}catch(err){alert('Não foi possível enviar o cadastro. '+err.message)}finally{btn.disabled=false;btn.textContent='Enviar cadastro para análise'}});
+    o.addEventListener('change',async e=>{if(!e.target.matches('.creator-video'))return;const campaignId=e.target.dataset.campaign;const file=e.target.files?.[0];if(!file)return;if(file.size>50*1024*1024){alert('O vídeo deve ter no máximo 50 MB.');e.target.value='';return}const card=e.target.closest('.campaign');const checks=[...card.querySelectorAll('.submit-check')];if(checks.some(c=>!c.checked)){alert('Confirme todas as declarações antes de enviar.');e.target.value='';return}const allowed=['video/mp4','video/quicktime','video/webm'];if(!allowed.includes(file.type)){alert('Envie vídeo MP4, MOV ou WebM.');e.target.value='';return}const t=token();if(!t){alert('Cadastro não encontrado.');return}const ext=(file.name.split('.').pop()||'mp4').replace(/[^a-z0-9]/gi,'').toLowerCase();const path=`${t}/${campaignId}/${crypto.randomUUID()}.${ext}`;const msg=card.querySelector('.upload-msg');msg.textContent='Enviando vídeo...';try{const up=await fetch(`${STORAGE}/creator-ads-videos/${path}`,{method:'POST',headers:headers({'Content-Type':file.type,'x-upsert':'false'}),body:file});if(!up.ok)throw new Error(await up.text());await rpc('creator_ads_submit_video',{p_token:t,p_campaign:campaignId,p_video_path:path,p_video_nome:file.name,p_video_mime:file.type});msg.innerHTML='<div class="message">Vídeo enviado com sucesso. Agora aguarde a análise da Crediti.</div>'}catch(err){msg.textContent='Não foi possível enviar: '+err.message}});
+    o.refresh=refresh;
   }
 
-  function createOverlay() {
-    if (document.getElementById(OVERLAY_ID)) return;
-    const overlay = document.createElement("div");
-    overlay.id = OVERLAY_ID;
-    overlay.dataset.open = "false";
-    overlay.setAttribute("role", "dialog");
-    overlay.setAttribute("aria-modal", "true");
-    overlay.innerHTML = `
-      <section class="creator-sheet">
-        <header class="creator-head"><div class="creator-head-row"><div><h2>Creator Ads Crediti</h2><p>Envie seu vídeo, participe de campanhas e ganhe se for o escolhido.</p></div><button class="creator-close" type="button" aria-label="Fechar">×</button></div></header>
-        <div class="creator-body">
-          <div class="creator-tabs"><button type="button" data-tab="rules" data-active="true">Regras</button><button type="button" data-tab="register">Cadastro</button><button type="button" data-tab="term">Meu termo</button></div>
-          <section class="creator-panel" data-panel="rules" data-active="true"><ul class="creator-rules">${rules.map(r=>`<li>${r}</li>`).join("")}</ul></section>
-          <section class="creator-panel" data-panel="register"><div class="creator-status" id="creator-current-status">Seu cadastro ainda não foi enviado.</div>
-            <form id="creator-form">
-              <label>Nome completo</label><input name="name" required autocomplete="name">
-              <label>WhatsApp</label><input name="whatsapp" required inputmode="tel" autocomplete="tel">
-              <label>Plataforma</label><select name="platform" required><option value="">Escolha</option><option>Instagram</option><option>TikTok</option><option>Kwai</option></select>
-              <label>@perfil ou link oficial</label><input name="profile" required autocapitalize="none">
-              <label>Chave Pix</label><input name="pix" required>
-              <label>Tipo da chave Pix</label><select name="pixType" required><option value="">Escolha</option><option>Telefone</option><option>E-mail</option><option>Chave aleatória</option><option>Outro</option></select>
-              <label>Banco ou instituição da conta Pix</label><input name="bank" required>
-              <label class="creator-check"><input type="checkbox" name="adult" required><span>Declaro que tenho 18 anos ou mais.</span></label>
-              <label class="creator-check"><input type="checkbox" name="publicProfile" required><span>Confirmo que meu perfil é público e permanecerá público enquanto eu estiver ativo como Creator Ads.</span></label>
-              <label class="creator-check"><input type="checkbox" name="imageConsent" required><span>Autorizo a Crediti a utilizar minha imagem, voz, nome e conteúdo enviado conforme o termo e a campanha.</span></label>
-              <label class="creator-check"><input type="checkbox" name="dataConsent" required><span>Concordo com o tratamento dos dados necessários para cadastro, análise, contato, participação e pagamento.</span></label>
-              <button class="creator-primary" type="submit">Enviar cadastro para análise</button>
-            </form>
-            <div id="creator-message" aria-live="polite"></div>
-          </section>
-          <section class="creator-panel" data-panel="term"><div class="creator-term" id="creator-term-content">Você ainda não possui termo aceito.</div></section>
-        </div>
-      </section>`;
-    document.body.appendChild(overlay);
+  async function refresh(){const o=document.getElementById(OVERLAY_ID);if(!o)return;const me=await getMe();const status=o.querySelector('#creator-status'),form=o.querySelector('#creator-form'),term=o.querySelector('#creator-term'),campaignBox=o.querySelector('#creator-campaigns');if(!me||!me.id){status.textContent='Seu cadastro ainda não foi enviado.';form.style.display='block';term.textContent='Você ainda não possui termo aceito.';campaignBox.textContent='Faça seu cadastro e aguarde aprovação para acessar campanhas.';return}form.style.display='none';status.innerHTML=`<b>${esc(me.nome)}</b><br>${esc(me.plataforma)}: ${esc(me.perfil)}<br>Status: <b>${esc(statusLabel(me.status))}</b>${me.seguidores_verificados?`<br>Seguidores verificados: ${Number(me.seguidores_verificados).toLocaleString('pt-BR')}`:''}`;term.textContent=`TERMO DE PARTICIPAÇÃO, USO DE IMAGEM E TRATAMENTO DE DADOS\n\nParticipante: ${me.nome}\nPlataforma: ${me.plataforma}\nPerfil: ${me.perfil}\nVersão: ${me.term_version}\nAceite registrado em: ${new Date(me.accepted_at).toLocaleString('pt-BR')}\n\nDeclaro que tenho 18 anos ou mais. Autorizo a Crediti Soluções Financeiras a utilizar minha imagem, voz, nome, nome de perfil, vídeo enviado, trechos e imagens do vídeo nos canais digitais oficiais da Crediti, com ajustes técnicos de formato, corte, legenda e identidade visual sem alterar de forma enganosa o sentido do conteúdo. Concordo com o tratamento dos dados necessários para cadastro, análise, contato, participação, registro do consentimento e eventual pagamento. O envio do vídeo não garante seleção, publicação ou pagamento. Cada campanha possui regras, prazo e prêmio próprios. Bônus por visualizações somente quando estiver expressamente previsto na campanha.\n\nEste termo fica disponível para consulta e não pode ser alterado depois do aceite.`;if(me.status!=='aprovado'){campaignBox.textContent=me.status==='em_analise'?'Seu perfil está em análise. As campanhas serão liberadas depois da aprovação.':'Seu perfil não está liberado para participar de campanhas no momento.';return}try{const camps=await rpc('creator_ads_public_campaigns',{p_token:token()});campaignBox.className='';campaignBox.innerHTML=Array.isArray(camps)&&camps.length?camps.map(c=>`<article class="campaign"><h3>${esc(c.titulo)}</h3>${c.descricao?`<p>${esc(c.descricao)}</p>`:''}<p><b>Briefing:</b> ${esc(c.briefing)}</p><p><b>Prêmio:</b> ${money(c.premio)} · <b>Encerra:</b> ${new Date(c.fim).toLocaleString('pt-BR')}</p>${c.bonus_ativo?`<p><b>Bônus:</b> + ${money(c.bonus_valor)} ao atingir ${Number(c.bonus_meta_views||0).toLocaleString('pt-BR')} visualizações${c.bonus_prazo?` até ${new Date(c.bonus_prazo).toLocaleString('pt-BR')}`:''}.</p>`:''}<div class="uploadchecks"><label class="check"><input class="submit-check" type="checkbox"><span>Confirmo que este vídeo foi produzido por mim.</span></label><label class="check"><input class="submit-check" type="checkbox"><span>Confirmo que possuo autorização para pessoas e elementos utilizados.</span></label><label class="check"><input class="submit-check" type="checkbox"><span>Confirmo que não utilizei conteúdo protegido sem autorização.</span></label><label class="check"><input class="submit-check" type="checkbox"><span>Li e aceito as regras desta campanha.</span></label></div><label>Enviar vídeo (MP4, MOV ou WebM, até 50 MB)</label><input class="creator-video" data-campaign="${c.id}" type="file" accept="video/mp4,video/quicktime,video/webm"><div class="upload-msg"></div></article>`).join(''):'<div class="notice">Não há campanhas ativas no momento.</div>'}catch{campaignBox.className='notice';campaignBox.textContent='Não foi possível carregar as campanhas agora.'}}
 
-    const close = () => { overlay.dataset.open="false"; document.documentElement.style.overflow=""; };
-    overlay.querySelector(".creator-close").addEventListener("click", close);
-    overlay.addEventListener("click", e => { if(e.target===overlay) close(); });
-    document.addEventListener("keydown", e => { if(e.key==="Escape" && overlay.dataset.open==="true") close(); });
-
-    overlay.querySelectorAll("[data-tab]").forEach(btn => btn.addEventListener("click", () => {
-      overlay.querySelectorAll("[data-tab]").forEach(b=>b.dataset.active=String(b===btn));
-      overlay.querySelectorAll("[data-panel]").forEach(p=>p.dataset.active=String(p.dataset.panel===btn.dataset.tab));
-      refreshProfile();
-    }));
-
-    overlay.querySelector("#creator-form").addEventListener("submit", e => {
-      e.preventDefault();
-      const f = new FormData(e.currentTarget);
-      const profile = {
-        name:String(f.get("name")||"").trim(), whatsapp:String(f.get("whatsapp")||"").trim(), platform:String(f.get("platform")||""), profile:String(f.get("profile")||"").trim(), pix:String(f.get("pix")||"").trim(), pixType:String(f.get("pixType")||""), bank:String(f.get("bank")||"").trim(), status:"Em análise", acceptedAt:new Date().toISOString(), termVersion:"Creator Ads v1.0"
-      };
-      if(!profile.name.includes(" ")) { alert("Informe nome e sobrenome."); return; }
-      saveProfile(profile);
-      overlay.querySelector("#creator-message").innerHTML='<div class="creator-success">Cadastro salvo. Status: <b>Em análise</b>. A Crediti precisa verificar manualmente se o perfil está público e possui pelo menos 2.000 seguidores.</div>';
-      refreshProfile();
-    });
-
-    function refreshProfile(){
-      const p = readProfile();
-      const status = overlay.querySelector("#creator-current-status");
-      const term = overlay.querySelector("#creator-term-content");
-      if(!p){ status.textContent="Seu cadastro ainda não foi enviado."; term.textContent="Você ainda não possui termo aceito."; return; }
-      status.innerHTML=`<b>${p.name}</b><br>${p.platform}: ${p.profile}<br>Status: <b>${p.status}</b>`;
-      const accepted = new Date(p.acceptedAt).toLocaleString("pt-BR");
-      term.textContent=`TERMO DE PARTICIPAÇÃO, USO DE IMAGEM E TRATAMENTO DE DADOS\n\nParticipante: ${p.name}\nPlataforma: ${p.platform}\nPerfil: ${p.profile}\nVersão: ${p.termVersion}\nAceite registrado em: ${accepted}\n\nDeclaro que tenho 18 anos ou mais. Autorizo a Crediti Soluções Financeiras a utilizar minha imagem, voz, nome, nome de perfil e conteúdo audiovisual enviado para divulgação das campanhas e da marca Crediti em seus canais digitais, observadas as condições da campanha. Concordo com o tratamento dos dados necessários à participação, análise, contato e eventual pagamento. O envio do vídeo não garante seleção, publicação ou pagamento. Cada campanha terá suas próprias regras, prazo e prêmio. Bônus por visualizações somente se expressamente previsto na campanha.\n\nEste termo permanece disponível para consulta e não pode ser editado após o aceite.`;
-    }
-    overlay.refreshProfile = refreshProfile;
-  }
-
-  function openOverlay(){ const o=document.getElementById(OVERLAY_ID); if(!o)return; o.dataset.open="true"; document.documentElement.style.overflow="hidden"; o.refreshProfile?.(); requestAnimationFrame(()=>o.querySelector(".creator-close")?.focus()); }
-
-  function mountCard(){
-    if(document.getElementById(CARD_ID)) return;
-    const tools=document.querySelector(".home-personal-tools");
-    if(!tools||!tools.parentElement) return;
-    const card=document.createElement("button"); card.id=CARD_ID; card.type="button";
-    card.innerHTML='<span class="creator-kicker">1 vencedor por campanha</span><strong>Seja um Creator Ads da Crediti e fature</strong><small>Envie seu vídeo, participe de campanhas e ganhe se for o escolhido.</small><span class="creator-action">Ver campanhas ›</span>';
-    card.addEventListener("click",openOverlay); tools.insertAdjacentElement("afterend",card);
-  }
-
-  function init(){ injectStyles(); createOverlay(); mountCard(); const observer=new MutationObserver(mountCard); observer.observe(document.getElementById("root")||document.body,{childList:true,subtree:true}); }
-  if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",init,{once:true}); else init();
+  function openOverlay(){const o=document.getElementById(OVERLAY_ID);if(!o)return;o.dataset.open='true';document.documentElement.style.overflow='hidden';o.refresh?.();requestAnimationFrame(()=>o.querySelector('.close')?.focus())}
+  function mountCard(){if(document.getElementById(CARD_ID))return;const tools=document.querySelector('.home-personal-tools');if(!tools||!tools.parentElement)return;const c=document.createElement('button');c.id=CARD_ID;c.type='button';c.innerHTML='<span class="k">1 vencedor por campanha</span><strong>Seja um Creator Ads da Crediti e fature</strong><small>Envie seu vídeo, participe de campanhas e ganhe se for o escolhido.</small><span class="a">Ver campanhas ›</span>';c.addEventListener('click',openOverlay);tools.insertAdjacentElement('afterend',c)}
+  function init(){injectStyles();createOverlay();mountCard();new MutationObserver(mountCard).observe(document.getElementById('root')||document.body,{childList:true,subtree:true})}
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
 })();
