@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#FDCA01">
+  <title>Creator Ads | Administração Crediti</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/creator-admin.css">
+</head>
+<body>
+  <main>
+    <section id="loginView" class="login-wrap">
+      <div class="login-card">
+        <span class="brand">CREDITI</span>
+        <p class="eyebrow">CREATOR ADS</p>
+        <h1>Administração</h1>
+        <p>Área restrita ao administrador da Crediti.</p>
+        <label>E-mail<input id="email" type="email" autocomplete="email"></label>
+        <label>Senha<input id="password" type="password" autocomplete="current-password"></label>
+        <button id="loginBtn" class="primary" type="button">ENTRAR</button>
+        <div id="loginMsg" class="message" aria-live="polite"></div>
+      </div>
+    </section>
+
+    <section id="appView" class="app hidden">
+      <header class="topbar">
+        <div><span class="brand">CREDITI</span><small>Creator Ads | Área administrativa</small></div>
+        <div class="top-actions"><button id="refreshBtn">Atualizar</button><button id="logoutBtn">Sair</button></div>
+      </header>
+
+      <nav class="tabs">
+        <button data-tab="cadastros" class="active">Cadastros</button>
+        <button data-tab="campanhas">Campanhas</button>
+        <button data-tab="videos">Vídeos</button>
+        <button data-tab="pagamentos">Pagamentos</button>
+      </nav>
+
+      <section class="view active" data-view="cadastros">
+        <div class="section-head"><div><p class="eyebrow">CREATORS</p><h2>Cadastros</h2></div><select id="profileFilter"><option value="">Todos</option><option value="em_analise">Em análise</option><option value="ativo">Ativos</option><option value="nao_elegivel">Não elegíveis</option><option value="perfil_privado">Perfil privado</option><option value="cancelado_creator">Cancelados pelo Creator</option><option value="desativado_crediti">Desativados pela Crediti</option></select></div>
+        <div id="profilesList" class="grid"></div>
+      </section>
+
+      <section class="view" data-view="campanhas">
+        <div class="section-head"><div><p class="eyebrow">CAMPANHAS</p><h2>Campanhas</h2></div><button id="newCampaignBtn" class="primary small">+ Nova campanha</button></div>
+        <div id="campaignsList" class="grid"></div>
+      </section>
+
+      <section class="view" data-view="videos">
+        <div class="section-head"><div><p class="eyebrow">ENVIOS</p><h2>Vídeos</h2></div></div>
+        <div id="submissionsList" class="grid"></div>
+      </section>
+
+      <section class="view" data-view="pagamentos">
+        <div class="section-head"><div><p class="eyebrow">FINANCEIRO</p><h2>Pagamentos</h2></div></div>
+        <div id="paymentsList" class="grid"></div>
+      </section>
+    </section>
+  </main>
+
+  <dialog id="profileDialog"><button class="dialog-close" data-close="profileDialog">×</button><div id="profileDetail"></div></dialog>
+
+  <dialog id="campaignDialog">
+    <button class="dialog-close" data-close="campaignDialog">×</button>
+    <form id="campaignForm">
+      <input type="hidden" name="id">
+      <p class="eyebrow">CAMPANHA</p><h2 id="campaignFormTitle">Nova campanha</h2>
+      <label>Título<input name="titulo" required></label>
+      <label>Descrição<textarea name="descricao" rows="3"></textarea></label>
+      <label>Briefing<textarea name="briefing" rows="5" required></textarea></label>
+      <div class="two"><label>Início<input name="inicio" type="datetime-local" required></label><label>Fim<input name="fim" type="datetime-local" required></label></div>
+      <div class="two"><label>Valor do prêmio<input name="premio" inputmode="decimal" placeholder="R$ 0,00" required></label><label>Vencedores<input name="numero_vencedores" type="number" min="1" value="1" required></label></div>
+      <label class="check"><input name="bonus_ativo" type="checkbox"><span>Ativar bônus por visualizações nesta campanha</span></label>
+      <div id="bonusFields" class="hidden">
+        <div class="two"><label>Valor do bônus<input name="bonus_valor" inputmode="decimal" placeholder="R$ 0,00"></label><label>Meta de visualizações<input name="bonus_meta_views" type="number" min="1"></label></div>
+        <label>Prazo para atingir a meta<input name="bonus_prazo" type="datetime-local"></label>
+      </div>
+      <div class="form-actions"><button id="saveDraftBtn" type="button">Salvar rascunho</button><button class="primary" type="submit">Salvar e ativar</button></div>
+    </form>
+  </dialog>
+
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js" defer></script>
+  <script src="/creator-admin.js" defer></script>
+  <script src="/creator-admin-retention.js" defer></script>
+  <script src="/creator-admin-term-pdf.js" defer></script>
+</body>
+</html>
