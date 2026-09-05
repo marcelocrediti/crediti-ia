@@ -7,14 +7,17 @@
   const headers=(extra={})=>({apikey:KEY,Authorization:`Bearer ${token()}`,...extra});
 
   async function rest(path,opts={}){
+    if(typeof window.creatorAdminRest==='function')return window.creatorAdminRest(path,opts);
     const r=await fetch(`${REST}/${path}`,{...opts,headers:headers({'Content-Type':'application/json',...(opts.headers||{})})});
     const text=await r.text();
     if(!r.ok)throw new Error(text||'Não foi possível concluir.');
     return text?JSON.parse(text):null;
   }
 
-  async function deleteCampaign(id,card){
+  async function deleteCampaign(id,card,button){
     if(!token())return;
+    const old=button?.textContent;
+    if(button){button.disabled=true;button.textContent='VERIFICANDO...'}
     try{
       const [subs,pays]=await Promise.all([
         rest(`creator_ads_submissions?select=id&campaign_id=eq.${encodeURIComponent(id)}&limit=1`),
@@ -26,10 +29,13 @@
       }
       const title=card?.querySelector('h3')?.textContent?.trim()||'esta campanha';
       if(!confirm(`Apagar definitivamente “${title}”? Esta ação não poderá ser desfeita.`))return;
+      if(button)button.textContent='APAGANDO...';
       await rest(`creator_ads_campaigns?id=eq.${encodeURIComponent(id)}`,{method:'DELETE',headers:{Prefer:'return=minimal'}});
       card?.remove();
     }catch(e){
-      alert('Não foi possível apagar a campanha. '+e.message);
+      alert('Não foi possível apagar a campanha. '+(e.message||''));
+    }finally{
+      if(button&&document.body.contains(button)){button.disabled=false;button.textContent=old||'Apagar'}
     }
   }
 
@@ -46,13 +52,14 @@
       btn.textContent='Apagar';
       btn.className='danger';
       btn.setAttribute('data-delete-campaign',id);
-      btn.addEventListener('click',e=>{e.stopPropagation();deleteCampaign(id,card)});
+      btn.addEventListener('click',e=>{e.preventDefault();e.stopImmediatePropagation();deleteCampaign(id,card,btn)});
       actions.appendChild(btn);
     });
   }
 
+  const target=document.getElementById('campaignsList')||document.documentElement;
   const observer=new MutationObserver(enhance);
-  observer.observe(document.documentElement,{childList:true,subtree:true});
-  document.addEventListener('click',e=>{if(e.target.closest('[data-tab="campanhas"]'))setTimeout(enhance,100)});
+  observer.observe(target,{childList:true,subtree:true});
+  document.addEventListener('click',e=>{if(e.target.closest('[data-tab="campanhas"]'))setTimeout(enhance,80)});
   enhance();
 })();
