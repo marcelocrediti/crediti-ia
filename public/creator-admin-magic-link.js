@@ -3,6 +3,7 @@
   const AUTH=`${BASE}/auth/v1`;
   const KEY='sb_publishable_dmoTPKmglghAohv0MrRA9A_2zlUYhER';
   const TOKEN_KEY='crediti_creator_admin_token';
+  const REFRESH_KEY='crediti_creator_admin_refresh_token';
   const ADMIN_EMAIL='marcelinoteixeira.santos@gmail.com';
 
   function readAuthFromUrl(){
@@ -10,8 +11,10 @@
     if(!raw)return false;
     const p=new URLSearchParams(raw);
     const token=p.get('access_token');
+    const refresh=p.get('refresh_token');
     if(!token)return false;
     localStorage.setItem(TOKEN_KEY,token);
+    if(refresh)localStorage.setItem(REFRESH_KEY,refresh);
     history.replaceState({},'',location.pathname+location.search);
     location.reload();
     return true;
@@ -61,6 +64,7 @@
     btn.style.color='#111';
     btn.style.font='inherit';
     btn.style.fontWeight='900';
+    btn.style.touchAction='manipulation';
     btn.addEventListener('click',sendMagicLink);
     login.insertAdjacentElement('afterend',btn);
 
