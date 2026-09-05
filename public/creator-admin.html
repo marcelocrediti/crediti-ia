@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="theme-color" content="#ff006f">
+  <meta name="theme-color" content="#FDCA01">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="Crediti Ads">
@@ -15,7 +15,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/creator-admin.css?v=20260904-2">
+  <link rel="stylesheet" href="/creator-admin.css?v=20260905-1">
 </head>
 <body>
   <main>
@@ -32,24 +32,24 @@
       </div>
     </section>
     <section id="appView" class="app hidden">
-      <header class="topbar"><div><span class="brand">CREDITI</span><small>Creator Ads | Área administrativa</small></div><div class="top-actions"><button id="refreshBtn">Atualizar</button><button id="logoutBtn">Sair</button></div></header>
-      <nav class="tabs"><button data-tab="cadastros" class="active">Cadastros</button><button data-tab="campanhas">Campanhas</button><button data-tab="videos">Vídeos</button><button data-tab="pagamentos">Pagamentos</button></nav>
+      <header class="topbar"><div><span class="brand">CREDITI</span><small>Creator Ads | Área administrativa</small></div><div class="top-actions"><button id="refreshBtn" type="button">Atualizar</button><button id="logoutBtn" type="button">Sair</button></div></header>
+      <nav class="tabs"><button type="button" data-tab="cadastros" class="active">Cadastros</button><button type="button" data-tab="campanhas">Campanhas</button><button type="button" data-tab="videos">Vídeos</button><button type="button" data-tab="pagamentos">Pagamentos</button></nav>
       <section class="view active" data-view="cadastros"><div class="section-head"><div><p class="eyebrow">CREATORS</p><h2>Cadastros</h2></div><select id="profileFilter"><option value="">Todos</option><option value="em_analise">Em análise</option><option value="ativo">Ativos</option><option value="nao_elegivel">Não elegíveis</option><option value="perfil_privado">Perfil privado</option><option value="cancelado_creator">Cancelados pelo Creator</option><option value="desativado_crediti">Desativados pela Crediti</option></select></div><div id="profilesList" class="grid"></div></section>
-      <section class="view" data-view="campanhas"><div class="section-head"><div><p class="eyebrow">CAMPANHAS</p><h2>Campanhas</h2></div><button id="newCampaignBtn" class="primary small">+ Nova campanha</button></div><div id="campaignsList" class="grid"></div></section>
+      <section class="view" data-view="campanhas"><div class="section-head"><div><p class="eyebrow">CAMPANHAS</p><h2>Campanhas</h2></div><button id="newCampaignBtn" type="button" class="primary small">+ Nova campanha</button></div><div id="campaignsList" class="grid"></div></section>
       <section class="view" data-view="videos"><div class="section-head"><div><p class="eyebrow">ENVIOS</p><h2>Vídeos</h2></div></div><div id="submissionsList" class="grid"></div></section>
       <section class="view" data-view="pagamentos"><div class="section-head"><div><p class="eyebrow">FINANCEIRO</p><h2>Pagamentos</h2></div></div><div id="paymentsList" class="grid"></div></section>
     </section>
   </main>
-  <dialog id="profileDialog"><button class="dialog-close" data-close="profileDialog">×</button><div id="profileDetail"></div></dialog>
-  <dialog id="campaignDialog"><button class="dialog-close" data-close="campaignDialog">×</button><form id="campaignForm"><input type="hidden" name="id"><p class="eyebrow">CAMPANHA</p><h2 id="campaignFormTitle">Nova campanha</h2><label>Título<input name="titulo" required></label><label>Descrição<textarea name="descricao" rows="3"></textarea></label><label>Briefing<textarea name="briefing" rows="5" required></textarea></label><div class="two"><label>Início<input name="inicio" type="datetime-local" required></label><label>Fim<input name="fim" type="datetime-local" required></label></div><div class="two"><label>Prêmio por vencedor<input name="premio" inputmode="decimal" placeholder="R$ 0,00" required><small style="display:block;margin-top:6px;color:#666;font-weight:600;line-height:1.35">Digite quanto cada vídeo vencedor receberá.</small></label><label>Quantidade de vencedores<input name="numero_vencedores" type="number" min="1" value="1" required><small style="display:block;margin-top:6px;color:#666;font-weight:600;line-height:1.35">Ex.: 2 vencedores × R$ 10,00 = R$ 20,00 em prêmios.</small></label></div><label class="check"><input name="bonus_ativo" type="checkbox"><span>Ativar bônus por visualizações nesta campanha</span></label><div id="bonusFields" class="hidden"><div class="two"><label>Valor do bônus<input name="bonus_valor" inputmode="decimal" placeholder="R$ 0,00"></label><label>Meta de visualizações<input name="bonus_meta_views" type="number" min="1"></label></div><label>Prazo para atingir a meta<input name="bonus_prazo" type="datetime-local"></label></div><div class="form-actions"><button id="saveDraftBtn" type="button">Salvar rascunho</button><button class="primary" type="submit">Salvar e ativar</button></div></form></dialog>
+  <dialog id="profileDialog"><button class="dialog-close" type="button" data-close="profileDialog">×</button><div id="profileDetail"></div></dialog>
+  <dialog id="campaignDialog"><button class="dialog-close" type="button" data-close="campaignDialog">×</button><form id="campaignForm"><input type="hidden" name="id"><p class="eyebrow">CAMPANHA</p><h2 id="campaignFormTitle">Nova campanha</h2><label>Título<input name="titulo" required></label><label>Descrição<textarea name="descricao" rows="3"></textarea></label><label>Briefing<textarea name="briefing" rows="5" required></textarea></label><div class="two"><label>Início<input name="inicio" type="datetime-local" required></label><label>Fim<input name="fim" type="datetime-local" required></label></div><div class="two"><label>Prêmio por vencedor<input name="premio" inputmode="decimal" placeholder="R$ 0,00" required><small style="display:block;margin-top:6px;color:#666;font-weight:600;line-height:1.35">Digite quanto cada vídeo vencedor receberá.</small></label><label>Quantidade de vencedores<input name="numero_vencedores" type="number" min="1" value="1" required><small style="display:block;margin-top:6px;color:#666;font-weight:600;line-height:1.35">Ex.: 2 vencedores × R$ 10,00 = R$ 20,00 em prêmios.</small></label></div><label class="check"><input name="bonus_ativo" type="checkbox"><span>Ativar bônus por visualizações nesta campanha</span></label><div id="bonusFields" class="hidden"><div class="two"><label>Valor do bônus<input name="bonus_valor" inputmode="decimal" placeholder="R$ 0,00"></label><label>Meta de visualizações<input name="bonus_meta_views" type="number" min="1"></label></div><label>Prazo para atingir a meta<input name="bonus_prazo" type="datetime-local"></label></div><div class="form-actions"><button id="saveDraftBtn" type="button">Salvar rascunho</button><button class="primary" type="submit">Salvar e ativar</button></div></form></dialog>
   <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js" defer></script>
-  <script src="/creator-admin.js?v=20260904-5" defer></script>
-  <script src="/creator-admin-magic-link.js?v=20260904-1" defer></script>
+  <script src="/creator-admin.js?v=20260905-1" defer></script>
+  <script src="/creator-admin-magic-link.js?v=20260905-1" defer></script>
   <script src="/creator-admin-retention.js?v=20260904-2" defer></script>
   <script src="/creator-admin-term-pdf.js?v=20260904-2" defer></script>
   <script src="/creator-admin-campaign-detail.js?v=20260904-2" defer></script>
-  <script src="/creator-admin-delete-campaign.js?v=20260904-1" defer></script>
+  <script src="/creator-admin-delete-campaign.js?v=20260905-1" defer></script>
   <script src="/creator-admin-video-tools.js?v=20260904-1" defer></script>
-  <script src="/creator-admin-payment-tools.js?v=20260904-1" defer></script>
+  <script src="/creator-admin-payment-tools.js?v=20260905-1" defer></script>
 </body>
 </html>
