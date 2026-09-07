@@ -16,7 +16,7 @@ export const SHOP_URLS = {
   polishop: "https://mais.app/EKkAgs",
   todoVino: "https://mais.app/70NJ9j",
   amokarite: "https://compre.vc/aI5Y0gg8RE01",
-  lojasRede: "https://compre.vc/aI5Y0gg8RE01",
+  lojasRede: "https://acesse.vc/Sai99P3i3v07",
   sieno: "https://compre.vc/GBUaEiswDUZE",
   biovittare: "https://acesse.vc/Coanj81qEbhD",
   amakha: "https://acesse.vc/pAXYPEv9XW5p",
