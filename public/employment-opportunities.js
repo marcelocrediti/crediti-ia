@@ -45,10 +45,32 @@
     }
   }
 
+  function removeSection() {
+    document.getElementById(SECTION_ID)?.remove();
+  }
+
   function ensureSection() {
-    if (document.getElementById(SECTION_ID)) return;
     const groups = document.querySelector('.service-groups');
-    if (!groups) return;
+    const existing = document.getElementById(SECTION_ID);
+
+    if (!groups || !groups.isConnected) {
+      if (existing) existing.remove();
+      return;
+    }
+
+    const parent = groups.parentNode;
+    if (!parent || !parent.isConnected) {
+      if (existing) existing.remove();
+      return;
+    }
+
+    if (existing) {
+      if (existing.parentNode !== parent) {
+        existing.remove();
+      } else {
+        return;
+      }
+    }
 
     injectStyles();
 
@@ -81,7 +103,7 @@
       list.appendChild(button);
     });
 
-    groups.parentNode.insertBefore(section, groups);
+    parent.insertBefore(section, groups);
   }
 
   let scheduled = false;
@@ -95,9 +117,15 @@
   }
 
   scheduleEnsure();
+  window.addEventListener('popstate', scheduleEnsure);
+  window.addEventListener('hashchange', scheduleEnsure);
+  window.addEventListener('pageshow', scheduleEnsure);
+
   const root = document.getElementById('root');
   if (root) {
     const observer = new MutationObserver(scheduleEnsure);
     observer.observe(root, { childList: true, subtree: true });
+  } else {
+    removeSection();
   }
 })();
