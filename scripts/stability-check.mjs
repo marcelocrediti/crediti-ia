@@ -31,6 +31,7 @@ const requiredFiles = [
   'public/creator-ads-campaign-organizer.js',
   'public/shopee-affiliate-link.js',
   'public/employment-opportunities.js',
+  'public/solides-partnership.js',
   'public/creator-admin.html',
   'public/creator-admin.js'
 ];
@@ -59,7 +60,8 @@ const secondaryScripts = [
   '/creator-ads-placement.js?v=20260904-3',
   '/creator-ads-campaign-organizer.js?v=20260904-1',
   '/shopee-affiliate-link.js?v=20260904-2',
-  '/employment-opportunities.js?v=20260907-1'
+  '/employment-opportunities.js?v=20260907-1',
+  '/solides-partnership.js?v=20260907-1'
 ];
 secondaryScripts.forEach((script) => requireText(index, script, 'index.html'));
 requireText(index, 'loadScriptSequentially', 'index.html');
@@ -73,6 +75,13 @@ const employment = read('public/employment-opportunities.js');
   'K5dgwoZuUob6ezkbTkeJWb',
   'GZemMLWmnhiCKJH4VtdoR4'
 ].forEach((marker) => requireText(employment, marker, 'public/employment-opportunities.js'));
+
+const solides = read('public/solides-partnership.js');
+[
+  'Gestão de pessoas para sua empresa',
+  'https://indiquei.app/VOYKWVZ',
+  'Sólides'
+].forEach((marker) => requireText(solides, marker, 'public/solides-partnership.js'));
 
 const runtime = read('src/config/runtime.js');
 requireText(runtime, 'crediti-ia-api.onrender.com', 'src/config/runtime.js');
