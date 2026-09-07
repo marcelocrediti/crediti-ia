@@ -50,16 +50,23 @@
           '/shopee-affiliate-link.js?v=20260904-2'
         ];
         let started = false;
+
+        function loadScriptSequentially(index) {
+          if (index >= secondaryScripts.length) return;
+          const script = document.createElement('script');
+          script.src = secondaryScripts[index];
+          script.async = false;
+          script.onload = () => loadScriptSequentially(index + 1);
+          script.onerror = () => loadScriptSequentially(index + 1);
+          document.body.appendChild(script);
+        }
+
         function loadSecondaryScripts() {
           if (started) return;
           started = true;
-          secondaryScripts.forEach((src) => {
-            const script = document.createElement('script');
-            script.src = src;
-            script.async = true;
-            document.body.appendChild(script);
-          });
+          loadScriptSequentially(0);
         }
+
         function scheduleSecondaryScripts() {
           if ('requestIdleCallback' in window) {
             requestIdleCallback(loadSecondaryScripts, { timeout: 2500 });
@@ -67,6 +74,7 @@
             setTimeout(loadSecondaryScripts, 1200);
           }
         }
+
         if (document.readyState === 'complete') scheduleSecondaryScripts();
         else window.addEventListener('load', scheduleSecondaryScripts, { once: true });
       })();
