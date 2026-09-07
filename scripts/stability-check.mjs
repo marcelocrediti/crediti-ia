@@ -37,7 +37,7 @@ requiredFiles.forEach(requireFile);
 
 const main = read('src/main.jsx');
 [
-  'function AppErrorBoundary',
+  'class AppErrorBoundary',
   'function App()',
   'Minha Crediti',
   'Caminhos Crediti',
