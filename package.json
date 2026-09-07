@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "check:stability": "node scripts/stability-check.mjs",
+    "build": "npm run check:stability && vite build",
     "preview": "vite preview",
     "server": "node server/index.js"
   },
