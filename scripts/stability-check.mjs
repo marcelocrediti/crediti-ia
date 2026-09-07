@@ -30,6 +30,7 @@ const requiredFiles = [
   'public/creator-ads-placement.js',
   'public/creator-ads-campaign-organizer.js',
   'public/shopee-affiliate-link.js',
+  'public/employment-opportunities.js',
   'public/creator-admin.html',
   'public/creator-admin.js'
 ];
@@ -57,13 +58,21 @@ const secondaryScripts = [
   '/creator-ads-video-status.js?v=20260904-2',
   '/creator-ads-placement.js?v=20260904-3',
   '/creator-ads-campaign-organizer.js?v=20260904-1',
-  '/shopee-affiliate-link.js?v=20260904-2'
+  '/shopee-affiliate-link.js?v=20260904-2',
+  '/employment-opportunities.js?v=20260907-1'
 ];
 secondaryScripts.forEach((script) => requireText(index, script, 'index.html'));
 requireText(index, 'loadScriptSequentially', 'index.html');
 requireText(index, 'script.async = false', 'index.html');
 requireText(index, '#FDCA01', 'index.html');
 requireText(index, '/src/main.jsx', 'index.html');
+
+const employment = read('public/employment-opportunities.js');
+[
+  'Encontre seu emprego',
+  'K5dgwoZuUob6ezkbTkeJWb',
+  'GZemMLWmnhiCKJH4VtdoR4'
+].forEach((marker) => requireText(employment, marker, 'public/employment-opportunities.js'));
 
 const runtime = read('src/config/runtime.js');
 requireText(runtime, 'crediti-ia-api.onrender.com', 'src/config/runtime.js');
