@@ -1,6 +1,5 @@
 (() => {
   const HOME_CLASS = 'crediti-home-visible';
-  const CREATOR_ID = 'crediti-creator-ads-card';
   let scheduled = false;
   let observer = null;
 
@@ -8,24 +7,6 @@
     if (!el || !el.isConnected) return false;
     const style = getComputedStyle(el);
     return style.display !== 'none' && style.visibility !== 'hidden' && el.getClientRects().length > 0;
-  }
-
-  function placeCreatorCard(homeVisible) {
-    const creator = document.getElementById(CREATOR_ID);
-    const homeTools = document.querySelector('.home-personal-tools');
-
-    if (!creator || !homeVisible || !homeTools || !homeTools.parentNode) {
-      document.documentElement.classList.remove(HOME_CLASS);
-      return;
-    }
-
-    const correctParent = homeTools.parentNode;
-    const correctPrevious = homeTools;
-    if (creator.parentNode !== correctParent || creator.previousElementSibling !== correctPrevious) {
-      homeTools.insertAdjacentElement('afterend', creator);
-    }
-
-    document.documentElement.classList.add(HOME_CLASS);
   }
 
   function reconcile() {
@@ -36,7 +17,7 @@
     const homeVisible = isVisible(homeTools);
     const servicesVisible = isVisible(serviceGroups);
 
-    placeCreatorCard(homeVisible);
+    document.documentElement.classList.toggle(HOME_CLASS, homeVisible);
 
     if (servicesVisible) {
       window.CreditiEmploymentOpportunities?.mount?.();
