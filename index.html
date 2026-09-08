@@ -34,7 +34,6 @@
       .initial-splash i{width:24px;height:24px;margin-top:14px;border:3px solid rgba(17,17,17,.22);border-top-color:#111;border-radius:50%;animation:initial-spin 700ms linear infinite}
       @keyframes initial-spin{to{transform:rotate(360deg)}}
 
-      /* creator-card-stable-style: um único estado visual desde a primeira pintura */
       #crediti-creator-ads-card{position:relative!important;overflow:hidden!important;width:100%!important;min-height:158px!important;border:0!important;border-radius:24px!important;padding:20px!important;margin:18px 0!important;background:linear-gradient(135deg,#087CFF 0%,#3157FF 48%,#D91FEA 100%)!important;color:#fff!important;box-shadow:0 12px 28px rgba(65,63,210,.18)!important;display:none!important;grid-template-columns:minmax(0,1fr) auto!important;align-items:center!important;gap:16px!important;text-align:left!important;box-sizing:border-box!important}
       html.crediti-home-visible #crediti-creator-ads-card{display:grid!important}
       #crediti-creator-ads-card:before{content:none!important;display:none!important}
@@ -53,36 +52,10 @@
   <body>
     <div id="root"><div class="initial-splash" role="status" aria-label="Abrindo a Crediti"><strong>CREDITI</strong><small>Crédito com responsabilidade</small><i aria-hidden="true"></i></div></div>
 
-    <script>
-      (() => {
-        const HOME_CLASS = 'crediti-home-visible';
-        let scheduled = false;
-        function isVisible(el) {
-          if (!el || !el.isConnected) return false;
-          const style = getComputedStyle(el);
-          return style.display !== 'none' && style.visibility !== 'hidden' && el.getClientRects().length > 0;
-        }
-        function syncCreatorHomeVisibility() {
-          scheduled = false;
-          const tools = document.querySelector('.home-personal-tools');
-          document.documentElement.classList.toggle(HOME_CLASS, isVisible(tools));
-        }
-        function scheduleCreatorHomeVisibility() {
-          if (scheduled) return;
-          scheduled = true;
-          requestAnimationFrame(syncCreatorHomeVisibility);
-        }
-        const root = document.getElementById('root');
-        if (root) new MutationObserver(scheduleCreatorHomeVisibility).observe(root,{childList:true,subtree:true,attributes:true,attributeFilter:['class','style','hidden','aria-hidden']});
-        window.addEventListener('popstate',scheduleCreatorHomeVisibility);
-        window.addEventListener('hashchange',scheduleCreatorHomeVisibility);
-        document.addEventListener('click',scheduleCreatorHomeVisibility,true);
-        scheduleCreatorHomeVisibility();
-      })();
-    </script>
     <script src="/creator-ads-preview.js?v=20260904-6"></script>
-    <script src="/employment-opportunities.js?v=20260907-1"></script>
-    <script src="/solides-partnership.js?v=20260907-1"></script>
+    <script src="/employment-opportunities.js?v=20260908-2"></script>
+    <script src="/solides-partnership.js?v=20260908-2"></script>
+    <script src="/ui-stability-controller.js?v=20260908-1"></script>
     <script type="module" src="/src/main.jsx"></script>
 
     <script>
