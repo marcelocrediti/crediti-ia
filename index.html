@@ -33,24 +33,38 @@
       .initial-splash small{font-size:14px;font-weight:600}
       .initial-splash i{width:24px;height:24px;margin-top:14px;border:3px solid rgba(17,17,17,.22);border-top-color:#111;border-radius:50%;animation:initial-spin 700ms linear infinite}
       @keyframes initial-spin{to{transform:rotate(360deg)}}
+
+      /* creator-card-stable-style: um único estado visual desde a primeira pintura */
+      #crediti-creator-ads-card{position:relative!important;overflow:hidden!important;width:100%!important;min-height:158px!important;border:0!important;border-radius:24px!important;padding:20px!important;margin:18px 0!important;background:linear-gradient(135deg,#087CFF 0%,#3157FF 48%,#D91FEA 100%)!important;color:#fff!important;box-shadow:0 12px 28px rgba(65,63,210,.18)!important;display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;align-items:center!important;gap:16px!important;text-align:left!important;box-sizing:border-box!important}
+      #crediti-creator-ads-card:before{content:none!important;display:none!important}
+      #crediti-creator-ads-card:after{content:'';position:absolute;width:150px;height:150px;right:-62px;bottom:-92px;border-radius:50%;background:rgba(255,255,255,.07);pointer-events:none}
+      #crediti-creator-ads-card .k,#crediti-creator-ads-card .creator-ca-card{display:none!important}
+      #crediti-creator-ads-card .copy{position:relative;z-index:1;display:grid!important;gap:7px!important;min-width:0}
+      #crediti-creator-ads-card strong{position:relative;z-index:1;max-width:430px;color:#fff!important;font-size:clamp(20px,5.4vw,27px)!important;line-height:1.06!important;letter-spacing:-.025em!important;font-weight:900!important}
+      #crediti-creator-ads-card small{position:relative;z-index:1;max-width:430px;color:rgba(255,255,255,.88)!important;font-size:13px!important;line-height:1.42!important}
+      #crediti-creator-ads-card .a{position:relative;z-index:1;color:#FDCA01!important;font-size:14px!important;font-weight:900!important}
+      #crediti-creator-ads-card .film{position:relative!important;z-index:2!important;width:72px!important;height:72px!important;flex:0 0 72px!important;border-radius:20px!important;background:rgba(20,20,24,.78)!important;display:grid!important;place-items:center!important;align-self:center!important;color:#FDCA01!important;border:1px solid rgba(255,255,255,.12)!important}
+      #crediti-creator-ads-card .film svg{width:38px!important;height:38px!important}
+      #crediti-creator-ads-mini-card{display:none!important}
+      @media(max-width:420px){#crediti-creator-ads-card{min-height:150px!important;padding:18px!important;gap:13px!important;margin:16px 0!important}#crediti-creator-ads-card strong{font-size:22px!important}#crediti-creator-ads-card small{font-size:12px!important}#crediti-creator-ads-card .film{width:64px!important;height:64px!important;flex-basis:64px!important;border-radius:18px!important}#crediti-creator-ads-card .film svg{width:34px!important;height:34px!important}}
     </style>
   </head>
   <body>
     <div id="root"><div class="initial-splash" role="status" aria-label="Abrindo a Crediti"><strong>CREDITI</strong><small>Crédito com responsabilidade</small><i aria-hidden="true"></i></div></div>
+
+    <script src="/creator-ads-preview.js?v=20260904-6"></script>
+    <script src="/employment-opportunities.js?v=20260907-1"></script>
+    <script src="/solides-partnership.js?v=20260907-1"></script>
     <script type="module" src="/src/main.jsx"></script>
+
     <script>
       (() => {
         const secondaryScripts = [
-          '/creator-ads-placement.js?v=20260908-1',
-          '/creator-ads-preview.js?v=20260904-6',
           '/creator-ads-upload-meus-videos.js?v=20260904-2',
           '/creator-ads-video-status.js?v=20260904-2',
-          '/creator-ads-campaign-organizer.js?v=20260904-1',
-          '/employment-opportunities.js?v=20260907-1',
-          '/solides-partnership.js?v=20260907-1'
+          '/creator-ads-campaign-organizer.js?v=20260904-1'
         ];
         let started = false;
-
         function loadScriptSequentially(index) {
           if (index >= secondaryScripts.length) return;
           const script = document.createElement('script');
@@ -60,23 +74,13 @@
           script.onerror = () => loadScriptSequentially(index + 1);
           document.body.appendChild(script);
         }
-
         function loadSecondaryScripts() {
           if (started) return;
           started = true;
           loadScriptSequentially(0);
         }
-
-        function scheduleSecondaryScripts() {
-          if ('requestIdleCallback' in window) {
-            requestIdleCallback(loadSecondaryScripts, { timeout: 2500 });
-          } else {
-            setTimeout(loadSecondaryScripts, 1200);
-          }
-        }
-
-        if (document.readyState === 'complete') scheduleSecondaryScripts();
-        else window.addEventListener('load', scheduleSecondaryScripts, { once: true });
+        if (document.readyState === 'complete') setTimeout(loadSecondaryScripts, 300);
+        else window.addEventListener('load', () => setTimeout(loadSecondaryScripts, 300), { once:true });
       })();
     </script>
   </body>
