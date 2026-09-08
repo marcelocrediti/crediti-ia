@@ -32,6 +32,7 @@ const requiredFiles = [
   'public/creator-ads-campaign-organizer.js',
   'public/employment-opportunities.js',
   'public/solides-partnership.js',
+  'public/ui-stability-controller.js',
   'public/creator-admin.html',
   'public/creator-admin.js'
 ];
@@ -58,8 +59,9 @@ if (Buffer.byteLength(styles, 'utf8') < 70000) fail('styles.css ficou pequeno de
 const index = read('index.html');
 [
   '/creator-ads-preview.js?v=20260904-6',
-  '/employment-opportunities.js?v=20260907-1',
-  '/solides-partnership.js?v=20260907-1',
+  '/employment-opportunities.js?v=20260908-2',
+  '/solides-partnership.js?v=20260908-2',
+  '/ui-stability-controller.js?v=20260908-1',
   '/creator-ads-upload-meus-videos.js?v=20260904-2',
   '/creator-ads-video-status.js?v=20260904-2',
   '/creator-ads-campaign-organizer.js?v=20260904-1'
@@ -68,16 +70,21 @@ forbidText(index, '/shopee-affiliate-link.js', 'index.html');
 forbidText(index, '/lojas-rede-link-fix.js', 'index.html');
 forbidText(index, '/creator-ads-home-card-cleanup.js', 'index.html');
 forbidText(index, '/creator-ads-placement.js', 'index.html');
-requireText(index, 'creator-card-stable-style', 'index.html');
+requireText(index, 'html.crediti-home-visible #crediti-creator-ads-card', 'index.html');
 requireText(index, 'linear-gradient(135deg,#087CFF 0%,#3157FF 48%,#D91FEA 100%)', 'index.html');
 requireText(index, '#FDCA01', 'index.html');
 requireText(index, '/src/main.jsx', 'index.html');
 
 const employment = read('public/employment-opportunities.js');
-['Encontre seu emprego','K5dgwoZuUob6ezkbTkeJWb','GZemMLWmnhiCKJH4VtdoR4'].forEach((m) => requireText(employment, m, 'public/employment-opportunities.js'));
+['Encontre seu emprego','K5dgwoZuUob6ezkbTkeJWb','GZemMLWmnhiCKJH4VtdoR4','CreditiEmploymentOpportunities'].forEach((m) => requireText(employment, m, 'public/employment-opportunities.js'));
+forbidText(employment, 'MutationObserver', 'public/employment-opportunities.js');
 
 const solides = read('public/solides-partnership.js');
-['Gestão de pessoas para sua empresa','https://indiquei.app/VOYKWVZ','Sólides'].forEach((m) => requireText(solides, m, 'public/solides-partnership.js'));
+['Gestão de pessoas para sua empresa','https://indiquei.app/VOYKWVZ','Sólides','CreditiSolidesPartnership'].forEach((m) => requireText(solides, m, 'public/solides-partnership.js'));
+forbidText(solides, 'MutationObserver', 'public/solides-partnership.js');
+
+const controller = read('public/ui-stability-controller.js');
+['crediti-home-visible','CreditiEmploymentOpportunities','CreditiSolidesPartnership','MutationObserver'].forEach((m) => requireText(controller, m, 'public/ui-stability-controller.js'));
 
 const runtime = read('src/config/runtime.js');
 requireText(runtime, 'crediti-ia-api.onrender.com', 'src/config/runtime.js');
