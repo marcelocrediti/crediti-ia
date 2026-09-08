@@ -61,7 +61,7 @@ const index = read('index.html');
   '/creator-ads-preview.js?v=20260904-6',
   '/employment-opportunities.js?v=20260908-2',
   '/solides-partnership.js?v=20260908-2',
-  '/ui-stability-controller.js?v=20260908-1',
+  '/ui-stability-controller.js?v=20260908-',
   '/creator-ads-upload-meus-videos.js?v=20260904-2',
   '/creator-ads-video-status.js?v=20260904-2',
   '/creator-ads-campaign-organizer.js?v=20260904-1'
@@ -84,7 +84,7 @@ const solides = read('public/solides-partnership.js');
 forbidText(solides, 'MutationObserver', 'public/solides-partnership.js');
 
 const controller = read('public/ui-stability-controller.js');
-['crediti-home-visible','CreditiEmploymentOpportunities','CreditiSolidesPartnership','MutationObserver'].forEach((m) => requireText(controller, m, 'public/ui-stability-controller.js'));
+['crediti-home-visible','CreditiEmploymentOpportunities','CreditiSolidesPartnership','MutationObserver','Caminhos Crediti','insertAdjacentElement'].forEach((m) => requireText(controller, m, 'public/ui-stability-controller.js'));
 
 const runtime = read('src/config/runtime.js');
 requireText(runtime, 'crediti-ia-api.onrender.com', 'src/config/runtime.js');
