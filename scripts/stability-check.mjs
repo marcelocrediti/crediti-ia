@@ -13,6 +13,9 @@ const requireFile = (file) => {
 const requireText = (content, text, label) => {
   if (!content.includes(text)) fail(`Marcador crítico ausente em ${label}: ${text}`);
 };
+const forbidText = (content, text, label) => {
+  if (content.includes(text)) fail(`Marcador proibido presente em ${label}: ${text}`);
+};
 
 const requiredFiles = [
   'index.html',
@@ -24,12 +27,10 @@ const requiredFiles = [
   'src/core/text.js',
   'src/core/time.js',
   'public/creator-ads-preview.js',
-  'public/creator-ads-home-card-cleanup.js',
   'public/creator-ads-upload-meus-videos.js',
   'public/creator-ads-video-status.js',
   'public/creator-ads-placement.js',
   'public/creator-ads-campaign-organizer.js',
-  'public/shopee-affiliate-link.js',
   'public/employment-opportunities.js',
   'public/solides-partnership.js',
   'public/creator-admin.html',
@@ -54,16 +55,17 @@ const main = read('src/main.jsx');
 const index = read('index.html');
 const secondaryScripts = [
   '/creator-ads-preview.js?v=20260904-6',
-  '/creator-ads-home-card-cleanup.js?v=20260904-1',
   '/creator-ads-upload-meus-videos.js?v=20260904-2',
   '/creator-ads-video-status.js?v=20260904-2',
   '/creator-ads-placement.js?v=20260904-3',
   '/creator-ads-campaign-organizer.js?v=20260904-1',
-  '/shopee-affiliate-link.js?v=20260904-2',
   '/employment-opportunities.js?v=20260907-1',
   '/solides-partnership.js?v=20260907-1'
 ];
 secondaryScripts.forEach((script) => requireText(index, script, 'index.html'));
+forbidText(index, '/shopee-affiliate-link.js', 'index.html');
+forbidText(index, '/lojas-rede-link-fix.js', 'index.html');
+forbidText(index, '/creator-ads-home-card-cleanup.js', 'index.html');
 requireText(index, 'loadScriptSequentially', 'index.html');
 requireText(index, 'script.async = false', 'index.html');
 requireText(index, '#FDCA01', 'index.html');
