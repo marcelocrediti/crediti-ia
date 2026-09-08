@@ -10,7 +10,7 @@
   }
 
   function injectStyles() {
-    document.getElementById(STYLE_ID)?.remove();
+    if (document.getElementById(STYLE_ID)) return;
     const style = document.createElement('style');
     style.id = STYLE_ID;
     style.textContent = `
@@ -125,6 +125,7 @@
   }
 
   function init() {
+    injectStyles();
     sync();
     const root = document.getElementById('root') || document.body;
     new MutationObserver(() => requestAnimationFrame(sync)).observe(root, {
@@ -133,7 +134,6 @@
       attributes:true,
       attributeFilter:['class','style','aria-current','aria-selected']
     });
-    document.addEventListener('click', () => setTimeout(sync, 50), true);
     window.addEventListener('popstate', sync);
   }
 
