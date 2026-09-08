@@ -1,6 +1,7 @@
 (() => {
   const HOME_CLASS = 'crediti-home-visible';
   const CREATOR_ID = 'crediti-creator-ads-card';
+  const LOJAS_REDE_URL = 'https://acesse.vc/Sai99P3i3v07';
   let scheduled = false;
   let observer = null;
 
@@ -12,6 +13,19 @@
 
   function firstVisible(selector) {
     return [...document.querySelectorAll(selector)].find(isVisible) || null;
+  }
+
+  function fixLojasRedeLink() {
+    const button = document.querySelector('.lojasrede-store-card button');
+    if (!button || button.dataset.creditiLojasRedeFixed === '1') return;
+
+    button.dataset.creditiLojasRedeFixed = '1';
+    button.addEventListener('click', (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      const opened = window.open(LOJAS_REDE_URL, '_blank', 'noopener,noreferrer');
+      if (opened) opened.opener = null;
+    });
   }
 
   function reconcile() {
@@ -30,6 +44,8 @@
       const alreadyCorrect = creator.parentNode === correctParent && creator.previousElementSibling === homeTools;
       if (!alreadyCorrect) homeTools.insertAdjacentElement('afterend', creator);
     }
+
+    fixLojasRedeLink();
 
     if (servicesVisible) {
       window.CreditiEmploymentOpportunities?.mount?.();
