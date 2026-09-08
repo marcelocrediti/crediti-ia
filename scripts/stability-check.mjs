@@ -54,10 +54,10 @@ const main = read('src/main.jsx');
 
 const index = read('index.html');
 const secondaryScripts = [
+  '/creator-ads-placement.js?v=20260908-1',
   '/creator-ads-preview.js?v=20260904-6',
   '/creator-ads-upload-meus-videos.js?v=20260904-2',
   '/creator-ads-video-status.js?v=20260904-2',
-  '/creator-ads-placement.js?v=20260904-3',
   '/creator-ads-campaign-organizer.js?v=20260904-1',
   '/employment-opportunities.js?v=20260907-1',
   '/solides-partnership.js?v=20260907-1'
@@ -70,6 +70,10 @@ requireText(index, 'loadScriptSequentially', 'index.html');
 requireText(index, 'script.async = false', 'index.html');
 requireText(index, '#FDCA01', 'index.html');
 requireText(index, '/src/main.jsx', 'index.html');
+
+const placement = read('public/creator-ads-placement.js');
+requireText(placement, 'if (document.getElementById(STYLE_ID)) return;', 'public/creator-ads-placement.js');
+forbidText(placement, "document.getElementById(STYLE_ID)?.remove()", 'public/creator-ads-placement.js');
 
 const employment = read('public/employment-opportunities.js');
 [
