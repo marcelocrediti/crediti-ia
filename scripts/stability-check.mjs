@@ -57,9 +57,8 @@ const solides = read('public/solides-partnership.js');
 forbidText(solides, 'MutationObserver', 'public/solides-partnership.js');
 
 const controller = read('public/ui-stability-controller.js');
-['crediti-home-visible','CreditiEmploymentOpportunities','CreditiSolidesPartnership','MutationObserver','.home-personal-tools']
+['crediti-home-visible','CreditiEmploymentOpportunities','CreditiSolidesPartnership','MutationObserver','.home-personal-tools','firstVisible','creator.previousElementSibling === homeTools',"homeTools.insertAdjacentElement('afterend', creator)"]
   .forEach((m) => requireText(controller, m, 'public/ui-stability-controller.js'));
-forbidText(controller, 'insertAdjacentElement', 'public/ui-stability-controller.js');
 forbidText(controller, 'insertBefore', 'public/ui-stability-controller.js');
 forbidText(controller, 'appendChild', 'public/ui-stability-controller.js');
 forbidText(controller, 'Caminhos Crediti', 'public/ui-stability-controller.js');
