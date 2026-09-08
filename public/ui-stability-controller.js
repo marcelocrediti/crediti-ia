@@ -1,5 +1,6 @@
 (() => {
   const HOME_CLASS = 'crediti-home-visible';
+  const CREATOR_ID = 'crediti-creator-ads-card';
   let scheduled = false;
   let observer = null;
 
@@ -9,15 +10,26 @@
     return style.display !== 'none' && style.visibility !== 'hidden' && el.getClientRects().length > 0;
   }
 
+  function firstVisible(selector) {
+    return [...document.querySelectorAll(selector)].find(isVisible) || null;
+  }
+
   function reconcile() {
     scheduled = false;
 
-    const homeTools = document.querySelector('.home-personal-tools');
-    const serviceGroups = document.querySelector('.service-groups');
-    const homeVisible = isVisible(homeTools);
-    const servicesVisible = isVisible(serviceGroups);
+    const homeTools = firstVisible('.home-personal-tools');
+    const serviceGroups = firstVisible('.service-groups');
+    const creator = document.getElementById(CREATOR_ID);
+    const homeVisible = !!homeTools;
+    const servicesVisible = !!serviceGroups;
 
     document.documentElement.classList.toggle(HOME_CLASS, homeVisible);
+
+    if (creator && homeTools?.parentNode) {
+      const correctParent = homeTools.parentNode;
+      const alreadyCorrect = creator.parentNode === correctParent && creator.previousElementSibling === homeTools;
+      if (!alreadyCorrect) homeTools.insertAdjacentElement('afterend', creator);
+    }
 
     if (servicesVisible) {
       window.CreditiEmploymentOpportunities?.mount?.();
