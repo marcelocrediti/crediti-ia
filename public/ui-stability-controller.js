@@ -1,5 +1,7 @@
 (() => {
   const HOME_CLASS = 'crediti-home-visible';
+  const CREATOR_ID = 'crediti-creator-ads-card';
+  const CAMINHOS_TEXT = 'Caminhos Crediti';
   let scheduled = false;
   let observer = null;
 
@@ -7,6 +9,27 @@
     if (!el || !el.isConnected) return false;
     const style = getComputedStyle(el);
     return style.display !== 'none' && style.visibility !== 'hidden' && el.getClientRects().length > 0;
+  }
+
+  function findCaminhosAnchor() {
+    const candidates = [...document.querySelectorAll('button,a,[role="button"]')];
+    return candidates.find((el) => isVisible(el) && String(el.textContent || '').includes(CAMINHOS_TEXT)) || null;
+  }
+
+  function placeCreatorCard(homeVisible) {
+    const creator = document.getElementById(CREATOR_ID);
+    const anchor = homeVisible ? findCaminhosAnchor() : null;
+
+    if (!creator || !homeVisible || !anchor || !anchor.parentNode) {
+      document.documentElement.classList.remove(HOME_CLASS);
+      return;
+    }
+
+    if (creator.parentNode !== anchor.parentNode || creator.previousElementSibling !== anchor) {
+      anchor.insertAdjacentElement('afterend', creator);
+    }
+
+    document.documentElement.classList.add(HOME_CLASS);
   }
 
   function reconcile() {
@@ -17,7 +40,7 @@
     const homeVisible = isVisible(homeTools);
     const servicesVisible = isVisible(serviceGroups);
 
-    document.documentElement.classList.toggle(HOME_CLASS, homeVisible);
+    placeCreatorCard(homeVisible);
 
     if (servicesVisible) {
       window.CreditiEmploymentOpportunities?.mount?.();
