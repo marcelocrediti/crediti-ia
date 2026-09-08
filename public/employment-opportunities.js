@@ -37,43 +37,27 @@
   }
 
   function openExternal(url) {
-    try {
-      const opened = window.open(url, '_blank', 'noopener,noreferrer');
-      if (opened) opened.opener = null;
-    } catch {
-      window.location.href = url;
-    }
+    const opened = window.open(url, '_blank', 'noopener,noreferrer');
+    if (opened) opened.opener = null;
   }
 
-  function removeSection() {
+  function unmount() {
     document.getElementById(SECTION_ID)?.remove();
   }
 
-  function ensureSection() {
+  function mount() {
     const groups = document.querySelector('.service-groups');
-    const existing = document.getElementById(SECTION_ID);
-
-    if (!groups || !groups.isConnected) {
-      if (existing) existing.remove();
-      return;
+    if (!groups || !groups.isConnected || !groups.parentNode?.isConnected) {
+      unmount();
+      return false;
     }
 
     const parent = groups.parentNode;
-    if (!parent || !parent.isConnected) {
-      if (existing) existing.remove();
-      return;
-    }
-
-    if (existing) {
-      if (existing.parentNode !== parent) {
-        existing.remove();
-      } else {
-        return;
-      }
-    }
+    const existing = document.getElementById(SECTION_ID);
+    if (existing?.parentNode === parent) return true;
+    existing?.remove();
 
     injectStyles();
-
     const section = document.createElement('section');
     section.id = SECTION_ID;
     section.innerHTML = `
@@ -104,28 +88,8 @@
     });
 
     parent.insertBefore(section, groups);
+    return true;
   }
 
-  let scheduled = false;
-  function scheduleEnsure() {
-    if (scheduled) return;
-    scheduled = true;
-    requestAnimationFrame(() => {
-      scheduled = false;
-      ensureSection();
-    });
-  }
-
-  scheduleEnsure();
-  window.addEventListener('popstate', scheduleEnsure);
-  window.addEventListener('hashchange', scheduleEnsure);
-  window.addEventListener('pageshow', scheduleEnsure);
-
-  const root = document.getElementById('root');
-  if (root) {
-    const observer = new MutationObserver(scheduleEnsure);
-    observer.observe(root, { childList: true, subtree: true });
-  } else {
-    removeSection();
-  }
+  window.CreditiEmploymentOpportunities = { mount, unmount };
 })();
