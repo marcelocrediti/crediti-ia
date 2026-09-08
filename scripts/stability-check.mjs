@@ -45,6 +45,9 @@ requireText(index, 'linear-gradient(135deg,#087CFF 0%,#3157FF 48%,#D91FEA 100%)'
 requireText(index, '#FDCA01', 'index.html');
 requireText(index, '/src/main.jsx', 'index.html');
 
+const preview = read('public/creator-ads-preview.js');
+requireText(preview, "tools.insertAdjacentElement('afterend',b)", 'public/creator-ads-preview.js');
+
 const employment = read('public/employment-opportunities.js');
 ['Encontre seu emprego','K5dgwoZuUob6ezkbTkeJWb','GZemMLWmnhiCKJH4VtdoR4','CreditiEmploymentOpportunities'].forEach((m) => requireText(employment, m, 'public/employment-opportunities.js'));
 forbidText(employment, 'MutationObserver', 'public/employment-opportunities.js');
@@ -54,8 +57,11 @@ const solides = read('public/solides-partnership.js');
 forbidText(solides, 'MutationObserver', 'public/solides-partnership.js');
 
 const controller = read('public/ui-stability-controller.js');
-['crediti-home-visible','CreditiEmploymentOpportunities','CreditiSolidesPartnership','MutationObserver','.home-personal-tools','homeTools.insertAdjacentElement(\'afterend\', creator)']
+['crediti-home-visible','CreditiEmploymentOpportunities','CreditiSolidesPartnership','MutationObserver','.home-personal-tools']
   .forEach((m) => requireText(controller, m, 'public/ui-stability-controller.js'));
+forbidText(controller, 'insertAdjacentElement', 'public/ui-stability-controller.js');
+forbidText(controller, 'insertBefore', 'public/ui-stability-controller.js');
+forbidText(controller, 'appendChild', 'public/ui-stability-controller.js');
 forbidText(controller, 'Caminhos Crediti', 'public/ui-stability-controller.js');
 
 const runtime = read('src/config/runtime.js');
