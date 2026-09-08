@@ -18,53 +18,23 @@ const forbidText = (content, text, label) => {
 };
 
 const requiredFiles = [
-  'index.html',
-  'src/main.jsx',
-  'src/styles.css',
-  'src/config/runtime.js',
-  'src/core/storage.js',
-  'src/core/currency.js',
-  'src/core/text.js',
-  'src/core/time.js',
-  'public/creator-ads-preview.js',
-  'public/creator-ads-upload-meus-videos.js',
-  'public/creator-ads-video-status.js',
-  'public/creator-ads-campaign-organizer.js',
-  'public/employment-opportunities.js',
-  'public/solides-partnership.js',
-  'public/ui-stability-controller.js',
-  'public/creator-admin.html',
-  'public/creator-admin.js'
+  'index.html','src/main.jsx','src/styles.css','src/config/runtime.js','src/core/storage.js','src/core/currency.js','src/core/text.js','src/core/time.js',
+  'public/creator-ads-preview.js','public/creator-ads-upload-meus-videos.js','public/creator-ads-video-status.js','public/creator-ads-campaign-organizer.js',
+  'public/employment-opportunities.js','public/solides-partnership.js','public/ui-stability-controller.js','public/creator-admin.html','public/creator-admin.js'
 ];
 requiredFiles.forEach(requireFile);
 
 const main = read('src/main.jsx');
-[
-  'class AppErrorBoundary',
-  'function App()',
-  'Minha Crediti',
-  'Caminhos Crediti',
-  'Crediti Protege',
-  'Melhore seu Score',
-  'Crediti Shop',
-  'Renda Extra Crediti',
-  'Converse com a Crediti IA',
-  'createRoot('
-].forEach((marker) => requireText(main, marker, 'src/main.jsx'));
-
+['class AppErrorBoundary','function App()','Minha Crediti','Caminhos Crediti','Crediti Protege','Melhore seu Score','Crediti Shop','Renda Extra Crediti','Converse com a Crediti IA','createRoot(']
+  .forEach((marker) => requireText(main, marker, 'src/main.jsx'));
 if (Buffer.byteLength(main, 'utf8') < 150000) fail('main.jsx ficou pequeno demais; possível truncamento acidental.');
 const styles = read('src/styles.css');
 if (Buffer.byteLength(styles, 'utf8') < 70000) fail('styles.css ficou pequeno demais; possível truncamento acidental.');
 
 const index = read('index.html');
 [
-  '/creator-ads-preview.js?v=20260904-6',
-  '/employment-opportunities.js?v=20260908-2',
-  '/solides-partnership.js?v=20260908-2',
-  '/ui-stability-controller.js?v=20260908-',
-  '/creator-ads-upload-meus-videos.js?v=20260904-2',
-  '/creator-ads-video-status.js?v=20260904-2',
-  '/creator-ads-campaign-organizer.js?v=20260904-1'
+  '/creator-ads-preview.js?v=20260904-6','/employment-opportunities.js?v=20260908-2','/solides-partnership.js?v=20260908-2','/ui-stability-controller.js?v=20260908-',
+  '/creator-ads-upload-meus-videos.js?v=20260904-2','/creator-ads-video-status.js?v=20260904-2','/creator-ads-campaign-organizer.js?v=20260904-1'
 ].forEach((script) => requireText(index, script, 'index.html'));
 forbidText(index, '/shopee-affiliate-link.js', 'index.html');
 forbidText(index, '/lojas-rede-link-fix.js', 'index.html');
@@ -84,20 +54,16 @@ const solides = read('public/solides-partnership.js');
 forbidText(solides, 'MutationObserver', 'public/solides-partnership.js');
 
 const controller = read('public/ui-stability-controller.js');
-['crediti-home-visible','CreditiEmploymentOpportunities','CreditiSolidesPartnership','MutationObserver','Caminhos Crediti','insertAdjacentElement'].forEach((m) => requireText(controller, m, 'public/ui-stability-controller.js'));
+['crediti-home-visible','CreditiEmploymentOpportunities','CreditiSolidesPartnership','MutationObserver','.home-personal-tools','homeTools.insertAdjacentElement(\'afterend\', creator)']
+  .forEach((m) => requireText(controller, m, 'public/ui-stability-controller.js'));
+forbidText(controller, 'Caminhos Crediti', 'public/ui-stability-controller.js');
 
 const runtime = read('src/config/runtime.js');
 requireText(runtime, 'crediti-ia-api.onrender.com', 'src/config/runtime.js');
 requireText(runtime, 'crediti_local_bills_v1', 'src/config/runtime.js');
-
 const storage = read('src/core/storage.js');
-['readLocalList', 'readLocalObject', 'saveLocalList', 'saveLocalObject'].forEach((m) => requireText(storage, m, 'src/core/storage.js'));
-
+['readLocalList','readLocalObject','saveLocalList','saveLocalObject'].forEach((m) => requireText(storage, m, 'src/core/storage.js'));
 const currency = read('src/core/currency.js');
-['parseCurrencyBR', 'formatCurrencyBR', 'maskCurrencyBR'].forEach((m) => requireText(currency, m, 'src/core/currency.js'));
-
-if (/placeholder|TODO: substituir app|app tempor[aá]rio/i.test(main.slice(0, 4000))) {
-  fail('Foi detectado conteúdo temporário no início do main.jsx.');
-}
-
+['parseCurrencyBR','formatCurrencyBR','maskCurrencyBR'].forEach((m) => requireText(currency, m, 'src/core/currency.js'));
+if (/placeholder|TODO: substituir app|app tempor[aá]rio/i.test(main.slice(0, 4000))) fail('Foi detectado conteúdo temporário no início do main.jsx.');
 console.log('[stability-check] OK: estrutura crítica preservada.');
