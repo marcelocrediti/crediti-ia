@@ -33,37 +33,35 @@
     if (opened) opened.opener = null;
   }
 
-  function removeCard() {
+  function unmount() {
     document.getElementById(CARD_ID)?.remove();
   }
 
   function findBusinessGroup(groups) {
-    const candidates = [...groups.children];
-    return candidates.find((node) => {
+    return [...groups.children].find((node) => {
       const text = normalize(node.textContent);
       return text.includes('empresa') && text.includes('solu');
     }) || null;
   }
 
-  function ensureCard() {
+  function mount() {
     const groups = document.querySelector('.service-groups');
     if (!groups || !groups.isConnected) {
-      removeCard();
-      return;
+      unmount();
+      return false;
     }
 
     const targetGroup = findBusinessGroup(groups);
     if (!targetGroup || !targetGroup.isConnected) {
-      removeCard();
-      return;
+      unmount();
+      return false;
     }
 
     const existing = document.getElementById(CARD_ID);
-    if (existing && existing.parentNode === targetGroup) return;
-    if (existing) existing.remove();
+    if (existing?.parentNode === targetGroup) return true;
+    existing?.remove();
 
     injectStyles();
-
     const card = document.createElement('article');
     card.id = CARD_ID;
     card.innerHTML = `
@@ -84,26 +82,8 @@
     `;
     card.querySelector('.solides-action')?.addEventListener('click', openPartner);
     targetGroup.appendChild(card);
+    return true;
   }
 
-  let scheduled = false;
-  function scheduleEnsure() {
-    if (scheduled) return;
-    scheduled = true;
-    requestAnimationFrame(() => {
-      scheduled = false;
-      ensureCard();
-    });
-  }
-
-  scheduleEnsure();
-  window.addEventListener('popstate', scheduleEnsure);
-  window.addEventListener('hashchange', scheduleEnsure);
-  window.addEventListener('pageshow', scheduleEnsure);
-
-  const root = document.getElementById('root');
-  if (root) {
-    const observer = new MutationObserver(scheduleEnsure);
-    observer.observe(root, { childList: true, subtree: true });
-  }
+  window.CreditiSolidesPartnership = { mount, unmount };
 })();
