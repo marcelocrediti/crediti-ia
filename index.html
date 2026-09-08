@@ -42,13 +42,12 @@
       (() => {
         const secondaryScripts = [
           '/creator-ads-preview.js?v=20260904-6',
-          '/creator-ads-placement.js?v=20260904-3',
           '/creator-ads-home-card-cleanup.js?v=20260904-1',
           '/creator-ads-upload-meus-videos.js?v=20260904-2',
           '/creator-ads-video-status.js?v=20260904-2',
+          '/creator-ads-placement.js?v=20260904-3',
           '/creator-ads-campaign-organizer.js?v=20260904-1',
           '/shopee-affiliate-link.js?v=20260904-2',
-          '/lojas-rede-link-fix.js?v=20260907-1',
           '/employment-opportunities.js?v=20260907-1',
           '/solides-partnership.js?v=20260907-1'
         ];
@@ -70,11 +69,16 @@
           loadScriptSequentially(0);
         }
 
-        if (document.readyState === 'loading') {
-          document.addEventListener('DOMContentLoaded', loadSecondaryScripts, { once: true });
-        } else {
-          loadSecondaryScripts();
+        function scheduleSecondaryScripts() {
+          if ('requestIdleCallback' in window) {
+            requestIdleCallback(loadSecondaryScripts, { timeout: 2500 });
+          } else {
+            setTimeout(loadSecondaryScripts, 1200);
+          }
         }
+
+        if (document.readyState === 'complete') scheduleSecondaryScripts();
+        else window.addEventListener('load', scheduleSecondaryScripts, { once: true });
       })();
     </script>
   </body>
