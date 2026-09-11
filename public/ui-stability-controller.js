@@ -1,7 +1,23 @@
 (() => {
   const HOME_CLASS = 'crediti-home-visible';
   const CREATOR_ID = 'crediti-creator-ads-card';
-  const LOJAS_REDE_URL = 'https://acesse.vc/Sai99P3i3v07';
+  const SHOP_LINKS = [
+    {
+      selector: '.shopee-store-card button',
+      url: 'https://s.shopee.com.br/5fofuwHW0n',
+      datasetKey: 'creditiShopeeFixed'
+    },
+    {
+      selector: '.lojasrede-store-card button',
+      url: 'https://acesse.vc/Sai99P3i3v07',
+      datasetKey: 'creditiLojasRedeFixed'
+    },
+    {
+      selector: '.amokarite-store-card button',
+      url: 'https://compre.vc/aI5Y0gg8RE01',
+      datasetKey: 'creditiAmokariteFixed'
+    }
+  ];
   let scheduled = false;
   let observer = null;
 
@@ -15,16 +31,18 @@
     return [...document.querySelectorAll(selector)].find(isVisible) || null;
   }
 
-  function fixLojasRedeLink() {
-    const button = document.querySelector('.lojasrede-store-card button');
-    if (!button || button.dataset.creditiLojasRedeFixed === '1') return;
+  function fixShopLinks() {
+    SHOP_LINKS.forEach(({ selector, url, datasetKey }) => {
+      const button = document.querySelector(selector);
+      if (!button || button.dataset[datasetKey] === '1') return;
 
-    button.dataset.creditiLojasRedeFixed = '1';
-    button.addEventListener('click', (event) => {
-      event.preventDefault();
-      event.stopPropagation();
-      const opened = window.open(LOJAS_REDE_URL, '_blank', 'noopener,noreferrer');
-      if (opened) opened.opener = null;
+      button.dataset[datasetKey] = '1';
+      button.addEventListener('click', (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        const opened = window.open(url, '_blank', 'noopener,noreferrer');
+        if (opened) opened.opener = null;
+      });
     });
   }
 
@@ -45,7 +63,7 @@
       if (!alreadyCorrect) homeTools.insertAdjacentElement('afterend', creator);
     }
 
-    fixLojasRedeLink();
+    fixShopLinks();
 
     if (servicesVisible) {
       window.CreditiEmploymentOpportunities?.mount?.();
