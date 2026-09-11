@@ -1,5 +1,5 @@
 export const SHOP_URLS = {
-  shopee: "https://collshp.com/marceloachou?view=storefront",
+  shopee: "https://s.shopee.com.br/5fofuwHW0n",
   magalu: "https://www.influenciadormagalu.com.br/creditishop",
   shein: "https://onelink.shein.com/50/609kponu54lj",
   amazon: "https://amzn.to/46trmWP",
