@@ -26,7 +26,6 @@ export const SHOP_URLS = {
   cicatrissim: "https://compre.vc/smGApyfu2sBV",
   gazin: "https://compre.vc/VaG6z8w2of4n",
   hipervarejo: "https://compre.vc/EIa6BAdRE5iN",
-  komo: "https://compre.vc/zEIrFZlxguEa",
   laluna: "https://compre.vc/Iklt4z7TkZ9J",
   freeway: "https://compre.vc/YeuMj5D8FEN9",
   leloyn: "https://compre.vc/sxyzhqgxYK8N",
