@@ -18,6 +18,7 @@
       datasetKey: 'creditiAmokariteFixed'
     }
   ];
+  const REMOVED_SHOP_CARDS = ['.komo-store-card'];
   let scheduled = false;
   let observer = null;
 
@@ -46,6 +47,12 @@
     });
   }
 
+  function removeUnsupportedShopCards() {
+    REMOVED_SHOP_CARDS.forEach((selector) => {
+      document.querySelectorAll(selector).forEach((card) => card.remove());
+    });
+  }
+
   function reconcile() {
     scheduled = false;
 
@@ -63,6 +70,7 @@
       if (!alreadyCorrect) homeTools.insertAdjacentElement('afterend', creator);
     }
 
+    removeUnsupportedShopCards();
     fixShopLinks();
 
     if (servicesVisible) {
