@@ -1,8 +1,39 @@
 import O from "express";
 import h from "cors";
 import E from "openai";
+import {
+  isMetaConversionsConfigured,
+  sendMetaConversion
+} from "./meta-conversions.js";
+
 const s = O();
 s.use(h({ origin: "*", methods: ["GET", "POST", "OPTIONS"], allowedHeaders: ["Content-Type"] })), s.use(O.json({ limit: "1mb" }));
+
+s.post("/api/meta/events", async (o, a) => {
+  try {
+    const e = await sendMetaConversion(o, o.body || {});
+
+    if (!e.sent) {
+      return a.status(503).json({
+        success: false,
+        error: "API de Conversões não configurada."
+      });
+    }
+
+    return a.status(202).json({
+      success: true,
+      eventsReceived: e.eventsReceived
+    });
+  } catch (e) {
+    console.error("ERRO META CAPI:", e?.message || e);
+
+    return a.status(e?.statusCode || 502).json({
+      success: false,
+      error: e?.message || "Não foi possível registrar o evento."
+    });
+  }
+});
+
 const v = new E({ apiKey: process.env.OPENAI_API_KEY }), N = process.env.PORT || 1e4, m = "gpt-5.6-luna", S = `
 Voc\xEA \xE9 o Creditin, assistente inteligente oficial da Crediti.
 
@@ -525,7 +556,7 @@ AVISO DE HOR\xC1RIO: nosso atendimento humano funciona de segunda a sexta, das 7
 s.get("/", (o, a) => {
   a.json({ status: "online", app: "Crediti IA", assistant: "Creditin", model: m });
 }), s.get("/health", (o, a) => {
-  a.json({ status: "ok", openaiConfigured: !!process.env.OPENAI_API_KEY, model: m });
+  a.json({ status: "ok", openaiConfigured: !!process.env.OPENAI_API_KEY, metaCapiConfigured: isMetaConversionsConfigured(), model: m });
 }), s.post("/api/chat", async (o, a) => {
   try {
     const { message: e, history: n = [], customer: c = {} } = o.body || {};
