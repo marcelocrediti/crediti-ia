@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Crediti · Diagnóstico Meta Pixel</title>
+  <!-- Meta Pixel Code -->
+  <script>
+  !function(f,b,e,v,n,t,s)
+  {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+  n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+  if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+  n.queue=[];t=b.createElement(e);t.async=!0;
+  t.src=v;s=b.getElementsByTagName(e)[0];
+  s.parentNode.insertBefore(t,s)}(window, document,'script',
+  'https://connect.facebook.net/en_US/fbevents.js');
+  fbq('init', '1430998185171928');
+  fbq('track', 'PageView');
+  fbq('trackCustom', 'PixelCheck');
+  </script>
+  <noscript><img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=1430998185171928&ev=PageView&noscript=1" alt=""></noscript>
+  <!-- End Meta Pixel Code -->
+  <style>
+    body{font-family:Arial,sans-serif;background:#FDCA01;color:#111;margin:0;padding:32px}
+    main{max-width:680px;margin:0 auto;background:#fff;border-radius:20px;padding:28px}
+    code{word-break:break-all;background:#f2f2f2;padding:3px 6px;border-radius:6px}
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Meta Pixel ativo</h1>
+    <p>Pixel ID: <code>1430998185171928</code></p>
+    <p>Esta página dispara <strong>PageView</strong> e <strong>PixelCheck</strong> ao abrir.</p>
+    <p id="status">Carregando diagnóstico...</p>
+  </main>
+  <script>
+    setTimeout(function(){
+      var loaded = !!(window.fbq && window.fbq.loaded);
+      document.getElementById('status').textContent = loaded
+        ? 'Código do Pixel inicializado no navegador.'
+        : 'O navegador bloqueou ou não inicializou o Pixel.';
+    }, 2500);
+  </script>
+</body>
+</html>
