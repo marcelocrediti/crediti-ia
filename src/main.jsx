@@ -29,6 +29,12 @@ const SUPABASE_URL =
 const SUPABASE_KEY =
   "sb_publishable_dmoTPKmglghAohv0MrRA9A_2zlUYhER";
 
+
+const ANALYTICS_URL = "https://vgdtywdpywezrwlrsawq.supabase.co/rest/v1/crediti_app_events";
+const ANALYTICS_KEY = SUPABASE_KEY;
+function getAnalyticsId(storageKey) { try { const storage = storageKey === "session" ? window.sessionStorage : window.localStorage; const key = "crediti_" + storageKey + "_id"; const existing = storage.getItem(key); if (existing) return existing; const value = window.crypto?.randomUUID?.() || (Date.now() + "-" + Math.random().toString(36).slice(2)); storage.setItem(key, value); return value; } catch { return ""; } }
+function recordAppEvent(eventName, details = {}) { if (!eventName || !window.fetch) return; const params = new URLSearchParams(window.location.search); const referrer = document.referrer || ""; const source = params.get("utm_source") || (params.get("fbclid") ? "meta" : referrer ? "referral" : "directo"); fetch(ANALYTICS_URL, { method: "POST", headers: { apikey: ANALYTICS_KEY, "Content-Type": "application/json", Prefer: "return=minimal" }, body: JSON.stringify({ event_name: eventName, visitor_id: getAnalyticsId("visitor"), session_id: getAnalyticsId("session"), page_path: window.location.pathname, traffic_source: source.slice(0, 80), utm_medium: (params.get("utm_medium") || "").slice(0, 120), utm_campaign: (params.get("utm_campaign") || "").slice(0, 160), event_time: new Date().toISOString(), ...details }), keepalive: true }).catch(() => {}); }
+
 const RENDA_EXTRA_URL =
   "https://crediti.startcapital.app/signIn";
 
@@ -2172,6 +2178,13 @@ class AppErrorBoundary extends React.Component {
 }
 
 function App() {
+  useEffect(() => {
+    recordAppEvent("app_open");
+    const onClick = (event) => { const button = event.target.closest("button, a"); if (!button) return; const text = (button.innerText || button.getAttribute("aria-label") || "").trim().toLowerCase(); if (!text) return; if (text.includes("whatsapp")) recordAppEvent("whatsapp_click", { destination: text.slice(0, 160) }); else if (text.includes("ia") || text.includes("convers")) recordAppEvent("ai_chat_started", { destination: text.slice(0, 160) }); else if (text.includes("simul") || text.includes("financ") || text.includes("consign") || text.includes("crédito") || text.includes("credito")) recordAppEvent("product_view", { product: text.slice(0, 160) }); else if (text.includes("serviço") || text.includes("servico") || text.includes("receita") || text.includes("serasa")) recordAppEvent("service_click", { destination: text.slice(0, 160) }); else if (button.tagName === "A" || button.getAttribute("href")?.startsWith("http")) recordAppEvent("partner_click", { destination: text.slice(0, 160) }); };
+    const onSubmit = (event) => { const input = event.target.querySelector?.('input[type="search"], input[type="text"]'); if (input?.value) recordAppEvent("search", { search_term: input.value.slice(0, 160) }); };
+    document.addEventListener("click", onClick, true); document.addEventListener("submit", onSubmit, true);
+    return () => { document.removeEventListener("click", onClick, true); document.removeEventListener("submit", onSubmit, true); };
+  }, []);
   const serviceNotice = useMemo(
     () => getServiceNotice(),
     []
