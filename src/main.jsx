@@ -65,6 +65,23 @@ function createMetaEventId() {
   return `crediti-lead-${suffix}`;
 }
 
+function trackMetaBrowserEvent(eventName) {
+  const allowedEvents = new Set([
+    "Search",
+    "ViewContent",
+    "Contact"
+  ]);
+
+  if (
+    !allowedEvents.has(eventName) ||
+    typeof window.fbq !== "function"
+  ) {
+    return;
+  }
+
+  window.fbq("track", eventName);
+}
+
 function trackMetaLead() {
   const eventId = createMetaEventId();
 
@@ -2809,6 +2826,10 @@ function App() {
   }, [screen, searchTarget]);
 
   function navigateSearchItem(item) {
+    if (normalizedSearch) {
+      trackMetaBrowserEvent("Search");
+    }
+
     setHomeSearch("");
 
     if (item.screen === "debtHelp") {
@@ -3073,6 +3094,9 @@ function App() {
   const messagesRef =
     useRef([]);
 
+  const trackedProductViewRef =
+    useRef("");
+
   useEffect(() => {
     const themeColor =
       document.querySelector(
@@ -3105,6 +3129,28 @@ function App() {
     messagesRef.current =
       messages;
   }, [messages]);
+
+  useEffect(() => {
+    if (
+      screen !== "productDetail" ||
+      !selectedProduct?.id
+    ) {
+      trackedProductViewRef.current = "";
+      return;
+    }
+
+    const viewKey =
+      `product-${selectedProduct.id}`;
+
+    if (
+      trackedProductViewRef.current === viewKey
+    ) {
+      return;
+    }
+
+    trackedProductViewRef.current = viewKey;
+    trackMetaBrowserEvent("ViewContent");
+  }, [screen, selectedProduct?.id]);
 
   useEffect(() => {
     if (screen === "scorePlan" && scorePlanStarted) {
@@ -4625,12 +4671,20 @@ function App() {
       "?text=" +
       encodeURIComponent(message);
 
+    if (!openExternal(url)) {
+      return;
+    }
+
+    trackMetaBrowserEvent("Contact");
+
+    if (!customerData?.name) {
+      trackMetaLead();
+    }
+
     recordServiceRequest(
       analystKey,
       productName || customerData?.interest || ""
     );
-
-    window.open(url, "_blank");
   }
 
   function openPartnerLink(
@@ -4775,6 +4829,7 @@ function App() {
             className="partner-notice-continue"
             onClick={() => {
               if (openExternal(product.url)) {
+                trackMetaLead();
                 recordSimulation(externalProduct);
                 setScreen(
                   externalReturnScreen || "direct"
