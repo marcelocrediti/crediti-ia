@@ -65,6 +65,167 @@ function createMetaEventId() {
   return `crediti-lead-${suffix}`;
 }
 
+const ANALYTICS_EVENTS = new Set([
+  "app_open",
+  "search",
+  "product_view",
+  "service_click",
+  "partner_click",
+  "whatsapp_click",
+  "ai_chat_started",
+  "lead_created"
+]);
+
+function createAnonymousUuid() {
+  if (window.crypto?.randomUUID) {
+    return window.crypto.randomUUID();
+  }
+
+  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(
+    /[xy]/g,
+    (character) => {
+      const random = Math.floor(Math.random() * 16);
+      const value = character === "x" ? random : (random & 0x3) | 0x8;
+      return value.toString(16);
+    }
+  );
+}
+
+function getAnonymousUuid(storage, key) {
+  try {
+    const saved = storage.getItem(key);
+
+    if (/^[0-9a-f-]{36}$/i.test(saved || "")) {
+      return saved;
+    }
+
+    const created = createAnonymousUuid();
+    storage.setItem(key, created);
+    return created;
+  } catch {
+    return createAnonymousUuid();
+  }
+}
+
+const ANALYTICS_VISITOR_ID = getAnonymousUuid(
+  window.localStorage,
+  "crediti_analytics_visitor_v1"
+);
+
+const ANALYTICS_SESSION_ID = getAnonymousUuid(
+  window.sessionStorage,
+  "crediti_analytics_session_v1"
+);
+
+function cleanAnalyticsText(value, maxLength) {
+  const cleaned = String(value || "").trim();
+  return cleaned ? cleaned.slice(0, maxLength) : null;
+}
+
+function readTrafficAttribution() {
+  const params = new URLSearchParams(window.location.search);
+  const explicitSource =
+    params.get("utm_source") ||
+    (params.has("fbclid") ? "meta" : "");
+
+  let saved = {};
+
+  try {
+    saved = JSON.parse(
+      window.localStorage.getItem("crediti_attribution_v1") || "{}"
+    );
+  } catch {
+    saved = {};
+  }
+
+  if (explicitSource) {
+    saved = {
+      source: explicitSource,
+      medium: params.get("utm_medium") || "anuncio",
+      campaign: params.get("utm_campaign") || ""
+    };
+
+    try {
+      window.localStorage.setItem(
+        "crediti_attribution_v1",
+        JSON.stringify(saved)
+      );
+    } catch {
+      // A medição continua sem impedir o uso do aplicativo.
+    }
+  }
+
+  if (!saved.source && document.referrer) {
+    try {
+      const referrer = new URL(document.referrer).hostname;
+
+      if (/instagram/i.test(referrer)) saved.source = "instagram";
+      else if (/facebook|fb\.com/i.test(referrer)) saved.source = "facebook";
+      else if (/google/i.test(referrer)) saved.source = "google";
+      else saved.source = referrer;
+    } catch {
+      saved.source = "direto";
+    }
+  }
+
+  return {
+    source: saved.source || "direto",
+    medium: saved.medium || "",
+    campaign: saved.campaign || ""
+  };
+}
+
+function trackAppEvent(eventName, details = {}) {
+  if (!ANALYTICS_EVENTS.has(eventName)) {
+    return;
+  }
+
+  const attribution = readTrafficAttribution();
+
+  fetch(`${SUPABASE_URL}/crediti_app_events`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "apikey": SUPABASE_KEY,
+      "Authorization": `Bearer ${SUPABASE_KEY}`,
+      "Prefer": "return=minimal"
+    },
+    keepalive: true,
+    body: JSON.stringify({
+      event_name: eventName,
+      visitor_id: ANALYTICS_VISITOR_ID,
+      session_id: ANALYTICS_SESSION_ID,
+      page_path: cleanAnalyticsText(window.location.pathname, 180) || "/",
+      product: cleanAnalyticsText(details.product, 160),
+      search_term: cleanAnalyticsText(details.searchTerm, 120),
+      destination: cleanAnalyticsText(details.destination, 160),
+      traffic_source: cleanAnalyticsText(attribution.source, 80) || "direto",
+      utm_medium: cleanAnalyticsText(attribution.medium, 80),
+      utm_campaign: cleanAnalyticsText(attribution.campaign, 160),
+      event_time: new Date().toISOString()
+    })
+  }).catch(() => {
+    // A medição nunca deve bloquear o atendimento do cliente.
+  });
+}
+
+function trackMetaBrowserEvent(eventName) {
+  const allowedEvents = new Set([
+    "Search",
+    "ViewContent",
+    "Contact"
+  ]);
+
+  if (
+    !allowedEvents.has(eventName) ||
+    typeof window.fbq !== "function"
+  ) {
+    return;
+  }
+
+  window.fbq("track", eventName);
+}
+
 function trackMetaLead() {
   const eventId = createMetaEventId();
 
@@ -2809,6 +2970,14 @@ function App() {
   }, [screen, searchTarget]);
 
   function navigateSearchItem(item) {
+    if (normalizedSearch) {
+      trackMetaBrowserEvent("Search");
+      trackAppEvent("search", {
+        searchTerm: homeSearch,
+        product: item.title
+      });
+    }
+
     setHomeSearch("");
 
     if (item.screen === "debtHelp") {
@@ -3073,6 +3242,9 @@ function App() {
   const messagesRef =
     useRef([]);
 
+  const trackedProductViewRef =
+    useRef("");
+
   useEffect(() => {
     const themeColor =
       document.querySelector(
@@ -3087,6 +3259,7 @@ function App() {
     setShowSplash(false);
     document.documentElement.classList.remove("splash-active");
     themeColor?.setAttribute("content", "#FFFFFF");
+    trackAppEvent("app_open");
 
     return () => {
       document.documentElement
@@ -3105,6 +3278,31 @@ function App() {
     messagesRef.current =
       messages;
   }, [messages]);
+
+  useEffect(() => {
+    if (
+      screen !== "productDetail" ||
+      !selectedProduct?.id
+    ) {
+      trackedProductViewRef.current = "";
+      return;
+    }
+
+    const viewKey =
+      `product-${selectedProduct.id}`;
+
+    if (
+      trackedProductViewRef.current === viewKey
+    ) {
+      return;
+    }
+
+    trackedProductViewRef.current = viewKey;
+    trackMetaBrowserEvent("ViewContent");
+    trackAppEvent("product_view", {
+      product: selectedProduct.name
+    });
+  }, [screen, selectedProduct?.id]);
 
   useEffect(() => {
     if (screen === "scorePlan" && scorePlanStarted) {
@@ -3324,6 +3522,10 @@ function App() {
         true;
 
       trackMetaLead();
+      trackAppEvent("lead_created", {
+        product: data.interest,
+        destination: status
+      });
     } catch (error) {
       console.log(
         "Lead não registrado:",
@@ -4083,13 +4285,21 @@ function App() {
       destination = item.androidUrl;
     }
 
-    openExternal(destination);
+    if (openExternal(destination)) {
+      trackAppEvent("service_click", {
+        product: item.name || item.title,
+        destination
+      });
+    }
   }
 
   function openChat(
     firstMessage = ""
   ) {
     warmAiServer();
+    trackAppEvent("ai_chat_started", {
+      product: firstMessage
+    });
 
     const greeting =
       getGreeting();
@@ -4625,12 +4835,24 @@ function App() {
       "?text=" +
       encodeURIComponent(message);
 
+    if (!openExternal(url)) {
+      return;
+    }
+
+    trackMetaBrowserEvent("Contact");
+    trackAppEvent("whatsapp_click", {
+      product: productName || customerData?.interest || "Atendimento",
+      destination: analyst.name
+    });
+
+    if (!customerData?.name) {
+      trackMetaLead();
+    }
+
     recordServiceRequest(
       analystKey,
       productName || customerData?.interest || ""
     );
-
-    window.open(url, "_blank");
   }
 
   function openPartnerLink(
@@ -4775,6 +4997,11 @@ function App() {
             className="partner-notice-continue"
             onClick={() => {
               if (openExternal(product.url)) {
+                trackMetaLead();
+                trackAppEvent("partner_click", {
+                  product: product.name,
+                  destination: product.partner
+                });
                 recordSimulation(externalProduct);
                 setScreen(
                   externalReturnScreen || "direct"
