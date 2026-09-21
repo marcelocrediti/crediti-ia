@@ -1536,10 +1536,10 @@ header small {
 
 .shop-real-store-row {
   width: 100%;
-  min-height: 88px;
-  padding: 12px;
+  min-height: 92px;
+  padding: 14px 12px;
   display: grid;
-  grid-template-columns: 62px minmax(0, 1fr) auto;
+  grid-template-columns: 64px minmax(0, 1fr) auto;
   align-items: center;
   gap: 12px;
   border: 1px solid #dedede;
@@ -1556,9 +1556,9 @@ header small {
 }
 
 .shop-real-logo {
-  width: 62px;
-  height: 62px;
-  padding: 9px;
+  width: 64px;
+  height: 64px;
+  padding: 8px;
   display: grid;
   place-items: center;
   overflow: hidden;
@@ -1577,13 +1577,18 @@ header small {
 .shop-real-logo img {
   width: 42px;
   height: 42px;
+  max-width: 100%;
+  max-height: 100%;
   display: block;
   object-fit: contain;
+  object-position: center;
 }
 
 .shop-real-logo.wordmark img {
-  width: 52px;
-  height: 30px;
+  width: 100%;
+  height: auto;
+  max-width: 46px;
+  max-height: 30px;
 }
 
 .shop-real-logo.compact img {
@@ -1592,19 +1597,23 @@ header small {
 }
 
 .shop-real-store-copy {
+  min-width: 0;
   display: grid;
   gap: 5px;
+  align-content: center;
 }
 
 .shop-real-store-copy strong {
   font-size: 16px;
   font-weight: 900;
+  line-height: 1.15;
 }
 
 .shop-real-store-copy small {
   color: #777777;
   font-size: 12px;
   font-weight: 600;
+  line-height: 1.35;
 }
 
 .shop-real-action {
