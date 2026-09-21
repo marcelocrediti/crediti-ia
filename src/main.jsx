@@ -2180,6 +2180,12 @@ const SHOP_REAL_CATEGORIES = [
   }
 ];
 
+const crispBrandIcon = (domain) =>
+  `https://www.google.com/s2/favicons?domain_url=https://${domain}&sz=128`;
+
+const simpleBrandIcon = (slug) =>
+  `https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/${slug}.svg`;
+
 const SHOP_REAL_STORES = [
   {
     id: "shopee",
@@ -2193,7 +2199,9 @@ const SHOP_REAL_STORES = [
     id: "magalu",
     name: "Magalu",
     description: "Eletrônicos, casa, móveis e mais",
-    logo: "https://www.magazineluiza.com.br/favicon.ico",
+    logo: "https://wx.mlcdn.com.br/shared/magalu/logo-white.svg",
+    logoBackground: "#0086ff",
+    logoKind: "wordmark",
     url: MAGALU_STORE_URL,
     categories: ["familia", "casa", "presentes", "tecnologia"]
   },
@@ -2201,7 +2209,8 @@ const SHOP_REAL_STORES = [
     id: "shein",
     name: "SHEIN",
     description: "Moda, beleza, casa e acessórios",
-    logo: "https://www.shein.com/favicon.ico",
+    logo: "/shop-assets/logo-shein.svg",
+    logoKind: "wordmark",
     url: SHEIN_STORE_URL,
     categories: ["familia", "beleza", "casa", "presentes"]
   },
@@ -2209,7 +2218,7 @@ const SHOP_REAL_STORES = [
     id: "amazon",
     name: "Amazon",
     description: "Produtos, ofertas e lançamentos",
-    logo: "https://www.amazon.com.br/favicon.ico",
+    logo: simpleBrandIcon("amazon"),
     url: AMAZON_STORE_URL,
     categories: ["familia", "casa", "presentes", "tecnologia"]
   },
@@ -2218,6 +2227,7 @@ const SHOP_REAL_STORES = [
     name: "Avon",
     description: "Maquiagem, perfumes e cuidados",
     logo: "/shop-assets/logo-avon.svg",
+    logoKind: "wordmark",
     url: AVON_STORE_URL,
     categories: ["beleza", "presentes"]
   },
@@ -2226,6 +2236,7 @@ const SHOP_REAL_STORES = [
     name: "O Boticário",
     description: "Perfumaria, beleza e presentes",
     logo: "https://res.cloudinary.com/beleza-na-web/image/upload/f_svg,fl_progressive,q_auto:eco/v1/blz/assets-store/0.0.628/images/store/47/logo.svg",
+    logoKind: "wordmark",
     url: BOTICARIO_STORE_URL,
     categories: ["beleza", "presentes"]
   },
@@ -2233,15 +2244,27 @@ const SHOP_REAL_STORES = [
     id: "cacau-show",
     name: "Cacau Show",
     description: "Chocolates, presentes e experiências",
-    logo: "https://www.cacaushow.com.br/favicon.ico",
+    logo: "https://www.cacaushow.com.br/on/demandware.static/Sites-CacauShow-Site/-/default/dw30bc7053/svg/logo_cacau_show.svg",
+    logoBackground: "#2b160d",
+    logoKind: "wordmark",
     url: CACAU_SHOW_STORE_URL,
     categories: ["familia", "presentes"]
+  },
+  {
+    id: "natura",
+    name: "Natura",
+    description: "Perfumaria, beleza e presentes",
+    logo: crispBrandIcon("natura.com.br"),
+    logoKind: "compact",
+    url: NATURA_STORE_URL,
+    categories: ["beleza", "presentes"]
   },
   {
     id: "lojas-rede",
     name: "Lojas Rede",
     description: "Beleza e bem-estar",
     logo: "/shop-assets/logo-lojas-rede.svg",
+    logoKind: "wordmark",
     url: LOJAS_REDE_STORE_URL,
     categories: ["beleza", "presentes"]
   },
@@ -2253,6 +2276,238 @@ const SHOP_REAL_STORES = [
     url: AMOKARITE_STORE_URL,
     categories: ["beleza", "presentes"],
     darkLogo: true
+  },
+  {
+    id: "gazin",
+    name: "Gazin",
+    description: "Móveis, eletrodomésticos e tecnologia",
+    logo: crispBrandIcon("gazin.com.br"),
+    logoKind: "compact",
+    url: GAZIN_STORE_URL,
+    categories: ["familia", "casa", "tecnologia"]
+  },
+  {
+    id: "itatiaia",
+    name: "Itatiaia",
+    description: "Cozinhas, móveis e eletrodomésticos",
+    logo: crispBrandIcon("cozinhasitatiaia.com.br"),
+    logoKind: "compact",
+    url: ITATIAIA_STORE_URL,
+    categories: ["casa"]
+  },
+  {
+    id: "electrolux",
+    name: "Electrolux",
+    description: "Eletrodomésticos para sua casa",
+    logo: crispBrandIcon("electrolux.com.br"),
+    logoKind: "compact",
+    url: ELECTROLUX_STORE_URL,
+    categories: ["casa", "tecnologia"]
+  },
+  {
+    id: "polishop",
+    name: "Polishop",
+    description: "Casa, cozinha, beleza e bem-estar",
+    logo: crispBrandIcon("polishop.com.br"),
+    logoKind: "compact",
+    url: POLISHOP_STORE_URL,
+    categories: ["casa", "beleza", "tecnologia"]
+  },
+  {
+    id: "xiaomi",
+    name: "Xiaomi",
+    description: "Celulares, acessórios e casa inteligente",
+    logo: simpleBrandIcon("xiaomi"),
+    url: XIAOMI_STORE_URL,
+    categories: ["tecnologia", "presentes"]
+  },
+  {
+    id: "loja-mecanico",
+    name: "Loja do Mecânico",
+    description: "Ferramentas, máquinas e equipamentos",
+    logo: crispBrandIcon("lojadomecanico.com.br"),
+    url: LOJA_MECANICO_STORE_URL,
+    categories: ["casa", "tecnologia"]
+  },
+  {
+    id: "hipervarejo",
+    name: "Hipervarejo",
+    description: "Autopeças, pneus e acessórios",
+    logo: crispBrandIcon("hipervarejo.com.br"),
+    url: HIPERVAREJO_STORE_URL,
+    categories: ["tecnologia"]
+  },
+  {
+    id: "cea",
+    name: "C&A",
+    description: "Moda, acessórios e ofertas",
+    logo: crispBrandIcon("cea.com.br"),
+    url: CEA_STORE_URL,
+    categories: ["familia", "presentes"]
+  },
+  {
+    id: "colombo",
+    name: "Camisaria Colombo",
+    description: "Moda masculina e alfaiataria",
+    logo: crispBrandIcon("camisariacolombo.com.br"),
+    url: COLOMBO_STORE_URL,
+    categories: ["familia", "presentes"]
+  },
+  {
+    id: "malwee",
+    name: "Malwee",
+    description: "Moda para toda a família",
+    logo: crispBrandIcon("malwee.com.br"),
+    url: MALWEE_STORE_URL,
+    categories: ["familia", "presentes"]
+  },
+  {
+    id: "sawary",
+    name: "Sawary Jeans",
+    description: "Jeans e moda para todos os estilos",
+    logo: crispBrandIcon("sawary.com"),
+    url: SAWARY_STORE_URL,
+    categories: ["familia", "presentes"]
+  },
+  {
+    id: "maria-valentina",
+    name: "Maria.Valentina",
+    description: "Moda feminina sofisticada",
+    logo: crispBrandIcon("mariavalentina.com.br"),
+    logoKind: "compact",
+    url: MARIA_VALENTINA_STORE_URL,
+    categories: ["familia", "presentes"]
+  },
+  {
+    id: "la-luna",
+    name: "La Luna",
+    description: "Moda infantil com estilo e conforto",
+    logo: crispBrandIcon("lalunamodas.com.br"),
+    logoKind: "compact",
+    url: LALUNA_STORE_URL,
+    categories: ["familia", "presentes"]
+  },
+  {
+    id: "babystock",
+    name: "BabyStock",
+    description: "Roupas e acessórios para bebês",
+    logo: crispBrandIcon("babystock.com.br"),
+    url: BABYSTOCK_STORE_URL,
+    categories: ["familia", "presentes"]
+  },
+  {
+    id: "toy-mania",
+    name: "Toy Mania",
+    description: "Brinquedos, jogos e diversão",
+    logo: crispBrandIcon("toymania.com.br"),
+    logoKind: "compact",
+    url: TOY_MANIA_STORE_URL,
+    categories: ["familia", "presentes"]
+  },
+  {
+    id: "kidy",
+    name: "Kidy Calçados",
+    description: "Calçados infantis e acessórios",
+    logo: crispBrandIcon("kidy.com.br"),
+    logoKind: "compact",
+    url: KIDY_STORE_URL,
+    categories: ["familia", "presentes"]
+  },
+  {
+    id: "freeway",
+    name: "Freeway",
+    description: "Calçados masculinos e casuais",
+    logo: crispBrandIcon("lojafreeway.com.br"),
+    logoKind: "compact",
+    url: FREEWAY_STORE_URL,
+    categories: ["familia", "presentes"]
+  },
+  {
+    id: "sieno",
+    name: "Sieno Perfumes",
+    description: "Perfumes e fragrâncias importadas",
+    logo: crispBrandIcon("sieno.com.br"),
+    logoKind: "compact",
+    url: SIENO_STORE_URL,
+    categories: ["beleza", "presentes"]
+  },
+  {
+    id: "leloyn",
+    name: "Le'Loyn Parfums",
+    description: "Alta perfumaria e cosméticos",
+    logo: "https://leloynparfums.com.br/cdn/shop/files/LELOYN_3.png?format=webp&height=500&v=1779756377",
+    logoKind: "wordmark",
+    url: LELOYN_STORE_URL,
+    categories: ["beleza", "presentes"]
+  },
+  {
+    id: "fator5",
+    name: "Fator 5",
+    description: "Perfumes, aromas e presentes",
+    logo: "https://fazul.vtexassets.com/assets/vtex.file-manager-graphql/images/c0ddce84-adea-4c3a-869f-bd1042049db1___cc05e1c7915ae9ff51b6bca2ee0f2436.png",
+    url: FATOR5_STORE_URL,
+    categories: ["beleza", "presentes"]
+  },
+  {
+    id: "amakha",
+    name: "Amakha Paris",
+    description: "Perfumes, cabelos e cuidados pessoais",
+    logo: "https://amakha.vtexassets.com/assets/vtex/assets-builder/amakha.store-theme/5.0.176/icons/header/logo___fbe4abebb0b0ca4fe85b2cef6ff540ef.png",
+    logoKind: "wordmark",
+    url: AMAKHA_STORE_URL,
+    categories: ["beleza", "presentes"]
+  },
+  {
+    id: "biovittare",
+    name: "BioVittare",
+    description: "Manipulação, saúde e bem-estar",
+    logo: crispBrandIcon("biovittare.com.br"),
+    url: BIOVITTARE_STORE_URL,
+    categories: ["beleza"]
+  },
+  {
+    id: "promofarma",
+    name: "PromoFarma",
+    description: "Farmácia, saúde e cuidados diários",
+    logo: "https://promofarma.vtexassets.com/assets/vtex.file-manager-graphql/images/5662976c-b6e6-4566-98a0-4c49483591ae___fc8293708e1449edc050289617c5b5b0.svg",
+    logoKind: "wordmark",
+    url: PROMOFARMA_STORE_URL,
+    categories: ["beleza"]
+  },
+  {
+    id: "komo",
+    name: "Komo Wellness",
+    description: "Tratamentos e bem-estar",
+    logo: crispBrandIcon("br.komowellness.com"),
+    logoKind: "compact",
+    url: KOMO_STORE_URL,
+    categories: ["beleza"]
+  },
+  {
+    id: "cicatrissim",
+    name: "CicatriSSim",
+    description: "Cuidados com a pele e o corpo",
+    logo: "https://cdn.awsli.com.br/400x300/967/967817/logo/bb80da4bba.png",
+    logoKind: "wordmark",
+    url: CICATRISSIM_STORE_URL,
+    categories: ["beleza"]
+  },
+  {
+    id: "todovino",
+    name: "TodoVino",
+    description: "Vinhos e espumantes selecionados",
+    logo: crispBrandIcon("todovino.com.br"),
+    url: TODOVINO_STORE_URL,
+    categories: ["presentes"]
+  },
+  {
+    id: "casa-aliancas",
+    name: "Casa das Alianças",
+    description: "Joias, alianças e relógios",
+    logo: crispBrandIcon("casadasaliancas.com.br"),
+    logoKind: "compact",
+    url: CASA_ALIANCAS_STORE_URL,
+    categories: ["presentes"]
   }
 ];
 
@@ -2365,16 +2620,19 @@ function ShopExperience({ onNavigate }) {
         <section className="shop-real-section" id="shop-real-stores">
           <div className="shop-real-section-heading">
             <h2>Marcas que você conhece</h2>
-            <button
-              onClick={() => {
-                setCategory("todos");
-                setQuery("");
-                setShowAllStores((current) => !current);
-              }}
-              aria-expanded={showAllStores}
-            >
-              {showAllStores ? "Ver menos" : "Ver todas"}
-            </button>
+            <div className="shop-real-heading-actions">
+              <span>{filteredStores.length} {filteredStores.length === 1 ? "loja" : "lojas"}</span>
+              <button
+                onClick={() => {
+                  setCategory("todos");
+                  setQuery("");
+                  setShowAllStores((current) => !current);
+                }}
+                aria-expanded={showAllStores}
+              >
+                {showAllStores ? "Ver menos" : "Ver todas"}
+              </button>
+            </div>
           </div>
 
           <div className="shop-real-store-list">
@@ -2384,14 +2642,19 @@ function ShopExperience({ onNavigate }) {
                 className="shop-real-store-row"
                 onClick={() => openExternal(store.url)}
               >
-                <span className={`shop-real-logo ${store.darkLogo ? "dark" : ""}`}>
+                <span
+                  className={`shop-real-logo ${store.darkLogo ? "dark" : ""} ${store.logoKind || ""}`}
+                  style={store.logoBackground ? { backgroundColor: store.logoBackground } : undefined}
+                >
                   <img src={store.logo} alt={`Logo oficial ${store.name}`} />
                 </span>
                 <span className="shop-real-store-copy">
                   <strong>{store.name}</strong>
                   <small>{store.description}</small>
                 </span>
-                <span className="shop-real-chevron" aria-hidden="true">›</span>
+                <span className="shop-real-action" aria-hidden="true">
+                  <b>Abrir</b><span>›</span>
+                </span>
               </button>
             ))}
 
@@ -2425,7 +2688,12 @@ function ShopExperience({ onNavigate }) {
             <div className="shop-real-mall-stores" aria-label="Lojas em destaque">
               {SHOP_REAL_STORES.slice(0, 4).map((store) => (
                 <button key={store.id} onClick={() => openExternal(store.url)}>
-                  <img src={store.logo} alt={`Logo oficial ${store.name}`} />
+                  <span
+                    className={`shop-real-mall-logo ${store.logoKind || ""}`}
+                    style={store.logoBackground ? { backgroundColor: store.logoBackground } : undefined}
+                  >
+                    <img src={store.logo} alt={`Logo oficial ${store.name}`} />
+                  </span>
                   <span>{store.name}</span>
                 </button>
               ))}

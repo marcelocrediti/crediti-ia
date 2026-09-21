@@ -18,15 +18,15 @@
 - Browser viewport capture: 1348 × 926 CSS pixels, DPR 1.
 - Full-page implementation: 1348 × 2025 pixels.
 - Comparison normalized both images to 1200 pixels of height and placed them in one side-by-side artifact.
-- State: Shop landing page, no active search or category filter, first seven brands visible.
+- State: Shop landing page, no active search or category filter, first seven brands visible; expanded catalog verified with 37 stores.
 
 ## Findings
 
 - No actionable P0, P1, or P2 issues remain.
 - The inactive regional-partner callout was removed. Its space now presents a photographic shopping gallery with four direct, functional store choices.
-- “Ver todas” expands the store list from seven to nine brands and changes to “Ver menos”; the second activation collapses the list again.
-- The priority order is Shopee, Magalu, SHEIN, Amazon, Avon, O Boticário and Cacau Show, followed by Lojas Rede and AmoKarité in the expanded state.
-- All visible logos load successfully. Avon uses the official wordmark captured from its official site. O Boticário uses the official store logo served by the brand’s production image CDN.
+- “Ver todas” expands the store list from seven to all 37 registered brands and changes to “Ver menos”; the second activation collapses the list again.
+- The priority order is Shopee, Magalu, SHEIN, Amazon, Avon, O Boticário and Cacau Show. The remaining 30 registered stores stay available in the expanded state.
+- All 37 rendered logos returned nonzero intrinsic dimensions in the browser check. Magalu, SHEIN, Avon, O Boticário, Cacau Show, Amakha Paris, PromoFarma, CicatriSSim, Le’Loyn and Fator 5 use official brand assets. Incorrect La Luna, Freeway and Le’Loyn domains were corrected.
 - At maximum scroll, the affiliate notice ends 15 CSS pixels above the fixed navigation, with no large blank footer area.
 
 ## Required fidelity surfaces
@@ -40,7 +40,7 @@
 ## Primary interactions tested
 
 - Opened Shop from the persistent navigation.
-- Expanded and collapsed “Ver todas”; verified 7 → 9 → 7 brand rows and the “Ver menos” state.
+- Expanded and collapsed “Ver todas”; verified 7 → 37 → 7 brand rows and the “Ver menos” state.
 - Selected “Beleza”; verified SHEIN, Avon, O Boticário, Lojas Rede and AmoKarité.
 - Cleared the category filter.
 - Searched “Amazon”; verified a single matching row.
@@ -66,6 +66,8 @@
 
 - Earlier iteration: the footer had a P2 excessive blank region caused by duplicate navigation spacing. The existing override removed the duplicate reserve; the current maximum-scroll measurement confirms a 15-pixel gap.
 - Current iteration: the first pass found a P1 broken Avon favicon and a P2 incorrect O Boticário cart favicon. Avon was replaced with its official wordmark and O Boticário with the official production logo. Post-fix browser checks reported zero failed images.
+- Current catalog pass restored the 28 previously omitted registrations, verified 37 rendered rows, replaced generic globe icons with official brand assets where available, and added a high-contrast yellow “ABRIR” control to every row.
+- Post-fix production build and stability checks passed. Three newly substituted official assets returned HTTP 200 with valid PNG/SVG MIME types; Fator 5 had already loaded successfully in the browser pass.
 - Current interaction pass found no remaining P0/P1/P2 issue.
 
 ## Follow-up polish
@@ -79,6 +81,7 @@
 - [x] Priority brands placed first.
 - [x] “Ver todas” and “Ver menos” tested.
 - [x] Official logos visually and programmatically checked.
+- [x] All 37 registered stores restored in the expanded catalog.
 - [x] Search and category filtering tested.
 - [x] Bottom spacing measured.
 - [x] Production build completed successfully.
