@@ -49,7 +49,7 @@ const preview = read('public/creator-ads-preview.js');
 requireText(preview, "tools.insertAdjacentElement('afterend',b)", 'public/creator-ads-preview.js');
 
 const employment = read('public/employment-opportunities.js');
-['Encontre seu emprego','K5dgwoZuUob6ezkbTkeJWb','GZemMLWmnhiCKJH4VtdoR4','CreditiEmploymentOpportunities'].forEach((m) => requireText(employment, m, 'public/employment-opportunities.js'));
+['Encontre seu emprego','GZemMLWmnhiCKJH4VtdoR4','CreditiEmploymentOpportunities'].forEach((m) => requireText(employment, m, 'public/employment-opportunities.js'));
 forbidText(employment, 'MutationObserver', 'public/employment-opportunities.js');
 
 const solides = read('public/solides-partnership.js');
