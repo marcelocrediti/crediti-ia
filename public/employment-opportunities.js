@@ -3,11 +3,6 @@
   const STYLE_ID = 'crediti-employment-opportunities-style';
   const LINKS = [
     {
-      title: 'Vagas e oportunidades 1',
-      description: 'Acesse o grupo e acompanhe vagas compartilhadas no WhatsApp.',
-      url: 'https://chat.whatsapp.com/K5dgwoZuUob6ezkbTkeJWb'
-    },
-    {
       title: 'Vagas e oportunidades 2',
       description: 'Entre no grupo e veja novas oportunidades de trabalho pelo WhatsApp.',
       url: 'https://chat.whatsapp.com/GZemMLWmnhiCKJH4VtdoR4?s=sw&p=a&mlu=4&ilr=4'
