@@ -1272,7 +1272,8 @@ header small {
 }
 
 /* Shop Crediti: vitrine real com fotos e logos oficiais. */
-.shop-real-app {
+.app-with-nav.shop-real-app {
+  padding-bottom: 0;
   background: #ffffff;
 }
 
@@ -1337,7 +1338,7 @@ header small {
 }
 
 .shop-real-page {
-  padding: 16px 16px 118px;
+  padding: 16px 16px calc(100px + env(safe-area-inset-bottom));
   display: grid;
   gap: 28px;
   background: #ffffff;

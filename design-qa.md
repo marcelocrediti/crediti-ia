@@ -3,6 +3,7 @@
 **Source visual truth path**
 
 - `/workspace/scratch/4edd461a4510/upload/FD8B6402-C172-4B47-9152-5CE1ECA13E8F.jpeg`
+- `/workspace/scratch/4edd461a4510/upload/IMG_3210.jpeg` (evidência do espaço excessivo no fim da rolagem)
 
 **Implementation evidence**
 
@@ -21,6 +22,7 @@
 ## Findings
 
 - No actionable P0, P1, or P2 issues remain.
+- The excessive blank area between the affiliate notice and the fixed navigation was removed. At the end of the scroll, the measured visible gap is now 15 CSS pixels.
 - The implementation preserves the selected direction: strong yellow Shop header, prominent search, realistic shopping hero, five photographic categories, official brand rows, nearby-partner banner, and fixed app navigation.
 - The existing Crediti five-item navigation is intentionally retained instead of copying the four-item mock navigation. This keeps the Shop consistent with the rest of the live product.
 - The profile and hamburger controls shown in the concept are not duplicated because those destinations already live in the app’s established navigation model. This is an intentional product constraint, not a fidelity defect.
@@ -55,10 +57,12 @@
 ## Focused-region comparison evidence
 
 - The store list and nearby banner were captured separately in the browser. Shopee, Lojas Rede, and AmoKarité marks render clearly with their official artwork, correct aspect ratios, and adequate contrast.
+- The user-provided bottom-of-scroll screenshot and the corrected browser-rendered bottom state were opened together. The duplicate 98-pixel navigation reservation is absent in the corrected state, and the notice now finishes naturally above the fixed navigation.
 
 ## Comparison history
 
 - Initial rendered pass found no P0/P1/P2 mismatch requiring a code change. Functional checks and a focused logo/banner pass confirmed the result.
+- Iteration 2: user evidence exposed a P2 spacing regression at the bottom of the Shop. `.app-with-nav` added 98 pixels after `.shop-real-page` had already reserved space for the fixed navigation. The fix changed the override to `.app-with-nav.shop-real-app { padding-bottom: 0; }` and set the page reserve to `calc(100px + env(safe-area-inset-bottom))`. Post-fix browser evidence measured a 15-pixel gap between the notice and the navigation, with the page scrolled to its exact maximum.
 
 ## Follow-up polish
 
@@ -72,5 +76,6 @@
 - [x] Search, filters, CTA, and internal navigation tested.
 - [x] Production build completed successfully.
 - [x] Console checked.
+- [x] Bottom-of-scroll spacing corrected and measured in the browser.
 
 final result: passed
