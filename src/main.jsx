@@ -349,7 +349,7 @@ const AMOKARITE_STORE_URL =
   "https://compre.vc/aI5Y0gg8RE01";
 
 const LOJAS_REDE_STORE_URL =
-  "https://compre.vc/aI5Y0gg8RE01";
+  "https://acesse.vc/Sai99P3i3v07";
 
 const SIENO_STORE_URL =
   "https://compre.vc/GBUaEiswDUZE";
@@ -2146,6 +2146,225 @@ function AppHeader({
         )}
       </div>
     </header>
+  );
+}
+
+const SHOP_REAL_CATEGORIES = [
+  {
+    id: "familia",
+    label: "Família",
+    image: "/shop-assets/category-family.webp"
+  },
+  {
+    id: "beleza",
+    label: "Beleza",
+    image: "/shop-assets/category-beauty.webp"
+  },
+  {
+    id: "casa",
+    label: "Casa",
+    image: "/shop-assets/category-home.webp"
+  },
+  {
+    id: "presentes",
+    label: "Presentes",
+    image: "/shop-assets/category-gifts.webp"
+  },
+  {
+    id: "tecnologia",
+    label: "Tecnologia",
+    image: "/shop-assets/category-technology.webp"
+  }
+];
+
+const SHOP_REAL_STORES = [
+  {
+    id: "shopee",
+    name: "Shopee",
+    description: "Eletrônicos, moda, casa e mais",
+    logo: "/shop-assets/logo-shopee.png",
+    url: SHOPEE_STORE_URL,
+    categories: ["familia", "casa", "presentes", "tecnologia"]
+  },
+  {
+    id: "lojas-rede",
+    name: "Lojas Rede",
+    description: "Beleza e bem-estar",
+    logo: "/shop-assets/logo-lojas-rede.svg",
+    url: LOJAS_REDE_STORE_URL,
+    categories: ["beleza", "presentes"]
+  },
+  {
+    id: "amokarite",
+    name: "AmoKarité",
+    description: "Beleza e cuidados pessoais",
+    logo: "/shop-assets/logo-amokarite.png",
+    url: AMOKARITE_STORE_URL,
+    categories: ["beleza", "presentes"],
+    darkLogo: true
+  }
+];
+
+function ShopExperience({ onNavigate }) {
+  const [query, setQuery] = useState("");
+  const [category, setCategory] = useState("todos");
+  const normalizedQuery = normalizeAppSearch(query);
+
+  const visibleStores = SHOP_REAL_STORES.filter((store) => {
+    const matchesCategory =
+      category === "todos" ||
+      store.categories.includes(category);
+
+    const matchesQuery =
+      !normalizedQuery ||
+      normalizeAppSearch(
+        `${store.name} ${store.description}`
+      ).includes(normalizedQuery);
+
+    return matchesCategory && matchesQuery;
+  });
+
+  const selectCategory = (id) => {
+    setCategory(id);
+    setQuery("");
+    window.requestAnimationFrame(() => {
+      document
+        .getElementById("shop-real-stores")
+        ?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  };
+
+  return (
+    <div className="app app-white app-with-nav shop-real-app">
+      <header className="shop-real-header">
+        <div className="shop-real-title">
+          <strong>Shop Crediti</strong>
+          <span>Compras em lojas parceiras</span>
+        </div>
+
+        <label className="shop-real-search">
+          <UiIcon name="search" />
+          <input
+            type="search"
+            value={query}
+            onChange={(event) => {
+              setQuery(event.target.value);
+              setCategory("todos");
+            }}
+            placeholder="Busque lojas e categorias"
+            aria-label="Busque lojas e categorias"
+          />
+        </label>
+      </header>
+
+      <main className="shop-real-page">
+        <section className="shop-real-hero">
+          <img
+            src="/shop-assets/hero-shop-crediti.webp"
+            alt="Mulher fazendo compras em um shopping"
+            loading="eager"
+            fetchPriority="high"
+          />
+          <div className="shop-real-hero-shade" />
+          <div className="shop-real-hero-copy">
+            <h1>Compre do seu jeito</h1>
+            <p>Mais marcas e possibilidades para o seu dia a dia.</p>
+            <button
+              onClick={() =>
+                document
+                  .getElementById("shop-real-stores")
+                  ?.scrollIntoView({ behavior: "smooth", block: "start" })
+              }
+            >
+              Conhecer o Shop <span aria-hidden="true">›</span>
+            </button>
+          </div>
+        </section>
+
+        <section className="shop-real-section">
+          <div className="shop-real-section-heading">
+            <h2>Explore por categoria</h2>
+            <button onClick={() => selectCategory("todos")}>Ver todas</button>
+          </div>
+
+          <div className="shop-real-categories" aria-label="Categorias do Shop">
+            {SHOP_REAL_CATEGORIES.map((item) => (
+              <button
+                key={item.id}
+                className={category === item.id ? "active" : ""}
+                onClick={() => selectCategory(item.id)}
+                aria-pressed={category === item.id}
+              >
+                <img src={item.image} alt="" loading="lazy" />
+                <strong>{item.label}</strong>
+              </button>
+            ))}
+          </div>
+        </section>
+
+        <section className="shop-real-section" id="shop-real-stores">
+          <div className="shop-real-section-heading">
+            <h2>Marcas que você conhece</h2>
+            <button onClick={() => selectCategory("todos")}>Ver todas</button>
+          </div>
+
+          <div className="shop-real-store-list">
+            {visibleStores.map((store) => (
+              <button
+                key={store.id}
+                className="shop-real-store-row"
+                onClick={() => openExternal(store.url)}
+              >
+                <span className={`shop-real-logo ${store.darkLogo ? "dark" : ""}`}>
+                  <img src={store.logo} alt={`Logo oficial ${store.name}`} />
+                </span>
+                <span className="shop-real-store-copy">
+                  <strong>{store.name}</strong>
+                  <small>{store.description}</small>
+                </span>
+                <span className="shop-real-chevron" aria-hidden="true">›</span>
+              </button>
+            ))}
+
+            {visibleStores.length === 0 && (
+              <div className="shop-real-empty">
+                <strong>Nenhuma loja encontrada</strong>
+                <p>Tente outra busca ou veja todas as categorias.</p>
+                <button onClick={() => {
+                  setQuery("");
+                  setCategory("todos");
+                }}>
+                  VER TODAS AS LOJAS
+                </button>
+              </div>
+            )}
+          </div>
+        </section>
+
+        <section className="shop-real-nearby">
+          <img
+            src="/shop-assets/near-you-shopping.webp"
+            alt="Galeria de lojas e parceiros"
+            loading="lazy"
+          />
+          <div className="shop-real-nearby-shade" />
+          <div>
+            <h2>Perto de você</h2>
+            <strong>Encontre parceiros da sua região</strong>
+            <p>Lojas, serviços e experiências mais perto de você.</p>
+            <button onClick={() => onNavigate("services")} aria-label="Abrir serviços e parceiros">
+              ›
+            </button>
+          </div>
+        </section>
+
+        <p className="shop-real-notice">
+          A compra é concluída no ambiente da loja parceira. A Crediti pode receber comissão por compras realizadas pelos links do Shop.
+        </p>
+      </main>
+
+      <BottomNav active="shop" onNavigate={onNavigate} />
+    </div>
   );
 }
 
@@ -6457,6 +6676,9 @@ function App() {
   }
 
   if (screen === "shop") {
+    return <ShopExperience onNavigate={navigateMain} />;
+
+    /* Estrutura anterior preservada temporariamente para rollback seguro. */
     return (
       <div className="app app-white app-with-nav">
         <AppHeader
