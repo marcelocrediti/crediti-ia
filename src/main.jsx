@@ -363,6 +363,9 @@ const AMAKHA_STORE_URL =
 const CACAU_SHOW_STORE_URL =
   "https://compre.vc/chUDdUuBAOBU";
 
+const BOTICARIO_STORE_URL =
+  "https://www.boticario.com.br/";
+
 const COLOMBO_STORE_URL =
   "https://compre.vc/AlHR2L4TKTp6";
 
@@ -2187,6 +2190,54 @@ const SHOP_REAL_STORES = [
     categories: ["familia", "casa", "presentes", "tecnologia"]
   },
   {
+    id: "magalu",
+    name: "Magalu",
+    description: "Eletrônicos, casa, móveis e mais",
+    logo: "https://www.magazineluiza.com.br/favicon.ico",
+    url: MAGALU_STORE_URL,
+    categories: ["familia", "casa", "presentes", "tecnologia"]
+  },
+  {
+    id: "shein",
+    name: "SHEIN",
+    description: "Moda, beleza, casa e acessórios",
+    logo: "https://www.shein.com/favicon.ico",
+    url: SHEIN_STORE_URL,
+    categories: ["familia", "beleza", "casa", "presentes"]
+  },
+  {
+    id: "amazon",
+    name: "Amazon",
+    description: "Produtos, ofertas e lançamentos",
+    logo: "https://www.amazon.com.br/favicon.ico",
+    url: AMAZON_STORE_URL,
+    categories: ["familia", "casa", "presentes", "tecnologia"]
+  },
+  {
+    id: "avon",
+    name: "Avon",
+    description: "Maquiagem, perfumes e cuidados",
+    logo: "/shop-assets/logo-avon.svg",
+    url: AVON_STORE_URL,
+    categories: ["beleza", "presentes"]
+  },
+  {
+    id: "boticario",
+    name: "O Boticário",
+    description: "Perfumaria, beleza e presentes",
+    logo: "https://res.cloudinary.com/beleza-na-web/image/upload/f_svg,fl_progressive,q_auto:eco/v1/blz/assets-store/0.0.628/images/store/47/logo.svg",
+    url: BOTICARIO_STORE_URL,
+    categories: ["beleza", "presentes"]
+  },
+  {
+    id: "cacau-show",
+    name: "Cacau Show",
+    description: "Chocolates, presentes e experiências",
+    logo: "https://www.cacaushow.com.br/favicon.ico",
+    url: CACAU_SHOW_STORE_URL,
+    categories: ["familia", "presentes"]
+  },
+  {
     id: "lojas-rede",
     name: "Lojas Rede",
     description: "Beleza e bem-estar",
@@ -2208,9 +2259,10 @@ const SHOP_REAL_STORES = [
 function ShopExperience({ onNavigate }) {
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState("todos");
+  const [showAllStores, setShowAllStores] = useState(false);
   const normalizedQuery = normalizeAppSearch(query);
 
-  const visibleStores = SHOP_REAL_STORES.filter((store) => {
+  const filteredStores = SHOP_REAL_STORES.filter((store) => {
     const matchesCategory =
       category === "todos" ||
       store.categories.includes(category);
@@ -2224,9 +2276,15 @@ function ShopExperience({ onNavigate }) {
     return matchesCategory && matchesQuery;
   });
 
+  const visibleStores =
+    showAllStores || normalizedQuery || category !== "todos"
+      ? filteredStores
+      : filteredStores.slice(0, 7);
+
   const selectCategory = (id) => {
     setCategory(id);
     setQuery("");
+    setShowAllStores(false);
     window.requestAnimationFrame(() => {
       document
         .getElementById("shop-real-stores")
@@ -2284,7 +2342,9 @@ function ShopExperience({ onNavigate }) {
         <section className="shop-real-section">
           <div className="shop-real-section-heading">
             <h2>Explore por categoria</h2>
-            <button onClick={() => selectCategory("todos")}>Ver todas</button>
+            {category !== "todos" && (
+              <button onClick={() => selectCategory("todos")}>Limpar filtro</button>
+            )}
           </div>
 
           <div className="shop-real-categories" aria-label="Categorias do Shop">
@@ -2305,7 +2365,16 @@ function ShopExperience({ onNavigate }) {
         <section className="shop-real-section" id="shop-real-stores">
           <div className="shop-real-section-heading">
             <h2>Marcas que você conhece</h2>
-            <button onClick={() => selectCategory("todos")}>Ver todas</button>
+            <button
+              onClick={() => {
+                setCategory("todos");
+                setQuery("");
+                setShowAllStores((current) => !current);
+              }}
+              aria-expanded={showAllStores}
+            >
+              {showAllStores ? "Ver menos" : "Ver todas"}
+            </button>
           </div>
 
           <div className="shop-real-store-list">
@@ -2333,6 +2402,7 @@ function ShopExperience({ onNavigate }) {
                 <button onClick={() => {
                   setQuery("");
                   setCategory("todos");
+                  setShowAllStores(true);
                 }}>
                   VER TODAS AS LOJAS
                 </button>
@@ -2344,17 +2414,22 @@ function ShopExperience({ onNavigate }) {
         <section className="shop-real-nearby">
           <img
             src="/shop-assets/near-you-shopping.webp"
-            alt="Galeria de lojas e parceiros"
+            alt="Galeria de lojas do Shop Crediti"
             loading="lazy"
           />
           <div className="shop-real-nearby-shade" />
           <div>
-            <h2>Perto de você</h2>
-            <strong>Encontre parceiros da sua região</strong>
-            <p>Lojas, serviços e experiências mais perto de você.</p>
-            <button onClick={() => onNavigate("services")} aria-label="Abrir serviços e parceiros">
-              ›
-            </button>
+            <h2>SHOP CREDITI</h2>
+            <strong>Um shopping inteiro na sua mão</strong>
+            <p>Escolha uma loja e continue seu passeio.</p>
+            <div className="shop-real-mall-stores" aria-label="Lojas em destaque">
+              {SHOP_REAL_STORES.slice(0, 4).map((store) => (
+                <button key={store.id} onClick={() => openExternal(store.url)}>
+                  <img src={store.logo} alt={`Logo oficial ${store.name}`} />
+                  <span>{store.name}</span>
+                </button>
+              ))}
+            </div>
           </div>
         </section>
 

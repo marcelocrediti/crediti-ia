@@ -8,74 +8,79 @@
 **Implementation evidence**
 
 - Local preview: `http://terminal.local:4173/`
-- Browser-rendered capture: Cloud Browser tab 3, Shop screen, top viewport
-- Focused browser-rendered capture: Cloud Browser tab 3, official store-logo list and “Perto de você” region
+- Browser-rendered screenshot: `/workspace/scratch/4edd461a4510/shop-browser-full.jpg`
+- Focused bottom-state screenshot: `/workspace/scratch/4edd461a4510/shop-browser-final.jpg`
+- Combined comparison: `/workspace/scratch/4edd461a4510/shop-qa-comparison.jpg`
 
 **Viewport and normalization**
 
-- Source pixels: 710 × 1536, mobile portrait reference.
-- Browser capture: 1363 × 936 CSS pixels, device pixel ratio 1.
-- Mobile responsive state was also rendered inside a 430 × 900 CSS-pixel iframe and inspected through the browser DOM. The cloud capture service timed out while rasterizing the iframe, so the browser screenshot evidence is the desktop-responsive view and the mobile evidence is rendered DOM inspection.
-- Density normalization: none required for the browser capture (DPR 1). The source was treated as a visual direction rather than a pixel-identical device frame because the existing Crediti app retains its five-item navigation and responsive desktop container.
-- State: Shop landing page, no active search or category filter.
+- Source: 711 × 1536 pixels, mobile portrait, 72 dpi.
+- Browser viewport capture: 1348 × 926 CSS pixels, DPR 1.
+- Full-page implementation: 1348 × 2025 pixels.
+- Comparison normalized both images to 1200 pixels of height and placed them in one side-by-side artifact.
+- State: Shop landing page, no active search or category filter, first seven brands visible.
 
 ## Findings
 
 - No actionable P0, P1, or P2 issues remain.
-- The excessive blank area between the affiliate notice and the fixed navigation was removed. At the end of the scroll, the measured visible gap is now 15 CSS pixels.
-- The implementation preserves the selected direction: strong yellow Shop header, prominent search, realistic shopping hero, five photographic categories, official brand rows, nearby-partner banner, and fixed app navigation.
-- The existing Crediti five-item navigation is intentionally retained instead of copying the four-item mock navigation. This keeps the Shop consistent with the rest of the live product.
-- The profile and hamburger controls shown in the concept are not duplicated because those destinations already live in the app’s established navigation model. This is an intentional product constraint, not a fidelity defect.
+- The inactive regional-partner callout was removed. Its space now presents a photographic shopping gallery with four direct, functional store choices.
+- “Ver todas” expands the store list from seven to nine brands and changes to “Ver menos”; the second activation collapses the list again.
+- The priority order is Shopee, Magalu, SHEIN, Amazon, Avon, O Boticário and Cacau Show, followed by Lojas Rede and AmoKarité in the expanded state.
+- All visible logos load successfully. Avon uses the official wordmark captured from its official site. O Boticário uses the official store logo served by the brand’s production image CDN.
+- At maximum scroll, the affiliate notice ends 15 CSS pixels above the fixed navigation, with no large blank footer area.
 
 ## Required fidelity surfaces
 
-- **Fonts and typography:** hierarchy, heavy display weight, readable supporting copy, line wrapping, and compact labels match the reference direction. No clipping or truncation was observed.
-- **Spacing and layout rhythm:** header, search, hero, section headings, category tiles, store list, nearby banner, and persistent navigation preserve a clear mobile-first rhythm. Desktop expansion is centered and does not distort the core composition.
-- **Colors and visual tokens:** Crediti yellow, white surfaces, black text, soft borders, and low-elevation shadows match the selected visual and the existing application tokens.
-- **Image quality and asset fidelity:** all photographic regions use dedicated high-resolution raster assets. Store marks use official Shopee, Lojas Rede, and AmoKarité logo files; no generated or hand-drawn substitute logos are used.
-- **Copy and content:** “Shop Crediti,” search prompt, hero message, five categories, three partner descriptions, nearby-partner message, and affiliate notice are complete and appropriate for the production app.
+- **Fonts and typography:** heavy display headings, compact labels and supporting copy retain the selected visual hierarchy without clipping.
+- **Spacing and layout rhythm:** hero, categories, store rows, shopping-gallery panel and notice have consistent spacing and rounded surfaces. The fixed navigation remains stable.
+- **Colors and visual tokens:** Crediti yellow, white surfaces, black text and subtle borders/shadows stay aligned with the chosen direction.
+- **Image quality and asset fidelity:** photographic hero, category images and gallery image are sharp. Store marks are official assets, not drawn approximations.
+- **Copy and content:** the former local-partner promise was replaced by “Um shopping inteiro na sua mão”, which accurately describes the functional store sequence.
 
 ## Primary interactions tested
 
 - Opened Shop from the persistent navigation.
-- Searched for “rede”; only Lojas Rede remained.
-- Selected “Beleza”; Lojas Rede and AmoKarité remained.
-- Cleared filters with “Ver todas.”
-- Used “Conhecer o Shop” to move to the partner list.
-- Used “Abrir serviços e parceiros” to navigate to Serviços and returned to Shop.
-- Verified the empty-state implementation exists for unmatched searches.
+- Expanded and collapsed “Ver todas”; verified 7 → 9 → 7 brand rows and the “Ver menos” state.
+- Selected “Beleza”; verified SHEIN, Avon, O Boticário, Lojas Rede and AmoKarité.
+- Cleared the category filter.
+- Searched “Amazon”; verified a single matching row.
+- Verified four enabled store buttons in the shopping-gallery panel.
+- Verified every rendered brand image has a nonzero natural width and height.
 
 ## Console check
 
-- No application errors or warnings were observed.
-- The only logged errors came from the cloud-browser extension metadata bridge and were unrelated to the Crediti application.
+- No Crediti application errors were observed.
+- Logged errors came only from the cloud-browser extension metadata bridge and are unrelated to the application.
 
 ## Full-view comparison evidence
 
-- The source and browser-rendered top view were opened together in one comparison pass. Hero balance, section hierarchy, photographic treatment, yellow/black palette, and category rhythm are visibly aligned.
+- The combined comparison shows the implementation preserves the strong yellow header, search-first hierarchy, realistic shopping photography, category strip, official brand list and fixed navigation from the selected source direction.
+- The implementation intentionally keeps the existing Crediti five-item navigation and responsive desktop container.
 
 ## Focused-region comparison evidence
 
-- The store list and nearby banner were captured separately in the browser. Shopee, Lojas Rede, and AmoKarité marks render clearly with their official artwork, correct aspect ratios, and adequate contrast.
-- The user-provided bottom-of-scroll screenshot and the corrected browser-rendered bottom state were opened together. The duplicate 98-pixel navigation reservation is absent in the corrected state, and the notice now finishes naturally above the fixed navigation.
+- The focused lower-state capture shows the final brand rows, the shopping-gallery image with four store cards, the disclosure notice and the fixed navigation together.
+- No separate focused crop was required for logos because their intrinsic image dimensions and rendered load state were also checked directly in the browser.
 
 ## Comparison history
 
-- Initial rendered pass found no P0/P1/P2 mismatch requiring a code change. Functional checks and a focused logo/banner pass confirmed the result.
-- Iteration 2: user evidence exposed a P2 spacing regression at the bottom of the Shop. `.app-with-nav` added 98 pixels after `.shop-real-page` had already reserved space for the fixed navigation. The fix changed the override to `.app-with-nav.shop-real-app { padding-bottom: 0; }` and set the page reserve to `calc(100px + env(safe-area-inset-bottom))`. Post-fix browser evidence measured a 15-pixel gap between the notice and the navigation, with the page scrolled to its exact maximum.
+- Earlier iteration: the footer had a P2 excessive blank region caused by duplicate navigation spacing. The existing override removed the duplicate reserve; the current maximum-scroll measurement confirms a 15-pixel gap.
+- Current iteration: the first pass found a P1 broken Avon favicon and a P2 incorrect O Boticário cart favicon. Avon was replaced with its official wordmark and O Boticário with the official production logo. Post-fix browser checks reported zero failed images.
+- Current interaction pass found no remaining P0/P1/P2 issue.
 
 ## Follow-up polish
 
-- P3: a future iteration may add the concept’s profile/menu shortcuts if those controls become part of the app-wide header system.
+- P3: locally cache additional official brand assets in a future maintenance pass to reduce dependence on partner CDNs.
 
 ## Implementation checklist
 
-- [x] Selected visual direction implemented.
-- [x] Official store logos used.
-- [x] Responsive layout rendered in the cloud browser.
-- [x] Search, filters, CTA, and internal navigation tested.
+- [x] Inactive regional-partner CTA removed.
+- [x] Shopping-gallery store sequence added.
+- [x] Priority brands placed first.
+- [x] “Ver todas” and “Ver menos” tested.
+- [x] Official logos visually and programmatically checked.
+- [x] Search and category filtering tested.
+- [x] Bottom spacing measured.
 - [x] Production build completed successfully.
-- [x] Console checked.
-- [x] Bottom-of-scroll spacing corrected and measured in the browser.
 
 final result: passed
