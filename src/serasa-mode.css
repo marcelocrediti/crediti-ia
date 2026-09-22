@@ -442,6 +442,22 @@
   object-position: center;
 }
 
+.education-partner-carousel .career-card:not(.idomed) .career-logo-frame img {
+  width: 100% !important;
+  height: 36px !important;
+  max-width: 100% !important;
+  max-height: 36px !important;
+  object-fit: contain !important;
+}
+
+.education-partner-carousel .career-card.idomed .career-logo-frame img {
+  width: 38px !important;
+  height: 38px !important;
+  max-width: 38px !important;
+  max-height: 38px !important;
+  object-fit: contain !important;
+}
+
 /* As quatro imagens abaixo já contêm o nome completo da instituição. */
 .career-card.estacio .career-brand > b,
 .career-card.wyden .career-brand > b,
