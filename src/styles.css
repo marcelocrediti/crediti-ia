@@ -17,15 +17,26 @@ html,
 body,
 #root {
   width: 100%;
+  max-width: 100%;
   min-height: 100%;
 }
 
 html,
 body {
   overflow-x: hidden;
+  overscroll-behavior-x: none;
+}
+
+@supports (overflow: clip) {
+  html,
+  body,
+  #root {
+    overflow-x: clip;
+  }
 }
 
 body {
+  position: relative;
   background: var(--credi-white);
   color: var(--credi-black);
   font-family: "Montserrat", Arial, sans-serif;
@@ -50,10 +61,18 @@ button {
 
 .app {
   width: 100%;
+  max-width: 100%;
   min-height: 100vh;
   min-height: 100dvh;
   background: var(--credi-white);
   overflow-x: hidden;
+  overscroll-behavior-x: none;
+}
+
+@supports (overflow: clip) {
+  .app {
+    overflow-x: clip;
+  }
 }
 
 /* =========================================================
@@ -1273,8 +1292,18 @@ header small {
 
 /* Shop Crediti: vitrine real com fotos e logos oficiais. */
 .app-with-nav.shop-real-app {
+  width: 100%;
+  max-width: 100%;
   padding-bottom: 0;
+  overflow-x: hidden;
+  overscroll-behavior-x: none;
   background: #ffffff;
+}
+
+@supports (overflow: clip) {
+  .app-with-nav.shop-real-app {
+    overflow-x: clip;
+  }
 }
 
 .shop-real-header {
@@ -1338,10 +1367,19 @@ header small {
 }
 
 .shop-real-page {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
   padding: 16px 16px calc(100px + env(safe-area-inset-bottom));
   display: grid;
   gap: 28px;
+  overflow-x: hidden;
   background: #ffffff;
+}
+
+.shop-real-page > * {
+  min-width: 0;
+  max-width: 100%;
 }
 
 .shop-real-hero {
@@ -1478,11 +1516,13 @@ header small {
 }
 
 .shop-real-categories {
+  max-width: calc(100% + 32px);
   margin: 0 -16px;
   padding: 0 16px 4px;
   display: flex;
   gap: 12px;
   overflow-x: auto;
+  overscroll-behavior-x: contain;
   scrollbar-width: none;
   scroll-snap-type: x proximity;
   -webkit-overflow-scrolling: touch;
@@ -1726,11 +1766,14 @@ header small {
 
 .shop-real-mall-stores {
   width: 100%;
+  max-width: 100%;
   margin-top: 16px;
   padding-bottom: 2px;
   display: flex;
   gap: 8px;
   overflow-x: auto;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
 }
 

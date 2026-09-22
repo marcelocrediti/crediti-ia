@@ -32,6 +32,7 @@
 
 - No actionable P0, P1, or P2 issues remain.
 - The four lower-panel marks now have measured internal clearance. Magalu and SHEIN have 10 CSS pixels at both horizontal sides and 16 CSS pixels above and below; no letter touches the icon boundary. Shopee and Amazon retain 11 CSS pixels horizontally and 9 CSS pixels vertically.
+- The application viewport is now horizontally locked at the document, root, app and Shop levels. Browser measurements reported `document.scrollWidth === document.clientWidth` (`1348px`), `window.scrollX === 0` and no Shop section outside the viewport.
 - The logo tiles now reserve 9 to 11 CSS pixels of horizontal safety space around every visible mark. Avon, O Boticário and Cacau Show are fully contained and centered instead of touching or being clipped by the tile border.
 - Store names and descriptions use explicit line heights and remain separated from the action control by 12 CSS pixels.
 - The inactive regional-partner callout was removed. Its space now presents a photographic shopping gallery with four direct, functional store choices.
@@ -57,6 +58,7 @@
 - Searched “Amazon”; verified a single matching row.
 - Verified four enabled store buttons in the shopping-gallery panel.
 - Verified every rendered brand image has a nonzero natural width and height.
+- Verified horizontal overflow is clipped and horizontal overscroll is disabled while normal vertical scrolling remains active (`scrollY: 1147`, `scrollHeight: 2083`).
 
 ## Console check
 
@@ -86,6 +88,7 @@
 - Shopee correction: the supplied affiliate URL `https://s.shopee.com.br/qjgbXOrmd` replaced the obsolete Coolshop destination. A real browser activation completed the redirect to the official `shopee.com.br` storefront with affiliate parameters intact.
 - Gazin quality correction: the low-resolution favicon was replaced with the official Gazin vector mark extracted from the brand's own production storefront. The local SVG rendered at `300 × 106` intrinsic pixels with no load failure.
 - Lower-card safe-area correction: the previous wordmark rule forced a 46 × 26 CSS-pixel image into an icon container whose padding left a smaller usable area, allowing Magalu and SHEIN to crowd the boundary. The bottom-panel wrapper now has an 8-pixel inset, standard marks render at 32 × 32 and wordmarks at 34 × 18. Post-fix browser geometry confirms balanced clearances on all four sides, and the focused comparison shows no contact with the icon borders.
+- Horizontal-stability iteration: iOS could still expose a lateral elastic movement even though `overflow-x: hidden` existed on the page. The document, root, application and Shop containers now use `overflow-x: clip` where supported, retain `hidden` as fallback, and disable horizontal overscroll. Grid children receive `min-width: 0` and `max-width: 100%`, while intentional horizontal strips contain their own overscroll. Post-fix browser measurements show no page-width overflow and preserve full vertical scrolling.
 
 ## Follow-up polish
 
@@ -108,5 +111,6 @@
 - [x] New Shopee affiliate redirect tested in a real browser.
 - [x] Gazin favicon replaced with official vector artwork.
 - [x] Magalu and SHEIN lower-card safe areas measured and visually compared.
+- [x] Page-level horizontal movement blocked without disabling vertical scrolling.
 
 final result: passed
