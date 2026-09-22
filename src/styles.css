@@ -5543,6 +5543,607 @@ html.splash-active #root {
   white-space: nowrap;
 }
 
+/* =========================================================
+   VITRINE BANCÁRIA — REFINAMENTO VISUAL 2026
+   ========================================================= */
+
+:root {
+  --bank-ink: #111111;
+  --bank-paper: #ffffff;
+  --bank-soft: #f5f5f3;
+  --bank-line: #e4e4e0;
+  --bank-muted: #686866;
+  --bank-yellow: #fdca01;
+  --bank-radius: 20px;
+}
+
+.modern-home,
+.modern-page {
+  width: min(100%, 760px);
+  padding-top: 16px;
+}
+
+.bank-photo-hero {
+  position: relative;
+  width: 100%;
+  min-height: 290px;
+  margin: 0 0 18px;
+  overflow: hidden;
+  border: 1px solid rgba(17, 17, 17, 0.08);
+  border-radius: 24px;
+  background: #171717;
+  box-shadow: 0 12px 34px rgba(17, 17, 17, 0.1);
+}
+
+.bank-photo-hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, rgba(7, 7, 7, 0.92) 0%, rgba(7, 7, 7, 0.69) 48%, rgba(7, 7, 7, 0.08) 78%);
+  pointer-events: none;
+}
+
+.bank-photo-hero > img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 62% center;
+}
+
+.bank-photo-hero > div {
+  position: relative;
+  z-index: 1;
+  width: min(68%, 430px);
+  min-height: 290px;
+  padding: 28px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-end;
+  color: #ffffff;
+}
+
+.bank-photo-hero .eyebrow {
+  margin-bottom: 8px;
+  color: var(--bank-yellow);
+}
+
+.bank-photo-hero h1 {
+  margin: 0;
+  color: #ffffff;
+  font-size: clamp(27px, 6.5vw, 42px);
+  font-weight: 900;
+  line-height: 1.02;
+  letter-spacing: -1.25px;
+}
+
+.bank-photo-hero p {
+  max-width: 390px;
+  margin: 11px 0 0;
+  color: rgba(255, 255, 255, 0.84);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.42;
+}
+
+.bank-photo-hero button {
+  min-height: 44px;
+  margin-top: 16px;
+  padding: 0 17px;
+  border: 0;
+  border-radius: 12px;
+  background: var(--bank-yellow);
+  color: var(--bank-ink);
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.home-welcome.bank-photo-hero {
+  display: block;
+  padding: 0;
+  min-height: 310px;
+}
+
+.home-bank-hero > img {
+  transform: none;
+}
+
+.home-bank-hero > div {
+  min-height: 310px;
+}
+
+.learning-photo-hero > img {
+  object-position: 59% center;
+}
+
+.learning-photo-hero::after {
+  background: linear-gradient(90deg, rgba(7, 7, 7, 0.91) 0%, rgba(7, 7, 7, 0.62) 52%, rgba(7, 7, 7, 0.06) 84%);
+}
+
+.home-smart-search {
+  padding: 15px;
+  border-color: var(--bank-line);
+  border-radius: var(--bank-radius);
+  box-shadow: none;
+}
+
+.home-search-copy strong {
+  font-size: 17px;
+}
+
+.home-smart-search form {
+  min-height: 50px;
+  border-width: 1px;
+  border-color: #cacac6;
+  border-radius: 14px;
+}
+
+.home-smart-search form button {
+  min-height: 40px;
+  border-radius: 10px;
+}
+
+.home-personal-tools {
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+
+.home-personal-tools > button,
+.home-personal-tools > button:first-child {
+  min-height: 76px;
+  padding: 12px 14px;
+  border-color: var(--bank-line);
+  border-radius: 17px;
+  background: #ffffff;
+}
+
+.home-personal-tools > button:first-child {
+  border-left: 4px solid var(--bank-yellow);
+}
+
+.home-banners {
+  margin-top: 14px;
+  gap: 10px;
+}
+
+.home-banner {
+  width: min(78vw, 330px);
+  min-width: min(78vw, 330px);
+  min-height: 132px;
+  padding: 18px 78px 18px 18px;
+  justify-content: center;
+  border: 1px solid var(--bank-line);
+  border-radius: 18px;
+  background: #ffffff;
+  color: var(--bank-ink);
+  box-shadow: none;
+}
+
+.home-banner strong {
+  font-size: 18px;
+  line-height: 1.08;
+}
+
+.home-banner small,
+.home-banner-cta,
+.pravaler-banner,
+.dark-banner,
+.light-banner {
+  color: var(--bank-ink);
+}
+
+.home-banner small,
+.home-banner-cta {
+  color: #6d5a00;
+}
+
+.home-banner-visual,
+.home-banner-visual.credit,
+.home-banner-visual.education,
+.home-banner-visual.security,
+.home-banner-visual.services {
+  top: 18px;
+  right: 16px;
+  width: 48px;
+  height: 48px;
+  border: 0;
+  border-radius: 13px;
+  background: #f4f4f1;
+  color: #111111;
+}
+
+.home-banner-visual svg {
+  width: 27px;
+  height: 27px;
+}
+
+.quick-grid,
+.hub-grid {
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+
+.quick-card,
+.hub-card,
+.quick-card.primary,
+.hub-card.featured {
+  min-height: 82px;
+  padding: 13px 14px;
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr);
+  grid-template-rows: auto auto;
+  align-items: center;
+  column-gap: 13px;
+  row-gap: 3px;
+  border-color: var(--bank-line);
+  border-radius: 17px;
+  background: #ffffff;
+}
+
+.quick-card.primary,
+.hub-card.featured {
+  border-left: 4px solid var(--bank-yellow);
+}
+
+.quick-card > span,
+.hub-icon {
+  grid-row: 1 / 3;
+  width: 44px;
+  height: 44px;
+  border-radius: 13px;
+}
+
+.quick-card strong,
+.hub-card strong {
+  min-height: 0;
+  margin: 0;
+  align-self: end;
+  font-size: 15px;
+}
+
+.quick-card small,
+.hub-card small {
+  margin: 0;
+  align-self: start;
+  font-size: 12px;
+}
+
+.product-strip > button,
+.product-strip .product-strip-card {
+  width: 185px;
+  min-width: 185px;
+  min-height: 158px;
+  padding: 12px;
+  border-radius: 17px;
+  box-shadow: none;
+}
+
+.product-strip-logo {
+  height: 56px;
+  border-radius: 12px;
+}
+
+.product-strip .product-strip-action {
+  min-height: 38px;
+  margin-top: 12px;
+  border-radius: 10px;
+  font-size: 9.5px;
+}
+
+.tip-feature {
+  min-height: 0;
+  padding: 16px;
+  grid-template-columns: 68px minmax(0, 1fr);
+  border-color: #e5c400;
+  border-radius: var(--bank-radius);
+  background: #fff8d7;
+}
+
+.tip-feature > img {
+  width: 68px;
+  height: 92px;
+}
+
+.tip-feature h2 {
+  font-size: 19px;
+}
+
+.tip-feature button,
+.shop-feature button {
+  min-height: 42px;
+  padding: 0 14px;
+  border-radius: 11px;
+}
+
+.shop-feature {
+  border-radius: var(--bank-radius);
+  background: #f5f2ed;
+}
+
+.credit-overview-hero {
+  margin-bottom: 14px;
+}
+
+.direct-grid {
+  gap: 12px;
+}
+
+.direct-card {
+  padding: 16px;
+  border-color: var(--bank-line);
+  border-radius: var(--bank-radius);
+  box-shadow: none;
+}
+
+.direct-card .favorite-toggle {
+  min-height: 36px;
+  font-size: 10px;
+}
+
+.direct-card .primary-action {
+  min-height: 46px;
+  border-radius: 12px;
+  font-size: 11px;
+}
+
+.score-feature-card {
+  min-height: 0;
+  margin-bottom: 26px;
+  padding: 15px;
+  grid-template-columns: 72px minmax(0, 1fr);
+  align-items: center;
+  gap: 14px;
+  border-color: var(--bank-line);
+  border-left: 4px solid var(--bank-yellow);
+  border-radius: var(--bank-radius);
+  background: #ffffff;
+}
+
+.score-feature-card > img {
+  width: 72px;
+  max-height: 106px;
+}
+
+.score-feature-card h2 {
+  margin: 4px 0 5px;
+  font-size: 17px;
+}
+
+.score-feature-card p {
+  color: var(--bank-muted);
+  font-size: 12px;
+}
+
+.score-feature-card button {
+  width: auto;
+  min-height: 40px;
+  margin-top: 10px;
+  padding: 0 13px;
+  border-radius: 10px;
+  background: var(--bank-ink);
+}
+
+.career-section {
+  gap: 9px;
+}
+
+.education-partner-carousel .career-card {
+  width: min(82vw, 340px);
+  min-width: min(82vw, 340px);
+  padding: 12px;
+  border-color: var(--bank-line);
+  border-radius: 18px;
+  background: #ffffff;
+}
+
+.education-partner-carousel .career-brand,
+.career-card.estacio .career-brand,
+.career-card.wyden .career-brand,
+.career-card.uninter .career-brand,
+.career-card.unifatecie .career-brand,
+.career-card.idomed .career-brand {
+  min-height: 74px;
+  padding: 10px 12px;
+  gap: 12px;
+  border: 1px solid #ededeb;
+  border-radius: 14px;
+  background: #fafaf8;
+  color: var(--bank-ink);
+}
+
+.career-logo-frame {
+  width: 74px;
+  min-width: 74px;
+  height: 52px;
+  padding: 7px;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border: 1px solid #e3e3df;
+  border-radius: 12px;
+  background: #ffffff;
+}
+
+.career-logo-frame img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: contain;
+}
+
+.career-card.estacio .career-logo-frame img,
+.career-card.wyden .career-logo-frame img {
+  width: 28px;
+  height: 28px;
+}
+
+.career-card.idomed .career-logo-frame img {
+  width: 38px;
+  height: 38px;
+}
+
+.education-partner-carousel .career-brand b {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  color: var(--bank-ink);
+  font-size: 20px;
+}
+
+.education-partner-carousel .career-copy {
+  min-height: 112px;
+}
+
+.career-card.estacio .career-logo-frame img,
+.career-card.wyden .career-logo-frame img {
+  width: 100%;
+  height: 100%;
+}
+
+.career-card.estacio .career-logo-frame,
+.career-card.wyden .career-logo-frame,
+.career-card.uninter .career-logo-frame,
+.career-card.unifatecie .career-logo-frame {
+  width: 142px;
+  min-width: 142px;
+}
+
+.career-card.estacio .career-brand b,
+.career-card.wyden .career-brand b,
+.career-card.uninter .career-brand b,
+.career-card.unifatecie .career-brand b {
+  display: none;
+}
+
+.career-card .career-copy small,
+.career-card .career-copy span,
+.career-card.wyden .career-copy small,
+.career-card.wyden .career-copy span,
+.career-card.uninter .career-copy small,
+.career-card.uninter .career-copy span,
+.career-card.unifatecie .career-copy small,
+.career-card.unifatecie .career-copy span,
+.career-card.idomed .career-copy small,
+.career-card.idomed .career-copy span {
+  color: #665500;
+}
+
+.education-connected-card {
+  border-color: var(--bank-line);
+  background: var(--bank-soft);
+}
+
+.education-connected-card button:first-child {
+  background: var(--bank-ink);
+}
+
+.services-page-intro {
+  margin-bottom: 14px;
+  padding: 18px;
+  border: 1px solid var(--bank-line);
+  border-radius: var(--bank-radius);
+  background: var(--bank-soft);
+}
+
+.services-page-intro h1 {
+  font-size: clamp(26px, 6.5vw, 38px);
+}
+
+.debt-help-entry {
+  min-height: 108px;
+  border-radius: var(--bank-radius);
+  background: var(--bank-ink);
+  color: #ffffff;
+}
+
+.debt-help-entry small {
+  color: var(--bank-yellow);
+}
+
+.debt-help-entry p {
+  color: #d8d8d8;
+}
+
+.service-grid {
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+
+.service-card {
+  min-height: 112px;
+  padding: 16px;
+  border-color: var(--bank-line);
+  border-radius: 17px;
+  background: #ffffff;
+}
+
+.service-card strong {
+  font-size: 16px;
+}
+
+.service-card span {
+  margin-top: 12px;
+  color: #665500;
+}
+
+@media (max-width: 520px) {
+  .bank-photo-hero,
+  .home-welcome.bank-photo-hero {
+    min-height: 360px;
+  }
+
+  .bank-photo-hero::after,
+  .learning-photo-hero::after {
+    background: linear-gradient(0deg, rgba(7, 7, 7, 0.96) 0%, rgba(7, 7, 7, 0.64) 48%, rgba(7, 7, 7, 0.04) 78%);
+  }
+
+  .bank-photo-hero > img {
+    object-position: 58% 22%;
+  }
+
+  .learning-photo-hero > img {
+    object-position: center 22%;
+  }
+
+  .bank-photo-hero > div,
+  .home-bank-hero > div {
+    width: 100%;
+    min-height: 360px;
+    padding: 118px 19px 20px;
+    justify-content: flex-end;
+  }
+
+  .bank-photo-hero h1 {
+    max-width: 430px;
+    font-size: clamp(27px, 8vw, 36px);
+  }
+
+  .bank-photo-hero p {
+    font-size: 12px;
+  }
+
+  .home-search-shortcuts {
+    margin-top: 10px;
+  }
+
+  .score-feature-card {
+    grid-template-columns: 62px minmax(0, 1fr);
+  }
+
+  .score-feature-card > img {
+    width: 62px;
+  }
+
+  .score-feature-card button {
+    width: 100%;
+  }
+
+  .education-connected-card > div:last-child {
+    grid-template-columns: 1fr;
+  }
+}
+
 @media (max-width: 560px) {
   .product-strip .product-strip-card {
     width: calc((100% - 12px) / 2);
@@ -8221,5 +8822,795 @@ button:disabled {
   .smart-profile-card > button {
     grid-column: 1 / -1;
     width: 100%;
+  }
+}
+
+/* Última camada: garante a nova régua visual acima dos estilos legados. */
+.home-smart-search {
+  padding: 15px;
+  border-color: var(--bank-line);
+  border-radius: var(--bank-radius);
+  box-shadow: none;
+}
+
+.home-smart-search form {
+  min-height: 50px;
+  border: 1px solid #cacac6;
+  border-radius: 14px;
+}
+
+.home-personal-tools {
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+
+.home-personal-tools > button,
+.home-personal-tools > button:first-child {
+  min-height: 76px;
+  padding: 12px 14px;
+  border-color: var(--bank-line);
+  border-radius: 17px;
+  background: #ffffff;
+}
+
+.home-personal-tools > button:first-child {
+  border-left: 4px solid var(--bank-yellow);
+}
+
+.quick-grid,
+.hub-grid {
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+
+.quick-card,
+.hub-card,
+.quick-card.primary,
+.hub-card.featured {
+  min-height: 82px;
+  padding: 13px 14px;
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr);
+  grid-template-rows: auto auto;
+  align-items: center;
+  column-gap: 13px;
+  row-gap: 3px;
+  border-color: var(--bank-line);
+  border-radius: 17px;
+  background: #ffffff;
+}
+
+.quick-card.primary,
+.hub-card.featured {
+  border-left: 4px solid var(--bank-yellow);
+}
+
+.quick-card > span,
+.hub-icon {
+  grid-row: 1 / 3;
+}
+
+.quick-card strong,
+.hub-card strong {
+  min-height: 0;
+  margin: 0;
+  align-self: end;
+  font-size: 15px;
+}
+
+.quick-card small,
+.hub-card small {
+  margin: 0;
+  align-self: start;
+  font-size: 12px;
+}
+
+.direct-card {
+  padding: 16px;
+  border-color: var(--bank-line);
+  border-radius: var(--bank-radius);
+  box-shadow: none;
+}
+
+.education-partner-carousel {
+  margin: 0 -16px;
+  padding: 0 16px 8px;
+  gap: 12px;
+}
+
+.education-partner-carousel .career-card {
+  width: min(82vw, 340px);
+  min-width: min(82vw, 340px);
+  padding: 12px;
+  border-color: var(--bank-line);
+  border-radius: 18px;
+}
+
+.education-partner-carousel .career-brand,
+.career-card.estacio .career-brand,
+.career-card.wyden .career-brand,
+.career-card.uninter .career-brand,
+.career-card.unifatecie .career-brand,
+.career-card.idomed .career-brand {
+  min-height: 74px;
+  padding: 10px 12px;
+  gap: 12px;
+  border: 1px solid #ededeb;
+  border-radius: 14px;
+  background: #fafaf8;
+  color: var(--bank-ink);
+}
+
+.education-partner-carousel .career-brand b {
+  color: var(--bank-ink);
+  font-size: 20px;
+}
+
+.education-partner-carousel .career-copy {
+  min-height: 112px;
+}
+
+.education-connected-card {
+  border-color: var(--bank-line);
+  background: var(--bank-soft);
+}
+
+.education-connected-card button:first-child {
+  background: var(--bank-ink);
+}
+
+@media (max-width: 520px) {
+  .education-connected-card > div:last-child {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* =========================================================
+   CAMADA FINAL 2026 — SIMPLES, LEVE E SEM SOBREPOSIÇÕES
+   ========================================================= */
+
+html,
+body,
+#root,
+.app {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: clip;
+  overscroll-behavior-x: none;
+}
+
+.modern-home,
+.modern-page {
+  width: min(100%, 760px);
+  padding-inline: 16px;
+}
+
+.home-welcome.bank-photo-hero,
+.bank-photo-hero {
+  position: relative;
+  min-height: 278px;
+  padding: 0;
+  overflow: hidden;
+  border: 0;
+  border-radius: 22px;
+  background: #161616;
+  box-shadow: none;
+}
+
+.home-welcome.bank-photo-hero > img,
+.bank-photo-hero > img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  max-height: none;
+  padding: 0;
+  object-fit: cover;
+  object-position: 58% center;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  transform: none;
+}
+
+.home-welcome.bank-photo-hero::after,
+.bank-photo-hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: linear-gradient(90deg, rgba(8, 8, 8, .92) 0%, rgba(8, 8, 8, .66) 52%, rgba(8, 8, 8, .12) 100%);
+  pointer-events: none;
+}
+
+.home-welcome.bank-photo-hero > div,
+.bank-photo-hero > div {
+  position: relative;
+  z-index: 1;
+  width: min(70%, 430px);
+  min-height: 278px;
+  padding: 24px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-end;
+}
+
+.home-welcome.bank-photo-hero h1,
+.bank-photo-hero h1 {
+  font-size: clamp(26px, 7vw, 38px);
+  line-height: 1.02;
+}
+
+.home-welcome.bank-photo-hero p,
+.bank-photo-hero p {
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.home-welcome.bank-photo-hero button,
+.bank-photo-hero button {
+  min-height: 42px;
+  margin-top: 14px;
+  padding: 0 15px;
+  border-radius: 11px;
+  font-size: 10px;
+}
+
+.bank-home-message,
+.bank-credit-hero,
+.bank-education-hero,
+.bank-services-hero,
+.bank-university-wordmark {
+  display: none !important;
+}
+
+.home-smart-search {
+  margin-top: 12px;
+  padding: 14px;
+  border: 1px solid #e5e5e2;
+  border-radius: 18px;
+  background: #ffffff;
+  box-shadow: none;
+}
+
+.home-smart-search form {
+  min-height: 48px;
+}
+
+.home-search-shortcuts {
+  gap: 6px;
+  overflow-x: auto;
+  flex-wrap: nowrap;
+  scrollbar-width: none;
+}
+
+.home-search-shortcuts::-webkit-scrollbar {
+  display: none;
+}
+
+.home-search-shortcuts button {
+  flex: 0 0 auto;
+  min-height: 32px;
+  padding: 0 11px;
+  font-size: 10px;
+}
+
+.home-personal-tools {
+  margin-top: 12px;
+  gap: 0;
+  overflow: hidden;
+  border: 1px solid #e5e5e2;
+  border-radius: 18px;
+  background: #ffffff;
+}
+
+.home-personal-tools > button,
+.home-personal-tools > button:first-child {
+  min-height: 68px;
+  padding: 11px 13px;
+  border: 0;
+  border-bottom: 1px solid #ececea;
+  border-left: 0;
+  border-radius: 0;
+  background: #ffffff;
+}
+
+.home-personal-tools > button:last-child {
+  border-bottom: 0;
+}
+
+#crediti-creator-ads-card {
+  min-height: 94px !important;
+  margin: 12px 0 0 !important;
+  padding: 14px 15px !important;
+  border-radius: 18px !important;
+}
+
+#crediti-creator-ads-card strong {
+  font-size: 16px !important;
+}
+
+#crediti-creator-ads-card small {
+  font-size: 10px !important;
+}
+
+#crediti-creator-ads-card .film {
+  width: 46px !important;
+  height: 46px !important;
+  flex-basis: 46px !important;
+}
+
+.home-section {
+  margin-top: 20px;
+}
+
+.product-strip {
+  display: block;
+  overflow: hidden;
+  border: 1px solid #e5e5e2;
+  border-radius: 18px;
+  background: #ffffff;
+}
+
+.product-strip > button,
+.product-strip .product-strip-card {
+  width: 100%;
+  min-width: 0;
+  min-height: 76px;
+  padding: 10px 12px;
+  display: grid;
+  grid-template-columns: 78px minmax(0, 1fr);
+  grid-template-rows: auto auto;
+  align-items: center;
+  gap: 3px 12px;
+  border: 0;
+  border-bottom: 1px solid #ececea;
+  border-radius: 0;
+  background: #ffffff;
+  box-shadow: none;
+  text-align: left;
+}
+
+.product-strip .product-strip-card:last-child {
+  border-bottom: 0;
+}
+
+.product-strip-logo {
+  grid-row: 1 / 3;
+  width: 78px;
+  height: 52px;
+  padding: 7px;
+  border: 1px solid #ececea;
+  border-radius: 12px;
+  background: #ffffff !important;
+}
+
+.product-strip-logo img,
+.product-strip .product-strip-brand {
+  display: block;
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.product-strip-card > strong {
+  align-self: end;
+  font-size: 13px;
+  line-height: 1.2;
+}
+
+.product-strip .product-strip-action {
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  align-self: start;
+  border: 0;
+  background: transparent !important;
+  color: #665500 !important;
+  font-size: 9px;
+  text-align: left;
+}
+
+.quick-grid,
+.hub-grid {
+  gap: 0;
+  overflow: hidden;
+  border: 1px solid #e5e5e2;
+  border-radius: 18px;
+  background: #ffffff;
+}
+
+.quick-card,
+.hub-card,
+.quick-card.primary,
+.hub-card.featured {
+  min-height: 74px;
+  padding: 11px 13px;
+  border: 0;
+  border-bottom: 1px solid #ececea;
+  border-left: 0;
+  border-radius: 0;
+  background: #ffffff;
+  box-shadow: none;
+}
+
+.quick-card:last-child,
+.hub-card:last-child {
+  border-bottom: 0;
+}
+
+.quick-card > span,
+.hub-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: #f5f5f2;
+}
+
+.quick-card.primary > span,
+.hub-card.featured > span {
+  background: #fdca01;
+}
+
+.quick-card strong,
+.hub-card strong {
+  font-size: 14px;
+}
+
+.quick-card small,
+.hub-card small {
+  font-size: 11px;
+}
+
+.page-intro.compact {
+  margin: 0 0 16px;
+  padding: 0;
+}
+
+.page-intro.compact h1 {
+  margin-top: 5px;
+  font-size: clamp(25px, 7vw, 34px);
+  line-height: 1.05;
+}
+
+.page-intro.compact p {
+  margin-top: 8px;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.credit-filter-bar {
+  width: 100%;
+  margin: 0 0 12px;
+  padding: 0 0 5px;
+  gap: 7px;
+  position: relative;
+  z-index: 1;
+}
+
+.credit-filter-bar button {
+  min-height: 38px;
+  padding: 0 13px;
+  font-size: 11px;
+}
+
+.compare-tray {
+  min-height: 58px;
+  margin-bottom: 12px;
+  padding: 9px 11px;
+  border: 1px solid #e5e5e2;
+  border-radius: 14px;
+  background: #ffffff;
+}
+
+.compare-tray button {
+  min-width: 92px;
+  min-height: 38px;
+  font-size: 10px;
+}
+
+.direct-grid {
+  gap: 10px;
+}
+
+.direct-card {
+  padding: 14px;
+  grid-template-columns: 92px minmax(0, 1fr);
+  gap: 11px;
+  overflow: hidden;
+  border: 1px solid #e5e5e2;
+  border-radius: 18px;
+  background: #ffffff;
+  box-shadow: none;
+}
+
+.direct-logo,
+.direct-logo.pravaler-logo {
+  width: 92px;
+  height: 66px;
+  min-height: 66px;
+  padding: 12px;
+  overflow: hidden;
+  border: 1px solid #ececea;
+  border-radius: 13px;
+  background: #ffffff;
+  color: #111111;
+}
+
+.direct-logo img,
+.direct-card:not(.direct-pravaler) .direct-logo img,
+.direct-card.direct-inss .direct-logo img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  mix-blend-mode: normal;
+  filter: none;
+}
+
+/* A marca Consiga Mais usa lettering branco em arquivo transparente. */
+.direct-card.direct-inss .direct-logo,
+.product-strip-inss .product-strip-logo,
+.partner-notice-logo.consiga-mais {
+  background: #43207a !important;
+  border-color: #43207a;
+}
+
+.direct-card.direct-inss .direct-logo img,
+.product-strip-inss .product-strip-logo img,
+.partner-notice-logo.consiga-mais img {
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.direct-card h2 {
+  margin-top: 3px;
+  font-size: 15px;
+  line-height: 1.18;
+}
+
+.direct-card small {
+  font-size: 10px;
+}
+
+.direct-card-copy {
+  font-size: 12px;
+}
+
+.direct-options {
+  padding: 12px 13px 12px 28px;
+}
+
+.direct-options li {
+  font-size: 11px;
+}
+
+.direct-card .compare-select,
+.direct-card .primary-action {
+  min-height: 42px;
+  border-radius: 11px;
+  font-size: 10px;
+}
+
+.partner-notice-brand {
+  padding: 18px;
+  border: 1px solid #e5e5e2;
+  border-radius: 20px;
+  background: #ffffff;
+}
+
+.partner-notice-logo,
+.partner-notice-logo.pravaler,
+.partner-notice-logo.consiga-mais {
+  min-height: 86px;
+  margin: 12px 0;
+  padding: 16px 20px;
+  border: 1px solid #ececea;
+  background: #ffffff;
+}
+
+.partner-notice-logo img,
+.partner-notice-logo.consiga-mais img {
+  display: block;
+  width: 100%;
+  height: 58px;
+  max-width: 230px;
+  max-height: 58px;
+  object-fit: contain;
+  opacity: 1;
+  mix-blend-mode: normal;
+  filter: none;
+}
+
+.score-feature-card {
+  margin-bottom: 18px;
+  padding: 14px;
+  grid-template-columns: 54px minmax(0, 1fr);
+  gap: 12px;
+  border: 1px solid #e5e5e2;
+  border-radius: 18px;
+  background: #ffffff;
+}
+
+.score-feature-card > img {
+  width: 54px;
+  max-height: 82px;
+}
+
+.score-feature-card h2 {
+  font-size: 16px;
+}
+
+.score-feature-card p {
+  font-size: 11px;
+}
+
+.score-feature-card button {
+  min-height: 38px;
+  font-size: 9px;
+}
+
+.education-partner-carousel {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  display: block;
+  overflow: hidden;
+  border: 1px solid #e5e5e2;
+  border-radius: 19px;
+  background: #ffffff;
+}
+
+.education-partner-carousel .career-card {
+  width: 100%;
+  min-width: 100%;
+  min-height: 106px;
+  padding: 13px;
+  display: grid;
+  grid-template-columns: 122px minmax(0, 1fr);
+  align-items: center;
+  gap: 13px;
+  border: 0;
+  border-bottom: 1px solid #ececea;
+  border-radius: 0;
+  background: #ffffff;
+  box-shadow: none;
+  text-align: left;
+}
+
+.education-partner-carousel .career-card:last-child {
+  border-bottom: 0;
+}
+
+.education-partner-carousel .career-brand,
+.career-card.estacio .career-brand,
+.career-card.wyden .career-brand,
+.career-card.uninter .career-brand,
+.career-card.unifatecie .career-brand,
+.career-card.idomed .career-brand {
+  min-height: 62px;
+  padding: 7px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  overflow: hidden;
+  border: 1px solid #ececea;
+  border-radius: 13px;
+  background: #ffffff;
+}
+
+.career-logo-frame,
+.career-card.estacio .career-logo-frame,
+.career-card.wyden .career-logo-frame,
+.career-card.uninter .career-logo-frame,
+.career-card.unifatecie .career-logo-frame {
+  width: 106px;
+  min-width: 0;
+  height: 48px;
+  padding: 5px;
+  overflow: hidden;
+  border: 0;
+  background: #ffffff;
+}
+
+.career-logo-frame img,
+.career-card.estacio .career-logo-frame img,
+.career-card.wyden .career-logo-frame img,
+.career-card.uninter .career-logo-frame img,
+.career-card.unifatecie .career-logo-frame img,
+.career-card.idomed .career-logo-frame img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.career-card.estacio .career-brand b,
+.career-card.wyden .career-brand b,
+.career-card.uninter .career-brand b,
+.career-card.unifatecie .career-brand b {
+  display: none;
+}
+
+.career-card.idomed .career-brand b {
+  display: block;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.education-partner-carousel .career-copy {
+  min-height: 0;
+  padding: 0;
+  gap: 4px;
+}
+
+.education-partner-carousel .career-copy small {
+  font-size: 8px;
+  line-height: 1.25;
+}
+
+.education-partner-carousel .career-copy strong {
+  font-size: 14px;
+  line-height: 1.2;
+}
+
+.education-partner-carousel .career-copy span {
+  margin-top: 2px;
+  font-size: 9px;
+}
+
+@media (max-width: 520px) {
+  .home-welcome.bank-photo-hero,
+  .bank-photo-hero {
+    min-height: 284px;
+  }
+
+  .home-welcome.bank-photo-hero::after,
+  .bank-photo-hero::after {
+    background: linear-gradient(0deg, rgba(8, 8, 8, .94) 0%, rgba(8, 8, 8, .58) 58%, rgba(8, 8, 8, .08) 100%);
+  }
+
+  .home-welcome.bank-photo-hero > img,
+  .bank-photo-hero > img {
+    object-position: 58% 28%;
+  }
+
+  .home-welcome.bank-photo-hero > div,
+  .bank-photo-hero > div {
+    width: 100%;
+    min-height: 284px;
+    padding: 98px 18px 18px;
+  }
+
+  .home-welcome.bank-photo-hero h1,
+  .bank-photo-hero h1 {
+    max-width: 330px;
+    font-size: 27px;
+  }
+
+  .education-partner-carousel .career-card {
+    grid-template-columns: 112px minmax(0, 1fr);
+    gap: 11px;
+  }
+
+  .career-logo-frame,
+  .career-card.estacio .career-logo-frame,
+  .career-card.wyden .career-logo-frame,
+  .career-card.uninter .career-logo-frame,
+  .career-card.unifatecie .career-logo-frame {
+    width: 98px;
   }
 }

@@ -415,6 +415,7 @@ const EDUCATION_PARTNERS = [
   {
     id: "estacio",
     name: "Estácio",
+    logo: "/education/estacio.png",
     symbol: "◇",
     category: "GRADUAÇÃO, PÓS E CURSOS",
     title: "Escolha seu próximo passo",
@@ -424,6 +425,7 @@ const EDUCATION_PARTNERS = [
   {
     id: "wyden",
     name: "Wyden",
+    logo: "/education/wyden.png",
     symbol: "W",
     category: "GRADUAÇÃO, PÓS E CURSOS TÉCNICOS",
     title: "Formação para transformar sua carreira",
@@ -433,6 +435,7 @@ const EDUCATION_PARTNERS = [
   {
     id: "uninter",
     name: "Uninter",
+    logo: "/education/uninter.png",
     symbol: "U",
     category: "PRESENCIAL, SEMIPRESENCIAL E EAD",
     title: "Estude com flexibilidade onde estiver",
@@ -442,6 +445,7 @@ const EDUCATION_PARTNERS = [
   {
     id: "unifatecie",
     name: "UniFatecie",
+    logo: "/education/unifatecie.png",
     symbol: "UF",
     category: "GRADUAÇÃO, PÓS E SEGUNDA GRADUAÇÃO",
     title: "Escolha sua formação presencial ou EAD",
@@ -451,6 +455,7 @@ const EDUCATION_PARTNERS = [
   {
     id: "idomed",
     name: "IDOMED",
+    logo: "/education/idomed.png",
     symbol: "+",
     category: "MEDICINA, ODONTOLOGIA E PÓS",
     title: "Formação para cuidar e transformar vidas",
@@ -485,7 +490,7 @@ const PARTNER_PRODUCTS = {
   pravaler: {
     name: "Financiamento estudantil",
     partner: "Pravaler",
-    logoText: "Pravaler",
+    logo: "/partners/pravaler.svg",
     logoTone: "pravaler",
     url: "https://afiliado.saberemrede.net/checkout-pravaler/313855?sponsor=805324&e=1",
     button: "SIMULAR FINANCIAMENTO",
@@ -2175,54 +2180,6 @@ function BottomNav({
         </button>
       ))}
     </nav>
-  );
-}
-
-function HomeBannerVisual({ type }) {
-  const iconProps = {
-    viewBox: "0 0 64 64",
-    fill: "none",
-    stroke: "currentColor",
-    strokeWidth: 4,
-    strokeLinecap: "round",
-    strokeLinejoin: "round"
-  };
-
-  return (
-    <span
-      className={`home-banner-visual ${type}`}
-      aria-hidden="true"
-    >
-      {type === "credit" && (
-        <svg {...iconProps}>
-          <rect x="8" y="16" width="48" height="34" rx="7" />
-          <path d="M8 27h48M16 41h13" />
-          <circle cx="45" cy="39" r="5" />
-        </svg>
-      )}
-
-      {type === "education" && (
-        <svg {...iconProps}>
-          <path d="m7 25 25-12 25 12-25 12L7 25Z" />
-          <path d="M17 31v12c8 7 22 7 30 0V31M55 28v16" />
-          <circle cx="55" cy="48" r="3" />
-        </svg>
-      )}
-
-      {type === "security" && (
-        <svg {...iconProps}>
-          <path d="M32 7 53 15v15c0 13-8 23-21 28C19 53 11 43 11 30V15l21-8Z" />
-          <path d="m22 32 7 7 14-15" />
-        </svg>
-      )}
-
-      {type === "services" && (
-        <svg {...iconProps}>
-          <path d="M8 25 32 10l24 15H8ZM13 49h38M8 56h48" />
-          <path d="M16 25v24M27 25v24M37 25v24M48 25v24" />
-        </svg>
-      )}
-    </span>
   );
 }
 
@@ -6466,18 +6423,19 @@ function App() {
         />
 
         <main className="modern-page">
-          <section className="page-intro">
-            <span className="eyebrow">
-              CREDITI
-            </span>
-
-            <h1>
-              Crédito com orientação e responsabilidade
-            </h1>
-
-            <p>
-              Simule diretamente ou converse com a Crediti IA para entender qual opção pode fazer sentido.
-            </p>
+          <section className="bank-photo-hero credit-overview-hero">
+            <img
+              src="/editorial/crediti-banking-woman.jpg"
+              alt="Mulher usando o celular e segurando um cartão"
+              loading="eager"
+              fetchPriority="high"
+            />
+            <div>
+              <span className="eyebrow">CRÉDITO COM RESPONSABILIDADE</span>
+              <h1>Seu score te travou? Calma, existem caminhos.</h1>
+              <p>Compare possibilidades e continue somente no ambiente seguro da instituição responsável.</p>
+              <button onClick={() => setScreen("direct")}>VER OPÇÕES DE CRÉDITO</button>
+            </div>
           </section>
 
           <div className="hub-grid">
@@ -6821,27 +6779,27 @@ function App() {
         />
 
         <main className="modern-page">
-          <section className="page-intro">
-            <span className="eyebrow">
-              APRENDA E CRESÇA
-            </span>
-
-            <h1>
-              Conhecimento para transformar seu futuro
-            </h1>
-
-            <p>
-              Formação, carreira e conteúdos simples para cuidar melhor do seu dinheiro.
-            </p>
+          <section className="bank-photo-hero learning-photo-hero">
+            <img
+              src="/editorial/crediti-students.jpg"
+              alt="Estudantes reunidos em um campus universitário"
+              loading="eager"
+              fetchPriority="high"
+            />
+            <div>
+              <span className="eyebrow">SEU FUTURO COMEÇA AGORA</span>
+              <h1>Sua faculdade espera por você.</h1>
+              <p>Conheça instituições parceiras, encontre seu curso e planeje o próximo passo.</p>
+            </div>
           </section>
 
           <section className="score-feature-card">
             <img src="/creditin-oficial.png" alt="Creditin, assistente da Crediti" />
             <div>
-              <span className="eyebrow">NOVO NA CREDITI</span>
-              <h2>Plano para melhorar suas chances de crédito</h2>
-              <p>Receba orientações para os próximos 30, 60 e 90 dias.</p>
-              <button onClick={openScorePlan}>MELHORE SEU SCORE</button>
+              <span className="eyebrow">DICA DO CREDITIN</span>
+              <h2>Score baixo talvez não seja o único ponto.</h2>
+              <p>Organize sua vida financeira com um plano educativo de 30, 60 e 90 dias.</p>
+              <button onClick={openScorePlan}>MONTAR MEU PLANO</button>
             </div>
           </section>
 
@@ -6870,9 +6828,9 @@ function App() {
                     }
                   >
                     <div className="career-brand">
-                      <i aria-hidden="true">
-                        {partner.symbol}
-                      </i>
+                      <span className="career-logo-frame">
+                        <img src={partner.logo} alt={`Logo ${partner.name}`} loading="lazy" />
+                      </span>
                       <b>{partner.name}</b>
                     </div>
 
@@ -7081,17 +7039,17 @@ function App() {
         />
 
         <main className="modern-page">
-          <section className="page-intro">
+          <section className="page-intro services-page-intro">
             <span className="eyebrow">
               ACESSO RÁPIDO
             </span>
 
             <h1>
-              Serviços úteis em um só lugar
+              Resolva o que precisa, com clareza
             </h1>
 
             <p>
-              A Crediti apenas direciona. Seus dados serão preenchidos nos sites oficiais escolhidos.
+              Consultas, oportunidades e canais oficiais organizados em um ambiente simples e seguro.
             </p>
           </section>
 
@@ -8963,7 +8921,7 @@ function App() {
               openExternal(RENDA_EXTRA_URL)
             }
           >
-            <span className="simple-action-icon"><span className="handshake-emoji" role="img" aria-label="Duas mãos se cumprimentando">🤝</span></span>
+            <span className="simple-action-icon" aria-hidden="true"><UiIcon name="partner" /></span>
             <span className="simple-action-copy">
               <strong>Quero me cadastrar</strong>
               <small>Abrir a plataforma Renda Extra Crediti</small>
@@ -8992,21 +8950,19 @@ function App() {
       </header>
 
       <main className="modern-home">
-        <section className="home-welcome">
-          <div>
-            <span className="eyebrow">
-              BEM-VINDO À CREDITI
-            </span>
-
-            <h1>
-              Olá! Como a Crediti pode ajudar você hoje?
-            </h1>
-          </div>
-
+        <section className="home-welcome bank-photo-hero home-bank-hero">
           <img
-            src="/creditin-oficial.png"
-            alt="Creditin"
+            src="/editorial/crediti-banking-woman.jpg"
+            alt="Mulher usando o celular e segurando um cartão"
+            loading="eager"
+            fetchPriority="high"
           />
+          <div>
+            <span className="eyebrow">CREDITI PARA VOCÊ</span>
+            <h1>Escolhas financeiras mais claras começam aqui.</h1>
+            <p>Crédito, estudo, serviços e compras em um só aplicativo.</p>
+            <button onClick={() => setScreen("direct")}>ENCONTRAR OPÇÕES</button>
+          </div>
         </section>
 
         <section className="home-smart-search" aria-label="Buscar no aplicativo">
@@ -9102,80 +9058,6 @@ function App() {
           </button>
         </section>
 
-        <div className="home-banners">
-          <button
-            className="home-banner yellow-banner"
-            onClick={() =>
-              setScreen("direct")
-            }
-          >
-            <HomeBannerVisual type="credit" />
-            <small>
-              SIMULAÇÃO ONLINE
-            </small>
-            <strong>
-              Encontre opções de crédito
-            </strong>
-            <span className="home-banner-cta">
-              Escolha e simule com segurança ›
-            </span>
-          </button>
-
-          <button
-            className="home-banner pravaler-banner"
-            onClick={() =>
-              openPartnerLink("pravaler")
-            }
-          >
-            <HomeBannerVisual type="education" />
-            <small>
-              FINANCIAMENTO ESTUDANTIL
-            </small>
-            <strong>
-              Simule seu financiamento estudantil
-            </strong>
-            <span className="home-banner-cta">
-              Financie sua faculdade ›
-            </span>
-          </button>
-
-          <button
-            className="home-banner dark-banner"
-            onClick={() =>
-              setScreen("protect")
-            }
-          >
-            <HomeBannerVisual type="security" />
-            <small>
-              DICA DO CREDITIN
-            </small>
-            <strong>
-              Nunca pague para liberar crédito
-            </strong>
-            <span className="home-banner-cta">
-              Veja como evitar golpes ›
-            </span>
-          </button>
-
-          <button
-            className="home-banner light-banner"
-            onClick={() =>
-              setScreen("services")
-            }
-          >
-            <HomeBannerVisual type="services" />
-            <small>
-              SERVIÇOS OFICIAIS
-            </small>
-            <strong>
-              Receita, Banco Central e Serasa
-            </strong>
-            <span className="home-banner-cta">
-              Acesse serviços úteis ›
-            </span>
-          </button>
-        </div>
-
         <section className="home-section">
           <div className="section-title-row">
             <div>
@@ -9236,7 +9118,7 @@ function App() {
                 setScreen("partner")
               }
             >
-              <span><span className="handshake-emoji" role="img" aria-label="Duas mãos se cumprimentando">🤝</span></span>
+              <span aria-hidden="true"><UiIcon name="partner" /></span>
               <strong>
                 Quero ser parceiro
               </strong>

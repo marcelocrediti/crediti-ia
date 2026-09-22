@@ -33,7 +33,7 @@ if (Buffer.byteLength(styles, 'utf8') < 70000) fail('styles.css ficou pequeno de
 
 const index = read('index.html');
 [
-  '/creator-ads-preview.js?v=20260904-6','/employment-opportunities.js?v=20260921-1','/solides-partnership.js?v=20260908-2','/ui-stability-controller.js?v=20260908-',
+  '/creator-ads-preview.js?v=20260904-6','/employment-opportunities.js?v=20260921-1','/solides-partnership.js?v=20260908-2','/ui-stability-controller.js?v=20260922-',
   '/creator-ads-upload-meus-videos.js?v=20260904-2','/creator-ads-video-status.js?v=20260904-2','/creator-ads-campaign-organizer.js?v=20260904-1'
 ].forEach((script) => requireText(index, script, 'index.html'));
 forbidText(index, '/shopee-affiliate-link.js', 'index.html');
@@ -41,7 +41,8 @@ forbidText(index, '/lojas-rede-link-fix.js', 'index.html');
 forbidText(index, '/creator-ads-home-card-cleanup.js', 'index.html');
 forbidText(index, '/creator-ads-placement.js', 'index.html');
 requireText(index, 'html.crediti-home-visible #crediti-creator-ads-card', 'index.html');
-requireText(index, 'linear-gradient(135deg,#087CFF 0%,#3157FF 48%,#D91FEA 100%)', 'index.html');
+requireText(index, 'background:#151515!important', 'index.html');
+requireText(index, 'background:#FDCA01', 'index.html');
 requireText(index, '#FDCA01', 'index.html');
 requireText(index, '/src/main.jsx', 'index.html');
 
@@ -57,7 +58,7 @@ const solides = read('public/solides-partnership.js');
 forbidText(solides, 'MutationObserver', 'public/solides-partnership.js');
 
 const controller = read('public/ui-stability-controller.js');
-['crediti-home-visible','CreditiEmploymentOpportunities','CreditiSolidesPartnership','MutationObserver','.home-personal-tools','firstVisible','creator.previousElementSibling === homeTools',"homeTools.insertAdjacentElement('afterend', creator)"]
+['crediti-home-visible','MutationObserver','.home-personal-tools','SHOP_LINKS','keepShopLinksCorrect']
   .forEach((m) => requireText(controller, m, 'public/ui-stability-controller.js'));
 forbidText(controller, 'insertBefore', 'public/ui-stability-controller.js');
 forbidText(controller, 'appendChild', 'public/ui-stability-controller.js');
