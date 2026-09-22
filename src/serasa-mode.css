@@ -525,3 +525,234 @@
   line-height: 1.2;
   overflow-wrap: anywhere;
 }
+
+/* Padrao unico das cinco abas: branco, cinza claro e amarelo so em acao. */
+.app,
+.app-white,
+.modern-page,
+.shop-real-app,
+.shop-real-page {
+  background: #fff !important;
+}
+
+.app-header,
+.home-header,
+.shop-real-header {
+  background: #fff !important;
+  color: #111 !important;
+  border-bottom: 1px solid #eceef1 !important;
+  box-shadow: none !important;
+}
+
+.shop-real-header {
+  padding-top: max(20px, env(safe-area-inset-top)) !important;
+}
+
+.shop-real-title strong { font-size: 23px !important; }
+.shop-real-title span { color: #686d75 !important; }
+
+.shop-real-search {
+  border: 0 !important;
+  background: #f4f6f8 !important;
+  box-shadow: none !important;
+}
+
+.shop-real-search input {
+  color: #171d2e !important;
+  background: transparent !important;
+}
+
+.score-feature-card,
+.education-connected-card,
+.article-card,
+.service-card,
+.hub-card,
+.direct-card {
+  border: 1px solid #e3e5e8 !important;
+  background: #f4f6f8 !important;
+  color: #171d2e !important;
+  box-shadow: none !important;
+}
+
+.score-feature-card {
+  border-radius: 16px !important;
+}
+
+.score-feature-card button,
+.education-connected-card button:first-child {
+  border: 1px solid #d6aa00 !important;
+  background: #fdca01 !important;
+  color: #111 !important;
+  box-shadow: none !important;
+}
+
+.education-connected-card {
+  border-radius: 16px !important;
+}
+
+.education-connected-card small {
+  color: #665a16 !important;
+}
+
+.education-connected-card button:last-child {
+  border: 1px solid #d9dce1 !important;
+  background: #fff !important;
+  color: #171d2e !important;
+  box-shadow: none !important;
+}
+
+/* O carrossel nao e um cartao: somente cada universidade recebe uma borda. */
+.education-partner-carousel {
+  padding: 0 16px 7px !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.education-partner-carousel .career-card {
+  width: min(calc(100vw - 54px), 326px) !important;
+  min-width: min(calc(100vw - 54px), 326px) !important;
+  border: 1px solid #dfe2e6 !important;
+  border-radius: 15px !important;
+  background: #fff !important;
+  box-shadow: none !important;
+}
+
+.education-partner-carousel .career-brand,
+.career-card.estacio .career-brand,
+.career-card.wyden .career-brand,
+.career-card.uninter .career-brand,
+.career-card.unifatecie .career-brand,
+.career-card.idomed .career-brand {
+  border: 0 !important;
+  border-radius: 10px !important;
+  background: #f4f6f8 !important;
+  box-shadow: none !important;
+}
+
+.education-partner-carousel .career-copy {
+  padding-inline: 5px !important;
+}
+
+.education-partner-carousel .career-copy span {
+  color: #5d5200 !important;
+}
+
+/* Shop no mesmo ritmo visual do restante do aplicativo. */
+.shop-real-store-row {
+  border: 1px solid #e3e5e8 !important;
+  background: #f4f6f8 !important;
+  box-shadow: none !important;
+}
+
+.shop-real-action {
+  min-width: 44px !important;
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  color: #5d5200 !important;
+  box-shadow: none !important;
+}
+
+.shop-real-action b {
+  font-size: 9px !important;
+}
+
+.shop-real-nearby-shade {
+  background: rgba(255, 255, 255, .88) !important;
+}
+
+.shop-real-nearby {
+  border: 1px solid #e3e5e8 !important;
+  background: #f4f6f8 !important;
+  color: #171d2e !important;
+  box-shadow: none !important;
+}
+
+.shop-real-nearby h2 { color: #665500 !important; }
+.shop-real-nearby strong { color: #171d2e !important; }
+.shop-real-nearby p { color: #5f6570 !important; }
+
+.shop-real-mall-stores button {
+  border: 1px solid #dfe2e6 !important;
+  background: #fff !important;
+  color: #171d2e !important;
+  box-shadow: none !important;
+}
+
+@media (max-width: 520px) {
+  .modern-page {
+    padding-inline: 14px !important;
+  }
+
+  .learning-photo-hero {
+    min-height: 250px !important;
+    border-radius: 18px !important;
+  }
+
+  .learning-photo-hero > div {
+    padding: 22px 18px !important;
+  }
+
+  .learning-photo-hero h1 {
+    max-width: 310px !important;
+    font-size: clamp(29px, 8.6vw, 36px) !important;
+    line-height: 1.02 !important;
+  }
+
+  .learning-photo-hero p {
+    max-width: 315px !important;
+    font-size: 13px !important;
+    line-height: 1.35 !important;
+  }
+
+  .score-feature-card {
+    grid-template-columns: 54px minmax(0, 1fr) !important;
+    gap: 11px !important;
+    padding: 12px !important;
+  }
+
+  .score-feature-card > img {
+    width: 54px !important;
+    max-height: 82px !important;
+  }
+
+  .score-feature-card h2 {
+    font-size: 16px !important;
+  }
+
+  .score-feature-card p {
+    font-size: 11px !important;
+  }
+
+  .score-feature-card button {
+    width: auto !important;
+    min-height: 36px !important;
+    padding-inline: 13px !important;
+    font-size: 9px !important;
+  }
+
+  .career-section > h2,
+  .financial-learning-heading h2 {
+    font-size: 27px !important;
+  }
+
+  .education-connected-card {
+    padding: 15px !important;
+  }
+
+  .education-connected-card h2 {
+    font-size: 20px !important;
+  }
+
+  .education-connected-card p {
+    font-size: 12px !important;
+  }
+
+  .shop-real-header {
+    padding-inline: 16px !important;
+  }
+}
