@@ -526,6 +526,15 @@ const PARTNER_PRODUCTS = {
     note: "Contratação, aprovação, valores e condições são definidos pela instituição responsável pela oferta."
   },
 
+  finanzero: {
+    name: "Comparador de crédito",
+    partner: "FinanZero",
+    logo: "/partners/finanzero.svg",
+    logoTone: "finanzero",
+    url: "https://apretailer.com.br/click/6ab281112bfa816a66278004/180635/360419/crediti-app",
+    button: "COMPARAR OFERTAS"
+  },
+
   bpc: {
     name: "Consignado BPC / LOAS",
     partner: "Banco BRB",
@@ -6350,6 +6359,34 @@ function App() {
               }
             )}
           </div>
+
+          <section className="finanzero-alternative">
+            <div className="finanzero-alternative-logo">
+              <img src="/partners/finanzero.svg" alt="Logo oficial FinanZero" />
+            </div>
+            <div className="finanzero-alternative-copy">
+              <small>OUTRAS POSSIBILIDADES</small>
+              <h2>Compare ofertas com a FinanZero</h2>
+              <p>Uma única simulação para consultar opções de diferentes instituições.</p>
+            </div>
+            <button
+              onClick={() => {
+                const product = PARTNER_PRODUCTS.finanzero;
+                if (openExternal(product.url)) {
+                  rememberItem({
+                    key: "finanzero",
+                    title: product.name,
+                    partner: product.partner,
+                    type: "credit"
+                  });
+                  trackMetaLead();
+                  recordSimulation("finanzero");
+                }
+              }}
+            >
+              COMPARAR OFERTAS
+            </button>
+          </section>
 
           <p className="external-note">
             Contratação, aprovação, valores e condições são definidos pela instituição responsável pela oferta.
