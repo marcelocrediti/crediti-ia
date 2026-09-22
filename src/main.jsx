@@ -6918,7 +6918,6 @@ function App() {
 
         <main className="modern-page debt-help-page">
           <section className="debt-help-hero">
-            <span aria-hidden="true"><UiIcon name="shield" /></span>
             <div>
               <small>CAMINHO SEGURO</small>
               <h1>Vamos identificar sua dívida</h1>
@@ -7054,7 +7053,6 @@ function App() {
           </section>
 
           <button className="debt-help-entry" onClick={openDebtHelp}>
-            <span aria-hidden="true"><UiIcon name="shield" /></span>
             <div>
               <small>NOVO NA CREDITI</small>
               <strong>Renegocie suas dívidas</strong>
@@ -9073,7 +9071,13 @@ function App() {
                 setScreen("direct")
               }
             >
-              <span><UiIcon name="credit" /></span>
+              <img
+                className="quick-card-photo"
+                src="/editorial/crediti-banking-woman.jpg"
+                alt=""
+                loading="lazy"
+                decoding="async"
+              />
               <strong>
                 Quero simular agora
               </strong>
@@ -9088,7 +9092,13 @@ function App() {
                 openChat()
               }
             >
-              <span><UiIcon name="chat" /></span>
+              <img
+                className="quick-card-photo"
+                src="/editorial/crediti-students.jpg"
+                alt=""
+                loading="lazy"
+                decoding="async"
+              />
               <strong>
                 Converse com a Crediti IA
               </strong>
@@ -9103,7 +9113,13 @@ function App() {
                 setScreen("products")
               }
             >
-              <span><UiIcon name="products" /></span>
+              <img
+                className="quick-card-photo"
+                src="/shop-assets/hero-shop-crediti.webp"
+                alt=""
+                loading="lazy"
+                decoding="async"
+              />
               <strong>
                 Conheça nossos produtos
               </strong>
@@ -9118,7 +9134,13 @@ function App() {
                 setScreen("partner")
               }
             >
-              <span aria-hidden="true"><UiIcon name="partner" /></span>
+              <img
+                className="quick-card-photo"
+                src="/shop-assets/near-you-shopping.webp"
+                alt=""
+                loading="lazy"
+                decoding="async"
+              />
               <strong>
                 Quero ser parceiro
               </strong>

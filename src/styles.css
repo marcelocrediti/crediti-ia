@@ -1290,6 +1290,344 @@ header small {
   }
 }
 
+/* =========================================================
+   AJUSTE FINAL — MAIS HUMANO, COMPACTO E SEM ÍCONES ILUSTRADOS
+   ========================================================= */
+
+.modern-home,
+.modern-page {
+  width: min(100%, 680px);
+}
+
+.section-title-row h2,
+.financial-learning-heading h2,
+.career-section h2,
+.local-section-title h2 {
+  font-size: clamp(19px, 5.3vw, 23px);
+  line-height: 1.08;
+  letter-spacing: -.35px;
+}
+
+.section-title-row small,
+.eyebrow {
+  font-size: 8px;
+  letter-spacing: .055em;
+}
+
+.home-welcome.bank-photo-hero,
+.bank-photo-hero {
+  min-height: 232px;
+  border-radius: 18px;
+}
+
+.home-welcome.bank-photo-hero > div,
+.bank-photo-hero > div {
+  min-height: 232px;
+  padding: 76px 17px 17px;
+}
+
+.home-welcome.bank-photo-hero h1,
+.bank-photo-hero h1 {
+  max-width: 360px;
+  font-size: clamp(23px, 6.3vw, 31px);
+}
+
+.home-welcome.bank-photo-hero p,
+.bank-photo-hero p {
+  font-size: 11px;
+}
+
+.home-welcome.bank-photo-hero button,
+.bank-photo-hero button {
+  min-height: 36px;
+  margin-top: 10px;
+  padding: 0 12px;
+  font-size: 9px;
+}
+
+.home-smart-search {
+  padding: 12px;
+  border-radius: 16px;
+}
+
+.home-smart-search strong {
+  font-size: 15px;
+}
+
+.home-smart-search small,
+.home-smart-search input {
+  font-size: 11px;
+}
+
+/* Fotos reais substituem os pictogramas na área de acesso rápido. */
+.quick-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 9px;
+  overflow: visible;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+.quick-card,
+.quick-card.primary {
+  min-width: 0;
+  min-height: 154px;
+  padding: 8px;
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: 76px auto auto;
+  align-content: start;
+  gap: 5px;
+  overflow: hidden;
+  border: 1px solid #e5e5e2;
+  border-radius: 16px;
+  background: #ffffff;
+  box-shadow: none;
+  text-align: left;
+}
+
+.quick-card:nth-child(2n),
+.quick-card:last-child {
+  border-bottom: 1px solid #e5e5e2;
+}
+
+.quick-card-photo {
+  width: 100%;
+  height: 76px;
+  display: block;
+  object-fit: cover;
+  object-position: center;
+  border-radius: 11px;
+  background: #efefec;
+}
+
+.quick-card:first-child .quick-card-photo {
+  object-position: 52% 39%;
+}
+
+.quick-card strong {
+  min-height: 0;
+  margin: 2px 2px 0;
+  align-self: end;
+  font-size: 12px;
+  line-height: 1.16;
+}
+
+.quick-card small {
+  margin: 0 2px 2px;
+  align-self: start;
+  color: #6d6d6d;
+  font-size: 9px;
+  line-height: 1.25;
+}
+
+/* Serviços: menos bloco e contraste correto em qualquer tela. */
+.services-page-intro {
+  margin-bottom: 12px;
+  padding: 2px 0 7px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+.services-page-intro h1 {
+  font-size: clamp(24px, 6vw, 31px);
+  line-height: 1.05;
+}
+
+.services-page-intro p {
+  max-width: 540px;
+  font-size: 11px;
+}
+
+.debt-help-entry {
+  min-height: 78px;
+  margin-bottom: 16px;
+  padding: 12px 14px;
+  grid-template-columns: minmax(0, 1fr) 12px;
+  gap: 10px;
+  border: 1px solid #e1e1de;
+  border-left: 5px solid #fdca01;
+  border-radius: 15px;
+  background: #ffffff;
+  color: #111111;
+  box-shadow: none;
+}
+
+.debt-help-entry > div {
+  gap: 2px;
+}
+
+.debt-help-entry small {
+  color: #725e00;
+  font-size: 7px;
+}
+
+.debt-help-entry strong {
+  color: #111111;
+  font-size: 14px;
+  line-height: 1.15;
+}
+
+.debt-help-entry p {
+  color: #6b6b6b;
+  font-size: 9px;
+  line-height: 1.3;
+}
+
+.debt-help-entry > b {
+  color: #111111;
+  font-size: 20px;
+}
+
+.service-grid {
+  gap: 8px;
+}
+
+.service-card {
+  min-height: 86px;
+  padding: 12px 13px;
+  border-radius: 15px;
+}
+
+.service-card strong {
+  font-size: 14px;
+}
+
+.service-card p,
+.service-card small {
+  font-size: 10px;
+}
+
+/* Universidades: logo inteira e textos com espaço para quebrar linhas. */
+.education-partner-carousel {
+  overflow: visible;
+}
+
+.education-partner-carousel .career-card {
+  min-width: 0;
+  min-height: 86px;
+  padding: 10px;
+  grid-template-columns: 100px minmax(0, 1fr);
+  gap: 10px;
+  overflow: visible;
+}
+
+.education-partner-carousel .career-brand,
+.career-card.estacio .career-brand,
+.career-card.wyden .career-brand,
+.career-card.uninter .career-brand,
+.career-card.unifatecie .career-brand,
+.career-card.idomed .career-brand {
+  min-width: 0;
+  min-height: 54px;
+  padding: 5px;
+  overflow: visible;
+  border-radius: 11px;
+}
+
+.career-logo-frame,
+.career-card.estacio .career-logo-frame,
+.career-card.wyden .career-logo-frame,
+.career-card.uninter .career-logo-frame,
+.career-card.unifatecie .career-logo-frame,
+.career-card.idomed .career-logo-frame {
+  width: 88px;
+  min-width: 0;
+  height: 42px;
+  padding: 4px;
+  overflow: visible;
+}
+
+.career-logo-frame img,
+.career-card .career-logo-frame img {
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.education-partner-carousel .career-copy {
+  min-width: 0;
+  min-height: 0;
+  gap: 3px;
+  overflow: visible;
+}
+
+.education-partner-carousel .career-copy small {
+  font-size: 7px;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+
+.education-partner-carousel .career-copy strong {
+  font-size: 12px;
+  line-height: 1.18;
+  overflow-wrap: anywhere;
+}
+
+.education-partner-carousel .career-copy span {
+  font-size: 8px;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+
+.score-feature-card {
+  min-height: 0;
+  margin-bottom: 15px;
+  padding: 11px;
+  grid-template-columns: 46px minmax(0, 1fr);
+  gap: 10px;
+  border-radius: 15px;
+}
+
+.score-feature-card > img {
+  width: 46px;
+  max-height: 70px;
+}
+
+.score-feature-card h2 {
+  font-size: 14px;
+}
+
+.score-feature-card p {
+  font-size: 9px;
+}
+
+.score-feature-card button {
+  min-height: 34px;
+  margin-top: 7px;
+  padding: 0 10px;
+  font-size: 8px;
+}
+
+@media (max-width: 380px) {
+  .quick-card {
+    min-height: 146px;
+    grid-template-rows: 68px auto auto;
+  }
+
+  .quick-card-photo {
+    height: 68px;
+  }
+
+  .education-partner-carousel .career-card {
+    grid-template-columns: 92px minmax(0, 1fr);
+  }
+
+  .career-logo-frame,
+  .career-card.estacio .career-logo-frame,
+  .career-card.wyden .career-logo-frame,
+  .career-card.uninter .career-logo-frame,
+  .career-card.unifatecie .career-logo-frame,
+  .career-card.idomed .career-logo-frame {
+    width: 80px;
+  }
+}
+
 /* Shop Crediti: vitrine real com fotos e logos oficiais. */
 .app-with-nav.shop-real-app {
   width: 100%;
@@ -9612,5 +9950,445 @@ body,
   .career-card.uninter .career-logo-frame,
   .career-card.unifatecie .career-logo-frame {
     width: 98px;
+  }
+}
+
+/* Camada definitiva: compacta, humana e com contraste bancário. */
+.shop-store-card > button,
+.simulation-button span {
+  border-color: #e0b300;
+  background: #fdca01;
+  color: #111111;
+}
+
+.dark-banner {
+  background: #fff4bd;
+  color: #111111;
+}
+
+.score-feature-card button,
+.score-start-button,
+.score-name-question > button,
+.score-multi-confirm,
+.score-plan-result > button,
+.debt-restart,
+.tip-feature button,
+.useful-feature button,
+.shop-main-button,
+.smart-profile-card > button,
+.protect-help,
+.business-partner-callout button,
+.education-connected-card button,
+.journey-card button,
+.partner-notice-continue,
+.bill-actions button:first-child {
+  border: 1px solid #e0b300;
+  background: #fdca01;
+  color: #111111;
+  box-shadow: none;
+}
+
+.credit-filter-bar button.active,
+.direct-card .compare-select.selected,
+.shop-category-filter button.active {
+  border-color: #e0b300;
+  background: #fff4bd;
+  color: #111111;
+}
+
+.debt-help-hero,
+.protect-hero,
+.business-hero,
+.partner-notice-brand {
+  border: 1px solid #efd77c;
+  background: #fff8dc;
+  color: #111111;
+  box-shadow: none;
+}
+
+.debt-help-hero {
+  padding: 18px;
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.debt-help-hero small,
+.partner-notice-brand small {
+  color: #7a6100;
+}
+
+.debt-help-hero p,
+.protect-hero p,
+.business-hero p,
+.partner-notice-brand p {
+  color: #625f56;
+}
+
+.journey-card.business > span {
+  background: #fff1df;
+  color: #8b4a00;
+}
+
+.bank-photo-hero,
+.home-welcome.bank-photo-hero {
+  background: #f2eee5;
+}
+
+.bank-photo-hero::after,
+.home-welcome.bank-photo-hero::after {
+  background: linear-gradient(90deg, rgba(255, 249, 225, 0.98) 0%, rgba(255, 249, 225, 0.86) 48%, rgba(255, 249, 225, 0.08) 80%);
+}
+
+.bank-photo-hero > div,
+.home-welcome.bank-photo-hero > div,
+.bank-photo-hero h1,
+.home-welcome.bank-photo-hero h1 {
+  color: #111111;
+}
+
+.bank-photo-hero p,
+.home-welcome.bank-photo-hero p {
+  color: #53514b;
+}
+
+.bank-photo-hero button,
+.home-welcome.bank-photo-hero button {
+  border: 1px solid #e0b300;
+  background: #fdca01;
+  color: #111111;
+  box-shadow: none;
+}
+
+.quick-card,
+.hub-card,
+.service-card,
+.score-feature-card,
+.career-card {
+  background: #f7f7f5;
+  color: #111111;
+}
+
+.quick-card.primary,
+.hub-card.featured {
+  border-color: #efd77c;
+  background: #fff8dc;
+}
+
+@media (max-width: 520px) {
+  .bank-photo-hero::after,
+  .home-welcome.bank-photo-hero::after {
+    background: linear-gradient(90deg, rgba(255, 249, 225, 0.98) 0%, rgba(255, 249, 225, 0.88) 56%, rgba(255, 249, 225, 0.12) 88%);
+  }
+}
+
+.modern-home,
+.modern-page {
+  width: min(100%, 680px);
+}
+
+.section-title-row h2,
+.financial-learning-heading h2,
+.career-section h2,
+.local-section-title h2 {
+  font-size: clamp(19px, 5.3vw, 23px);
+  line-height: 1.08;
+  letter-spacing: -.35px;
+}
+
+.section-title-row small,
+.eyebrow {
+  font-size: 8px;
+  letter-spacing: .055em;
+}
+
+.home-welcome.bank-photo-hero,
+.bank-photo-hero {
+  min-height: 232px;
+  border-radius: 18px;
+}
+
+.home-welcome.bank-photo-hero > div,
+.bank-photo-hero > div {
+  min-height: 232px;
+  padding: 76px 17px 17px;
+}
+
+.home-welcome.bank-photo-hero h1,
+.bank-photo-hero h1 {
+  max-width: 360px;
+  font-size: clamp(23px, 6.3vw, 31px);
+}
+
+.home-welcome.bank-photo-hero p,
+.bank-photo-hero p {
+  font-size: 11px;
+}
+
+.home-welcome.bank-photo-hero button,
+.bank-photo-hero button {
+  min-height: 36px;
+  margin-top: 10px;
+  padding: 0 12px;
+  font-size: 9px;
+}
+
+.quick-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 9px;
+  overflow: visible;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+.quick-card,
+.quick-card.primary {
+  min-width: 0;
+  min-height: 154px;
+  padding: 8px;
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: 76px auto auto;
+  align-content: start;
+  gap: 5px;
+  overflow: hidden;
+  border: 1px solid #e5e5e2;
+  border-radius: 16px;
+  background: #ffffff;
+  box-shadow: none;
+  text-align: left;
+}
+
+.quick-card:nth-child(2n),
+.quick-card:last-child {
+  border-bottom: 1px solid #e5e5e2;
+}
+
+.quick-card-photo {
+  width: 100%;
+  height: 76px;
+  display: block;
+  object-fit: cover;
+  object-position: center;
+  border-radius: 11px;
+  background: #efefec;
+}
+
+.quick-card:first-child .quick-card-photo {
+  object-position: 52% 39%;
+}
+
+.quick-card strong {
+  min-height: 0;
+  margin: 2px 2px 0;
+  align-self: end;
+  font-size: 12px;
+  line-height: 1.16;
+}
+
+.quick-card small {
+  margin: 0 2px 2px;
+  align-self: start;
+  color: #6d6d6d;
+  font-size: 9px;
+  line-height: 1.25;
+}
+
+.services-page-intro {
+  margin-bottom: 12px;
+  padding: 2px 0 7px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+.services-page-intro h1 {
+  font-size: clamp(24px, 6vw, 31px);
+  line-height: 1.05;
+}
+
+.services-page-intro p {
+  max-width: 540px;
+  font-size: 11px;
+}
+
+.debt-help-entry {
+  min-height: 78px;
+  margin-bottom: 16px;
+  padding: 12px 14px;
+  grid-template-columns: minmax(0, 1fr) 12px;
+  gap: 10px;
+  border: 1px solid #e1e1de;
+  border-left: 5px solid #fdca01;
+  border-radius: 15px;
+  background: #ffffff;
+  color: #111111;
+  box-shadow: none;
+}
+
+.debt-help-entry small {
+  color: #725e00;
+  font-size: 7px;
+}
+
+.debt-help-entry strong {
+  color: #111111;
+  font-size: 14px;
+}
+
+.debt-help-entry p {
+  color: #6b6b6b;
+  font-size: 9px;
+  line-height: 1.3;
+}
+
+.debt-help-entry > b {
+  color: #111111;
+  font-size: 20px;
+}
+
+.service-grid {
+  gap: 8px;
+}
+
+.service-card {
+  min-height: 86px;
+  padding: 12px 13px;
+  border-radius: 15px;
+}
+
+.service-card strong {
+  font-size: 14px;
+}
+
+.service-card p,
+.service-card small {
+  font-size: 10px;
+}
+
+.education-partner-carousel {
+  overflow: visible;
+}
+
+.education-partner-carousel .career-card {
+  min-width: 0;
+  min-height: 86px;
+  padding: 10px;
+  grid-template-columns: 100px minmax(0, 1fr);
+  gap: 10px;
+  overflow: visible;
+  white-space: normal;
+}
+
+.education-partner-carousel .career-brand,
+.career-card.estacio .career-brand,
+.career-card.wyden .career-brand,
+.career-card.uninter .career-brand,
+.career-card.unifatecie .career-brand,
+.career-card.idomed .career-brand {
+  min-width: 0;
+  min-height: 54px;
+  padding: 5px;
+  overflow: visible;
+  border-radius: 11px;
+}
+
+.career-logo-frame,
+.career-card.estacio .career-logo-frame,
+.career-card.wyden .career-logo-frame,
+.career-card.uninter .career-logo-frame,
+.career-card.unifatecie .career-logo-frame,
+.career-card.idomed .career-logo-frame {
+  width: 88px;
+  min-width: 0;
+  height: 42px;
+  padding: 4px;
+  overflow: visible;
+}
+
+.career-logo-frame img,
+.career-card .career-logo-frame img {
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.education-partner-carousel .career-copy {
+  min-width: 0;
+  min-height: 0;
+  gap: 3px;
+  overflow: visible;
+}
+
+.education-partner-carousel .career-copy small {
+  font-size: 7px;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+
+.education-partner-carousel .career-copy strong {
+  font-size: 12px;
+  line-height: 1.18;
+  overflow-wrap: anywhere;
+}
+
+.education-partner-carousel .career-copy span {
+  font-size: 8px;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+
+.score-feature-card {
+  min-height: 0;
+  margin-bottom: 15px;
+  padding: 11px;
+  grid-template-columns: 46px minmax(0, 1fr);
+  gap: 10px;
+  border-radius: 15px;
+}
+
+.score-feature-card > img {
+  width: 46px;
+  max-height: 70px;
+}
+
+.score-feature-card h2 {
+  font-size: 14px;
+}
+
+.score-feature-card p {
+  font-size: 9px;
+}
+
+.score-feature-card button {
+  min-height: 34px;
+  margin-top: 7px;
+  padding: 0 10px;
+  font-size: 8px;
+}
+
+@media (max-width: 380px) {
+  .quick-card {
+    min-height: 146px;
+    grid-template-rows: 68px auto auto;
+  }
+
+  .quick-card-photo {
+    height: 68px;
+  }
+
+  .education-partner-carousel .career-card {
+    grid-template-columns: 92px minmax(0, 1fr);
+  }
+
+  .career-logo-frame,
+  .career-card.estacio .career-logo-frame,
+  .career-card.wyden .career-logo-frame,
+  .career-card.uninter .career-logo-frame,
+  .career-card.unifatecie .career-logo-frame,
+  .career-card.idomed .career-logo-frame {
+    width: 80px;
   }
 }

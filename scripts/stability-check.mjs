@@ -41,7 +41,7 @@ forbidText(index, '/lojas-rede-link-fix.js', 'index.html');
 forbidText(index, '/creator-ads-home-card-cleanup.js', 'index.html');
 forbidText(index, '/creator-ads-placement.js', 'index.html');
 requireText(index, 'html.crediti-home-visible #crediti-creator-ads-card', 'index.html');
-requireText(index, 'background:#151515!important', 'index.html');
+requireText(index, 'background:#fff8dc!important', 'index.html');
 requireText(index, 'background:#FDCA01', 'index.html');
 requireText(index, '#FDCA01', 'index.html');
 requireText(index, '/src/main.jsx', 'index.html');
