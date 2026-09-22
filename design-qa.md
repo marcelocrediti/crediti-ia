@@ -73,6 +73,7 @@
 - Current iteration: the first pass found a P1 broken Avon favicon and a P2 incorrect O Boticário cart favicon. Avon was replaced with its official wordmark and O Boticário with the official production logo. Post-fix browser checks reported zero failed images.
 - Current catalog pass restored the 28 previously omitted registrations, verified 37 rendered rows, replaced generic globe icons with official brand assets where available, and added a high-contrast yellow “ABRIR” control to every row.
 - Logo-alignment iteration: the source screenshot showed horizontal wordmarks rendered at 52 CSS pixels inside a 42-pixel content area, causing visible clipping and crowding. The logo tile was adjusted to 64 × 64 CSS pixels with an 8-pixel inset, wordmarks now use `max-width: 46px` and `max-height: 30px`, and text blocks received explicit line height. The latest focused browser capture and DOM geometry check confirm all seven priority logos are fully contained, with 9–11 pixels of horizontal safety space and no overlap with text or controls.
+- Store-integrity iteration: Natura, Itatiaia, La Luna, Freeway, Sieno Perfumes, Komo Wellness and Casa das Alianças were replaced with official logo assets sourced from their own storefronts or official delivery assets. All seven loaded with nonzero intrinsic dimensions in the browser. The Shop component previously referenced an out-of-scope `openExternal` function, which prevented every store button from navigating. The callback is now passed explicitly by the app; a real browser click opened the tracked Natura link and completed the redirect to the secure official `natura.com.br` storefront. The other six links were individually resolved to their official HTTPS domains.
 - Post-fix production build and stability checks passed. Three newly substituted official assets returned HTTP 200 with valid PNG/SVG MIME types; Fator 5 had already loaded successfully in the browser pass.
 - Current interaction pass found no remaining P0/P1/P2 issue.
 
@@ -88,6 +89,8 @@
 - [x] “Ver todas” and “Ver menos” tested.
 - [x] Official logos visually and programmatically checked.
 - [x] All 37 registered stores restored in the expanded catalog.
+- [x] Seven reported brand logos replaced with their official identities.
+- [x] Store-button callback connected and real affiliate redirect tested.
 - [x] Search and category filtering tested.
 - [x] Bottom spacing measured.
 - [x] Production build completed successfully.

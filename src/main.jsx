@@ -2254,8 +2254,8 @@ const SHOP_REAL_STORES = [
     id: "natura",
     name: "Natura",
     description: "Perfumaria, beleza e presentes",
-    logo: crispBrandIcon("natura.com.br"),
-    logoKind: "compact",
+    logo: "/shop-assets/logo-natura.svg",
+    logoKind: "wordmark",
     url: NATURA_STORE_URL,
     categories: ["beleza", "presentes"]
   },
@@ -2290,8 +2290,8 @@ const SHOP_REAL_STORES = [
     id: "itatiaia",
     name: "Itatiaia",
     description: "Cozinhas, móveis e eletrodomésticos",
-    logo: crispBrandIcon("cozinhasitatiaia.com.br"),
-    logoKind: "compact",
+    logo: "https://itatiaia.vtexassets.com/assets/vtex.file-manager-graphql/images/40ffae23-7856-4196-9a3e-eb443553afe0___0eec17a8b41b1bedcc269556727528f0.svg",
+    logoKind: "wordmark",
     url: ITATIAIA_STORE_URL,
     categories: ["casa"]
   },
@@ -2382,8 +2382,7 @@ const SHOP_REAL_STORES = [
     id: "la-luna",
     name: "La Luna",
     description: "Moda infantil com estilo e conforto",
-    logo: crispBrandIcon("lalunamodas.com.br"),
-    logoKind: "compact",
+    logo: "https://dgk28ckagqims.cloudfront.net/external-attachment/12041/7d8e41270c8a4da0b968cedd6dab1fa0.JPEG",
     url: LALUNA_STORE_URL,
     categories: ["familia", "presentes"]
   },
@@ -2417,8 +2416,8 @@ const SHOP_REAL_STORES = [
     id: "freeway",
     name: "Freeway",
     description: "Calçados masculinos e casuais",
-    logo: crispBrandIcon("lojafreeway.com.br"),
-    logoKind: "compact",
+    logo: "/shop-assets/logo-freeway.svg",
+    logoKind: "wordmark",
     url: FREEWAY_STORE_URL,
     categories: ["familia", "presentes"]
   },
@@ -2426,8 +2425,8 @@ const SHOP_REAL_STORES = [
     id: "sieno",
     name: "Sieno Perfumes",
     description: "Perfumes e fragrâncias importadas",
-    logo: crispBrandIcon("sieno.com.br"),
-    logoKind: "compact",
+    logo: "https://www.sieno.com.br/cdn/shop/files/sieno-logo-15-anos.png?v=1775042638&width=400",
+    logoKind: "wordmark",
     url: SIENO_STORE_URL,
     categories: ["beleza", "presentes"]
   },
@@ -2478,8 +2477,8 @@ const SHOP_REAL_STORES = [
     id: "komo",
     name: "Komo Wellness",
     description: "Tratamentos e bem-estar",
-    logo: crispBrandIcon("br.komowellness.com"),
-    logoKind: "compact",
+    logo: "https://br.komowellness.com/cdn/shop/files/20251003-192609.png?v=1759490816&width=1100",
+    logoKind: "wordmark",
     url: KOMO_STORE_URL,
     categories: ["beleza"]
   },
@@ -2504,14 +2503,14 @@ const SHOP_REAL_STORES = [
     id: "casa-aliancas",
     name: "Casa das Alianças",
     description: "Joias, alianças e relógios",
-    logo: crispBrandIcon("casadasaliancas.com.br"),
-    logoKind: "compact",
+    logo: "https://golden.vtexassets.com/arquivos/ids/155462/logo-ca-topo.png?v=638481009982900000",
+    logoKind: "wordmark",
     url: CASA_ALIANCAS_STORE_URL,
     categories: ["presentes"]
   }
 ];
 
-function ShopExperience({ onNavigate }) {
+function ShopExperience({ onNavigate, onOpenExternal }) {
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState("todos");
   const [showAllStores, setShowAllStores] = useState(false);
@@ -2640,7 +2639,7 @@ function ShopExperience({ onNavigate }) {
               <button
                 key={store.id}
                 className="shop-real-store-row"
-                onClick={() => openExternal(store.url)}
+                onClick={() => onOpenExternal(store.url)}
               >
                 <span
                   className={`shop-real-logo ${store.darkLogo ? "dark" : ""} ${store.logoKind || ""}`}
@@ -2687,7 +2686,7 @@ function ShopExperience({ onNavigate }) {
             <p>Escolha uma loja e continue seu passeio.</p>
             <div className="shop-real-mall-stores" aria-label="Lojas em destaque">
               {SHOP_REAL_STORES.slice(0, 4).map((store) => (
-                <button key={store.id} onClick={() => openExternal(store.url)}>
+                <button key={store.id} onClick={() => onOpenExternal(store.url)}>
                   <span
                     className={`shop-real-mall-logo ${store.logoKind || ""}`}
                     style={store.logoBackground ? { backgroundColor: store.logoBackground } : undefined}
@@ -7019,7 +7018,7 @@ function App() {
   }
 
   if (screen === "shop") {
-    return <ShopExperience onNavigate={navigateMain} />;
+    return <ShopExperience onNavigate={navigateMain} onOpenExternal={openExternal} />;
 
     /* Estrutura anterior preservada temporariamente para rollback seguro. */
     return (
