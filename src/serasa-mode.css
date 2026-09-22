@@ -756,3 +756,175 @@
     padding-inline: 16px !important;
   }
 }
+
+/* Ajuste final: Crédito e Aprenda sem banho amarelo e com leitura compacta. */
+.credit-overview-hero::after,
+.learning-photo-hero::after {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, .97) 0%,
+    rgba(255, 255, 255, .90) 48%,
+    rgba(255, 255, 255, .24) 78%,
+    rgba(255, 255, 255, .06) 100%
+  ) !important;
+}
+
+.credit-overview-hero .eyebrow,
+.learning-photo-hero .eyebrow {
+  color: #6a5a12 !important;
+}
+
+/* Jornada de estudo vira uma seção limpa, não um grande cartão colorido. */
+.education-connected-card {
+  margin: 22px 0 24px !important;
+  padding: 4px 0 8px !important;
+  gap: 10px !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: #fff !important;
+  box-shadow: none !important;
+}
+
+.education-connected-card small {
+  color: #676d76 !important;
+  font-size: 8px !important;
+  letter-spacing: .08em !important;
+}
+
+.education-connected-card h2 {
+  max-width: 560px !important;
+  margin: 5px 0 !important;
+  font-size: 19px !important;
+  line-height: 1.18 !important;
+}
+
+.education-connected-card p {
+  max-width: 620px !important;
+  margin: 0 !important;
+  color: #686d75 !important;
+  font-size: 11px !important;
+  line-height: 1.4 !important;
+}
+
+.education-connected-card > div:last-child {
+  display: flex !important;
+  align-items: center !important;
+  flex-wrap: wrap !important;
+  gap: 8px !important;
+}
+
+.education-connected-card button,
+.education-connected-card button:first-child,
+.education-connected-card button:last-child {
+  width: auto !important;
+  min-height: 34px !important;
+  padding: 7px 12px !important;
+  border-radius: 9px !important;
+  font-size: 8px !important;
+  line-height: 1.1 !important;
+}
+
+/* Um cartão completo por vez: sem recuo e sem a faixa branca na lateral. */
+.career-section {
+  min-width: 0 !important;
+  overflow: hidden !important;
+}
+
+.education-partner-carousel {
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  display: flex !important;
+  gap: 12px !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  box-sizing: border-box !important;
+  scroll-snap-type: x mandatory !important;
+  scroll-padding-inline: 0 !important;
+  overscroll-behavior-inline: contain !important;
+  scrollbar-width: none !important;
+}
+
+.education-partner-carousel::-webkit-scrollbar {
+  display: none !important;
+}
+
+.education-partner-carousel .career-card {
+  flex: 0 0 100% !important;
+  width: 100% !important;
+  min-width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+  scroll-snap-align: start !important;
+  scroll-snap-stop: always !important;
+}
+
+@media (max-width: 520px) {
+  .credit-overview-hero,
+  .learning-photo-hero {
+    min-height: 218px !important;
+    border-radius: 16px !important;
+  }
+
+  .credit-overview-hero > div,
+  .learning-photo-hero > div {
+    padding: 18px 16px !important;
+  }
+
+  .credit-overview-hero h1,
+  .learning-photo-hero h1 {
+    max-width: 285px !important;
+    font-size: clamp(24px, 7.2vw, 30px) !important;
+    line-height: 1.06 !important;
+    letter-spacing: -.45px !important;
+  }
+
+  .credit-overview-hero p,
+  .learning-photo-hero p {
+    max-width: 292px !important;
+    margin-top: 8px !important;
+    font-size: 11px !important;
+    line-height: 1.35 !important;
+  }
+
+  .credit-overview-hero button {
+    min-height: 34px !important;
+    margin-top: 10px !important;
+    padding: 7px 12px !important;
+    border-radius: 9px !important;
+    font-size: 8px !important;
+  }
+
+  .career-section > h2,
+  .financial-learning-heading h2 {
+    font-size: 23px !important;
+    line-height: 1.1 !important;
+  }
+
+  .education-partner-carousel {
+    gap: 10px !important;
+  }
+
+  .education-partner-carousel .career-card {
+    min-height: 214px !important;
+    padding: 12px !important;
+  }
+
+  .education-partner-carousel .career-copy {
+    min-height: 88px !important;
+    padding: 9px 2px 1px !important;
+  }
+
+  .education-partner-carousel .career-copy strong {
+    font-size: 13px !important;
+  }
+
+  .education-connected-card {
+    margin-top: 18px !important;
+  }
+
+  .education-connected-card h2 {
+    font-size: 18px !important;
+  }
+}
