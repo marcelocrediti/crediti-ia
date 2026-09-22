@@ -3349,6 +3349,15 @@ html.splash-active #root {
   color: #ffffff;
 }
 
+.direct-card.direct-inss .primary-action {
+  position: relative;
+  z-index: 1;
+  border: 2px solid #d8c5ff;
+  background: #43207a !important;
+  color: #ffffff !important;
+  box-shadow: 0 7px 16px rgba(67, 32, 122, 0.22);
+}
+
 .direct-cartao-credito .direct-logo,
 .product-strip-cartao-credito .product-strip-logo {
   background: #f1f6ff;
@@ -7811,8 +7820,16 @@ button:disabled {
   width: 100%;
   max-width: 180px;
   max-height: 52px;
-  mix-blend-mode: normal;
-  filter: none;
+  opacity: 1;
+  mix-blend-mode: normal !important;
+  filter: none !important;
+}
+
+.direct-card.direct-inss .direct-logo img {
+  display: block;
+  width: 100%;
+  height: auto;
+  object-fit: contain;
 }
 
 .direct-cartao-credito .direct-logo img,
