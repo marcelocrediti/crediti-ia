@@ -5,6 +5,34 @@
     [".amokarite-store-card button", "https://compre.vc/aI5Y0gg8RE01", "creditiAmokariteFixed"]
   ];
 
+  const EDUCATION_LOGOS = [
+    "/education/estacio.png",
+    "/education/wyden.png",
+    "/education/uninter.png",
+    "/education/unifatecie.png",
+    "/education/idomed.png"
+  ];
+
+  const educationImageCache = [];
+
+  const warmEducationLogos = () => {
+    EDUCATION_LOGOS.forEach((src) => {
+      const image = new Image();
+      image.decoding = "async";
+      image.fetchPriority = "high";
+      image.src = src;
+      educationImageCache.push(image);
+    });
+  };
+
+  const prioritizeVisibleLogos = () => {
+    document.querySelectorAll(".career-logo-frame img").forEach((image) => {
+      image.loading = "eager";
+      image.fetchPriority = "high";
+      image.decoding = "async";
+    });
+  };
+
   const openSafely = (url) => {
     const opened = window.open(url, "_blank", "noopener,noreferrer");
     if (opened) opened.opener = null;
@@ -15,6 +43,8 @@
       "crediti-home-visible",
       Boolean(document.querySelector(".home-personal-tools"))
     );
+
+    prioritizeVisibleLogos();
 
     SHOP_LINKS.forEach(([selector, url, key]) => {
       document.querySelectorAll(selector).forEach((button) => {
@@ -39,6 +69,7 @@
     });
   };
 
+  warmEducationLogos();
   schedule();
   new MutationObserver(schedule).observe(document.getElementById("root") || document.body, {
     childList: true,
