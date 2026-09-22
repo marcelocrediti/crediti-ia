@@ -2,6 +2,7 @@
 
 **Source visual truth path**
 
+- `/workspace/scratch/shop-crediti-publicado-1790041321857.jpg` (estado publicado anterior, com Magalu e SHEIN grandes demais dentro dos ícones)
 - `/workspace/scratch/4edd461a4510/upload/IMG_3236.jpeg` (desalinhamento nos quatro cards do painel “Um shopping inteiro na sua mão”)
 - `/workspace/scratch/4edd461a4510/upload/IMG_3227.png` (relato visual de logos espremidas e desalinhadas)
 - `/workspace/scratch/4edd461a4510/upload/FD8B6402-C172-4B47-9152-5CE1ECA13E8F.jpeg`
@@ -10,6 +11,8 @@
 **Implementation evidence**
 
 - Local preview: `http://terminal.local:4173/`
+- Latest safe-area screenshot: `/workspace/scratch/shop-logos-safe-area-1790047628129.jpg`
+- Latest focused before/after comparison: `/workspace/scratch/shop-logos-focused-before-after.jpg`
 - Latest browser-rendered logo screenshot: `/workspace/scratch/4edd461a4510/shop-logo-alignment-after.jpg`
 - Latest focused comparison: `/workspace/scratch/4edd461a4510/shop-logo-alignment-comparison.jpg`
 - Browser-rendered screenshot: `/workspace/scratch/4edd461a4510/shop-browser-full.jpg`
@@ -20,6 +23,7 @@
 
 - Source: 711 × 1536 pixels, mobile portrait, 72 dpi.
 - Browser viewport capture: 1348 × 926 CSS pixels, DPR 1.
+- Latest implementation capture: 1348 × 926 pixels at the same viewport and state as the previous published capture.
 - Full-page implementation: 1348 × 2025 pixels.
 - Comparison normalized both images to 1200 pixels of height and placed them in one side-by-side artifact.
 - State: Shop landing page, no active search or category filter, first seven brands visible; expanded catalog verified with 37 stores.
@@ -27,6 +31,7 @@
 ## Findings
 
 - No actionable P0, P1, or P2 issues remain.
+- The four lower-panel marks now have measured internal clearance. Magalu and SHEIN have 10 CSS pixels at both horizontal sides and 16 CSS pixels above and below; no letter touches the icon boundary. Shopee and Amazon retain 11 CSS pixels horizontally and 9 CSS pixels vertically.
 - The logo tiles now reserve 9 to 11 CSS pixels of horizontal safety space around every visible mark. Avon, O Boticário and Cacau Show are fully contained and centered instead of touching or being clipped by the tile border.
 - Store names and descriptions use explicit line heights and remain separated from the action control by 12 CSS pixels.
 - The inactive regional-partner callout was removed. Its space now presents a photographic shopping gallery with four direct, functional store choices.
@@ -66,7 +71,7 @@
 ## Focused-region comparison evidence
 
 - The focused lower-state capture shows the final brand rows, the shopping-gallery image with four store cards, the disclosure notice and the fixed navigation together.
-- No separate focused crop was required for logos because their intrinsic image dimensions and rendered load state were also checked directly in the browser.
+- The focused before/after crop shows the corrected reduction of the Magalu and SHEIN wordmarks while preserving the same card, icon container and label alignment.
 
 ## Comparison history
 
@@ -80,6 +85,7 @@
 - Final-card alignment iteration: the source showed inconsistent vertical placement across Shopee, Magalu, SHEIN and Amazon. The cards now use fixed 50 px logo and 14 px label grid tracks. Browser geometry measured identical logo tops (`692.390625`), logo heights (`50`), label tops (`748.390625`), label heights (`14`) and button heights (`89`) for all four cards.
 - Shopee correction: the supplied affiliate URL `https://s.shopee.com.br/qjgbXOrmd` replaced the obsolete Coolshop destination. A real browser activation completed the redirect to the official `shopee.com.br` storefront with affiliate parameters intact.
 - Gazin quality correction: the low-resolution favicon was replaced with the official Gazin vector mark extracted from the brand's own production storefront. The local SVG rendered at `300 × 106` intrinsic pixels with no load failure.
+- Lower-card safe-area correction: the previous wordmark rule forced a 46 × 26 CSS-pixel image into an icon container whose padding left a smaller usable area, allowing Magalu and SHEIN to crowd the boundary. The bottom-panel wrapper now has an 8-pixel inset, standard marks render at 32 × 32 and wordmarks at 34 × 18. Post-fix browser geometry confirms balanced clearances on all four sides, and the focused comparison shows no contact with the icon borders.
 
 ## Follow-up polish
 
@@ -101,5 +107,6 @@
 - [x] Four final-card logo and label tracks measured and aligned.
 - [x] New Shopee affiliate redirect tested in a real browser.
 - [x] Gazin favicon replaced with official vector artwork.
+- [x] Magalu and SHEIN lower-card safe areas measured and visually compared.
 
 final result: passed
