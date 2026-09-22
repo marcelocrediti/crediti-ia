@@ -1,0 +1,107 @@
+/* Crediti Bank Polish — 22/09/2026
+   Camada visual final: simples, leve, amarela, branca e humana. */
+
+:root{--bank-yellow:#FDCA01;--bank-ink:#111;--bank-muted:#686868;--bank-line:#e8e8e8;--bank-soft:#f7f7f5;--bank-warm:#fff8d9}
+
+.modern-home,.modern-page{width:min(100%,720px)}
+.modern-home{padding:18px 16px 42px}
+.home-section{margin-top:24px}
+
+/* Cabeçalho mais leve */
+.home-header{min-height:72px;background:rgba(255,255,255,.98);box-shadow:none;border-bottom:1px solid #eee}
+.home-header img{width:42px;height:42px;box-shadow:none}
+
+/* Boas-vindas: sem aparência de card pesado */
+.home-welcome{min-height:108px;padding:18px 18px;grid-template-columns:1fr 88px;border-radius:20px;background:#fff;border:1px solid var(--bank-line);box-shadow:none}
+.home-welcome h1{font-size:clamp(22px,5.2vw,30px);line-height:1.06}
+.home-welcome img{width:90px;height:90px;transform:translate(7px,12px)}
+
+/* Busca */
+.home-smart-search{z-index:8;margin-top:14px;padding:13px;border-radius:18px;border:1px solid var(--bank-line);box-shadow:none}
+.home-smart-search form{min-height:50px;border:1.5px solid #bbb;border-radius:14px}
+.home-smart-search form:focus-within{border-color:#111;box-shadow:0 0 0 3px rgba(253,202,1,.22)}
+.home-smart-search form button{min-height:40px;border-radius:10px;background:var(--bank-yellow)}
+.home-search-shortcuts button{min-height:36px;padding:0 13px;background:#fff;border-color:#ddd;font-size:12px}
+.home-search-results{top:114px;z-index:30;box-shadow:0 14px 34px rgba(17,17,17,.12)}
+
+/* Banners: menos mirabolantes */
+.home-banners{gap:10px;margin-top:14px}
+.home-banner{min-height:132px;padding:20px 92px 20px 19px;border-radius:19px;justify-content:center;box-shadow:none}
+.home-banner strong{font-size:20px;line-height:1.08}
+.home-banner-visual{top:50%;right:18px;width:56px;height:56px;border-radius:16px;transform:translateY(-50%)}
+.home-banner-visual svg{width:32px;height:32px}
+.yellow-banner{background:var(--bank-yellow)}
+.dark-banner{background:#f4f4f2;color:#111}
+.dark-banner .home-banner-visual{background:#fff;color:#111;border:1px solid #ddd}
+.light-banner{background:#f4f4f2}
+.pravaler-banner{background:#f5f2fa;color:#111;border:1px solid #e5dff0}
+.pravaler-banner .home-banner-visual{background:#fff;color:#5c2aa8;border:1px solid #ddd}
+
+/* Acesso rápido compacto */
+.quick-grid,.hub-grid{gap:10px}
+.quick-card,.hub-card{min-height:124px;padding:14px;border-radius:17px;background:#fff;border:1px solid var(--bank-line);box-shadow:none}
+.quick-card.primary,.hub-card.featured{background:var(--bank-warm);border-color:#e9c300}
+.quick-card>span,.hub-icon{min-width:34px;height:34px;border-radius:10px;background:var(--bank-yellow)}
+.quick-card strong,.hub-card strong{font-size:13px}
+.quick-card small,.hub-card small{font-size:9.5px}
+
+/* Títulos e filtros: espaço real entre chamada e botões */
+.section-title-row{margin-bottom:15px;align-items:center}
+.section-title-row h2{font-size:20px}
+.credit-filter-bar{position:relative;z-index:2;margin:0 0 16px;padding:0 0 4px;gap:7px}
+.credit-filter-bar button{min-height:36px;padding:0 14px;font-size:11px;background:#fff}
+.credit-filter-bar button.active{border-color:#d6ae00;background:var(--bank-yellow);color:#111}
+.privacy-first-note{margin:0 0 18px;padding:12px;border-radius:14px;background:#fff9df;border-color:#ead274}
+
+/* Produtos: vitrine financeira, não blocos pesados */
+.product-strip{gap:10px;padding:0 1px 7px}
+.product-strip .product-strip-card{width:154px;min-width:154px;min-height:168px;padding:11px;border-radius:16px;border:1px solid var(--bank-line);box-shadow:none;background:#fff}
+.product-strip-logo{height:54px;border-radius:11px;background:#fafafa!important;border:1px solid #eee}
+.product-strip-logo img{max-width:96px;max-height:38px;mix-blend-mode:normal!important;filter:none!important}
+.product-strip .product-strip-logo .product-strip-brand{padding:0 7px;font-size:14px;line-height:1.05;white-space:normal;text-align:center;overflow-wrap:anywhere}
+.product-strip .product-strip-card>strong{margin-top:10px;font-size:11.5px;line-height:1.2}
+.product-strip .product-strip-action{min-height:34px;margin-top:auto;padding:7px 6px;border-radius:9px;background:var(--bank-yellow)!important;color:#111!important;font-size:8.5px;white-space:normal;line-height:1.1}
+
+/* Cards de crédito completos */
+.direct-grid{gap:10px}
+.direct-card{padding:13px;grid-template-columns:72px 1fr;gap:11px;border-radius:16px;border:1px solid var(--bank-line);box-shadow:none}
+.direct-logo{width:72px;height:58px;padding:9px;border-radius:12px;background:#fafafa!important;border:1px solid #eee}
+.direct-logo img{max-height:40px;mix-blend-mode:normal!important;filter:none!important}
+.direct-logo strong{max-width:100%;font-size:14px;line-height:1.05;text-align:center;overflow-wrap:anywhere}
+.direct-card h2{font-size:15px}
+.direct-card-copy{font-size:11.5px}
+.direct-options{padding:11px 12px 11px 27px;border-radius:11px;background:#f7f7f5}
+.direct-options li{font-size:11px}
+.direct-card .primary-action{min-height:40px;border:0!important;border-radius:11px;background:var(--bank-yellow)!important;color:#111!important;box-shadow:none!important}
+.direct-card .compare-select{min-height:38px;border-radius:10px}
+.direct-card .compare-select.selected{background:#fff8d9;color:#111;border-color:#d9b500}
+
+/* Pravaler nunca mais espremido */
+.direct-logo.pravaler-logo{background:#fff!important;color:#6028aa;border:1px solid #ddd}
+.partner-text-logo-pravaler{display:block;width:100%;font-size:13px!important;line-height:1!important;text-align:center;letter-spacing:-.03em;overflow-wrap:anywhere}
+.product-strip .pravaler-strip-brand{background:#fff!important;color:#6028aa!important;font-size:13px!important}
+
+/* Dicas: mascote continua, mas sem dominar */
+.tip-feature{padding:16px;grid-template-columns:68px 1fr;gap:12px;border-radius:18px;background:#fff9df;border-color:#ead274}
+.tip-feature>img{width:68px;height:88px}
+.tip-feature h2{font-size:18px}
+.tip-feature button,.useful-feature button{padding:9px 12px;border-radius:10px;background:var(--bank-yellow);color:#111}
+.useful-feature{padding:16px;border-radius:18px;background:#f7f7f5}
+
+/* Evita elementos encostados ou sobrepostos */
+.home-section>.section-title-row+.credit-filter-bar{margin-top:2px}
+.home-section>.privacy-first-note+.credit-filter-bar{margin-top:2px}
+.search-target-active{outline-width:2px!important;outline-offset:2px;box-shadow:0 0 0 5px rgba(253,202,1,.18)!important}
+
+@media(max-width:560px){
+  .modern-home,.modern-page{padding-left:14px;padding-right:14px}
+  .product-strip .product-strip-card{width:calc((100% - 10px)/2);min-width:calc((100% - 10px)/2)}
+  .credit-filter-bar{margin-left:0;margin-right:0;padding-left:0;padding-right:0}
+}
+
+@media(max-width:390px){
+  .home-welcome{grid-template-columns:1fr 74px;padding:16px}
+  .home-welcome img{width:78px;height:78px}
+  .quick-card,.hub-card{min-height:116px;padding:12px}
+  .product-strip .product-strip-card{min-height:164px;padding:10px}
+}
