@@ -7,6 +7,7 @@ import React, {
 
 import { createRoot } from "react-dom/client";
 import "./styles.css";
+import "./serasa-mode.css";
 
 const API_URL =
   "https://crediti-ia-api.onrender.com";
@@ -9056,7 +9057,7 @@ function App() {
           </button>
         </section>
 
-        <section className="home-section">
+        <section className="home-section home-quick-section">
           <div className="section-title-row">
             <div>
               <small>ACESSO RÁPIDO</small>
@@ -9071,13 +9072,7 @@ function App() {
                 setScreen("direct")
               }
             >
-              <img
-                className="quick-card-photo"
-                src="/editorial/crediti-banking-woman.jpg"
-                alt=""
-                loading="lazy"
-                decoding="async"
-              />
+              <span aria-hidden="true"><UiIcon name="credit" /></span>
               <strong>
                 Quero simular agora
               </strong>
@@ -9092,13 +9087,7 @@ function App() {
                 openChat()
               }
             >
-              <img
-                className="quick-card-photo"
-                src="/editorial/crediti-students.jpg"
-                alt=""
-                loading="lazy"
-                decoding="async"
-              />
+              <span aria-hidden="true"><UiIcon name="chat" /></span>
               <strong>
                 Converse com a Crediti IA
               </strong>
@@ -9113,13 +9102,7 @@ function App() {
                 setScreen("products")
               }
             >
-              <img
-                className="quick-card-photo"
-                src="/shop-assets/hero-shop-crediti.webp"
-                alt=""
-                loading="lazy"
-                decoding="async"
-              />
+              <span aria-hidden="true"><UiIcon name="products" /></span>
               <strong>
                 Conheça nossos produtos
               </strong>
@@ -9134,13 +9117,7 @@ function App() {
                 setScreen("partner")
               }
             >
-              <img
-                className="quick-card-photo"
-                src="/shop-assets/near-you-shopping.webp"
-                alt=""
-                loading="lazy"
-                decoding="async"
-              />
+              <span aria-hidden="true"><UiIcon name="partner" /></span>
               <strong>
                 Quero ser parceiro
               </strong>
@@ -9151,7 +9128,7 @@ function App() {
           </div>
         </section>
 
-        <section className="home-section">
+        <section className="home-section home-credit-section">
           <div className="section-title-row">
             <div>
               <small>SIMULE ONLINE</small>
