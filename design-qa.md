@@ -2,6 +2,7 @@
 
 **Source visual truth path**
 
+- `/workspace/scratch/4edd461a4510/upload/IMG_3236.jpeg` (desalinhamento nos quatro cards do painel “Um shopping inteiro na sua mão”)
 - `/workspace/scratch/4edd461a4510/upload/IMG_3227.png` (relato visual de logos espremidas e desalinhadas)
 - `/workspace/scratch/4edd461a4510/upload/FD8B6402-C172-4B47-9152-5CE1ECA13E8F.jpeg`
 - `/workspace/scratch/4edd461a4510/upload/IMG_3210.jpeg` (evidência do espaço excessivo no fim da rolagem)
@@ -76,6 +77,9 @@
 - Store-integrity iteration: Natura, Itatiaia, La Luna, Freeway, Sieno Perfumes, Komo Wellness and Casa das Alianças were replaced with official logo assets sourced from their own storefronts or official delivery assets. All seven loaded with nonzero intrinsic dimensions in the browser. The Shop component previously referenced an out-of-scope `openExternal` function, which prevented every store button from navigating. The callback is now passed explicitly by the app; a real browser click opened the tracked Natura link and completed the redirect to the secure official `natura.com.br` storefront. The other six links were individually resolved to their official HTTPS domains.
 - Post-fix production build and stability checks passed. Three newly substituted official assets returned HTTP 200 with valid PNG/SVG MIME types; Fator 5 had already loaded successfully in the browser pass.
 - Current interaction pass found no remaining P0/P1/P2 issue.
+- Final-card alignment iteration: the source showed inconsistent vertical placement across Shopee, Magalu, SHEIN and Amazon. The cards now use fixed 50 px logo and 14 px label grid tracks. Browser geometry measured identical logo tops (`692.390625`), logo heights (`50`), label tops (`748.390625`), label heights (`14`) and button heights (`89`) for all four cards.
+- Shopee correction: the supplied affiliate URL `https://s.shopee.com.br/qjgbXOrmd` replaced the obsolete Coolshop destination. A real browser activation completed the redirect to the official `shopee.com.br` storefront with affiliate parameters intact.
+- Gazin quality correction: the low-resolution favicon was replaced with the official Gazin vector mark extracted from the brand's own production storefront. The local SVG rendered at `300 × 106` intrinsic pixels with no load failure.
 
 ## Follow-up polish
 
@@ -94,5 +98,8 @@
 - [x] Search and category filtering tested.
 - [x] Bottom spacing measured.
 - [x] Production build completed successfully.
+- [x] Four final-card logo and label tracks measured and aligned.
+- [x] New Shopee affiliate redirect tested in a real browser.
+- [x] Gazin favicon replaced with official vector artwork.
 
 final result: passed

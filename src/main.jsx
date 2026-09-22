@@ -298,7 +298,7 @@ function daysUntil(dateValue) {
 }
 
 const SHOPEE_STORE_URL =
-  "https://collshp.com/marceloachou?view=storefront";
+  "https://s.shopee.com.br/qjgbXOrmd";
 
 const MAGALU_STORE_URL =
   "https://www.influenciadormagalu.com.br/creditishop";
@@ -2281,8 +2281,8 @@ const SHOP_REAL_STORES = [
     id: "gazin",
     name: "Gazin",
     description: "Móveis, eletrodomésticos e tecnologia",
-    logo: crispBrandIcon("gazin.com.br"),
-    logoKind: "compact",
+    logo: "/shop-assets/logo-gazin.svg",
+    logoKind: "wordmark",
     url: GAZIN_STORE_URL,
     categories: ["familia", "casa", "tecnologia"]
   },
@@ -2693,7 +2693,7 @@ function ShopExperience({ onNavigate, onOpenExternal }) {
                   >
                     <img src={store.logo} alt={`Logo oficial ${store.name}`} />
                   </span>
-                  <span>{store.name}</span>
+                  <span className="shop-real-mall-name">{store.name}</span>
                 </button>
               ))}
             </div>
