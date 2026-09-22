@@ -84,14 +84,18 @@
   function iconPlay(){return '<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="3"><circle cx="24" cy="24" r="18"/><path d="M20 16l12 8-12 8z" fill="currentColor" stroke="none"/></svg>'}
 
   function mountCard(){
-    if(document.getElementById(CARD_ID)) return;
-    const tools=document.querySelector('.home-personal-tools');
-    if(!tools?.parentElement) return;
-    const b=document.createElement('button');
-    b.id=CARD_ID;b.type='button';
-    b.innerHTML=`<span class="copy"><span class="k">1 vencedor por campanha</span><strong>Seja um Creator Ads da Crediti e fature</strong><small>Envie seu vídeo, participe de campanhas e ganhe se for o escolhido.</small><span class="a">Ver campanhas →</span></span><span class="film" aria-hidden="true">${iconFilm()}</span>`;
-    b.addEventListener('click',openPage);
-    tools.insertAdjacentElement('afterend',b);
+    const highlights=document.querySelector('.product-strip')?.closest('.home-section');
+    const fallback=document.querySelector('.home-personal-tools');
+    const anchor=highlights||fallback;
+    if(!anchor?.parentElement) return;
+    let b=document.getElementById(CARD_ID);
+    if(!b){
+      b=document.createElement('button');
+      b.id=CARD_ID;b.type='button';
+      b.innerHTML=`<span class="copy"><span class="k">1 vencedor por campanha</span><strong>Seja um Creator Ads da Crediti e fature</strong><small>Envie seu vídeo, participe de campanhas e ganhe se for o escolhido.</small><span class="a">Ver campanhas →</span></span><span class="film" aria-hidden="true">${iconFilm()}</span>`;
+      b.addEventListener('click',openPage);
+    }
+    if(anchor.nextElementSibling!==b) anchor.insertAdjacentElement('afterend',b);
   }
 
   function pageHtml(){return `<main id="${PAGE_ID}"><header class="top"><button class="back" type="button" id="creatorBack">← Voltar ao app</button><div class="brand">CREDITI</div></header><div class="wrap"><section class="hero"><div class="hero-copy"><span class="pill">CREATOR ADS CREDITI</span><h1>Crie conteúdo e fature com a Crediti</h1><p>Participe das campanhas, envie seu vídeo e tenha a chance de ser o creator escolhido da vez.</p><div class="hero-note">Sua ideia pode virar campanha</div></div><div class="hero-art"><img src="${PHOTO}" referrerpolicy="no-referrer" alt="Jovem criando conteúdo com smartphone"></div></section><section class="steps"><article class="step"><span class="ico">${iconFilm()}</span><b>Campanhas</b><small>Veja o tema e o prêmio de cada oportunidade.</small></article><article class="step"><span class="ico">${iconCamera()}</span><b>Criação</b><small>Grave seu vídeo no formato pedido.</small></article><article class="step"><span class="ico">${iconPlay()}</span><b>Envio</b><small>Envie e acompanhe o resultado pelo app.</small></article></section><nav class="tabs" aria-label="Creator Ads"><button data-tab="rules" class="active">Regras</button><button data-tab="profile">Meu cadastro</button><button data-tab="campaigns">Campanhas</button><button data-tab="videos">Meus vídeos</button><button data-tab="term">Meu termo</button></nav><section class="panel active" data-panel="rules"><div class="section-title"><span>Antes de participar</span><h2>Regras principais</h2></div><div id="creatorRules" class="rules"></div></section><section class="panel" data-panel="profile"><div class="section-title"><span>Creator Ads</span><h2>Meu cadastro</h2></div><div id="creatorProfile"></div></section><section class="panel" data-panel="campaigns"><div class="section-title"><span>Oportunidades</span><h2>Campanhas</h2></div><div id="creatorCampaigns"></div></section><section class="panel" data-panel="videos"><div class="section-title"><span>Acompanhamento</span><h2>Meus vídeos</h2></div><div id="creatorVideos"></div></section><section class="panel" data-panel="term"><div class="section-title"><span>Transparência</span><h2>Meu termo</h2></div><div id="creatorTerm"></div></section></div></main>`}

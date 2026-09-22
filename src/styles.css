@@ -9962,7 +9962,7 @@ body,
 }
 
 .dark-banner {
-  background: #fff4bd;
+  background: #f5f6f8;
   color: #111111;
 }
 
@@ -10000,8 +10000,8 @@ body,
 .protect-hero,
 .business-hero,
 .partner-notice-brand {
-  border: 1px solid #efd77c;
-  background: #fff8dc;
+  border: 1px solid #e3e5e8;
+  background: #f5f6f8;
   color: #111111;
   box-shadow: none;
 }
@@ -10069,8 +10069,81 @@ body,
 
 .quick-card.primary,
 .hub-card.featured {
-  border-color: #efd77c;
-  background: #fff8dc;
+  border-color: #e3e5e8;
+  background: #ffffff;
+}
+
+/* Vitrine simples: branco, cinza claro e amarelo somente nas acoes. */
+#crediti-creator-ads-card {
+  background: #f5f6f8 !important;
+  border-color: #e3e5e8 !important;
+}
+
+.product-strip .product-strip-card {
+  min-height: 70px;
+  grid-template-columns: 72px minmax(0, 1fr);
+  gap: 1px 10px;
+}
+
+.product-strip-logo {
+  width: 72px;
+  height: 48px;
+}
+
+.product-strip-card > strong {
+  align-self: end;
+  font-size: 12.5px;
+}
+
+.product-strip .product-strip-action {
+  grid-column: 2;
+  justify-self: start !important;
+  align-self: start;
+  width: auto !important;
+  margin: 2px 0 0 !important;
+  color: #5f5200 !important;
+  font-size: 8px;
+  line-height: 1.15;
+  text-align: left !important;
+}
+
+.partner-notice-brand {
+  padding: 16px;
+  background: #f5f6f8;
+}
+
+.partner-notice-brand small {
+  color: #5f5200;
+  font-size: 9px;
+}
+
+.partner-notice-brand h1 {
+  margin: 8px 0 3px;
+  color: #111111;
+  font-size: 22px;
+}
+
+.partner-notice-brand p {
+  color: #68707b;
+  font-size: 12px;
+}
+
+.partner-notice-logo,
+.partner-notice-logo.pravaler,
+.partner-notice-logo.consiga-mais {
+  min-height: 70px;
+  margin: 10px 0;
+  padding: 12px 16px;
+  background: #ffffff;
+}
+
+.partner-notice-safe {
+  border-color: #e3e5e8;
+  background: #f5f6f8;
+}
+
+.partner-notice-safe p {
+  color: #5f6368;
 }
 
 @media (max-width: 520px) {

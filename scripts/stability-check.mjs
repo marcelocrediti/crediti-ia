@@ -41,13 +41,13 @@ forbidText(index, '/lojas-rede-link-fix.js', 'index.html');
 forbidText(index, '/creator-ads-home-card-cleanup.js', 'index.html');
 forbidText(index, '/creator-ads-placement.js', 'index.html');
 requireText(index, 'html.crediti-home-visible #crediti-creator-ads-card', 'index.html');
-requireText(index, 'background:#fff8dc!important', 'index.html');
+requireText(index, 'background:#f5f6f8!important', 'index.html');
 requireText(index, 'background:#FDCA01', 'index.html');
 requireText(index, '#FDCA01', 'index.html');
 requireText(index, '/src/main.jsx', 'index.html');
 
 const preview = read('public/creator-ads-preview.js');
-requireText(preview, "tools.insertAdjacentElement('afterend',b)", 'public/creator-ads-preview.js');
+requireText(preview, "anchor.insertAdjacentElement('afterend',b)", 'public/creator-ads-preview.js');
 
 const employment = read('public/employment-opportunities.js');
 ['Encontre seu emprego','GZemMLWmnhiCKJH4VtdoR4','CreditiEmploymentOpportunities'].forEach((m) => requireText(employment, m, 'public/employment-opportunities.js'));
