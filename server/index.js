@@ -119,6 +119,24 @@ Quando aceitar atendimento humano:
 
 [[HANDOFF]]
 
+EMPRÉSTIMO PESSOAL - SUPERSIM
+
+Pode apresentar opções para diferentes perfis, incluindo:
+
+- negativados;
+- recebimento via PIX;
+- trabalhadores CLT;
+- MEI;
+- autônomos;
+- empréstimo pessoal tradicional;
+- empréstimo com garantia de celular.
+
+Não prometa disponibilidade, valor ou aprovação. Explique que as opções dependem da análise da SuperSim.
+
+Quando a pessoa quiser consultar ou simular:
+
+[[PARTNER:emprestimo-pessoal]]
+
 CONS\xD3RCIO DE CARRO
 
 Pode ser apresentado para quem deseja comprar um carro e pode esperar.
@@ -162,13 +180,7 @@ CONSIGNADO INSS
 
 Atende aposentados e pensionistas do INSS.
 
-Regra:
-
-- idade de at\xE9 72 anos.
-
-Pergunte a idade antes de concluir a pr\xE9-an\xE1lise.
-
-Quando houver interesse, pergunte se pode encaminhar para a simula\xE7\xE3o no banco parceiro.
+Quando houver interesse, pergunte se pode encaminhar para a simulação na Consiga Mais.
 
 Quando aceitar, responda que a op\xE7\xE3o foi encontrada e que o bot\xE3o abaixo leva ao ambiente seguro do parceiro.
 
@@ -252,6 +264,16 @@ Verifique as duas condi\xE7\xF5es.
 Quando aceitar a simula\xE7\xE3o:
 
 [[PARTNER:cartao]]
+
+CARTÃO DE CRÉDITO - CONSUMIDOR POSITIVO
+
+Esta opção é para quem deseja consultar cartões de crédito disponíveis para o próprio perfil.
+
+Não confunda com empréstimo usando o limite de um cartão existente.
+
+Quando a pessoa disser que quer solicitar, pedir ou encontrar um cartão de crédito:
+
+[[PARTNER:cartao-credito]]
 
 EMPR\xC9STIMO NA CONTA DE LUZ
 
@@ -421,7 +443,7 @@ N\xE3o escolha um produto imediatamente.
 
 Pergunte:
 
-"Hoje voc\xEA \xE9 aposentado, trabalha registrado, recebe algum benef\xEDcio ou possui carro ou moto no seu nome?"
+"Hoje você é aposentado, trabalha registrado, é MEI, autônomo, recebe algum benefício ou possui carro ou moto no seu nome?"
 
 Depois siga para o produto relacionado.
 
@@ -452,7 +474,7 @@ Prefira:
 
 ENCAMINHAMENTO
 
-INSS, BPC/LOAS, CLT, FGTS, empr\xE9stimo no cart\xE3o e empr\xE9stimo na conta de luz possuem links pr\xF3prios.
+Empréstimo pessoal, INSS, BPC/LOAS, CLT, FGTS, cartão de crédito, empréstimo no cartão e empréstimo na conta de luz possuem links próprios.
 
 Para esses produtos, nunca use [[HANDOFF]]. Use exclusivamente o marcador [[PARTNER:produto]] indicado em cada regra.
 
@@ -543,8 +565,8 @@ N\xE3o pe\xE7a novamente os dados acima quando j\xE1 estiverem informados.
   return d && d.role === "user" && String(d.content).trim() === i || n.push({ role: "user", content: i }), n;
 }
 function b(o = "") {
-  const routes = [...o.matchAll(/\[\[ROUTE:(learn|services|shop|partner|myCrediti|protect|organizer|business|debtHelp|scorePlan)(?::(todos|casa|moda|beleza|familia|auto))?\]\]/gi)].map((t) => ({ screen: t[1], category: t[2] || "" })), a = "[[HANDOFF]]", e = "[[HANDOFF:SAMILA]]", c = o.match(/\[\[PARTNER:(inss|bpc|fgts|clt|energia|cartao|pravaler)\]\]/i)?.[1]?.toLowerCase() || "", i = (o.includes(a) || o.includes(e)) && !c, d = o.includes(e) ? "samila" : "";
-  let u = o.replaceAll(e, "").replaceAll(a, "").replace(/\[\[PARTNER:(inss|bpc|fgts|clt|energia|cartao|pravaler)\]\]/gi, "").replace(/\[\[ROUTE:(learn|services|shop|partner|myCrediti|protect|organizer|business|debtHelp|scorePlan)(?::(todos|casa|moda|beleza|familia|auto))?\]\]/gi, "").trim();
+  const routes = [...o.matchAll(/\[\[ROUTE:(learn|services|shop|partner|myCrediti|protect|organizer|business|debtHelp|scorePlan)(?::(todos|casa|moda|beleza|familia|auto))?\]\]/gi)].map((t) => ({ screen: t[1], category: t[2] || "" })), a = "[[HANDOFF]]", e = "[[HANDOFF:SAMILA]]", c = o.match(/\[\[PARTNER:(emprestimo-pessoal|cartao-credito|inss|bpc|fgts|clt|energia|cartao|pravaler)\]\]/i)?.[1]?.toLowerCase() || "", i = (o.includes(a) || o.includes(e)) && !c, d = o.includes(e) ? "samila" : "";
+  let u = o.replaceAll(e, "").replaceAll(a, "").replace(/\[\[PARTNER:(emprestimo-pessoal|cartao-credito|inss|bpc|fgts|clt|energia|cartao|pravaler)\]\]/gi, "").replace(/\[\[ROUTE:(learn|services|shop|partner|myCrediti|protect|organizer|business|debtHelp|scorePlan)(?::(todos|casa|moda|beleza|familia|auto))?\]\]/gi, "").trim();
   if (i) {
     const t = new Intl.DateTimeFormat("en-US", { timeZone: "America/Fortaleza", weekday: "short", hour: "2-digit", minute: "2-digit", hour12: false }).formatToParts(/* @__PURE__ */ new Date()), r = t.find((p) => p.type === "weekday")?.value || "", l = Number(t.find((p) => p.type === "hour")?.value || 0), g = Number(t.find((p) => p.type === "minute")?.value || 0), A = l * 60 + g, f = r === "Sat" || r === "Sun", R = r === "Fri" && A >= 1020;
     !f && A >= 460 && A < 1020 || (u += `

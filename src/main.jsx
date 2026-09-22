@@ -460,6 +460,28 @@ const EDUCATION_PARTNERS = [
 ];
 
 const PARTNER_PRODUCTS = {
+  "emprestimo-pessoal": {
+    name: "Empréstimo pessoal",
+    partner: "SuperSim",
+    logo: "/partners/supersim.webp",
+    logoTone: "supersim",
+    url: "https://apretailer.com.br/click/6aa4af912bfa816ab47e8c90/184363/360419/app_crediti",
+    button: "SIMULAR MEU EMPRÉSTIMO",
+    eyebrow: "CRÉDITO PARA DIFERENTES PERFIS",
+    heading: "Consulte as opções disponíveis para você",
+    shortText: "Crédito para diferentes perfis. Consulte as opções disponíveis para você.",
+    options: [
+      "Empréstimo para negativados",
+      "Empréstimo via PIX",
+      "Empréstimo para CLT",
+      "Empréstimo para MEI",
+      "Empréstimo para autônomos",
+      "Empréstimo pessoal tradicional",
+      "Empréstimo com garantia de celular"
+    ],
+    note: "Contratação, aprovação, valores e condições são definidos pela instituição responsável pela oferta."
+  },
+
   pravaler: {
     name: "Financiamento estudantil",
     partner: "Pravaler",
@@ -474,10 +496,28 @@ const PARTNER_PRODUCTS = {
 
   inss: {
     name: "Consignado INSS",
-    partner: "Banco BRB",
-    logo: "/partners/brb.jpeg",
-    url: "https://solution.consig360.com.br/self-hire/EkCwaEb",
-    button: "SIMULAR SEU CRÉDITO"
+    partner: "Consiga Mais",
+    logo: "/partners/consiga-mais.png",
+    logoTone: "consiga-mais",
+    url: "https://apretailer.com.br/click/6aa4af912bfa8159945c68c9/184987/360419/app_crediti",
+    button: "SIMULAR CONSIGNADO",
+    eyebrow: "CONSIGNADO INSS",
+    heading: "Consulte as condições disponíveis",
+    shortText: "Consulte as condições disponíveis para seu consignado INSS.",
+    note: "Contratação, aprovação, valores e condições são definidos pela instituição responsável pela oferta."
+  },
+
+  "cartao-credito": {
+    name: "Cartão de crédito",
+    partner: "Consumidor Positivo",
+    logo: "/partners/consumidor-positivo.svg",
+    logoTone: "consumidor-positivo",
+    url: "https://apretailer.com.br/click/6aa4af922bfa816ac97f6e34/185301/360419/app_crediti",
+    button: "SOLICITAR CARTÃO",
+    eyebrow: "CARTÃO DE CRÉDITO",
+    heading: "Encontre uma opção para o seu perfil",
+    shortText: "Consulte opções de cartão disponíveis para o seu perfil.",
+    note: "Contratação, aprovação, valores e condições são definidos pela instituição responsável pela oferta."
   },
 
   bpc: {
@@ -550,6 +590,31 @@ const ANALYSTS = {
 
 const products = [
   {
+    id: "emprestimo-pessoal",
+    name: "Empréstimo pessoal",
+    typeLabel: "CRÉDITO PARA DIFERENTES PERFIS",
+    what:
+      "Crédito para diferentes perfis. Consulte as opções disponíveis para você.",
+    forWho:
+      "Pessoas negativadas, trabalhadores CLT, MEI, autônomos e clientes que procuram crédito pessoal.",
+    how:
+      "A SuperSim apresenta as opções disponíveis para o perfil informado e realiza a análise em seu próprio ambiente.",
+    when:
+      "Pode ajudar em uma necessidade financeira pontual, desde que a contratação caiba no orçamento.",
+    tip:
+      "Compare o valor total, as parcelas e as condições antes de contratar.",
+    options: [
+      "Empréstimo para negativados",
+      "Empréstimo via PIX",
+      "Empréstimo para CLT",
+      "Empréstimo para MEI",
+      "Empréstimo para autônomos",
+      "Empréstimo pessoal tradicional",
+      "Empréstimo com garantia de celular"
+    ]
+  },
+
+  {
     id: "pravaler",
     name: "Financiamento estudantil",
     typeLabel: "FINANCIAMENTO PARA ESTUDAR",
@@ -569,15 +634,31 @@ const products = [
     id: "inss",
     name: "Consignado INSS",
     what:
-      "Crédito para aposentados e pensionistas do INSS, com parcelas descontadas do benefício.",
+      "Consulte as condições disponíveis para seu consignado INSS.",
     forWho:
       "Aposentados e pensionistas que querem verificar uma possibilidade de crédito.",
     how:
-      "A Crediti faz uma análise inicial. A regra cadastrada atualmente considera idade de até 72 anos.",
+      "A simulação e a análise são realizadas no ambiente da Consiga Mais.",
     when:
       "Pode ajudar em uma necessidade específica ou na organização de despesas.",
     tip:
       "Não comprometa uma parte grande do benefício. A parcela precisa continuar confortável todo mês."
+  },
+
+  {
+    id: "cartao-credito",
+    name: "Cartão de crédito",
+    typeLabel: "CARTÃO PARA O SEU PERFIL",
+    what:
+      "Consulte opções de cartão disponíveis para o seu perfil.",
+    forWho:
+      "Pessoas que desejam conhecer opções de cartão de crédito disponíveis conforme análise.",
+    how:
+      "A consulta é feita no ambiente do Consumidor Positivo, responsável pelas opções apresentadas.",
+    when:
+      "Pode ajudar quem procura um cartão compatível com o próprio perfil.",
+    tip:
+      "Confira anuidade, juros, limite e demais condições antes de solicitar."
   },
 
   {
@@ -811,6 +892,8 @@ const products = [
 ];
 
 const DIRECT_PRODUCT_KEYS = [
+  "emprestimo-pessoal",
+  "cartao-credito",
   "pravaler",
   "inss",
   "bpc",
@@ -829,6 +912,16 @@ const CREDIT_FILTERS = [
 ];
 
 const CREDIT_META = {
+  "emprestimo-pessoal": {
+    category: "outros",
+    audience: "Negativados, CLT, MEI, autônomos e outros perfis.",
+    detail: "Opções de empréstimo pessoal com análise realizada pela SuperSim."
+  },
+  "cartao-credito": {
+    category: "outros",
+    audience: "Pessoas que procuram um cartão de crédito.",
+    detail: "Consulta de cartões disponíveis no Consumidor Positivo."
+  },
   pravaler: {
     category: "estudante",
     audience: "Para quem quer iniciar ou continuar uma faculdade.",
@@ -837,7 +930,7 @@ const CREDIT_META = {
   inss: {
     category: "beneficio",
     audience: "Aposentados e pensionistas do INSS.",
-    detail: "Consignado com análise e contratação no Banco BRB."
+    detail: "Consignado com simulação e análise realizadas pela Consiga Mais."
   },
   bpc: {
     category: "beneficio",
@@ -1167,9 +1260,9 @@ const APP_SEARCH_ITEMS = [
   },
   {
     title: "Crédito para trabalhador",
-    description: "CLT, antecipação do FGTS, cartão e conta de energia",
+    description: "Empréstimo pessoal, CLT, FGTS, cartão e conta de energia",
     screen: "direct",
-    keywords: "trabalhador trabalhadores empregado carteira assinada clt fgts saque aniversario cartao energia conta luz"
+    keywords: "trabalhador trabalhadores empregado carteira assinada clt mei autonomo supersim fgts saque aniversario cartao energia conta luz"
   },
   {
     title: "Faculdade e financiamento estudantil",
@@ -1185,9 +1278,9 @@ const APP_SEARCH_ITEMS = [
   },
   {
     title: "Simular crédito",
-    description: "INSS, BPC, CLT, FGTS, cartão, energia e estudante",
+    description: "Empréstimo pessoal, INSS, cartão, CLT, FGTS e outras opções",
     screen: "direct",
-    keywords: "credito emprestimo dinheiro simular inss aposentado pensionista bpc loas clt trabalhador fgts cartao energia pravaler estudante faculdade"
+    keywords: "credito emprestimo dinheiro simular negativado pix supersim mei autonomo inss aposentado pensionista bpc loas clt trabalhador fgts cartao consumidor positivo consiga mais energia pravaler estudante faculdade"
   },
   {
     title: "Aprenda com a Crediti",
@@ -1235,6 +1328,14 @@ const CHAT_ROUTE_LABELS = {
 };
 
 const PRODUCT_VISUALS = {
+  "emprestimo-pessoal": {
+    label: "Crédito pessoal para diferentes perfis.",
+    tone: "yellow"
+  },
+  "cartao-credito": {
+    label: "Consulte cartões disponíveis para o seu perfil.",
+    tone: "blue"
+  },
   pravaler: {
     label: "Financie sua faculdade com parcelas que cabem no orçamento.",
     tone: "purple"
@@ -3032,7 +3133,9 @@ function App() {
         product.forWho,
         product.how,
         product.when,
-        product.tip
+        product.tip,
+        product.options?.join(" "),
+        PARTNER_PRODUCTS[product.id]?.partner
       ]
         .filter(Boolean)
         .join(" ")
@@ -3555,10 +3658,10 @@ function App() {
         productKey: "pravaler"
       },
       autonomo: {
-        key: "all-products",
-        title: "Opções para seu perfil",
-        description: "Conheça os produtos e veja as exigências de cada um.",
-        screen: "products"
+        key: "product-personal-loan",
+        title: "Empréstimo pessoal",
+        description: "Consulte as opções disponíveis para autônomos.",
+        productKey: "emprestimo-pessoal"
       },
       outro: {
         key: "all-credit",
@@ -5376,9 +5479,33 @@ function App() {
         <main className="modern-page partner-notice-page">
           <section className="partner-notice-brand">
             <small>AMBIENTE EXTERNO</small>
+            <div className={`partner-notice-logo ${product.logoTone || ""}`}>
+              {product.logo ? (
+                <img src={product.logo} alt={`Logo ${product.partner}`} />
+              ) : (
+                <strong>{product.logoText || product.partner}</strong>
+              )}
+            </div>
             <h1>{product.name}</h1>
             <p>{product.partner}</p>
           </section>
+
+          {product.shortText && (
+            <p className="partner-notice-description">
+              {product.shortText}
+            </p>
+          )}
+
+          {product.options?.length > 0 && (
+            <section className="partner-notice-options">
+              <h2>Opções que você pode encontrar</h2>
+              <ul>
+                {product.options.map((option) => (
+                  <li key={option}>{option}</li>
+                ))}
+              </ul>
+            </section>
+          )}
 
           <section className="partner-notice-safe">
             <span aria-hidden="true"><UiIcon name="shield" /></span>
@@ -5411,7 +5538,7 @@ function App() {
               }
             }}
           >
-            CONTINUAR NO SITE OFICIAL
+            {product.button || "CONTINUAR NO SITE OFICIAL"}
           </button>
 
           <button
@@ -6221,6 +6348,20 @@ function App() {
                       </h2>
                     </div>
 
+                    {product.shortText && (
+                      <p className="direct-card-copy">
+                        {product.shortText}
+                      </p>
+                    )}
+
+                    {product.options?.length > 0 && (
+                      <ul className="direct-options">
+                        {product.options.map((option) => (
+                          <li key={option}>{option}</li>
+                        ))}
+                      </ul>
+                    )}
+
                     <button
                       className={
                         "compare-select " +
@@ -6253,7 +6394,7 @@ function App() {
           </div>
 
           <p className="external-note">
-            A análise, as condições e a contratação são de responsabilidade da instituição escolhida. A Crediti não garante aprovação.
+            Contratação, aprovação, valores e condições são definidos pela instituição responsável pela oferta.
           </p>
         </main>
 
@@ -8153,7 +8294,7 @@ function App() {
                   OPÇÃO ENCONTRADA PARA VOCÊ
                 </span>
 
-                <div className="partner-logo-box">
+                <div className={`partner-logo-box ${PARTNER_PRODUCTS[partnerProduct].logoTone || ""}`}>
                   {PARTNER_PRODUCTS[partnerProduct].logo ? (
                     <img
                       src={PARTNER_PRODUCTS[partnerProduct].logo}
@@ -8534,6 +8675,17 @@ function App() {
               </section>
             </div>
 
+            {selectedProduct.options?.length > 0 && (
+              <section className="product-options-panel">
+                <strong>Opções disponíveis para consulta</strong>
+                <ul>
+                  {selectedProduct.options.map((option) => (
+                    <li key={option}>{option}</li>
+                  ))}
+                </ul>
+              </section>
+            )}
+
             <div
               className=
                 "creditin-tip"
@@ -8568,7 +8720,7 @@ function App() {
                 </div>
 
                 <div
-                  className="partner-logo-card"
+                  className={`partner-logo-card ${selectedPartner.logoTone || ""}`}
                 >
                   {selectedPartner.logo ? (
                     <img
@@ -9160,9 +9312,7 @@ function App() {
                 </strong>
 
                 <span className="product-strip-action">
-                  {productKey === "pravaler"
-                    ? "FINANCIAR ›"
-                    : "SIMULAR ›"}
+                  {PARTNER_PRODUCTS[productKey].button} ›
                 </span>
               </button>
             ))}
