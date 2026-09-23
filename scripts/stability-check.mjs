@@ -33,7 +33,7 @@ if (Buffer.byteLength(styles, 'utf8') < 70000) fail('styles.css ficou pequeno de
 
 const index = read('index.html');
 [
-  '/creator-ads-preview.js?v=20260904-6','/employment-opportunities.js?v=20260921-1','/solides-partnership.js?v=20260908-2','/ui-stability-controller.js?v=20260922-',
+  '/creator-ads-preview.js?v=20260904-6','/employment-opportunities.js?v=20260921-1','/solides-partnership.js?v=20260908-2','/ui-stability-controller.js?v=20260923-',
   '/creator-ads-upload-meus-videos.js?v=20260904-2','/creator-ads-video-status.js?v=20260904-2','/creator-ads-campaign-organizer.js?v=20260904-1'
 ].forEach((script) => requireText(index, script, 'index.html'));
 forbidText(index, '/shopee-affiliate-link.js', 'index.html');
