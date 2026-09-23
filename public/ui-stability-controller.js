@@ -60,6 +60,30 @@
     }
   };
 
+  const moveCreditinScoreTip = () => {
+    const all = [...document.querySelectorAll("section,article,div")];
+    const tip = all.find((el) => {
+      const text = (el.textContent || "").replace(/\s+/g, " ").trim();
+      return text.includes("DICA DO CREDITIN") && text.includes("Score baixo") && text.includes("MONTAR MEU PLANO");
+    });
+    if (!tip || tip.dataset.creditiScoreMoved === "1") return;
+
+    let card = tip;
+    while (card.parentElement && card.parentElement !== document.body) {
+      const text = (card.textContent || "").replace(/\s+/g, " ").trim();
+      if (text.includes("DICA DO CREDITIN") && text.includes("MONTAR MEU PLANO") && card.children.length <= 8) break;
+      card = card.parentElement;
+    }
+
+    const headings = [...document.querySelectorAll("h1,h2,h3,h4,strong")];
+    const financialHeading = headings.find((el) => /educa[cç][aã]o financeira/i.test(el.textContent || ""));
+    const target = financialHeading?.closest("section,article,div") || financialHeading?.parentElement;
+    if (!target || !target.parentElement || card === target || card.contains(target)) return;
+
+    target.parentElement.insertBefore(card, target);
+    card.dataset.creditiScoreMoved = "1";
+  };
+
   const keepShopLinksCorrect = () => {
     document.documentElement.classList.toggle(
       "crediti-home-visible",
@@ -79,6 +103,7 @@
     });
 
     addGranExperience();
+    moveCreditinScoreTip();
   };
 
   let queued = false;
