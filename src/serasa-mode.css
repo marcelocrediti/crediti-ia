@@ -1026,3 +1026,74 @@
     padding-inline: 13px;
   }
 }
+
+
+/* Up.p: portabilidade CLT, CLT e FGTS usam o mesmo ambiente seguro. */
+.direct-card.direct-upp-portabilidade {
+  background: #fff;
+  border-color: #e3e5e8;
+}
+.direct-logo.upp-logo {
+  background: #f4f6f8;
+  border: 1px solid #e3e5e8;
+}
+.direct-logo.upp-logo strong {
+  color: #172033;
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: -.04em;
+}
+.direct-secondary-actions {
+  display: grid;
+  gap: 7px;
+  margin: 6px 0 2px;
+  padding: 9px;
+  border: 1px solid #e3e5e8;
+  border-radius: 12px;
+  background: #f7f8f9;
+}
+.direct-secondary-actions > small {
+  color: #687078;
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: .08em;
+}
+.direct-secondary-actions > button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-height: 42px;
+  padding: 7px 9px;
+  border: 1px solid #dfe2e6;
+  border-radius: 9px;
+  background: #fff;
+  color: #171d2e;
+  text-align: left;
+}
+.direct-secondary-actions > button span {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+.direct-secondary-actions > button strong {
+  font-size: 11px;
+  line-height: 1.15;
+}
+.direct-secondary-actions > button small {
+  color: #687078;
+  font-size: 8px;
+  line-height: 1.2;
+}
+.direct-secondary-actions > button b {
+  color: #5d5200;
+  font-size: 20px;
+}
+.direct-card.direct-upp-portabilidade .primary-action {
+  background: #ff7a1a;
+  color: #fff;
+}
+@media (max-width: 620px) {
+  .direct-secondary-actions > button strong { font-size: 10px; }
+  .direct-secondary-actions > button small { font-size: 7.5px; }
+}

@@ -535,6 +535,42 @@ const PARTNER_PRODUCTS = {
     button: "COMPARAR OFERTAS"
   },
 
+  "upp-portabilidade": {
+    name: "Portabilidade CLT com troco",
+    partner: "Up.p",
+    logoText: "Up.p",
+    logoTone: "upp",
+    url: "https://apretailer.com.br/click/6ab43ae52bfa810f9a64b789/179925/360419/app-crediti",
+    button: "SIMULAR PORTABILIDADE",
+    directOpen: true,
+    eyebrow: "PORTABILIDADE CLT",
+    heading: "Refinancie seu contrato CLT e veja a possibilidade de troco",
+    shortText: "Consulte novas condições e veja se existe valor disponível para receber na sua conta.",
+    note: "A análise, a aprovação, o valor do troco e as condições são definidos pela Up.p.",
+    secondaryOptions: [
+      { key: "upp-clt", label: "Consignado CLT", detail: "Consulte uma opção para trabalhador com carteira assinada." },
+      { key: "upp-fgts", label: "Antecipação FGTS", detail: "Consulte a possibilidade de antecipar o saque-aniversário." }
+    ]
+  },
+  "upp-clt": {
+    name: "Consignado CLT",
+    partner: "Up.p",
+    logoText: "Up.p",
+    logoTone: "upp",
+    url: "https://apretailer.com.br/click/6ab43ae52bfa810f9a64b789/179925/360419/app-crediti",
+    button: "SIMULAR CONSIGNADO CLT",
+    directOpen: true
+  },
+  "upp-fgts": {
+    name: "Antecipação FGTS",
+    partner: "Up.p",
+    logoText: "Up.p",
+    logoTone: "upp",
+    url: "https://apretailer.com.br/click/6ab43ae52bfa810f9a64b789/179925/360419/app-crediti",
+    button: "SIMULAR FGTS",
+    directOpen: true
+  },
+
   bpc: {
     name: "Consignado BPC / LOAS",
     partner: "Banco BRB",
@@ -545,10 +581,12 @@ const PARTNER_PRODUCTS = {
 
   fgts: {
     name: "Antecipação do FGTS",
-    partner: "Grandino Bank",
-    logo: "/partners/grandino.png",
-    url: "https://crediti.startcapital.app/credit/fgts",
-    button: "SIMULAR SEU CRÉDITO"
+    partner: "Up.p",
+    logoText: "Up.p",
+    logoTone: "upp",
+    url: "https://apretailer.com.br/click/6ab43ae52bfa810f9a64b789/179925/360419/app-crediti",
+    button: "SIMULAR FGTS",
+    directOpen: true
   },
 
   energia: {
@@ -561,10 +599,12 @@ const PARTNER_PRODUCTS = {
 
   clt: {
     name: "Consignado CLT",
-    partner: "Grandino Bank",
-    logo: "/partners/grandino.png",
-    url: "https://crediti.startcapital.app/credit/cltctps",
-    button: "SIMULAR SEU CRÉDITO"
+    partner: "Up.p",
+    logoText: "Up.p",
+    logoTone: "upp",
+    url: "https://apretailer.com.br/click/6ab43ae52bfa810f9a64b789/179925/360419/app-crediti",
+    button: "SIMULAR CONSIGNADO CLT",
+    directOpen: true
   },
 
   cartao: {
@@ -627,6 +667,17 @@ const products = [
       "Empréstimo pessoal tradicional",
       "Empréstimo com garantia de celular"
     ]
+  },
+
+  {
+    id: "upp-portabilidade",
+    name: "Portabilidade CLT com troco",
+    typeLabel: "PORTABILIDADE CLT",
+    what: "Refinancie seu contrato CLT e consulte a possibilidade de receber troco.",
+    forWho: "Para quem já possui um contrato consignado CLT e deseja verificar novas condições.",
+    how: "A simulação, a análise e a contratação são realizadas diretamente na Up.p.",
+    when: "Pode ajudar a reorganizar um contrato existente e avaliar se há valor disponível para troco.",
+    tip: "Compare o CET, o novo prazo, o valor da parcela e o total que será pago antes de aceitar."
   },
 
   {
@@ -912,8 +963,7 @@ const DIRECT_PRODUCT_KEYS = [
   "pravaler",
   "inss",
   "bpc",
-  "fgts",
-  "clt",
+  "upp-portabilidade",
   "cartao",
   "energia"
 ];
@@ -961,6 +1011,11 @@ const CREDIT_META = {
     category: "trabalhador",
     audience: "Trabalhadores com carteira assinada.",
     detail: "Crédito sujeito às regras e análise do Grandino Bank."
+  },
+  "upp-portabilidade": {
+    category: "trabalhador",
+    audience: "Trabalhadores CLT com contrato consignado que querem verificar novas condições.",
+    detail: "Portabilidade, análise e eventual troco são tratados diretamente pela Up.p."
   },
   cartao: {
     category: "outros",
@@ -3484,9 +3539,12 @@ function App() {
       openChat();
     } else if (item.directProductKey) {
       setSearchTarget(null);
-      openPartnerLink(
-        item.directProductKey
-      );
+      const directProduct = PARTNER_PRODUCTS[item.directProductKey];
+      if (directProduct?.directOpen) {
+        openDirectPartnerLink(item.directProductKey);
+      } else {
+        openPartnerLink(item.directProductKey);
+      }
     } else if (item.serviceItem) {
       setSearchTarget(null);
       openService(item.serviceItem);
@@ -4537,7 +4595,12 @@ function App() {
 
   function navigateRecommendation(item) {
     if (item.productKey) {
-      openPartnerLink(item.productKey);
+      const directProduct = PARTNER_PRODUCTS[item.productKey];
+      if (directProduct?.directOpen) {
+        openDirectPartnerLink(item.productKey);
+      } else {
+        openPartnerLink(item.productKey);
+      }
       return;
     }
 
@@ -4624,7 +4687,12 @@ function App() {
       return;
     }
 
-    openPartnerLink(productKey);
+    const product = PARTNER_PRODUCTS[productKey];
+    if (product?.directOpen) {
+      openDirectPartnerLink(productKey);
+    } else {
+      openPartnerLink(productKey);
+    }
   }
 
   function addLocalBill(event) {
@@ -5360,6 +5428,27 @@ function App() {
         : screen
     );
     setScreen("partnerNotice");
+  }
+
+  function openDirectPartnerLink(productKey) {
+    const product = PARTNER_PRODUCTS[productKey];
+
+    if (!product?.url) {
+      showNotice("Esta opção está temporariamente indisponível.");
+      return;
+    }
+
+    rememberItem({
+      key: productKey,
+      title: product.name,
+      partner: product.partner,
+      type: "credit"
+    });
+
+    if (openExternal(product.url)) {
+      trackMetaLead();
+      recordSimulation(productKey);
+    }
   }
 
   function chooseAnalyst(
@@ -6329,6 +6418,22 @@ function App() {
                       </ul>
                     )}
 
+                    {product.secondaryOptions?.length > 0 && (
+                      <div className="direct-secondary-actions">
+                        <small>OUTRAS OPÇÕES NO MESMO LINK</small>
+                        {product.secondaryOptions.map((secondary) => (
+                          <button type="button" key={secondary.key}
+                            onClick={() => openDirectPartnerLink(secondary.key)}>
+                            <span>
+                              <strong>{secondary.label}</strong>
+                              <small>{secondary.detail}</small>
+                            </span>
+                            <b aria-hidden="true">›</b>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+
                     <button
                       className={
                         "compare-select " +
@@ -6347,9 +6452,9 @@ function App() {
                     <button
                       className="primary-action"
                       onClick={() =>
-                        openPartnerLink(
-                          productKey
-                        )
+                        product.directOpen
+                          ? openDirectPartnerLink(productKey)
+                          : openPartnerLink(productKey)
                       }
                     >
                       {product.button || "SIMULAR SEU CRÉDITO"}
@@ -9192,8 +9297,13 @@ function App() {
                   productKey
                 }
                 key={productKey}
-                onClick={() =>
-                  openPartnerLink(productKey)
+                onClick={() => {
+                  const product = PARTNER_PRODUCTS[productKey];
+                  if (product?.directOpen) {
+                    openDirectPartnerLink(productKey);
+                  } else {
+                    openPartnerLink(productKey);
+                  }
                 }
               >
                 <div className="product-strip-logo">
