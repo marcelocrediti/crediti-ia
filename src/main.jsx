@@ -9304,7 +9304,7 @@ function App() {
                   } else {
                     openPartnerLink(productKey);
                   }
-                }
+                }}
               >
                 <div className="product-strip-logo">
                   {PARTNER_PRODUCTS[
