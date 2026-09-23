@@ -58,10 +58,8 @@ const solides = read('public/solides-partnership.js');
 forbidText(solides, 'MutationObserver', 'public/solides-partnership.js');
 
 const controller = read('public/ui-stability-controller.js');
-['crediti-home-visible','MutationObserver','.home-personal-tools','SHOP_LINKS','keepShopLinksCorrect']
+['crediti-home-visible','MutationObserver','.home-personal-tools','SHOP_LINKS','keepShopLinksCorrect','GRAN_URL','crediti-gran-card']
   .forEach((m) => requireText(controller, m, 'public/ui-stability-controller.js'));
-forbidText(controller, 'insertBefore', 'public/ui-stability-controller.js');
-forbidText(controller, 'appendChild', 'public/ui-stability-controller.js');
 forbidText(controller, 'Caminhos Crediti', 'public/ui-stability-controller.js');
 
 const runtime = read('src/config/runtime.js');
