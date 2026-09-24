@@ -21,21 +21,27 @@
     style.id = "crediti-structure-fix-style";
     style.textContent = `
       #root .app,
-      #root .app button,
       #root .app input,
       #root .app select,
-      #root .app textarea { font-weight: 400; }
+      #root .app textarea { font-weight: 400 !important; }
+      #root .app button,
+      #root .app strong,
+      #root .app b { font-weight: 500 !important; }
       #root .app h1,
       #root .app h2,
-      #root .app h3,
-      #root .app strong,
-      #root .app b { font-weight: 600 !important; }
-      #root .app .eyebrow,
-      #root .app button { font-weight: 600 !important; }
+      #root .app h3 { font-weight: 600 !important; }
+      #root .app .eyebrow { font-weight: 500 !important; }
+
+      .product-strip-card strong,
+      .product-strip-action,
+      .direct-card h2,
+      .direct-card .primary-action,
+      .direct-card .compare-select,
+      .direct-card .favorite-toggle { font-weight: 500 !important; }
 
       .product-strip-card.product-strip-upp-portabilidade {
         border-left: 3px solid #FDCA01 !important;
-        background: #fffdf3 !important;
+        background: #fff !important;
       }
       .product-strip-upp-portabilidade .product-strip-brand {
         display: inline-flex !important;
@@ -44,15 +50,22 @@
         width: 100% !important;
         height: 100% !important;
         color: #171d2e !important;
-        font-size: 17px !important;
-        font-weight: 600 !important;
+        font-size: 15px !important;
+        font-weight: 500 !important;
         line-height: 1 !important;
       }
 
+      .direct-grid {
+        contain: layout paint;
+      }
       .direct-card.direct-upp-portabilidade {
+        width: 100% !important;
+        min-width: 0 !important;
+        box-sizing: border-box !important;
         border: 1px solid #dedfe2 !important;
         border-left: 4px solid #FDCA01 !important;
         background: #fff !important;
+        overflow: hidden !important;
       }
       .direct-upp-portabilidade .direct-logo {
         min-width: 0 !important;
@@ -60,48 +73,56 @@
       }
       .direct-upp-portabilidade .direct-logo strong {
         max-width: 100% !important;
-        font-size: 18px !important;
+        font-size: 16px !important;
+        font-weight: 500 !important;
         line-height: 1 !important;
         white-space: nowrap !important;
       }
       .direct-upp-portabilidade h2 {
-        font-size: 18px !important;
+        margin: 4px 0 0 !important;
+        font-size: 17px !important;
+        font-weight: 600 !important;
         line-height: 1.18 !important;
       }
       .direct-upp-portabilidade .direct-card-copy {
+        margin: 8px 0 0 !important;
         font-size: 11px !important;
-        line-height: 1.42 !important;
+        line-height: 1.4 !important;
       }
       .direct-upp-portabilidade .direct-secondary-actions {
         width: 100% !important;
         min-width: 0 !important;
         box-sizing: border-box !important;
+        margin-top: 10px !important;
         padding: 8px !important;
         overflow: hidden !important;
         border: 1px solid #e7e9ec !important;
-        border-radius: 12px !important;
-        background: #f7f8f9 !important;
+        border-radius: 11px !important;
+        background: #f5f6f8 !important;
       }
       .direct-upp-portabilidade .direct-secondary-actions > small {
         display: block !important;
         margin: 0 0 6px !important;
         color: #6b7078 !important;
         font-size: 8px !important;
-        line-height: 1.25 !important;
+        font-weight: 500 !important;
+        line-height: 1.2 !important;
       }
       .direct-upp-portabilidade .direct-secondary-actions > button {
         width: 100% !important;
         min-width: 0 !important;
-        min-height: 50px !important;
-        margin-top: 6px !important;
+        max-width: 100% !important;
+        min-height: 48px !important;
+        margin: 6px 0 0 !important;
         padding: 8px 9px !important;
         display: grid !important;
-        grid-template-columns: minmax(0, 1fr) 14px !important;
+        grid-template-columns: minmax(0, 1fr) 12px !important;
         align-items: center !important;
-        gap: 7px !important;
+        gap: 6px !important;
         overflow: hidden !important;
+        box-sizing: border-box !important;
         border: 1px solid #e2e4e7 !important;
-        border-radius: 10px !important;
+        border-radius: 9px !important;
         background: #fff !important;
         color: #171d2e !important;
         text-align: left !important;
@@ -109,32 +130,47 @@
       }
       .direct-upp-portabilidade .direct-secondary-actions > button > span {
         min-width: 0 !important;
+        max-width: 100% !important;
         display: grid !important;
         gap: 2px !important;
         overflow: hidden !important;
       }
       .direct-upp-portabilidade .direct-secondary-actions strong {
         min-width: 0 !important;
-        font-size: 11px !important;
-        line-height: 1.2 !important;
-        overflow-wrap: anywhere !important;
+        max-width: 100% !important;
+        font-size: 10px !important;
+        font-weight: 500 !important;
+        line-height: 1.18 !important;
+        overflow-wrap: break-word !important;
+        word-break: normal !important;
       }
       .direct-upp-portabilidade .direct-secondary-actions button small {
         min-width: 0 !important;
+        max-width: 100% !important;
         color: #686f78 !important;
-        font-size: 9px !important;
-        line-height: 1.28 !important;
-        overflow-wrap: anywhere !important;
+        font-size: 8.5px !important;
+        font-weight: 400 !important;
+        line-height: 1.25 !important;
+        overflow-wrap: break-word !important;
+        word-break: normal !important;
       }
       .direct-upp-portabilidade .direct-secondary-actions button b {
         justify-self: end !important;
-        font-size: 16px !important;
+        font-size: 14px !important;
+        font-weight: 500 !important;
+      }
+
+      .direct-grid .favorite-toggle,
+      .direct-grid .compare-select,
+      .compare-tray {
+        display: none !important;
       }
 
       .product-strip-logo img,
       .direct-logo img,
       .career-logo-frame img,
       .partner-notice-logo img {
+        display: block !important;
         object-fit: contain !important;
         object-position: center !important;
         max-width: 100% !important;
@@ -160,9 +196,9 @@
     document.head.appendChild(style);
   };
 
-  const preloadVisibleLogos = () => {
-    document.querySelectorAll(
-      ".product-strip img, .direct-card img, .career-card img, .partner-notice-logo img"
+  const makeVisibleLogosImmediate = (scope = document) => {
+    scope.querySelectorAll(
+      ".product-strip img, .direct-card img, .career-card img, .partner-notice-logo img, .finanzero-alternative img"
     ).forEach((img) => {
       img.loading = "eager";
       img.decoding = "async";
@@ -171,7 +207,7 @@
   };
 
   const ensureUppHomeHighlight = () => {
-    const strip = document.querySelector(".product-strip");
+    const strip = document.querySelector(".modern-home .product-strip");
     if (!strip) return;
 
     let card = strip.querySelector(".product-strip-upp-portabilidade");
@@ -192,19 +228,16 @@
       strip.insertBefore(card, strip.firstElementChild);
     }
 
-    const cards = [...strip.querySelectorAll(":scope > .product-strip-card")];
-    cards.slice(4).forEach((item) => {
-      if (item.dataset.creditiInjected === "upp-home") return;
-      item.style.display = "none";
+    [...strip.querySelectorAll(":scope > .product-strip-card")].forEach((item, index) => {
+      item.style.display = index < 4 ? "" : "none";
     });
   };
 
   const prioritizeUppDirect = () => {
     const grid = document.querySelector(".direct-grid");
-    const upp = grid?.querySelector(".direct-upp-portabilidade");
-    if (grid && upp && grid.firstElementChild !== upp) {
-      grid.insertBefore(upp, grid.firstElementChild);
-    }
+    if (!grid) return;
+    const upp = grid.querySelector(".direct-upp-portabilidade");
+    if (upp && grid.firstElementChild !== upp) grid.insertBefore(upp, grid.firstElementChild);
   };
 
   const ensureGranCard = () => {
@@ -216,7 +249,7 @@
     card.className = "career-card gran crediti-gran-card";
     card.innerHTML = `
       <div class="career-brand">
-        <span class="career-logo-frame"><img src="${GRAN_LOGO}" alt="Gran Cursos Online"></span>
+        <span class="career-logo-frame"><img src="${GRAN_LOGO}" alt="Gran Cursos Online" loading="lazy" decoding="async"></span>
         <b>Gran Cursos Online</b>
       </div>
       <div class="career-copy">
@@ -243,17 +276,18 @@
     });
   };
 
-  const applyFixes = () => {
-    installStyles();
+  const syncCurrentScreen = () => {
     document.documentElement.classList.toggle(
       "crediti-home-visible",
-      Boolean(document.querySelector(".home-personal-tools"))
+      Boolean(document.querySelector(".modern-home"))
     );
-    ensureUppHomeHighlight();
-    prioritizeUppDirect();
-    preloadVisibleLogos();
-    ensureGranCard();
-    keepShopLinksCorrect();
+
+    if (document.querySelector(".modern-home")) ensureUppHomeHighlight();
+    if (document.querySelector(".direct-grid")) prioritizeUppDirect();
+    if (document.querySelector(".education-partner-carousel")) ensureGranCard();
+    if (document.querySelector(".shop-real-page, .shop-page")) keepShopLinksCorrect();
+
+    makeVisibleLogosImmediate(document);
   };
 
   let queued = false;
@@ -262,7 +296,7 @@
     queued = true;
     requestAnimationFrame(() => {
       queued = false;
-      applyFixes();
+      syncCurrentScreen();
     });
   };
 
@@ -271,9 +305,14 @@
 
   const root = document.getElementById("root");
   if (root) {
-    new MutationObserver(schedule).observe(root, {
-      childList: true,
-      subtree: true
-    });
+    new MutationObserver((mutations) => {
+      const app = root.firstElementChild;
+      const relevant = mutations.some((mutation) =>
+        mutation.target === root || mutation.target === app
+      );
+      if (relevant) schedule();
+    }).observe(root, { childList: true, subtree: true });
   }
+
+  window.addEventListener("pageshow", schedule, { passive: true });
 })();
