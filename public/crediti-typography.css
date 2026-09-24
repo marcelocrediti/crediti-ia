@@ -1,0 +1,134 @@
+/* Sistema tipográfico oficial Crediti: leve, bancário e consistente. */
+:root {
+  --crediti-type-regular: 400;
+  --crediti-type-medium: 500;
+  --crediti-type-brand: 700;
+}
+
+body,
+button,
+input,
+select,
+textarea {
+  font-family: "Montserrat", Arial, sans-serif !important;
+  font-weight: var(--crediti-type-regular) !important;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Marca: somente CREDITI recebe peso forte. */
+.brand,
+.home-header strong,
+.initial-splash strong {
+  font-weight: var(--crediti-type-brand) !important;
+}
+
+.home-header small,
+.home-header p,
+.home-header span {
+  font-weight: var(--crediti-type-regular) !important;
+}
+
+/* Títulos: presença sem aparência pesada. */
+.app h1,
+.app h2,
+.app h3,
+.app h4,
+.app h5,
+.app h6,
+.app .section-title-row h2,
+.app .page-intro h1,
+.app .services-page-intro h1,
+.app .home-search-copy strong,
+.app .tip-feature h2,
+.app .shop-feature h2,
+.app .career-copy strong,
+.app .finanzero-alternative-copy h2 {
+  font-weight: var(--crediti-type-medium) !important;
+  letter-spacing: -0.02em;
+}
+
+/* Textos de interface e nomes de produtos. */
+.app strong,
+.app b,
+.app button,
+.app a,
+.app .quick-card strong,
+.app .product-strip-card > strong,
+.app .crediti-home-credit-card > strong,
+.app .product-strip-action,
+.app .crediti-home-credit-card .product-strip-action,
+.app .direct-card strong,
+.app .direct-card b,
+.app .direct-secondary-actions strong,
+.app .primary-action,
+.app .eyebrow,
+.app .bottom-nav small,
+.app .home-credit-section .section-title-row > button,
+.app .finanzero-alternative.crediti-finanzero-clean > button {
+  font-weight: var(--crediti-type-medium) !important;
+}
+
+/* Corpo, apoio e descrições sempre leves. */
+.app p,
+.app small,
+.app label,
+.app li,
+.app input,
+.app textarea,
+.app select,
+.app .direct-secondary-actions small,
+.app .career-copy small,
+.app .finanzero-alternative-copy p,
+.app .home-search-copy small,
+.app .product-card p,
+.app .info-grid p {
+  font-weight: var(--crediti-type-regular) !important;
+}
+
+/* Navegação: ativa ganha só um pouco mais de presença. */
+.app .bottom-nav small {
+  font-weight: var(--crediti-type-regular) !important;
+}
+
+.app .bottom-nav button.active small {
+  font-weight: var(--crediti-type-medium) !important;
+}
+
+/* Remove sensação de peso criada por regras antigas. */
+.app .yellow,
+.app .product-list .yellow,
+.app .product-top h2,
+.app .info-grid strong,
+.app .creditin-tip strong,
+.app .product-cta strong,
+.app .product-analysts button,
+.app .simple-screen h2,
+.app .partner-tip strong,
+.app .simple-action-copy strong,
+.app .simple-action-icon {
+  font-weight: var(--crediti-type-medium) !important;
+}
+
+/* Cartões de destaque e parceiros. */
+.app .crediti-home-credit-card .product-strip-brand,
+.app .crediti-home-credit-card > strong,
+.app .crediti-home-credit-card .product-strip-action,
+.app .direct-upp-portabilidade .direct-secondary-actions strong,
+.app .finanzero-alternative.crediti-finanzero-clean .finanzero-alternative-copy h2,
+.app .finanzero-alternative.crediti-finanzero-clean > button {
+  font-weight: var(--crediti-type-medium) !important;
+}
+
+.app .finanzero-alternative.crediti-finanzero-clean .finanzero-alternative-copy small,
+.app .finanzero-alternative.crediti-finanzero-clean .finanzero-alternative-copy p,
+.app .direct-upp-portabilidade .direct-secondary-actions small,
+.app .direct-upp-portabilidade .direct-secondary-actions button small {
+  font-weight: var(--crediti-type-regular) !important;
+}
+
+/* Mantém a marca no topo como único elemento tipográfico realmente forte. */
+.app .home-header strong {
+  font-weight: var(--crediti-type-brand) !important;
+  letter-spacing: -0.04em;
+}
