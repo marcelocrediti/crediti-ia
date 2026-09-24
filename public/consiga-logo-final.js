@@ -1,6 +1,18 @@
 (() => {
   const LOGO = "/partners/consiga-mais.png?v=20260924-7";
   const AFFILIATE_URL = "https://apretailer.com.br/click/6aa4af912bfa8159945c68c9/184987/360419/crediti-app";
+  const TYPOGRAPHY_CSS = "/crediti-typography.css?v=20260924-1";
+
+  function ensureTypographyStylesheet() {
+    let link = document.querySelector('link[data-crediti-typography="1"]');
+    if (!link) {
+      link = document.createElement("link");
+      link.rel = "stylesheet";
+      link.dataset.creditiTypography = "1";
+      document.head.appendChild(link);
+    }
+    if (!link.href.endsWith(TYPOGRAPHY_CSS)) link.href = TYPOGRAPHY_CSS;
+  }
 
   function applyLogo(frame) {
     if (!frame) return;
@@ -39,6 +51,8 @@
   }
 
   function run() {
+    ensureTypographyStylesheet();
+
     document.querySelectorAll(".product-strip-card").forEach((card) => {
       const text = (card.textContent || "").toLowerCase();
       if (!text.includes("consignado inss")) return;
