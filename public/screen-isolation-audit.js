@@ -70,7 +70,7 @@
     let img=frame.querySelector('img');
     if(!img){frame.innerHTML='';img=document.createElement('img');frame.appendChild(img)}
     if(!img.src.includes('/partners/consiga-mais.png'))img.src=CONSIGA_LOGO;
-    img.alt='Consiga Mais';img.loading='eager';img.decoding='async';
+    img.alt='Consig Mais';img.loading='eager';img.decoding='async';
   };
   const fixConsigaMais=()=>{
     document.querySelectorAll('a[href*="184987"]').forEach(a=>{a.href=CONSIGA_URL;a.target='_blank';a.rel='noopener noreferrer'});
@@ -78,7 +78,7 @@
     if(home){home.classList.add('crediti-consiga-fixed');ensureLogo(home.querySelector('.product-strip-logo'))}
     document.querySelectorAll('.direct-card').forEach(card=>{
       const text=(card.textContent||'').toLowerCase();
-      if(!text.includes('consignado inss')&&!text.includes('consiga mais'))return;
+      if(!text.includes('consignado inss')&&!text.includes('consig mais'))return;
       card.classList.add('crediti-consiga-fixed');
       ensureLogo(card.querySelector('.direct-logo'));
       card.querySelectorAll('button').forEach(btn=>{
