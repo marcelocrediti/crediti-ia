@@ -11,7 +11,7 @@
   const HOME_CREDITS = [
     { id: "upp-refinanciamento", name: "Refinanciamento CLT com troco", partner: "Up.p", logoText: "Up.p", action: "SIMULAR REFINANCIAMENTO", url: UPP_URL },
     { id: "grandino-clt", name: "Consignado CLT", partner: "Grandino Bank", logo: "/partners/grandino.png", action: "SIMULAR CRÉDITO CLT", url: "https://crediti.startcapital.app/credit/cltctps" },
-    { id: "inss", name: "Consignado INSS", partner: "Consiga Mais", logo: "/partners/consiga-mais.png", action: "SIMULAR CONSIGNADO", url: "https://apretailer.com.br/click/6aa4af912bfa8159945c68c9/184987/360419/app_crediti" },
+    { id: "inss", name: "Consignado INSS", partner: "Consig Mais", logo: "/partners/consiga-mais.png", action: "SIMULAR CONSIGNADO", url: "https://apretailer.com.br/click/6aa4af912bfa8159945c68c9/184987/360419/app_crediti" },
     { id: "emprestimo-pessoal", name: "Empréstimo pessoal", partner: "SuperSim", logo: "/partners/supersim.webp", action: "SIMULAR MEU EMPRÉSTIMO", url: "https://apretailer.com.br/click/6aa4af912bfa816ab47e8c90/184363/360419/app_crediti" },
     { id: "grandino-fgts", name: "Antecipação do FGTS", partner: "Grandino Bank", logo: "/partners/grandino.png", action: "SIMULAR FGTS", url: "https://crediti.startcapital.app/credit/fgts" },
     { id: "bpc", name: "Consignado BPC / LOAS", partner: "Banco BRB", logo: "/partners/brb.jpeg", action: "SIMULAR SEU CRÉDITO", url: "https://solution.consig360.com.br/self-hire/EkCwaEb" },
