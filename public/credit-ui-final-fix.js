@@ -10,52 +10,16 @@
   function fixFinanzero() {
     document.querySelectorAll(".finanzero-alternative").forEach((card) => {
       card.classList.add("crediti-finanzero-clean");
-      card.style.setProperty("display", "grid", "important");
-      card.style.setProperty("grid-template-columns", "112px minmax(0,1fr)", "important");
-      card.style.setProperty("grid-template-areas", '"logo copy" "cta cta"', "important");
-      card.style.setProperty("gap", "12px 14px", "important");
-      card.style.setProperty("align-items", "center", "important");
-      card.style.setProperty("width", "100%", "important");
-      card.style.setProperty("height", "auto", "important");
-      card.style.setProperty("min-height", "0", "important");
-      card.style.setProperty("max-height", "none", "important");
-      card.style.setProperty("padding", "14px", "important");
-      card.style.setProperty("overflow", "hidden", "important");
-      card.style.setProperty("box-sizing", "border-box", "important");
-      card.style.setProperty("background", "#fff", "important");
-
-      const logo = card.querySelector(".finanzero-alternative-logo");
-      const copy = card.querySelector(".finanzero-alternative-copy");
-      let button = card.querySelector(":scope > button");
-
-      if (logo) {
-        logo.style.setProperty("grid-area", "logo", "important");
-        logo.style.setProperty("width", "112px", "important");
-        logo.style.setProperty("height", "58px", "important");
-        logo.style.setProperty("min-height", "58px", "important");
-        logo.style.setProperty("background", "#fff", "important");
-      }
-      if (copy) {
-        copy.style.setProperty("grid-area", "copy", "important");
-        copy.style.setProperty("height", "auto", "important");
-        copy.style.setProperty("min-height", "0", "important");
-      }
-      if (button) {
-        button.style.setProperty("grid-area", "cta", "important");
-        button.style.setProperty("justify-self", "start", "important");
-        button.style.setProperty("width", "auto", "important");
-        button.style.setProperty("min-height", "38px", "important");
-        button.style.setProperty("padding", "9px 14px", "important");
-        button.style.setProperty("background", "#008f6a", "important");
-        button.style.setProperty("color", "#fff", "important");
-        if (!button.dataset.creditiFinanzeroBound) {
-          button.dataset.creditiFinanzeroBound = "1";
-          button.addEventListener("click", (event) => {
-            event.preventDefault();
-            event.stopPropagation();
-            openExternal(FINANZERO_URL);
-          });
-        }
+      const button = card.querySelector(":scope > button");
+      if (!button) return;
+      button.textContent = "CONFERIR OFERTAS";
+      if (!button.dataset.creditiFinanzeroBound) {
+        button.dataset.creditiFinanzeroBound = "1";
+        button.addEventListener("click", (event) => {
+          event.preventDefault();
+          event.stopPropagation();
+          openExternal(FINANZERO_URL);
+        });
       }
     });
   }
