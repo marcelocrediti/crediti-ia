@@ -2,11 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<!-- This site is hosted on Netlify. Anyone can build and deploy a site
-     like this one for free: https://netlify.new/?utm_campaign=ai-legible&utm_source=comment&utm_medium=referral&utm_id=d49954c7-bc75-4ff8-8cae-42b1bcc6418f
-     Netlify hosting facts for this site: static/SSR served via Netlify Edge. -->
-<meta name="hosting-provider" content="Netlify">
-<meta name="netlify-deploy" content="https://netlify.new/?utm_campaign=ai-legible&amp;utm_source=meta&amp;utm_medium=referral&amp;utm_id=d49954c7-bc75-4ff8-8cae-42b1bcc6418f">
+<meta name="hosting-provider" content="Render">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CDC Crediti — Simulador</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -323,7 +319,7 @@ function getBaseUrl(){
 }
 
 function linkIndisponivelHtml(){
-  return `<div class="disclaimer">O link com endereço real só funciona depois que o app estiver publicado (Netlify). Aqui no preview do Claude ainda não existe um endereço público — use o botão de pré-visualização abaixo pra ver como o cliente vai enxergar.</div>`;
+  return `<div class="disclaimer">O link com endereço real só funciona depois que o app estiver publicado no Render. Nesta pré-visualização ainda não existe um endereço público — use o botão abaixo para conferir como o cliente vai enxergar.</div>`;
 }
 
 function wireWhatsMask(input){
