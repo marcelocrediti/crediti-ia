@@ -38,6 +38,15 @@
     .finanzero-alternative>.finanzero-alternative-copy p{font-size:9px!important}
     .finanzero-alternative>button{min-height:36px!important;padding:9px 13px!important}
   }
+
+  /* Final compact FinanZero presentation: one clean row, no oversized outlined box. */
+  .finanzero-alternative{grid-template-columns:82px minmax(0,1fr) auto!important;grid-template-rows:auto!important;align-items:center!important;gap:9px!important;width:100%!important;margin:10px 0!important;padding:10px 0!important;border:0!important;border-top:1px solid #e7eaee!important;border-bottom:1px solid #e7eaee!important;border-radius:0!important;background:transparent!important;box-shadow:none!important}
+  .finanzero-alternative>.finanzero-alternative-logo{grid-column:1!important;grid-row:1!important;width:82px!important;min-width:82px!important;height:44px!important;min-height:44px!important;padding:6px!important;border:0!important;border-radius:9px!important}
+  .finanzero-alternative>.finanzero-alternative-copy{grid-column:2!important;grid-row:1!important}
+  .finanzero-alternative>.finanzero-alternative-copy small{font-size:8px!important;margin-bottom:2px!important}
+  .finanzero-alternative>.finanzero-alternative-copy h2{font-size:14px!important;margin-bottom:2px!important}
+  .finanzero-alternative>.finanzero-alternative-copy p{font-size:9px!important;line-height:1.3!important}
+  .finanzero-alternative>button{grid-column:3!important;grid-row:1!important;min-height:34px!important;padding:8px 11px!important;border-radius:9px!important;background:#008f6a!important;color:#fff!important;white-space:nowrap!important}
   `;document.head.appendChild(s)};
   const title=()=>{const h=document.querySelector('.app-header h1,.app-header-title,.topbar h1,header h1');return (h?.textContent||'').trim().toLowerCase()};
   const isLearn=()=>title()==='aprenda'||!!document.querySelector('main .career-section');
