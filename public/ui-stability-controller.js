@@ -273,7 +273,7 @@
   if (root) {
     new MutationObserver(schedule).observe(root, {
       childList: true,
-      subtree: false
+      subtree: true
     });
   }
 })();
