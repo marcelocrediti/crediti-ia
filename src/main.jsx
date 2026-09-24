@@ -502,7 +502,7 @@ const PARTNER_PRODUCTS = {
 
   inss: {
     name: "Consignado INSS",
-    partner: "Consiga Mais",
+    partner: "Consig Mais",
     logo: "/partners/consiga-mais.png",
     logoTone: "consiga-mais",
     url: "https://apretailer.com.br/click/6aa4af912bfa8159945c68c9/184987/360419/app_crediti",
@@ -536,14 +536,14 @@ const PARTNER_PRODUCTS = {
   },
 
   "upp-portabilidade": {
-    name: "Portabilidade CLT com troco",
+    name: "Refinanciamento CLT com troco",
     partner: "Up.p",
     logoText: "Up.p",
     logoTone: "upp",
     url: "https://apretailer.com.br/click/6ab43ae52bfa810f9a64b789/179925/360419/app-crediti",
-    button: "SIMULAR PORTABILIDADE",
+    button: "SIMULAR REFINANCIAMENTO",
     directOpen: true,
-    eyebrow: "PORTABILIDADE CLT",
+    eyebrow: "REFINANCIAMENTO CLT",
     heading: "Refinancie seu contrato CLT e veja a possibilidade de troco",
     shortText: "Consulte novas condições e veja se existe valor disponível para receber na sua conta.",
     note: "A análise, a aprovação, o valor do troco e as condições são definidos pela Up.p.",
@@ -671,8 +671,8 @@ const products = [
 
   {
     id: "upp-portabilidade",
-    name: "Portabilidade CLT com troco",
-    typeLabel: "PORTABILIDADE CLT",
+    name: "Refinanciamento CLT com troco",
+    typeLabel: "REFINANCIAMENTO CLT",
     what: "Refinancie seu contrato CLT e consulte a possibilidade de receber troco.",
     forWho: "Para quem já possui um contrato consignado CLT e deseja verificar novas condições.",
     how: "A simulação, a análise e a contratação são realizadas diretamente na Up.p.",
@@ -704,7 +704,7 @@ const products = [
     forWho:
       "Aposentados e pensionistas que querem verificar uma possibilidade de crédito.",
     how:
-      "A simulação e a análise são realizadas no ambiente da Consiga Mais.",
+      "A simulação e a análise são realizadas no ambiente da Consig Mais.",
     when:
       "Pode ajudar em uma necessidade específica ou na organização de despesas.",
     tip:
@@ -933,8 +933,8 @@ const DIRECT_PRODUCT_KEYS = [
   "upp-portabilidade",
   "emprestimo-pessoal",
   "cartao-credito",
-  "pravaler",
   "inss",
+  "pravaler",
   "bpc",
   "cartao",
   "energia"
@@ -967,7 +967,7 @@ const CREDIT_META = {
   inss: {
     category: "beneficio",
     audience: "Aposentados e pensionistas do INSS.",
-    detail: "Consignado com simulação e análise realizadas pela Consiga Mais."
+    detail: "Consignado com simulação e análise realizadas pela Consig Mais."
   },
   bpc: {
     category: "beneficio",
@@ -1312,7 +1312,7 @@ const APP_SEARCH_ITEMS = [
     title: "Simular crédito",
     description: "Empréstimo pessoal, INSS, cartão, CLT, FGTS e outras opções",
     screen: "direct",
-    keywords: "credito emprestimo dinheiro simular negativado pix supersim mei autonomo inss aposentado pensionista bpc loas clt trabalhador fgts cartao consumidor positivo consiga mais energia pravaler estudante faculdade"
+    keywords: "credito emprestimo dinheiro simular negativado pix supersim mei autonomo inss aposentado pensionista bpc loas clt trabalhador fgts cartao consumidor positivo consig mais energia pravaler estudante faculdade"
   },
   {
     title: "Aprenda com a Crediti",
