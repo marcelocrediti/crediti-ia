@@ -742,20 +742,6 @@ const products = [
       "O benefício costuma pagar despesas essenciais. Evite assumir uma parcela que aperte o orçamento."
   },
 
-  {
-    id: "clt",
-    name: "Consignado CLT",
-    what:
-      "Crédito voltado para trabalhadores com carteira assinada.",
-    forWho:
-      "Para quem trabalha registrado e quer verificar uma possibilidade de crédito.",
-    how:
-      "A regra cadastrada considera idade mínima de 22 anos e pelo menos 12 meses de carteira assinada.",
-    when:
-      "Pode ajudar em uma despesa necessária ou na reorganização financeira.",
-    tip:
-      "Veja se a parcela continuará cabendo no orçamento mesmo quando aparecer uma despesa inesperada."
-  },
 
   {
     id: "bolsa",
@@ -772,20 +758,6 @@ const products = [
       "Não comprometa o dinheiro necessário para alimentação, água, energia e outras despesas da casa."
   },
 
-  {
-    id: "fgts",
-    name: "FGTS",
-    what:
-      "Possibilidade de usar valores relacionados ao seu FGTS.",
-    forWho:
-      "Para quem possui saldo e acesso ao aplicativo FGTS.",
-    how:
-      "É necessário ter acesso ao aplicativo e saque-aniversário ativado.",
-    when:
-      "Pode ser uma alternativa para quem precisa de dinheiro e possui saldo disponível.",
-    tip:
-      "Use seu FGTS com objetivo claro. Esse dinheiro também pode ser importante no futuro."
-  },
 
   {
     id: "cartao",
@@ -958,12 +930,12 @@ const products = [
 ];
 
 const DIRECT_PRODUCT_KEYS = [
+  "upp-portabilidade",
   "emprestimo-pessoal",
   "cartao-credito",
   "pravaler",
   "inss",
   "bpc",
-  "upp-portabilidade",
   "cartao",
   "energia"
 ];
@@ -1001,16 +973,6 @@ const CREDIT_META = {
     category: "beneficio",
     audience: "Pessoas que recebem BPC/LOAS.",
     detail: "Consignado sujeito às regras e análise do Banco BRB."
-  },
-  fgts: {
-    category: "trabalhador",
-    audience: "Trabalhadores com saldo disponível no FGTS.",
-    detail: "Antecipação do saque-aniversário pelo Grandino Bank."
-  },
-  clt: {
-    category: "trabalhador",
-    audience: "Trabalhadores com carteira assinada.",
-    detail: "Crédito sujeito às regras e análise do Grandino Bank."
   },
   "upp-portabilidade": {
     category: "trabalhador",
@@ -3671,10 +3633,10 @@ function App() {
         productKey: "bpc"
       },
       clt: {
-        key: "product-clt",
-        title: "Crédito para trabalhador CLT",
-        description: "Confira as regras antes de simular.",
-        productKey: "clt"
+        key: "product-upp-clt",
+        title: "Portabilidade, CLT e FGTS",
+        description: "Consulte as opções disponíveis no ambiente da Up.p.",
+        productKey: "upp-portabilidade"
       },
       estudante: {
         key: "product-student",
@@ -3700,14 +3662,6 @@ function App() {
       add(incomeRecommendations[financialProfile.incomeType]);
     }
 
-    if (financialProfile.incomeType === "clt") {
-      add({
-        key: "product-fgts",
-        title: "Antecipação do FGTS",
-        description: "Para quem possui saldo e saque-aniversário ativo.",
-        productKey: "fgts"
-      });
-    }
 
     const goalRecommendations = {
       credito: {
@@ -3812,7 +3766,7 @@ function App() {
 
     setShowSplash(false);
     document.documentElement.classList.remove("splash-active");
-    themeColor?.setAttribute("content", "#FFFFFF");
+    themeColor?.setAttribute("content", "#F6F8FA");
 
     return () => {
       document.documentElement
@@ -3822,7 +3776,7 @@ function App() {
 
       themeColor?.setAttribute(
         "content",
-        "#FFFFFF"
+        "#F6F8FA"
       );
     };
   }, []);
@@ -5421,13 +5375,10 @@ function App() {
       type: "credit"
     });
 
-    setExternalProduct(productKey);
-    setExternalReturnScreen(
-      screen === "partnerNotice"
-        ? "direct"
-        : screen
-    );
-    setScreen("partnerNotice");
+    if (openExternal(product.url)) {
+      trackMetaLead();
+      recordSimulation(productKey);
+    }
   }
 
   function openDirectPartnerLink(productKey) {
@@ -6489,13 +6440,10 @@ function App() {
                 }
               }}
             >
-              COMPARAR OFERTAS
+              CONFERIR OFERTAS
             </button>
           </section>
 
-          <p className="external-note">
-            Contratação, aprovação, valores e condições são definidos pela instituição responsável pela oferta.
-          </p>
         </main>
 
         {showComparison && (
@@ -9214,7 +9162,14 @@ function App() {
                 setScreen("direct")
               }
             >
-              <span aria-hidden="true"><UiIcon name="credit" /></span>
+              <span className="quick-card-media" aria-hidden="true">
+                <img
+                  src="/editorial/crediti-banking-woman.jpg"
+                  alt=""
+                  loading="eager"
+                  decoding="async"
+                />
+              </span>
               <strong>
                 Quero simular agora
               </strong>
@@ -9229,7 +9184,15 @@ function App() {
                 openChat()
               }
             >
-              <span aria-hidden="true"><UiIcon name="chat" /></span>
+              <span className="quick-card-media" aria-hidden="true">
+                <img
+                  src="/editorial/crediti-students.jpg"
+                  alt=""
+                  loading="eager"
+                  decoding="async"
+                />
+                <b className="quick-chat-mark"><UiIcon name="chat" /></b>
+              </span>
               <strong>
                 Converse com a Crediti IA
               </strong>
@@ -9244,7 +9207,14 @@ function App() {
                 setScreen("products")
               }
             >
-              <span aria-hidden="true"><UiIcon name="products" /></span>
+              <span className="quick-card-media" aria-hidden="true">
+                <img
+                  src="/shop-assets/hero-shop-crediti.webp"
+                  alt=""
+                  loading="eager"
+                  decoding="async"
+                />
+              </span>
               <strong>
                 Conheça nossos produtos
               </strong>
@@ -9259,7 +9229,14 @@ function App() {
                 setScreen("partner")
               }
             >
-              <span aria-hidden="true"><UiIcon name="partner" /></span>
+              <span className="quick-card-media" aria-hidden="true">
+                <img
+                  src="/shop-assets/category-family.webp"
+                  alt=""
+                  loading="eager"
+                  decoding="async"
+                />
+              </span>
               <strong>
                 Quero ser parceiro
               </strong>
@@ -9317,7 +9294,7 @@ function App() {
                         ].logo
                       }
                       alt=""
-                      loading="lazy"
+                      loading="eager"
                       decoding="async"
                     />
                   ) : (
