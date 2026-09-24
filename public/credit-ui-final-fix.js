@@ -34,7 +34,7 @@
 
     document.querySelectorAll(".direct-card").forEach((card) => {
       const text = (card.textContent || "").toLowerCase();
-      if (!text.includes("consignado inss") && !text.includes("consiga mais")) return;
+      if (!text.includes("consignado inss") && !text.includes("consig mais")) return;
       card.classList.add("crediti-consiga-direct");
     });
 
@@ -55,7 +55,7 @@
     const clickable = target.closest("button,a");
     if (!clickable) return false;
     const text = (clickable.textContent || "").toLowerCase();
-    return text.includes("consignado inss") || text.includes("consiga mais");
+    return text.includes("consignado inss") || text.includes("consig mais");
   }
 
   function interceptConsiga(event) {
