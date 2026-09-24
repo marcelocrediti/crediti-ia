@@ -49,15 +49,69 @@
 
   const boostLogos = (scope=document) => scope.querySelectorAll(".product-strip img,.direct-card img,.career-card img,.partner-notice-logo img,.finanzero-alternative img").forEach(img=>{img.loading="eager";img.decoding="async";try{img.fetchPriority="high"}catch{}});
 
-  const ensureUppHomeHighlight = () => {
-    const strip = document.querySelector(".modern-home .product-strip"); if(!strip) return;
-    let card=strip.querySelector(".product-strip-upp-portabilidade");
-    if(!card){card=document.createElement("button");card.type="button";card.className="product-strip-card product-strip-upp-portabilidade";card.dataset.creditiInjected="upp-home";card.innerHTML='<div class="product-strip-logo"><span class="product-strip-brand">Up.p</span></div><strong>Portabilidade CLT com troco</strong><span class="product-strip-action">SIMULAR PORTABILIDADE ›</span>';card.addEventListener("click",()=>openSafely(UPP_URL));}
-    if(strip.firstElementChild!==card) strip.insertBefore(card,strip.firstElementChild);
-    [...strip.querySelectorAll(":scope > .product-strip-card")].forEach((item,index)=>{item.style.display=index<4?"":"none"});
+  const createUppFeaturedCard = (kind) => {
+    const card = document.createElement("button");
+    card.type = "button";
+    if (kind === "refinanciamento") {
+      card.className = "product-strip-card product-strip-upp-portabilidade";
+      card.dataset.creditiInjected = "upp-refinanciamento-home";
+      card.innerHTML = '<div class="product-strip-logo"><span class="product-strip-brand">Up.p</span></div><strong>Refinanciamento CLT com troco</strong><span class="product-strip-action">SIMULAR REFINANCIAMENTO ›</span>';
+    } else {
+      card.className = "product-strip-card product-strip-clt product-strip-upp-clt-home";
+      card.dataset.creditiInjected = "upp-clt-home";
+      card.innerHTML = '<div class="product-strip-logo"><span class="product-strip-brand">Up.p</span></div><strong>Consignado CLT</strong><span class="product-strip-action">SIMULAR CONSIGNADO CLT ›</span>';
+    }
+    card.addEventListener("click",()=>openSafely(UPP_URL));
+    return card;
   };
 
-  const prioritizeUppDirect=()=>{const grid=document.querySelector(".direct-grid");if(!grid)return;const upp=grid.querySelector(".direct-upp-portabilidade");if(upp&&grid.firstElementChild!==upp)grid.insertBefore(upp,grid.firstElementChild)};
+  const ensureHomeFeaturedCredits = () => {
+    const strip = document.querySelector(".modern-home .product-strip");
+    if (!strip) return;
+
+    let refinance = strip.querySelector(".product-strip-upp-portabilidade");
+    if (!refinance) {
+      refinance = createUppFeaturedCard("refinanciamento");
+      strip.prepend(refinance);
+    } else {
+      const title = refinance.querySelector("strong");
+      const action = refinance.querySelector(".product-strip-action");
+      if (title) title.textContent = "Refinanciamento CLT com troco";
+      if (action) action.textContent = "SIMULAR REFINANCIAMENTO ›";
+    }
+
+    let clt = strip.querySelector(".product-strip-upp-clt-home");
+    if (!clt) {
+      clt = createUppFeaturedCard("clt");
+      strip.appendChild(clt);
+    }
+
+    const inss = strip.querySelector(".product-strip-inss");
+    const personal = strip.querySelector(".product-strip-emprestimo-pessoal");
+    const pravaler = strip.querySelector(".product-strip-pravaler");
+    const cardCredit = strip.querySelector(".product-strip-cartao-credito");
+
+    const featured = [refinance, inss, clt, personal].filter(Boolean);
+    featured.forEach((card) => strip.appendChild(card));
+
+    [...strip.querySelectorAll(":scope > .product-strip-card")].forEach((item) => {
+      item.style.display = featured.includes(item) ? "" : "none";
+    });
+
+    if (pravaler) pravaler.style.display = "none";
+    if (cardCredit && !featured.includes(cardCredit)) cardCredit.style.display = "none";
+  };
+
+  const syncUppNaming = () => {
+    const card = document.querySelector(".direct-card.direct-upp-portabilidade");
+    if (!card) return;
+    const title = card.querySelector("h2");
+    const primary = card.querySelector(".primary-action");
+    if (title) title.textContent = "Refinanciamento CLT com troco";
+    if (primary) primary.textContent = "SIMULAR REFINANCIAMENTO";
+  };
+
+  const prioritizeUppDirect=()=>{const grid=document.querySelector(".direct-grid");if(!grid)return;const upp=grid.querySelector(".direct-upp-portabilidade");if(upp&&grid.firstElementChild!==upp)grid.insertBefore(upp,grid.firstElementChild);syncUppNaming()};
 
   const ensureGranExperience=()=>{
     const hero=document.querySelector(".learning-photo-hero:not(.crediti-gran-hero)");
@@ -73,7 +127,7 @@
   const syncCurrentScreen=()=>{
     const home=Boolean(document.querySelector(".modern-home"));
     document.documentElement.classList.toggle("crediti-home-visible",home);
-    if(home)ensureUppHomeHighlight();
+    if(home)ensureHomeFeaturedCredits();
     if(document.querySelector(".direct-grid"))prioritizeUppDirect();
     if(document.querySelector(".learning-photo-hero,.education-partner-carousel"))ensureGranExperience();
     if(document.querySelector(".shop-real-page,.shop-page"))keepShopLinksCorrect();
