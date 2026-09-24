@@ -34,7 +34,7 @@
     }
 
     img.src = LOGO;
-    img.alt = "Consiga Mais";
+    img.alt = "Consig Mais";
     img.loading = "eager";
     img.decoding = "async";
     img.style.setProperty("display", "block", "important");
@@ -63,7 +63,7 @@
 
     document.querySelectorAll(".direct-card").forEach((card) => {
       const text = (card.textContent || "").toLowerCase();
-      if (!text.includes("consignado inss") && !text.includes("consiga mais")) return;
+      if (!text.includes("consignado inss") && !text.includes("consig mais")) return;
       card.classList.add("crediti-consiga-direct");
       applyLogo(card.querySelector(".direct-logo"));
     });
