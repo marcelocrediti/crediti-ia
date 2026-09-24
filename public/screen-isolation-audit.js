@@ -55,7 +55,7 @@
     if(!card)return;
     const logo=card.querySelector(':scope > .finanzero-alternative-logo');
     const copy=card.querySelector(':scope > .finanzero-alternative-copy');
-    const compareButton=[...card.querySelectorAll(':scope > button')].find(btn=>(btn.textContent||'').toLowerCase().includes('comparar ofertas'));
+    const compareButton=[...card.querySelectorAll(':scope > button')].find(btn=>{const label=(btn.textContent||'').toLowerCase();return label.includes('comparar ofertas')||label.includes('conferir ofertas')});
     [...card.children].forEach(child=>{
       if(child!==logo&&child!==copy&&child!==compareButton)child.remove();
     });
