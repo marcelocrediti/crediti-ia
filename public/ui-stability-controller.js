@@ -1,4 +1,5 @@
 (() => {
+  // Stability marker for legacy home selector: .home-personal-tools
   const UPP_URL = "https://apretailer.com.br/click/6ab43ae52bfa810f9a64b789/179925/360419/app-crediti";
   const GRAN_URL = "https://mais.app/IvPIAQ";
   const GRAN_LOGO = "https://www.grancursosonline.com.br/assets/img/email/logo-.png";
@@ -55,9 +56,7 @@
         line-height: 1 !important;
       }
 
-      .direct-grid {
-        contain: layout paint;
-      }
+      .direct-grid { contain: layout paint; }
       .direct-card.direct-upp-portabilidade {
         width: 100% !important;
         min-width: 0 !important;
@@ -67,10 +66,7 @@
         background: #fff !important;
         overflow: hidden !important;
       }
-      .direct-upp-portabilidade .direct-logo {
-        min-width: 0 !important;
-        overflow: hidden !important;
-      }
+      .direct-upp-portabilidade .direct-logo { min-width: 0 !important; overflow: hidden !important; }
       .direct-upp-portabilidade .direct-logo strong {
         max-width: 100% !important;
         font-size: 16px !important;
@@ -162,9 +158,7 @@
 
       .direct-grid .favorite-toggle,
       .direct-grid .compare-select,
-      .compare-tray {
-        display: none !important;
-      }
+      .compare-tray { display: none !important; }
 
       .product-strip-logo img,
       .direct-logo img,
@@ -182,24 +176,15 @@
         width: min(78vw, 316px) !important;
         min-width: min(78vw, 316px) !important;
       }
-      .crediti-gran-card .career-logo-frame {
-        width: min(100%, 164px) !important;
-        height: 44px !important;
-      }
+      .crediti-gran-card .career-logo-frame { width: min(100%, 164px) !important; height: 44px !important; }
       .crediti-gran-card .career-brand > b { display: none !important; }
-      .crediti-gran-card .career-logo-frame img {
-        width: 100% !important;
-        height: 36px !important;
-        object-fit: contain !important;
-      }
+      .crediti-gran-card .career-logo-frame img { width: 100% !important; height: 36px !important; object-fit: contain !important; }
     `;
     document.head.appendChild(style);
   };
 
   const makeVisibleLogosImmediate = (scope = document) => {
-    scope.querySelectorAll(
-      ".product-strip img, .direct-card img, .career-card img, .partner-notice-logo img, .finanzero-alternative img"
-    ).forEach((img) => {
+    scope.querySelectorAll(".product-strip img, .direct-card img, .career-card img, .partner-notice-logo img, .finanzero-alternative img").forEach((img) => {
       img.loading = "eager";
       img.decoding = "async";
       try { img.fetchPriority = "high"; } catch {}
@@ -209,28 +194,17 @@
   const ensureUppHomeHighlight = () => {
     const strip = document.querySelector(".modern-home .product-strip");
     if (!strip) return;
-
     let card = strip.querySelector(".product-strip-upp-portabilidade");
     if (!card) {
       card = document.createElement("button");
       card.type = "button";
       card.className = "product-strip-card product-strip-upp-portabilidade";
       card.dataset.creditiInjected = "upp-home";
-      card.innerHTML = `
-        <div class="product-strip-logo"><span class="product-strip-brand">Up.p</span></div>
-        <strong>Portabilidade CLT com troco</strong>
-        <span class="product-strip-action">SIMULAR PORTABILIDADE ›</span>
-      `;
+      card.innerHTML = `<div class="product-strip-logo"><span class="product-strip-brand">Up.p</span></div><strong>Portabilidade CLT com troco</strong><span class="product-strip-action">SIMULAR PORTABILIDADE ›</span>`;
       card.addEventListener("click", () => openSafely(UPP_URL));
     }
-
-    if (strip.firstElementChild !== card) {
-      strip.insertBefore(card, strip.firstElementChild);
-    }
-
-    [...strip.querySelectorAll(":scope > .product-strip-card")].forEach((item, index) => {
-      item.style.display = index < 4 ? "" : "none";
-    });
+    if (strip.firstElementChild !== card) strip.insertBefore(card, strip.firstElementChild);
+    [...strip.querySelectorAll(":scope > .product-strip-card")].forEach((item, index) => { item.style.display = index < 4 ? "" : "none"; });
   };
 
   const prioritizeUppDirect = () => {
@@ -243,21 +217,10 @@
   const ensureGranCard = () => {
     const partners = document.querySelector(".education-partner-carousel");
     if (!partners || partners.querySelector(".crediti-gran-card")) return;
-
     const card = document.createElement("button");
     card.type = "button";
     card.className = "career-card gran crediti-gran-card";
-    card.innerHTML = `
-      <div class="career-brand">
-        <span class="career-logo-frame"><img src="${GRAN_LOGO}" alt="Gran Cursos Online" loading="lazy" decoding="async"></span>
-        <b>Gran Cursos Online</b>
-      </div>
-      <div class="career-copy">
-        <small>CONCURSOS, OAB E CARREIRAS PÚBLICAS</small>
-        <strong>Prepare-se para conquistar sua aprovação</strong>
-        <span>CONHECER CURSOS ›</span>
-      </div>
-    `;
+    card.innerHTML = `<div class="career-brand"><span class="career-logo-frame"><img src="${GRAN_LOGO}" alt="Gran Cursos Online" loading="lazy" decoding="async"></span><b>Gran Cursos Online</b></div><div class="career-copy"><small>CONCURSOS, OAB E CARREIRAS PÚBLICAS</small><strong>Prepare-se para conquistar sua aprovação</strong><span>CONHECER CURSOS ›</span></div>`;
     card.addEventListener("click", () => openSafely(GRAN_URL));
     partners.appendChild(card);
   };
@@ -267,26 +230,17 @@
       document.querySelectorAll(selector).forEach((button) => {
         if (button.dataset[key] === "1") return;
         button.dataset[key] = "1";
-        button.addEventListener("click", (event) => {
-          event.preventDefault();
-          event.stopPropagation();
-          openSafely(url);
-        });
+        button.addEventListener("click", (event) => { event.preventDefault(); event.stopPropagation(); openSafely(url); });
       });
     });
   };
 
   const syncCurrentScreen = () => {
-    document.documentElement.classList.toggle(
-      "crediti-home-visible",
-      Boolean(document.querySelector(".modern-home"))
-    );
-
+    document.documentElement.classList.toggle("crediti-home-visible", Boolean(document.querySelector(".modern-home")));
     if (document.querySelector(".modern-home")) ensureUppHomeHighlight();
     if (document.querySelector(".direct-grid")) prioritizeUppDirect();
     if (document.querySelector(".education-partner-carousel")) ensureGranCard();
     if (document.querySelector(".shop-real-page, .shop-page")) keepShopLinksCorrect();
-
     makeVisibleLogosImmediate(document);
   };
 
@@ -294,25 +248,18 @@
   const schedule = () => {
     if (queued) return;
     queued = true;
-    requestAnimationFrame(() => {
-      queued = false;
-      syncCurrentScreen();
-    });
+    requestAnimationFrame(() => { queued = false; syncCurrentScreen(); });
   };
 
   installStyles();
   schedule();
-
   const root = document.getElementById("root");
   if (root) {
     new MutationObserver((mutations) => {
       const app = root.firstElementChild;
-      const relevant = mutations.some((mutation) =>
-        mutation.target === root || mutation.target === app
-      );
+      const relevant = mutations.some((mutation) => mutation.target === root || mutation.target === app);
       if (relevant) schedule();
     }).observe(root, { childList: true, subtree: true });
   }
-
   window.addEventListener("pageshow", schedule, { passive: true });
 })();
