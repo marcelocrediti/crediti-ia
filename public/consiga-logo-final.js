@@ -1,16 +1,18 @@
 (() => {
-  const LOGO = "/partners/consiga-mais.png?v=20260924-6";
+  const LOGO = "/partners/consiga-mais.png?v=20260924-7";
+  const AFFILIATE_URL = "https://apretailer.com.br/click/6aa4af912bfa8159945c68c9/184987/360419/crediti-app";
 
   function applyLogo(frame) {
     if (!frame) return;
 
     frame.dataset.creditiConsiga = "1";
     frame.classList.remove("crediti-consiga-frame");
-    frame.style.setProperty("background", "#fff", "important");
-    frame.style.setProperty("border-color", "#e3e5e8", "important");
+    frame.style.setProperty("background", "#4b2587", "important");
+    frame.style.setProperty("border-color", "#4b2587", "important");
     frame.style.setProperty("display", "grid", "important");
     frame.style.setProperty("place-items", "center", "important");
     frame.style.setProperty("overflow", "hidden", "important");
+    frame.style.setProperty("padding", "8px", "important");
 
     let img = frame.querySelector("img");
     if (!img || !img.src.includes("/partners/consiga-mais.png")) {
@@ -24,13 +26,14 @@
     img.loading = "eager";
     img.decoding = "async";
     img.style.setProperty("display", "block", "important");
-    img.style.setProperty("width", "100%", "important");
-    img.style.setProperty("height", "100%", "important");
-    img.style.setProperty("max-width", "100%", "important");
-    img.style.setProperty("max-height", "100%", "important");
+    img.style.setProperty("width", "92%", "important");
+    img.style.setProperty("height", "92%", "important");
+    img.style.setProperty("max-width", "92%", "important");
+    img.style.setProperty("max-height", "92%", "important");
     img.style.setProperty("object-fit", "contain", "important");
     img.style.setProperty("object-position", "center", "important");
     img.style.setProperty("opacity", "1", "important");
+    img.style.setProperty("visibility", "visible", "important");
     img.style.setProperty("filter", "none", "important");
     img.style.setProperty("mix-blend-mode", "normal", "important");
   }
@@ -47,7 +50,15 @@
     document.querySelectorAll(".direct-card").forEach((card) => {
       const text = (card.textContent || "").toLowerCase();
       if (!text.includes("consignado inss") && !text.includes("consiga mais")) return;
+      card.classList.add("crediti-consiga-direct");
       applyLogo(card.querySelector(".direct-logo"));
+    });
+
+    document.querySelectorAll("a[href]").forEach((anchor) => {
+      const href = anchor.getAttribute("href") || "";
+      if (href.includes("184987/360419") || href.includes("consigmais.com.br")) {
+        anchor.href = AFFILIATE_URL;
+      }
     });
   }
 
