@@ -191,6 +191,13 @@
   };
 
   const syncUppDirectCard = () => {
+    const homeCard = document.querySelector(".product-strip-upp-portabilidade");
+    if (homeCard) {
+      const homeTitle = homeCard.querySelector(":scope > strong");
+      const homeAction = homeCard.querySelector(".product-strip-action");
+      if (homeTitle) homeTitle.textContent = "Refinanciamento CLT com troco";
+      if (homeAction) homeAction.textContent = "SIMULAR REFINANCIAMENTO ›";
+    }
     const card = document.querySelector(".direct-card.direct-upp-portabilidade");
     if (!card) return;
     const title = card.querySelector("h2");
