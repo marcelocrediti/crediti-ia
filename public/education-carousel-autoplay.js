@@ -1,7 +1,7 @@
 (() => {
   const SELECTOR = ".education-partner-carousel";
-  const INTERVAL_MS = 10000;
-  const PAUSE_AFTER_TOUCH_MS = 10000;
+  const INTERVAL_MS = 5000;
+  const PAUSE_AFTER_TOUCH_MS = 5000;
 
   const ensureStyles = () => {
     if (document.getElementById("crediti-education-autoplay-styles")) return;
