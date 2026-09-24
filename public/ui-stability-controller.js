@@ -41,8 +41,8 @@
       .direct-upp-portabilidade .direct-secondary-actions button b{flex:0 0 auto!important;font-size:18px!important}
       .direct-grid .favorite-toggle,.direct-grid .compare-select,.compare-tray{display:none!important}
       .product-strip-logo img,.direct-logo img,.career-logo-frame img,.partner-notice-logo img{display:block!important;object-fit:contain!important;object-position:center!important;max-width:100%!important;max-height:100%!important}
-      .home-credit-section .product-strip.crediti-source-strip{display:none!important}
-      .crediti-home-credit-carousel{height:368px;overflow:hidden;border:1px solid #e1e4e8;border-radius:15px;background:#fff;touch-action:pan-x;position:relative}
+      .home-credit-section .product-strip.crediti-source-strip{display:grid!important}
+      .crediti-home-credit-carousel{display:none!important;height:0!important;overflow:hidden;border:1px solid #e1e4e8;border-radius:15px;background:#fff;touch-action:pan-x;position:relative}
       .crediti-home-credit-track{width:100%;transform:translateY(0);will-change:transform}
       .crediti-home-credit-track.crediti-moving{transition:transform .42s cubic-bezier(.22,.61,.36,1)}
       .crediti-home-credit-card{appearance:none;width:100%;height:92px;min-height:92px;padding:9px 11px;display:grid;grid-template-columns:66px minmax(0,1fr);grid-template-rows:auto auto;gap:1px 10px;align-items:center;border:0;border-bottom:1px solid #eceef1;border-radius:0;background:#fff;color:#171d2e;text-align:left;box-sizing:border-box}
@@ -325,7 +325,7 @@
     if (home) ensureHomeCreditCarousel();
     if (document.querySelector(".direct-grid")) {
       syncUppDirectCard();
-      ensureGrandinoDirectProducts();
+      document.querySelectorAll(".crediti-grandino-direct-grid").forEach((element) => element.remove());
     }
     if (document.querySelector(".learning-photo-hero,.education-partner-carousel")) ensureGranExperience();
     if (document.querySelector(".shop-real-page,.shop-page")) keepShopLinksCorrect();
