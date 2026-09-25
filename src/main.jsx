@@ -2885,6 +2885,48 @@ function App() {
     setScreen
   ] = useState("home");
 
+  useEffect(() => {
+    const validDestinations = new Set([
+      "home",
+      "credit",
+      "learn",
+      "services",
+      "shop"
+    ]);
+
+    const handleMainNavigation = (event) => {
+      const button = event.target.closest?.(
+        "[data-main-navigation]"
+      );
+
+      const destination =
+        button?.dataset.mainNavigation;
+
+      if (!validDestinations.has(destination)) {
+        return;
+      }
+
+      setScreen(destination);
+      window.scrollTo(0, 0);
+    };
+
+    // Captura o clique antes de scripts auxiliares do navegador. Isso evita
+    // que a barra inferior receba apenas foco sem efetuar a navegação.
+    document.addEventListener(
+      "click",
+      handleMainNavigation,
+      true
+    );
+
+    return () => {
+      document.removeEventListener(
+        "click",
+        handleMainNavigation,
+        true
+      );
+    };
+  }, []);
+
   const [
     messages,
     setMessages
