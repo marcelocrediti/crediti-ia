@@ -6423,6 +6423,27 @@ function App() {
             )}
           </div>
 
+          {(creditFilter === "todos" || creditFilter === "trabalhador") && (
+            <section className="upp-alternative" aria-label="Segundas opções de FGTS e CLT">
+              <div className="upp-alternative-logo" aria-label="Up.p">
+                <strong>Up.p</strong>
+              </div>
+              <div className="upp-alternative-copy">
+                <small>SEGUNDAS OPÇÕES DE CRÉDITO</small>
+                <h2>FGTS e CLT pela Up.p</h2>
+                <p>Consulte outra possibilidade sem substituir as opções da Grandino.</p>
+              </div>
+              <div className="upp-alternative-actions">
+                <button type="button" onClick={() => openDirectPartnerLink("upp-fgts")}>
+                  SIMULAR FGTS
+                </button>
+                <button type="button" onClick={() => openDirectPartnerLink("upp-clt")}>
+                  SIMULAR CLT
+                </button>
+              </div>
+            </section>
+          )}
+
           <section className="finanzero-alternative">
             <div className="finanzero-alternative-logo">
               <img src="/partners/finanzero.svg" alt="Logo oficial FinanZero" />
