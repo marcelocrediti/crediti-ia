@@ -2872,9 +2872,11 @@ function App() {
         window.location.search
       ).get("screen");
 
+    if (requestedScreen === "credit") return "direct";
+
     return [
       "home",
-      "credit",
+      "direct",
       "learn",
       "services",
       "shop"
@@ -2904,7 +2906,7 @@ function App() {
         return;
       }
 
-      setScreen(destination);
+      setScreen(destination === "credit" ? "direct" : destination);
       window.scrollTo(0, 0);
     };
 
@@ -4118,7 +4120,7 @@ function App() {
   ) {
     setSelectedArticle(null);
     setSelectedProduct(null);
-    setScreen(destination);
+    setScreen(destination === "credit" ? "direct" : destination);
     window.scrollTo(0, 0);
   }
 
@@ -6322,7 +6324,7 @@ function App() {
           title="Simule seu crédito"
           subtitle="Escolha uma opção disponível"
           onBack={() =>
-            setScreen("credit")
+            setScreen("home")
           }
         />
 
