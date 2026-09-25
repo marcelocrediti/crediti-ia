@@ -1519,3 +1519,60 @@ body,
     padding: 5px;
   }
 }
+
+/*
+ * Enquadramento definitivo das marcas de crédito.
+ * Mantido no fim do arquivo para neutralizar ajustes antigos por parceiro:
+ * toda marca e todo texto permanecem centralizados, sem encostar no rodapé.
+ */
+.product-strip .product-strip-logo,
+.direct-grid .direct-logo,
+.credit-alternative-buttons .credit-alt-logo {
+  box-sizing: border-box !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  overflow: hidden !important;
+  line-height: 0 !important;
+}
+
+.product-strip .product-strip-logo img,
+.direct-grid .direct-logo img,
+.credit-alternative-buttons .credit-alt-logo img {
+  display: block !important;
+  width: 100% !important;
+  height: 100% !important;
+  max-width: 100% !important;
+  max-height: 100% !important;
+  margin: auto !important;
+  object-fit: contain !important;
+  object-position: 50% 50% !important;
+  transform: none !important;
+  vertical-align: middle !important;
+}
+
+.product-strip .product-strip-brand,
+.direct-grid .direct-logo strong,
+.credit-alternative-buttons .upp-alt-logo {
+  display: block !important;
+  max-width: 100% !important;
+  margin: auto !important;
+  line-height: 1 !important;
+  text-align: center !important;
+}
+
+.product-strip .product-strip-card > strong,
+.product-strip .product-strip-card > .product-strip-action,
+.direct-grid .direct-logo + div {
+  min-width: 0 !important;
+}
+
+.direct-grid .direct-logo + div {
+  align-self: center !important;
+}
+
+.direct-grid .direct-logo + div > small,
+.direct-grid .direct-logo + div > h2 {
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+}
