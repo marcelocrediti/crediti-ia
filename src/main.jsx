@@ -581,16 +581,14 @@ const PARTNER_PRODUCTS = {
 
   fgts: {
     name: "Antecipação do FGTS",
-    partner: "Up.p",
-    logoText: "Up.p",
-    logoTone: "upp",
-    url: "https://apretailer.com.br/click/6ab43ae52bfa810f9a64b789/179925/360419/app-crediti",
-    button: "SIMULAR FGTS",
-    directOpen: true
+    partner: "Grandino Bank",
+    logo: "/partners/grandino.png",
+    url: "https://crediti.startcapital.app/credit/fgts",
+    button: "SIMULAR SEU CRÉDITO"
   },
 
   energia: {
-    name: "Crédito na conta de luz",
+    name: "Empréstimo na conta de luz",
     partner: "Crefaz",
     logo: "/partners/crefaz.jpeg",
     url: "https://crediti.startcapital.app/credit/cdccontadeluz",
@@ -599,12 +597,10 @@ const PARTNER_PRODUCTS = {
 
   clt: {
     name: "Consignado CLT",
-    partner: "Up.p",
-    logoText: "Up.p",
-    logoTone: "upp",
-    url: "https://apretailer.com.br/click/6ab43ae52bfa810f9a64b789/179925/360419/app-crediti",
-    button: "SIMULAR CONSIGNADO CLT",
-    directOpen: true
+    partner: "Grandino Bank",
+    logo: "/partners/grandino.png",
+    url: "https://crediti.startcapital.app/credit/cltctps",
+    button: "SIMULAR SEU CRÉDITO"
   },
 
   cartao: {
@@ -776,7 +772,7 @@ const products = [
 
   {
     id: "energia",
-    name: "Crédito na conta de luz",
+    name: "Empréstimo na conta de luz",
     what:
       "Modalidade de crédito que considera a titularidade e o histórico da conta de energia.",
     forWho:
@@ -930,14 +926,15 @@ const products = [
 ];
 
 const DIRECT_PRODUCT_KEYS = [
-  "upp-portabilidade",
+  "fgts",
+  "clt",
+  "energia",
   "emprestimo-pessoal",
   "cartao-credito",
   "inss",
   "pravaler",
   "bpc",
-  "cartao",
-  "energia"
+  "cartao"
 ];
 
 const CREDIT_FILTERS = [
@@ -973,6 +970,16 @@ const CREDIT_META = {
     category: "beneficio",
     audience: "Pessoas que recebem BPC/LOAS.",
     detail: "Consignado sujeito às regras e análise do Banco BRB."
+  },
+  fgts: {
+    category: "trabalhador",
+    audience: "Trabalhadores com saldo disponível no FGTS.",
+    detail: "Antecipação do saque-aniversário pelo Grandino Bank."
+  },
+  clt: {
+    category: "trabalhador",
+    audience: "Trabalhadores com carteira assinada.",
+    detail: "Crédito sujeito às regras e análise do Grandino Bank."
   },
   "upp-portabilidade": {
     category: "trabalhador",
