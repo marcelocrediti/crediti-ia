@@ -2189,18 +2189,7 @@ function BottomNav({
     }
   ];
 
-  function handlePointerNavigation(event, destination) {
-    event.preventDefault();
-    onNavigate(destination);
-  }
-
-  function handleKeyboardNavigation(event, destination) {
-    // Cliques de mouse/toque já são tratados no pointerup. O click com
-    // detail 0 preserva a navegação por teclado e por tecnologias assistivas.
-    if (event.detail !== 0) {
-      return;
-    }
-
+  function handleNavigation(event, destination) {
     event.preventDefault();
     onNavigate(destination);
   }
@@ -2211,9 +2200,9 @@ function BottomNav({
       aria-label="Navegação principal"
     >
       {items.map((item) => (
-        <button
-          type="button"
+        <a
           key={item.id}
+          href={`/?screen=${item.id}`}
           data-main-navigation={item.id}
           aria-current={
             active === item.id
@@ -2225,14 +2214,8 @@ function BottomNav({
               ? "active"
               : ""
           }
-          onPointerUp={(event) =>
-            handlePointerNavigation(
-              event,
-              item.id
-            )
-          }
           onClick={(event) =>
-            handleKeyboardNavigation(
+            handleNavigation(
               event,
               item.id
             )
@@ -2243,7 +2226,7 @@ function BottomNav({
           </span>
 
           <small>{item.label}</small>
-        </button>
+        </a>
       ))}
     </nav>
   );
@@ -2883,7 +2866,22 @@ function App() {
   const [
     screen,
     setScreen
-  ] = useState("home");
+  ] = useState(() => {
+    const requestedScreen =
+      new URLSearchParams(
+        window.location.search
+      ).get("screen");
+
+    return [
+      "home",
+      "credit",
+      "learn",
+      "services",
+      "shop"
+    ].includes(requestedScreen)
+      ? requestedScreen
+      : "home";
+  });
 
   useEffect(() => {
     const validDestinations = new Set([
