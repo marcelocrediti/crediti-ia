@@ -52,6 +52,7 @@ input {
 button {
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
+  text-decoration: none;
 }
 
 input,
@@ -3932,7 +3933,7 @@ html.splash-active #root {
   backdrop-filter: blur(16px);
 }
 
-.bottom-nav button {
+.bottom-nav :is(button, a) {
   width: 100%;
   min-width: 0;
   min-height: 64px;
@@ -3962,7 +3963,7 @@ html.splash-active #root {
   font-weight: 900;
 }
 
-.bottom-nav button:first-child span {
+.bottom-nav :is(button, a):first-child span {
   font-size: 27px;
   line-height: 1;
 }
@@ -3973,11 +3974,11 @@ html.splash-active #root {
   line-height: 1;
 }
 
-.bottom-nav button.active {
+.bottom-nav :is(button, a).active {
   color: #111111;
 }
 
-.bottom-nav button.active span {
+.bottom-nav :is(button, a).active span {
   background: #FDCA01;
 }
 
@@ -8014,14 +8015,14 @@ button:disabled {
   padding: 7px 6px calc(7px + env(safe-area-inset-bottom));
 }
 
-.bottom-nav button {
+.bottom-nav :is(button, a) {
   min-height: 66px;
   gap: 5px;
   border-radius: var(--ui-radius-control);
 }
 
 .bottom-nav span,
-.bottom-nav button:first-child span {
+.bottom-nav :is(button, a):first-child span {
   width: var(--ui-icon-box);
   min-width: var(--ui-icon-box);
   height: var(--ui-icon-box);
