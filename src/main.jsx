@@ -6423,210 +6423,51 @@ function App() {
             )}
           </div>
 
-          {(creditFilter === "todos" || creditFilter === "trabalhador") && (
-            <section className="upp-alternative" aria-label="Segundas opções de FGTS e CLT">
-              <div className="upp-alternative-logo" aria-label="Up.p">
-                <strong>Up.p</strong>
+          <div className="credit-alternative-grid" aria-label="Outras opções de crédito">
+            <section className="finanzero-alternative">
+              <div className="finanzero-alternative-logo">
+                <img src="/partners/finanzero.svg" alt="Logo oficial FinanZero" />
               </div>
-              <div className="upp-alternative-copy">
-                <small>SEGUNDAS OPÇÕES DE CRÉDITO</small>
-                <h2>FGTS e CLT pela Up.p</h2>
-                <p>Consulte outra possibilidade sem substituir as opções da Grandino.</p>
+              <div className="finanzero-alternative-copy">
+                <small>OUTRAS POSSIBILIDADES</small>
+                <h2>Compare ofertas com a FinanZero</h2>
+                <p>Consulte opções de diferentes instituições.</p>
               </div>
-              <div className="upp-alternative-actions">
-                <button type="button" onClick={() => openDirectPartnerLink("upp-fgts")}>
-                  SIMULAR FGTS
-                </button>
-                <button type="button" onClick={() => openDirectPartnerLink("upp-clt")}>
-                  SIMULAR CLT
-                </button>
-              </div>
+              <button
+                onClick={() => {
+                  const product = PARTNER_PRODUCTS.finanzero;
+                  if (openExternal(product.url)) {
+                    rememberItem({
+                      key: "finanzero",
+                      title: product.name,
+                      partner: product.partner,
+                      type: "credit"
+                    });
+                    trackMetaLead();
+                    recordSimulation("finanzero");
+                  }
+                }}
+              >
+                CONFERIR OFERTAS
+              </button>
             </section>
-          )}
 
-          <section className="finanzero-alternative">
-            <div className="finanzero-alternative-logo">
-              <img src="/partners/finanzero.svg" alt="Logo oficial FinanZero" />
-            </div>
-            <div className="finanzero-alternative-copy">
-              <small>OUTRAS POSSIBILIDADES</small>
-              <h2>Compare ofertas com a FinanZero</h2>
-              <p>Uma única simulação para consultar opções de diferentes instituições.</p>
-            </div>
-            <button
-              onClick={() => {
-                const product = PARTNER_PRODUCTS.finanzero;
-                if (openExternal(product.url)) {
-                  rememberItem({
-                    key: "finanzero",
-                    title: product.name,
-                    partner: product.partner,
-                    type: "credit"
-                  });
-                  trackMetaLead();
-                  recordSimulation("finanzero");
-                }
-              }}
-            >
-              CONFERIR OFERTAS
-            </button>
-          </section>
-
-        </main>
-
-        {showComparison && (
-          <div
-            className="compare-modal"
-            role="dialog"
-            aria-modal="true"
-            aria-label="Comparação de produtos"
-          >
-            <div className="compare-modal-card">
-              <div className="compare-modal-head">
-                <div>
-                  <small>COMPARAÇÃO CLARA</small>
-                  <h2>Compare antes de escolher</h2>
+            {(creditFilter === "todos" || creditFilter === "trabalhador") && (
+              <section className="upp-credit-option" aria-label="Mais opções de FGTS e CLT pela Up.p">
+                <div className="upp-credit-option-logo" aria-label="Up.p">
+                  <strong>Up.p</strong>
                 </div>
-                <button
-                  onClick={() => setShowComparison(false)}
-                  aria-label="Fechar comparação"
-                >
-                  ×
+                <div className="upp-credit-option-copy">
+                  <small>OUTRAS POSSIBILIDADES</small>
+                  <h2>Mais opções de FGTS e CLT pra você</h2>
+                  <p>Consulte as alternativas disponíveis na Up.p.</p>
+                </div>
+                <button type="button" onClick={() => openDirectPartnerLink("upp-clt")}>
+                  CONFERIR NA UP.P
                 </button>
-              </div>
-
-              <div className="compare-columns">
-                {compareKeys.map((productKey) => {
-                  const product = PARTNER_PRODUCTS[productKey];
-                  const meta = CREDIT_META[productKey];
-
-                  return (
-                    <article key={productKey}>
-                      <small>{product.partner}</small>
-                      <h3>{product.name}</h3>
-                      <b>Para quem é</b>
-                      <p>{meta.audience}</p>
-                      <b>Como funciona</b>
-                      <p>{meta.detail}</p>
-                      <button
-                        onClick={() => openPartnerLink(productKey)}
-                      >
-                        {product.button || "SIMULAR"}
-                      </button>
-                    </article>
-                  );
-                })}
-              </div>
-
-              <p className="compare-disclaimer">
-                Condições e aprovação são definidas pela instituição responsável. A Crediti apenas orienta e direciona.
-              </p>
-            </div>
+              </section>
+            )}
           </div>
-        )}
-
-        <BottomNav
-          active="credit"
-          onNavigate={navigateMain}
-        />
-      </div>
-    );
-  }
-
-  if (screen === "credit") {
-    return (
-      <div className="app app-white app-with-nav">
-        <AppHeader
-          title="Crédito"
-          subtitle="Escolha como deseja continuar"
-        />
-
-        <main className="modern-page">
-          <section className="bank-photo-hero credit-overview-hero">
-            <img
-              src="/editorial/crediti-banking-woman.jpg"
-              alt="Mulher usando o celular e segurando um cartão"
-              loading="eager"
-              fetchPriority="high"
-            />
-            <div>
-              <span className="eyebrow">CRÉDITO COM RESPONSABILIDADE</span>
-              <h1>Seu score te travou? Calma, existem caminhos.</h1>
-              <p>Compare possibilidades e continue somente no ambiente seguro da instituição responsável.</p>
-              <button onClick={() => setScreen("direct")}>VER OPÇÕES DE CRÉDITO</button>
-            </div>
-          </section>
-
-          <div className="hub-grid">
-            <button
-              className="hub-card featured"
-              onClick={() =>
-                setScreen("direct")
-              }
-            >
-              <span className="hub-icon"><UiIcon name="credit" /></span>
-              <strong>
-                Quero simular agora
-              </strong>
-              <small>
-                Veja os créditos disponíveis para simulação online.
-              </small>
-            </button>
-
-            <button
-              className="hub-card"
-              onClick={() =>
-                openChat()
-              }
-            >
-              <span className="hub-icon"><UiIcon name="chat" /></span>
-              <strong>
-                Converse com a Crediti IA
-              </strong>
-              <small>
-                Tire dúvidas, entenda seu perfil e gere seu atendimento.
-              </small>
-            </button>
-
-            <button
-              className="hub-card"
-              onClick={() =>
-                setScreen("products")
-              }
-            >
-              <span className="hub-icon"><UiIcon name="products" /></span>
-              <strong>
-                Conheça nossos produtos
-              </strong>
-              <small>
-                Veja regras, perguntas e dicas antes de decidir.
-              </small>
-            </button>
-
-            <button
-              className="hub-card"
-              onClick={() =>
-                setScreen("human")
-              }
-            >
-              <span className="hub-icon"><UiIcon name="headset" /></span>
-              <strong>
-                Atendimento com analista
-              </strong>
-              <small>
-                Fale com a equipe da Crediti pelo WhatsApp.
-              </small>
-            </button>
-          </div>
-
-          <section className="region-note">
-            <strong>
-              Onde atendemos financiamento?
-            </strong>
-            <p>
-              Financiamento de carro e moto está disponível em Itapajé, Irauçuba e Uruburetama. Crédito com garantia de carro ou moto está disponível em todo o Brasil.
-            </p>
-          </section>
         </main>
 
         <BottomNav
