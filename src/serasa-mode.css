@@ -1576,3 +1576,33 @@ body,
   margin-left: 0 !important;
   margin-right: 0 !important;
 }
+
+
+/* As marcas e o nome da instituição ocupam a mesma linha em todos os cards. */
+.direct-grid .direct-card:not(.direct-upp-portabilidade) > .direct-logo {
+  grid-column: 1 !important;
+  grid-row: 1 !important;
+  align-self: center !important;
+  margin: 0 !important;
+}
+
+.direct-grid .direct-card:not(.direct-upp-portabilidade) > .direct-logo + div {
+  grid-column: 2 !important;
+  grid-row: 1 !important;
+  align-self: center !important;
+  min-width: 0 !important;
+  margin: 0 !important;
+}
+
+.direct-grid .direct-card:not(.direct-upp-portabilidade) > .direct-logo + div small,
+.direct-grid .direct-card:not(.direct-upp-portabilidade) > .direct-logo + div h2 {
+  display: block !important;
+  margin-top: 0 !important;
+  margin-bottom: 4px !important;
+  line-height: 1.25 !important;
+}
+
+.direct-grid .direct-logo img {
+  padding: 2px !important;
+  box-sizing: border-box !important;
+}
