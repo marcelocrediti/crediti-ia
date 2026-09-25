@@ -6423,49 +6423,39 @@ function App() {
             )}
           </div>
 
-          <div className="credit-alternative-grid" aria-label="Outras opções de crédito">
-            <section className="finanzero-alternative">
-              <div className="finanzero-alternative-logo">
-                <img src="/partners/finanzero.svg" alt="Logo oficial FinanZero" />
-              </div>
-              <div className="finanzero-alternative-copy">
-                <small>OUTRAS POSSIBILIDADES</small>
-                <h2>Compare ofertas com a FinanZero</h2>
-                <p>Consulte opções de diferentes instituições.</p>
-              </div>
-              <button
-                onClick={() => {
-                  const product = PARTNER_PRODUCTS.finanzero;
-                  if (openExternal(product.url)) {
-                    rememberItem({
-                      key: "finanzero",
-                      title: product.name,
-                      partner: product.partner,
-                      type: "credit"
-                    });
-                    trackMetaLead();
-                    recordSimulation("finanzero");
-                  }
-                }}
-              >
-                CONFERIR OFERTAS
-              </button>
-            </section>
+          <div className="credit-alternative-buttons" aria-label="Outras opções de crédito">
+            <button
+              type="button"
+              className="credit-alt-button finanzero-alt-button"
+              onClick={() => {
+                const product = PARTNER_PRODUCTS.finanzero;
+                if (openExternal(product.url)) {
+                  rememberItem({
+                    key: "finanzero",
+                    title: product.name,
+                    partner: product.partner,
+                    type: "credit"
+                  });
+                  trackMetaLead();
+                  recordSimulation("finanzero");
+                }
+              }}
+            >
+              <span className="credit-alt-logo finanzero-alt-logo">
+                <img src="/partners/finanzero.svg" alt="" />
+              </span>
+              <span>Comparar outras opções de crédito</span>
+            </button>
 
             {(creditFilter === "todos" || creditFilter === "trabalhador") && (
-              <section className="upp-credit-option" aria-label="Mais opções de FGTS e CLT pela Up.p">
-                <div className="upp-credit-option-logo" aria-label="Up.p">
-                  <strong>Up.p</strong>
-                </div>
-                <div className="upp-credit-option-copy">
-                  <small>OUTRAS POSSIBILIDADES</small>
-                  <h2>Mais opções de FGTS e CLT pra você</h2>
-                  <p>Consulte as alternativas disponíveis na Up.p.</p>
-                </div>
-                <button type="button" onClick={() => openDirectPartnerLink("upp-clt")}>
-                  CONFERIR NA UP.P
-                </button>
-              </section>
+              <button
+                type="button"
+                className="credit-alt-button upp-alt-button"
+                onClick={() => openDirectPartnerLink("upp-clt")}
+              >
+                <span className="credit-alt-logo upp-alt-logo" aria-hidden="true">Up.p</span>
+                <span>Mais opções de FGTS e CLT pra você</span>
+              </button>
             )}
           </div>
         </main>
