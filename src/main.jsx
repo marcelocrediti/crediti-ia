@@ -2189,6 +2189,22 @@ function BottomNav({
     }
   ];
 
+  function handlePointerNavigation(event, destination) {
+    event.preventDefault();
+    onNavigate(destination);
+  }
+
+  function handleKeyboardNavigation(event, destination) {
+    // Cliques de mouse/toque já são tratados no pointerup. O click com
+    // detail 0 preserva a navegação por teclado e por tecnologias assistivas.
+    if (event.detail !== 0) {
+      return;
+    }
+
+    event.preventDefault();
+    onNavigate(destination);
+  }
+
   return (
     <nav
       className="bottom-nav"
@@ -2196,14 +2212,30 @@ function BottomNav({
     >
       {items.map((item) => (
         <button
+          type="button"
           key={item.id}
+          data-main-navigation={item.id}
+          aria-current={
+            active === item.id
+              ? "page"
+              : undefined
+          }
           className={
             active === item.id
               ? "active"
               : ""
           }
-          onClick={() =>
-            onNavigate(item.id)
+          onPointerUp={(event) =>
+            handlePointerNavigation(
+              event,
+              item.id
+            )
+          }
+          onClick={(event) =>
+            handleKeyboardNavigation(
+              event,
+              item.id
+            )
           }
         >
           <span aria-hidden="true">
