@@ -8919,7 +8919,6 @@ function App() {
             <span className="eyebrow">CREDITI PARA VOCÊ</span>
             <h1>Escolhas financeiras mais claras começam aqui.</h1>
             <p>Crédito, estudo, serviços e compras em um só aplicativo.</p>
-            <button onClick={() => setScreen("direct")}>ENCONTRAR OPÇÕES</button>
           </div>
         </section>
 
