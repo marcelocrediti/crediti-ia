@@ -1,6 +1,8 @@
 (() => {
   const SECTION_ID = 'crediti-employment-opportunities';
   const STYLE_ID = 'crediti-employment-opportunities-style';
+  const DESENROLA_CARD_ID = 'crediti-desenrola-brasil';
+  const DESENROLA_URL = 'https://www.gov.br/pt-br/servicos/solicitar-renegociacao-de-dividas-familias';
   const LINKS = [
     {
       title: 'Vagas e oportunidades 2',
@@ -86,5 +88,65 @@
     return true;
   }
 
+  function getConsumerGrid() {
+    const groups = Array.from(document.querySelectorAll('.service-group'));
+    const consumerGroup = groups.find((group) => {
+      const title = group.querySelector('h2')?.textContent?.trim().toLowerCase();
+      return title === 'consumidor';
+    });
+    return consumerGroup?.querySelector('.service-grid') || null;
+  }
+
+  function mountDesenrola() {
+    const grid = getConsumerGrid();
+    const existing = document.getElementById(DESENROLA_CARD_ID);
+
+    if (!grid || !grid.isConnected) {
+      existing?.remove();
+      return false;
+    }
+
+    if (existing?.parentNode === grid) return true;
+
+    const alreadyNative = Array.from(grid.querySelectorAll('.service-card strong')).some((title) =>
+      /desenrola brasil/i.test(title.textContent || '')
+    );
+    if (alreadyNative) {
+      existing?.remove();
+      return true;
+    }
+
+    existing?.remove();
+
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.id = DESENROLA_CARD_ID;
+    button.className = 'service-card';
+    button.setAttribute('data-search-key', 'service-desenrola-brasil');
+    button.setAttribute('aria-label', 'Acessar Desenrola Brasil');
+    button.innerHTML = `
+      <strong>Desenrola Brasil</strong>
+      <small>Acesse o serviço oficial para renegociar dívidas.</small>
+      <span>ACESSAR ›</span>
+    `;
+    button.addEventListener('click', () => openExternal(DESENROLA_URL));
+    grid.appendChild(button);
+    return true;
+  }
+
+  let desenrolaFrame = 0;
+  function scheduleDesenrola() {
+    if (desenrolaFrame) return;
+    desenrolaFrame = requestAnimationFrame(() => {
+      desenrolaFrame = 0;
+      mountDesenrola();
+    });
+  }
+
+  const desenrolaObserver = new MutationObserver(scheduleDesenrola);
+  desenrolaObserver.observe(document.documentElement, { childList: true, subtree: true });
+  scheduleDesenrola();
+
   window.CreditiEmploymentOpportunities = { mount, unmount };
+  window.CreditiDesenrolaBrasil = { mount: mountDesenrola };
 })();
