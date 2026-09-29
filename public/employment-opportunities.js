@@ -134,18 +134,13 @@
     return true;
   }
 
-  let desenrolaFrame = 0;
-  function scheduleDesenrola() {
-    if (desenrolaFrame) return;
-    desenrolaFrame = requestAnimationFrame(() => {
-      desenrolaFrame = 0;
-      mountDesenrola();
-    });
+  function keepDesenrolaMounted() {
+    mountDesenrola();
   }
 
-  const desenrolaObserver = new MutationObserver(scheduleDesenrola);
-  desenrolaObserver.observe(document.documentElement, { childList: true, subtree: true });
-  scheduleDesenrola();
+  keepDesenrolaMounted();
+  window.setInterval(keepDesenrolaMounted, 900);
+  window.addEventListener('pageshow', keepDesenrolaMounted, { passive: true });
 
   window.CreditiEmploymentOpportunities = { mount, unmount };
   window.CreditiDesenrolaBrasil = { mount: mountDesenrola };
