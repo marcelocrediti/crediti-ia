@@ -2,7 +2,7 @@
   const SECTION_ID = 'crediti-employment-opportunities';
   const STYLE_ID = 'crediti-employment-opportunities-style';
   const DESENROLA_CARD_ID = 'crediti-desenrola-brasil';
-  const DESENROLA_URL = 'https://www.gov.br/pt-br/servicos/solicitar-renegociacao-de-dividas-familias';
+  const DESENROLA_URL = 'https://www.gov.br/fazenda/pt-br/acesso-a-informacao/acoes-e-programas/renegociacao-de-dividas';
   const LINKS = [
     {
       title: 'Vagas e oportunidades 2',
@@ -126,7 +126,7 @@
     button.setAttribute('aria-label', 'Acessar Desenrola Brasil');
     button.innerHTML = `
       <strong>Desenrola Brasil</strong>
-      <small>Acesse o serviço oficial para renegociar dívidas.</small>
+      <small>Consulte as regras e os canais oficiais para renegociar dívidas.</small>
       <span>ACESSAR ›</span>
     `;
     button.addEventListener('click', () => openExternal(DESENROLA_URL));
