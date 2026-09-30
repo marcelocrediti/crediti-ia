@@ -1,0 +1,10 @@
+{
+  "appId": "br.com.creditisolucoes.app",
+  "appName": "Crediti",
+  "webDir": "dist",
+  "backgroundColor": "#FDCA01",
+  "android": {
+    "allowMixedContent": false,
+    "backgroundColor": "#FDCA01"
+  }
+}

@@ -968,6 +968,29 @@ header small {
   }
 }
 
+.home-legal-links {
+  display: grid;
+  justify-items: center;
+  gap: 7px;
+  margin: 24px 0 12px;
+  padding: 18px 12px 28px;
+  color: #68707b;
+  text-align: center;
+}
+
+.home-legal-links a {
+  color: #3f3a00;
+  font-size: 12px;
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.home-legal-links span {
+  font-size: 9px;
+  line-height: 1.45;
+}
+
 /* =========================================================
    TELAS GRANDES
    ========================================================= */
