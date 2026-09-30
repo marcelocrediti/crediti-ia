@@ -2827,6 +2827,29 @@ class AppErrorBoundary extends React.Component {
     return { hasError: true };
   }
 
+  componentDidCatch(error, errorInfo) {
+    console.error("Falha protegida no App Crediti:", error, errorInfo);
+
+    try {
+      window.sessionStorage.setItem(
+        "crediti_last_error_v1",
+        JSON.stringify({
+          message: String(error?.message || error || "Erro desconhecido").slice(0, 500),
+          screen: window.location.search,
+          recordedAt: new Date().toISOString()
+        })
+      );
+    } catch {
+      // O diagnostico nunca pode impedir a recuperacao do aplicativo.
+    }
+  }
+
+  recoverApp = () => {
+    const recoveryUrl = new URL("/", window.location.origin);
+    recoveryUrl.searchParams.set("recover", String(Date.now()));
+    window.location.replace(recoveryUrl.toString());
+  };
+
   render() {
     if (this.state.hasError) {
       return (
@@ -2834,7 +2857,7 @@ class AppErrorBoundary extends React.Component {
           <span aria-hidden="true">!</span>
           <h1>Algo não carregou como deveria</h1>
           <p>Seus dados locais continuam protegidos. Toque abaixo para tentar novamente.</p>
-          <button onClick={() => window.location.reload()}>
+          <button onClick={this.recoverApp}>
             TENTAR NOVAMENTE
           </button>
         </main>
@@ -9300,6 +9323,13 @@ function App() {
             CONHECER O SHOP
           </button>
         </section>
+
+        <footer className="home-legal-links" aria-label="Informações legais">
+          <a href="/privacidade.html" target="_blank" rel="noreferrer">
+            Política de Privacidade
+          </a>
+          <span>Crediti Soluções Financeiras · CNPJ 28.115.454/0001-27</span>
+        </footer>
       </main>
 
       <BottomNav
