@@ -189,6 +189,16 @@ function getFaixa(valor){
   return FAIXAS.find(f => valor <= f.max) || FAIXAS[FAIXAS.length-1];
 }
 
+// A taxa sugerida acompanha o prazo escolhido. O campo continua editável,
+// mas ao trocar o prazo o sistema reaplica a referência correta da tabela.
+function getTaxaSugeridaPorPrazo(prazo){
+  const meses = Math.max(CONFIG.prazoMin, Math.min(CONFIG.prazoMax, Number(prazo) || CONFIG.prazoMin));
+  if(meses <= 6) return 9;
+  if(meses <= 9) return 10;
+  if(meses <= 12) return 11;
+  return 12;
+}
+
 // ======================================================================
 // CONFIGURAÇÃO DO FIREBASE
 // Substitua os valores abaixo pelos dados do SEU projeto Firebase.
@@ -1698,15 +1708,26 @@ function wireFaixaSugestao(){
   const prazoEl = document.getElementById('f-prazo');
   const hintEl = document.getElementById('faixa-hint');
   let taxaTocada = false, prazoTocado = false;
+
+  const atualizarSugestaoDoPrazo = (forcarTaxa = false)=>{
+    const prazo = Number(prazoEl.value) || CONFIG.prazoMin;
+    const taxaSugerida = getTaxaSugeridaPorPrazo(prazo);
+    hintEl.textContent = `💡 Taxa sugerida para ${prazo}x: ${taxaSugerida}% a.m.`;
+    if(forcarTaxa || !taxaTocada) taxaEl.value = taxaSugerida;
+  };
+
   taxaEl.addEventListener('input', ()=>{ taxaTocada = true; });
-  prazoEl.addEventListener('change', ()=>{ prazoTocado = true; });
+  prazoEl.addEventListener('change', ()=>{
+    prazoTocado = true;
+    taxaTocada = false;
+    atualizarSugestaoDoPrazo(true);
+  });
   valorEl.addEventListener('input', ()=>{
     const valor = parseMilhar(valorEl.value);
     if(!valor){ hintEl.textContent=''; return; }
     const f = getFaixa(valor);
-    hintEl.textContent = `💡 Sugestão pra essa faixa: ${f.prazoTexto.toLowerCase()}, ${f.taxa}% a.m.`;
-    if(!taxaTocada) taxaEl.value = f.taxa;
     if(!prazoTocado) prazoEl.value = f.prazoMax;
+    atualizarSugestaoDoPrazo(false);
   });
 }
 
