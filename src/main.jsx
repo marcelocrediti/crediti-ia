@@ -482,9 +482,9 @@ const PARTNER_PRODUCTS = {
     logo: "/partners/finanzero.svg",
     logoTone: "finanzero",
     url: "https://apretailer.com.br/click/6ab281112bfa816a66278004/180635/360419/crediti-app",
-    button: "COMPARAR OFERTAS",
+    button: "SIMULE SEU CRÉDITO",
     eyebrow: "COMPARADOR DE CRÉDITO",
-    heading: "Compare opções de empréstimo pessoal",
+    heading: "Simule seu crédito pessoal",
     shortText: "Consulte propostas de instituições financeiras parceiras da FinanZero.",
     options: [
       "Prazo de pagamento de 6 a 36 meses",
@@ -533,12 +533,12 @@ const PARTNER_PRODUCTS = {
   },
 
   finanzero: {
-    name: "Comparador de crédito",
+    name: "Empréstimo pessoal",
     partner: "FinanZero",
     logo: "/partners/finanzero.svg",
     logoTone: "finanzero",
     url: "https://apretailer.com.br/click/6ab281112bfa816a66278004/180635/360419/crediti-app",
-    button: "COMPARAR OFERTAS"
+    button: "SIMULE SEU CRÉDITO"
   },
 
   "upp-portabilidade": {
@@ -955,7 +955,7 @@ const CREDIT_META = {
   "emprestimo-pessoal": {
     category: "outros",
     audience: "Negativados, CLT, MEI, autônomos e outros perfis.",
-    detail: "Comparação de opções de empréstimo pessoal no ambiente da FinanZero."
+    detail: "Simule seu crédito pessoal no ambiente da FinanZero."
   },
   "cartao-credito": {
     category: "outros",
@@ -5982,7 +5982,7 @@ function App() {
                       <strong>{product.name}</strong>
                       <div>
                         <button onClick={() => openSavedProduct(productKey)}>
-                          VER PRODUTO
+                          {product.partner === "FinanZero" ? "SIMULE SEU CRÉDITO" : "VER PRODUTO"}
                         </button>
                         <button
                           className="remove-saved"
