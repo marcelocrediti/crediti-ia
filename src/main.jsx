@@ -454,6 +454,16 @@ const EDUCATION_PARTNERS = [
     url: "https://afiliado.saberemrede.net/services?type=D&institution=UNIFATECIE%20-%20Consultores&campaign=unifatecie&&buyer=94410&campaign=unifatecie&shared=true"
   },
   {
+    id: "gran-cursos",
+    name: "Gran Cursos Online",
+    logoText: "GRAN",
+    symbol: "G",
+    category: "CONCURSOS, CURSOS E FORMAÇÃO",
+    title: "Prepare-se para sua próxima aprovação",
+    action: "CONHECER CURSOS ›",
+    url: "https://mais.app/7EJutg"
+  },
+  {
     id: "idomed",
     name: "IDOMED",
     logo: "/education/idomed.png",
@@ -468,24 +478,20 @@ const EDUCATION_PARTNERS = [
 const PARTNER_PRODUCTS = {
   "emprestimo-pessoal": {
     name: "Empréstimo pessoal",
-    partner: "SuperSim",
-    logo: "/partners/supersim.webp",
-    logoTone: "supersim",
-    url: "https://apretailer.com.br/click/6aa4af912bfa816ab47e8c90/184363/360419/app_crediti",
-    button: "SIMULAR MEU EMPRÉSTIMO",
-    eyebrow: "CRÉDITO PARA DIFERENTES PERFIS",
-    heading: "Consulte as opções disponíveis para você",
-    shortText: "Crédito para diferentes perfis. Consulte as opções disponíveis para você.",
+    partner: "FinanZero",
+    logo: "/partners/finanzero.svg",
+    logoTone: "finanzero",
+    url: "https://apretailer.com.br/click/6ab281112bfa816a66278004/180635/360419/crediti-app",
+    button: "COMPARAR OFERTAS",
+    eyebrow: "COMPARADOR DE CRÉDITO",
+    heading: "Compare opções de empréstimo pessoal",
+    shortText: "Consulte propostas de instituições financeiras parceiras da FinanZero.",
     options: [
-      "Empréstimo para negativados",
-      "Empréstimo via PIX",
-      "Empréstimo para CLT",
-      "Empréstimo para MEI",
-      "Empréstimo para autônomos",
-      "Empréstimo pessoal tradicional",
-      "Empréstimo com garantia de celular"
+      "Prazo de pagamento de 6 a 36 meses",
+      "CET divulgado de 26,82% a 621,38% ao ano",
+      "Compare valor total, parcelas e condições antes de contratar"
     ],
-    note: "Contratação, aprovação, valores e condições são definidos pela instituição responsável pela oferta."
+    note: "Exemplo divulgado pela FinanZero: R$ 5.000 em 12 meses, 12 parcelas de R$ 500,44, total de R$ 6.005,28 com IOF e CET de 64,4% ao ano. Aprovação e condições dependem da instituição financeira."
   },
 
   pravaler: {
@@ -649,7 +655,7 @@ const products = [
     forWho:
       "Pessoas negativadas, trabalhadores CLT, MEI, autônomos e clientes que procuram crédito pessoal.",
     how:
-      "A SuperSim apresenta as opções disponíveis para o perfil informado e realiza a análise em seu próprio ambiente.",
+      "A FinanZero compara propostas de instituições financeiras parceiras e apresenta as condições disponíveis para o perfil informado.",
     when:
       "Pode ajudar em uma necessidade financeira pontual, desde que a contratação caiba no orçamento.",
     tip:
@@ -949,7 +955,7 @@ const CREDIT_META = {
   "emprestimo-pessoal": {
     category: "outros",
     audience: "Negativados, CLT, MEI, autônomos e outros perfis.",
-    detail: "Opções de empréstimo pessoal com análise realizada pela SuperSim."
+    detail: "Comparação de opções de empréstimo pessoal no ambiente da FinanZero."
   },
   "cartao-credito": {
     category: "outros",
@@ -1301,13 +1307,13 @@ const APP_SEARCH_ITEMS = [
     title: "Crédito para trabalhador",
     description: "Empréstimo pessoal, CLT, FGTS, cartão e conta de energia",
     screen: "direct",
-    keywords: "trabalhador trabalhadores empregado carteira assinada clt mei autonomo supersim fgts saque aniversario cartao energia conta luz"
+    keywords: "trabalhador trabalhadores empregado carteira assinada clt mei autonomo finanzero fgts saque aniversario cartao energia conta luz"
   },
   {
     title: "Faculdade e financiamento estudantil",
     description: "Faculdades, cursos e financiamento estudantil",
     screen: "learn",
-    keywords: "faculdade faculdades curso cursos estudar estudo estudante vestibular graduacao pravaler estacio uninter wyden idomed unifatecie"
+    keywords: "faculdade faculdades curso cursos concurso concursos estudar estudo estudante vestibular graduacao pravaler estacio uninter wyden idomed unifatecie gran gran cursos"
   },
   {
     title: "Soluções para empresas",
@@ -1319,7 +1325,7 @@ const APP_SEARCH_ITEMS = [
     title: "Simular crédito",
     description: "Empréstimo pessoal, INSS, cartão, CLT, FGTS e outras opções",
     screen: "direct",
-    keywords: "credito emprestimo dinheiro simular negativado pix supersim mei autonomo inss aposentado pensionista bpc loas clt trabalhador fgts cartao consumidor positivo consig mais energia pravaler estudante faculdade"
+    keywords: "credito emprestimo dinheiro simular negativado pix finanzero mei autonomo inss aposentado pensionista bpc loas clt trabalhador fgts cartao consumidor positivo consig mais energia pravaler estudante faculdade"
   },
   {
     title: "Aprenda com a Crediti",
@@ -6840,16 +6846,6 @@ function App() {
             </div>
           </section>
 
-          <section className="score-feature-card">
-            <img src="/creditin-oficial.png" alt="Creditin, assistente da Crediti" />
-            <div>
-              <span className="eyebrow">DICA DO CREDITIN</span>
-              <h2>Score baixo talvez não seja o único ponto.</h2>
-              <p>Organize sua vida financeira com um plano educativo de 30, 60 e 90 dias.</p>
-              <button onClick={openScorePlan}>MONTAR MEU PLANO</button>
-            </div>
-          </section>
-
           <section className="career-section">
             <span className="eyebrow">
               OPORTUNIDADE DE CRESCIMENTO
@@ -6876,7 +6872,11 @@ function App() {
                   >
                     <div className="career-brand">
                       <span className="career-logo-frame">
-                        <img src={partner.logo} alt={`Logo ${partner.name}`} loading="lazy" />
+                        {partner.logo ? (
+                          <img src={partner.logo} alt={`Logo ${partner.name}`} loading="lazy" />
+                        ) : (
+                          <strong>{partner.logoText || partner.name}</strong>
+                        )}
                       </span>
                       <b>{partner.name}</b>
                     </div>
@@ -6909,6 +6909,16 @@ function App() {
               CONTEÚDOS DA CREDITI
             </span>
             <h2>Educação financeira</h2>
+          </section>
+
+          <section className="score-feature-card">
+            <img src="/creditin-oficial.png" alt="Creditin, assistente da Crediti" />
+            <div>
+              <span className="eyebrow">DICA DO CREDITIN</span>
+              <h2>Score baixo talvez não seja o único ponto.</h2>
+              <p>Organize sua vida financeira com um plano educativo de 30, 60 e 90 dias.</p>
+              <button onClick={openScorePlan}>MONTAR MEU PLANO</button>
+            </div>
           </section>
 
           <div className="article-grid">
