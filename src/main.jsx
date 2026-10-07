@@ -6870,10 +6870,13 @@ function App() {
                       openExternal(partner.url)
                     }
                   >
-                    <div className="career-brand">
+                    <div
+                      className="career-brand"
+                      style={partner.id === "gran-cursos" ? { background: "#a90817", borderColor: "#a90817" } : undefined}
+                    >
                       <span className="career-logo-frame">
                         {partner.logo ? (
-                          <img src={partner.logo} alt={`Logo ${partner.name}`} loading="lazy" />
+                          <img src={partner.logo} alt={`Logo ${partner.name}`} loading={partner.id === "gran-cursos" ? "eager" : "lazy"} />
                         ) : (
                           <strong>{partner.logoText || partner.name}</strong>
                         )}
