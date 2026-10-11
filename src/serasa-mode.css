@@ -1606,3 +1606,29 @@ body,
   padding: 2px !important;
   box-sizing: border-box !important;
 }
+
+/* Gran: official dark wordmark, isolated from generic carousel logo sizing. */
+.education-partner-carousel .career-card.gran-cursos .career-brand {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: #f4f6f8 !important;
+}
+.education-partner-carousel .career-card.gran-cursos .career-logo-frame {
+  width: min(100%, 164px) !important;
+  height: 60px !important;
+  padding: 8px !important;
+  background: transparent !important;
+  overflow: visible !important;
+}
+.education-partner-carousel .career-card.gran-cursos .career-logo-frame img {
+  width: 100% !important;
+  height: auto !important;
+  max-width: 148px !important;
+  max-height: 44px !important;
+  object-fit: contain !important;
+  object-position: center !important;
+}
+.education-partner-carousel .career-card.gran-cursos .career-brand > b {
+  display: none !important;
+}

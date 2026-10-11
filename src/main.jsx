@@ -456,7 +456,7 @@ const EDUCATION_PARTNERS = [
   {
     id: "gran-cursos",
     name: "Gran Cursos Online",
-    logo: "/education/gran-cursos.png",
+    logo: "/education/gran-logo.svg",
     symbol: "G",
     category: "CONCURSOS, CURSOS E FORMAÇÃO",
     title: "Prepare-se para sua próxima aprovação",
@@ -6872,7 +6872,6 @@ function App() {
                   >
                     <div
                       className="career-brand"
-                      style={partner.id === "gran-cursos" ? { background: "#a90817", borderColor: "#a90817" } : undefined}
                     >
                       <span className="career-logo-frame">
                         {partner.logo ? (
