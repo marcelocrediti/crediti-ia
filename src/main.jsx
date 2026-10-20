@@ -541,42 +541,6 @@ const PARTNER_PRODUCTS = {
     button: "SIMULE SEU CRÉDITO"
   },
 
-  "upp-portabilidade": {
-    name: "Refinanciamento CLT com troco",
-    partner: "Up.p",
-    logoText: "Up.p",
-    logoTone: "upp",
-    url: "https://apretailer.com.br/click/6ab43ae52bfa810f9a64b789/179925/360419/app-crediti",
-    button: "SIMULAR REFINANCIAMENTO",
-    directOpen: true,
-    eyebrow: "REFINANCIAMENTO CLT",
-    heading: "Refinancie seu contrato CLT e veja a possibilidade de troco",
-    shortText: "Consulte novas condições e veja se existe valor disponível para receber na sua conta.",
-    note: "A análise, a aprovação, o valor do troco e as condições são definidos pela Up.p.",
-    secondaryOptions: [
-      { key: "upp-clt", label: "Consignado CLT", detail: "Consulte uma opção para trabalhador com carteira assinada." },
-      { key: "upp-fgts", label: "Antecipação FGTS", detail: "Consulte a possibilidade de antecipar o saque-aniversário." }
-    ]
-  },
-  "upp-clt": {
-    name: "Consignado CLT",
-    partner: "Up.p",
-    logoText: "Up.p",
-    logoTone: "upp",
-    url: "https://apretailer.com.br/click/6ab43ae52bfa810f9a64b789/179925/360419/app-crediti",
-    button: "SIMULAR CONSIGNADO CLT",
-    directOpen: true
-  },
-  "upp-fgts": {
-    name: "Antecipação FGTS",
-    partner: "Up.p",
-    logoText: "Up.p",
-    logoTone: "upp",
-    url: "https://apretailer.com.br/click/6ab43ae52bfa810f9a64b789/179925/360419/app-crediti",
-    button: "SIMULAR FGTS",
-    directOpen: true
-  },
-
   bpc: {
     name: "Consignado BPC / LOAS",
     partner: "Banco BRB",
@@ -669,17 +633,6 @@ const products = [
       "Empréstimo pessoal tradicional",
       "Empréstimo com garantia de celular"
     ]
-  },
-
-  {
-    id: "upp-portabilidade",
-    name: "Refinanciamento CLT com troco",
-    typeLabel: "REFINANCIAMENTO CLT",
-    what: "Refinancie seu contrato CLT e consulte a possibilidade de receber troco.",
-    forWho: "Para quem já possui um contrato consignado CLT e deseja verificar novas condições.",
-    how: "A simulação, a análise e a contratação são realizadas diretamente na Up.p.",
-    when: "Pode ajudar a reorganizar um contrato existente e avaliar se há valor disponível para troco.",
-    tip: "Compare o CET, o novo prazo, o valor da parcela e o total que será pago antes de aceitar."
   },
 
   {
@@ -986,11 +939,6 @@ const CREDIT_META = {
     category: "trabalhador",
     audience: "Trabalhadores com carteira assinada.",
     detail: "Crédito sujeito às regras e análise do Grandino Bank."
-  },
-  "upp-portabilidade": {
-    category: "trabalhador",
-    audience: "Trabalhadores CLT com contrato consignado que querem verificar novas condições.",
-    detail: "Portabilidade, análise e eventual troco são tratados diretamente pela Up.p."
   },
   cartao: {
     category: "outros",
@@ -3741,12 +3689,6 @@ function App() {
         title: "Consignado BPC / LOAS",
         description: "Veja a opção disponível para beneficiários.",
         productKey: "bpc"
-      },
-      clt: {
-        key: "product-upp-clt",
-        title: "Portabilidade, CLT e FGTS",
-        description: "Consulte as opções disponíveis no ambiente da Up.p.",
-        productKey: "upp-portabilidade"
       },
       estudante: {
         key: "product-student",
@@ -6550,16 +6492,7 @@ function App() {
               <span>Comparar outras opções de crédito</span>
             </button>
 
-            {(creditFilter === "todos" || creditFilter === "trabalhador") && (
-              <button
-                type="button"
-                className="credit-alt-button upp-alt-button"
-                onClick={() => openDirectPartnerLink("upp-clt")}
-              >
-                <span className="credit-alt-logo upp-alt-logo" aria-hidden="true">Up.p</span>
-                <span>Mais opções de FGTS e CLT pra você</span>
-              </button>
-            )}
+
           </div>
         </main>
 
