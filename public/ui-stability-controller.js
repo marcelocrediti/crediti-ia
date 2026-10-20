@@ -1,5 +1,4 @@
 (() => {
-  const UPP_URL = "https://apretailer.com.br/click/6ab43ae52bfa810f9a64b789/179925/360419/app-crediti";
   const GRAN_URL = "https://mais.app/IvPIAQ";
   const GRAN_LOGO = "https://www.grancursosonline.com.br/assets/img/email/logo-.png";
   const SHOP_LINKS = [
@@ -9,7 +8,6 @@
   ];
 
   const HOME_CREDITS = [
-    { id: "upp-refinanciamento", name: "Refinanciamento CLT com troco", partner: "Up.p", logoText: "Up.p", action: "SIMULAR REFINANCIAMENTO", url: UPP_URL },
     { id: "grandino-clt", name: "Consignado CLT", partner: "Grandino Bank", logo: "/partners/grandino.png", action: "SIMULAR CRÉDITO CLT", url: "https://crediti.startcapital.app/credit/cltctps" },
     { id: "inss", name: "Consignado INSS", partner: "Consig Mais", logo: "/partners/consiga-mais.png", action: "SIMULAR CONSIGNADO", url: "https://apretailer.com.br/click/6aa4af912bfa8159945c68c9/184987/360419/app_crediti" },
     { id: "emprestimo-pessoal", name: "Empréstimo pessoal", partner: "SuperSim", logo: "/partners/supersim.webp", action: "SIMULAR MEU EMPRÉSTIMO", url: "https://apretailer.com.br/click/6aa4af912bfa816ab47e8c90/184363/360419/app_crediti" },
@@ -190,24 +188,6 @@
     boostLogos(carousel);
   };
 
-  const syncUppDirectCard = () => {
-    const homeCard = document.querySelector(".product-strip-upp-portabilidade");
-    if (homeCard) {
-      const homeTitle = homeCard.querySelector(":scope > strong");
-      const homeAction = homeCard.querySelector(".product-strip-action");
-      if (homeTitle) homeTitle.textContent = "Refinanciamento CLT com troco";
-      if (homeAction) homeAction.textContent = "SIMULAR REFINANCIAMENTO ›";
-    }
-    const card = document.querySelector(".direct-card.direct-upp-portabilidade");
-    if (!card) return;
-    const title = card.querySelector("h2");
-    const copy = card.querySelector(".direct-card-copy");
-    const action = card.querySelector(".primary-action");
-    if (title) title.textContent = "Refinanciamento CLT com troco";
-    if (copy) copy.textContent = "Já tem Consignado CLT ativo na Up.p? A partir da 1ª parcela paga, consulte novas condições e veja se há troco disponível.";
-    if (action) action.textContent = "SIMULAR REFINANCIAMENTO";
-  };
-
   const makeGrandinoDirectCard = (id, name, url, buttonText) => {
     const article = document.createElement("article");
     article.className = `direct-card crediti-grandino-${id}`;
@@ -331,7 +311,6 @@
     document.documentElement.classList.toggle("crediti-home-visible", home);
     if (home) ensureHomeCreditCarousel();
     if (document.querySelector(".direct-grid")) {
-      syncUppDirectCard();
       document.querySelectorAll(".crediti-grandino-direct-grid").forEach((element) => element.remove());
     }
     if (document.querySelector(".learning-photo-hero,.education-partner-carousel")) ensureGranExperience();
