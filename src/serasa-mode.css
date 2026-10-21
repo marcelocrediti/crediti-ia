@@ -16,8 +16,8 @@
 
 .modern-home > .home-legal-links {
   order: 9;
-  margin: 16px 0 0;
-  padding: 12px 12px 24px;
+  margin: 8px 0 0;
+  padding: 8px 12px;
 }
 
 .modern-home > .home-legal-links a {
@@ -1432,7 +1432,8 @@ body,
 .modern-home {
   width: 100% !important;
   max-width: 720px !important;
-  padding: 0 14px calc(96px + env(safe-area-inset-bottom)) !important;
+  /* .app-with-nav já reserva a altura do menu e a área segura. */
+  padding: 0 14px 8px !important;
 }
 
 .modern-page {
