@@ -441,6 +441,36 @@ function toast(msg){
   document.body.appendChild(t);
   setTimeout(()=>t.remove(), 6000);
 }
+
+// Parcelas iguais pelo valor presente nas datas reais, mês financeiro de 30 dias.
+function calcularCdcPorDatas(valor, taxa, prazo, dataBase, dataPrimeira){
+  const diaUtc = (iso)=>{
+    if(!/^\d{4}-\d{2}-\d{2}$/.test(iso || '')) throw new Error('Informe uma data válida.');
+    const ms = Date.parse(iso + 'T00:00:00Z');
+    if(!Number.isFinite(ms) || new Date(ms).toISOString().slice(0,10)!==iso) throw new Error('Informe uma data válida.');
+    return ms;
+  };
+  const inicio = diaUtc(dataBase);
+  const primeira = diaUtc(dataPrimeira);
+  if(primeira <= inicio) throw new Error('O primeiro vencimento deve ser posterior à data de liberação.');
+  if(!Number.isFinite(taxa) || taxa < 9) throw new Error('A taxa mínima do crédito pessoal é 9% ao mês. Você pode informar uma taxa maior.');
+  if(!Number.isFinite(valor) || valor <= 0 ||
+     !Number.isInteger(prazo) || prazo < CONFIG.prazoMin || prazo > CONFIG.prazoMax){
+    throw new Error('Confira o valor, a taxa e a quantidade de parcelas.');
+  }
+  const [ano,mes,dia] = dataPrimeira.split('-').map(Number);
+  const datasVencimento = Array.from({length:prazo}, (_,k)=>{
+    const fimMes = new Date(Date.UTC(ano, mes+k, 0)).getUTCDate();
+    return new Date(Date.UTC(ano, mes-1+k, Math.min(dia,fimMes))).toISOString().slice(0,10);
+  });
+  const diasVencimento = datasVencimento.map(d=>(diaUtc(d)-inicio)/86400000);
+  const somaFatores = diasVencimento.reduce((s,d)=>s+Math.pow(1+taxa/100,-d/30),0);
+  const parcela = arredondarCentavos(valor/somaFatores);
+  if(!Number.isFinite(parcela) || parcela <= 0) throw new Error('Não foi possível calcular. Confira as condições.');
+  return {parcela, dataBaseCalculo:dataBase, diasAtePrimeira:diasVencimento[0],
+    datasVencimento, dataUltima:datasVencimento[prazo-1],
+    totalPagar:arredondarCentavos(parcela*prazo), regraCalculo:'cdc_composto_dias_base30'};
+}
 async function compressImage(dataUrl, maxW){
   return new Promise((res)=>{
     const img = new Image();
@@ -657,10 +687,12 @@ function viewNovo(){
       <div><label>Prazo (meses)</label><select id="f-prazo">${opcoesPrazo}</select></div>
     </div>
     <label>Taxa de juros (% a.m.)</label>
-    <input type="number" step="0.01" id="f-taxa" placeholder="Preenchido pela faixa">
+    <input type="number" min="9" step="0.01" id="f-taxa" placeholder="Preenchido pela faixa">
+    <p class="hint">Mínimo de 9% ao mês. A taxa sugerida pode ser editada.</p>
     <div id="faixa-hint" class="hint" style="margin-top:6px;color:#8a5a00;font-weight:700;"></div>
     <label>Data da 1ª parcela</label>
     <input type="date" id="f-data1">
+    <p class="hint">Juros compostos pelos dias até cada vencimento, com base de 30 dias por mês. Alterar a data recalcula os valores.</p>
     <button class="btn btn-gold" id="btn-calcular">Calcular simulação</button>
     <div id="resultado"></div>
   </div>`;
@@ -747,10 +779,10 @@ function arredondarCentavos(valor){
   return Math.round((Number(valor) + 0.00000001) * 100) / 100;
 }
 
-function hojeFortalezaIso(){
+function hojeFortalezaIso(instante = Date.now()){
   const partes = new Intl.DateTimeFormat('en-US', {
     timeZone: 'America/Fortaleza', year: 'numeric', month: '2-digit', day: '2-digit'
-  }).formatToParts(new Date());
+  }).formatToParts(new Date(instante));
   const mapa = Object.fromEntries(partes.map(p=>[p.type,p.value]));
   return `${mapa.year}-${mapa.month}-${mapa.day}`;
 }
@@ -1196,7 +1228,7 @@ window.editarSimulacaoInline = async function(id){
     <label>Prazo (meses)</label>
     <select id="ei-prazo">${opcoesPrazo}</select>
     <label>Taxa de juros (% a.m.)</label>
-    <input type="number" step="0.01" id="ei-taxa" value="${s.taxa}">
+    <input type="number" min="9" step="0.01" id="ei-taxa" value="${s.taxa}">
     <label>Data da 1ª parcela</label>
     <input type="date" id="ei-data1" value="${s.dataPrimeira}">
     <button class="btn btn-gold" id="btn-salvar-inline" style="margin-top:14px;">💾 Salvar alterações</button>
@@ -1209,7 +1241,7 @@ window.editarSimulacaoInline = async function(id){
     try{
       const valor = parseMilhar(document.getElementById('ei-valor').value);
       const prazo = Number(document.getElementById('ei-prazo').value);
-      const taxa = Number(document.getElementById('ei-taxa').value) || getFaixa(valor || 0).taxa;
+      const taxa = Number(document.getElementById('ei-taxa').value);
       const data1 = document.getElementById('ei-data1').value;
       if(!valor || !prazo || !data1){
         toast('Preencha valor, prazo e data da 1ª parcela.');
@@ -1217,10 +1249,11 @@ window.editarSimulacaoInline = async function(id){
         return;
       }
       const jaEstavaAssinado = !!s.aceite;
+      const dataBase = s.dataBaseCalculo || hojeFortalezaIso(s.criadoEm || Date.now());
+      const calculo = calcularCdcPorDatas(valor, taxa, prazo, dataBase, data1);
       s.valor = valor; s.prazo = prazo; s.taxa = taxa; s.cet = taxa;
       s.dataPrimeira = data1;
-      s.dataUltima = addMonths(data1, prazo-1);
-      s.parcela = calcParcela(valor, taxa, prazo);
+      Object.assign(s, calculo);
       s.cetAnual = (Math.pow(1+taxa/100,12)-1)*100;
       if(jaEstavaAssinado){
         s.aceite = null;
@@ -1378,6 +1411,7 @@ function gerarPDFSimulacao(id){
       ['Valor da parcela', brl(s.parcela)],
       ['Data da 1ª parcela', fmtDate(s.dataPrimeira)],
       ['Data da última parcela', fmtDate(s.dataUltima)],
+      ...(s.dataBaseCalculo ? [['Data-base da liberação', fmtDate(s.dataBaseCalculo)], ['Dias até a 1ª parcela', String(s.diasAtePrimeira)]] : []),
       ['Taxa de juros', s.taxa + '% a.m.'],
       ['CET', (s.cet||0).toFixed(2) + '% a.m.'],
       ['Total a pagar (estimado)', brl(s.parcela*s.prazo)],
@@ -1795,12 +1829,19 @@ async function viewCliente(id){
 // ---------- Wire events per view ----------
 function wireEvents(view){
   if(view==='novo'){
-    const hoje = new Date();
-    hoje.setDate(hoje.getDate()+30);
+    window.__simTemp = null;
+    window.__cdcCalculoAtivo = false;
+    const hoje = new Date(hojeFortalezaIso()+'T00:00:00Z');
+    hoje.setUTCDate(hoje.getUTCDate()+30);
     document.getElementById('f-data1').value = hoje.toISOString().slice(0,10);
     document.getElementById('btn-calcular').onclick = onCalcular;
     wireMilharMask(document.getElementById('f-valor'));
     wireFaixaSugestao();
+    for(const id of ['f-cliente','f-valor','f-prazo','f-taxa','f-data1']){
+      for(const evento of ['input','change']) document.getElementById(id).addEventListener(evento, ()=>{
+        if(window.__cdcCalculoAtivo) onCalcular();
+      });
+    }
   }
   if(view==='decimo-terceiro'){
     wireMoedaMask(document.getElementById('d13-salario'));
@@ -1868,10 +1909,14 @@ function parseMoedaBR(str){
 }
 
 async function onCalcular(){
+  window.__cdcCalculoAtivo = true;
+  window.__simTemp = null;
+  document.getElementById('resultado').innerHTML = '';
   const cliente = document.getElementById('f-cliente').value.trim();
   const valor = parseMilhar(document.getElementById('f-valor').value);
   const prazo = Number(document.getElementById('f-prazo').value);
-  const taxa = Number(document.getElementById('f-taxa').value) || getFaixa(valor || 0).taxa;
+  const taxaTexto = document.getElementById('f-taxa').value;
+  const taxa = taxaTexto === '' ? getFaixa(valor || 0).taxa : Number(taxaTexto);
   const data1 = document.getElementById('f-data1').value;
   if(!cliente || !valor || !prazo || !data1){
     toast('Preencha nome, valor, prazo e data da 1ª parcela.');
@@ -1882,19 +1927,24 @@ async function onCalcular(){
     return;
   }
   const cet = taxa; // CET aproximado (sem tarifas adicionais)
-  const parcela = calcParcela(valor, taxa, prazo);
-  const dataUltima = addMonths(data1, prazo-1);
+  let calculo;
+  try{ calculo = calcularCdcPorDatas(valor, taxa, prazo, hojeFortalezaIso(), data1); }
+  catch(e){ toast(e.message); return; }
+  const {parcela, dataUltima} = calculo;
   const cetAnual = (Math.pow(1+cet/100,12)-1)*100;
   const id = uid();
   window.__simTemp = {
     id, cliente, valor, prazo, taxa, cet, cetAnual,
     dataPrimeira: data1, dataUltima, parcela,
+    ...calculo,
     criadoEm: Date.now(),
     status: 'simulado'
   };
   document.getElementById('resultado').innerHTML = `
   <div class="result-box">
     <div class="kv"><span>Parcela mensal</span><b>${brl(parcela)}</b></div>
+    <div class="kv"><span>Data-base da liberação</span><b>${fmtDate(calculo.dataBaseCalculo)}</b></div>
+    <div class="kv"><span>Dias até a 1ª parcela</span><b>${calculo.diasAtePrimeira} dias</b></div>
     <div class="kv"><span>1ª parcela</span><b>${fmtDate(data1)}</b></div>
     <div class="kv"><span>Última parcela</span><b>${fmtDate(dataUltima)}</b></div>
     <div class="kv"><span>CET</span><b>${cet.toFixed(2)}% a.m. · ${cetAnual.toFixed(2)}% a.a.</b></div>
@@ -2207,6 +2257,7 @@ window.gerarPDF = async function(id){
     ['Valor da parcela', brl(s.parcela)],
     ['Data da 1ª parcela', fmtDate(s.dataPrimeira)],
     ['Data da última parcela', fmtDate(s.dataUltima)],
+    ...(s.dataBaseCalculo ? [['Data-base da liberação', fmtDate(s.dataBaseCalculo)], ['Dias até a 1ª parcela', String(s.diasAtePrimeira)]] : []),
     ['Taxa de juros', s.taxa + '% a.m.'],
     ['CET', s.cet + '% a.m. (' + (s.cetAnual? s.cetAnual.toFixed(2):'-') + '% a.a. aprox.)'],
     ['Total a pagar (estimado)', brl(s.parcela*s.prazo)]
