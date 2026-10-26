@@ -692,7 +692,7 @@ function viewNovo(){
     <div id="faixa-hint" class="hint" style="margin-top:6px;color:#8a5a00;font-weight:700;"></div>
     <label>Data da 1ª parcela</label>
     <input type="date" id="f-data1">
-    <p class="hint">Juros compostos pelos dias até cada vencimento, com base de 30 dias por mês. Alterar a data recalcula os valores.</p>
+    <p class="hint">Juros compostos pelos dias até cada vencimento, com base de 30 dias por mês. Depois de alterar os dados, toque em Calcular simulação.</p>
     <button class="btn btn-gold" id="btn-calcular">Calcular simulação</button>
     <div id="resultado"></div>
   </div>`;
@@ -1830,7 +1830,6 @@ async function viewCliente(id){
 function wireEvents(view){
   if(view==='novo'){
     window.__simTemp = null;
-    window.__cdcCalculoAtivo = false;
     const hoje = new Date(hojeFortalezaIso()+'T00:00:00Z');
     hoje.setUTCDate(hoje.getUTCDate()+30);
     document.getElementById('f-data1').value = hoje.toISOString().slice(0,10);
@@ -1839,7 +1838,7 @@ function wireEvents(view){
     wireFaixaSugestao();
     for(const id of ['f-cliente','f-valor','f-prazo','f-taxa','f-data1']){
       for(const evento of ['input','change']) document.getElementById(id).addEventListener(evento, ()=>{
-        if(window.__cdcCalculoAtivo) onCalcular();
+        marcarCdcPendente();
       });
     }
   }
@@ -1908,8 +1907,27 @@ function parseMoedaBR(str){
   return digits ? Number(digits) / 100 : 0;
 }
 
+function marcarCdcPendente(){
+  const aviso = document.getElementById('cdc-recalcular-aviso');
+  if(!aviso) return;
+  // Mantém o último resumo visível, mas impede envio/contratação de dados desatualizados.
+  window.__simTemp = null;
+  aviso.hidden = false;
+  for(const id of ['btn-enviar','btn-salvar','btn-contratar']){
+    const btn = document.getElementById(id);
+    if(btn) btn.disabled = true;
+  }
+  const envio = document.getElementById('painel-envio');
+  if(envio) envio.innerHTML = '';
+}
+
+function cdcProntoParaEnviar(){
+  if(window.__simTemp) return true;
+  toast('Os dados foram alterados. Toque em Calcular simulação antes de continuar.');
+  return false;
+}
+
 async function onCalcular(){
-  window.__cdcCalculoAtivo = true;
   window.__simTemp = null;
   document.getElementById('resultado').innerHTML = '';
   const cliente = document.getElementById('f-cliente').value.trim();
@@ -1941,6 +1959,7 @@ async function onCalcular(){
     status: 'simulado'
   };
   document.getElementById('resultado').innerHTML = `
+  <p id="cdc-recalcular-aviso" class="hint" role="status" hidden style="color:var(--warn);font-weight:700;">Dados alterados. O resumo abaixo ainda é do último cálculo. Toque em Calcular simulação para atualizar.</p>
   <div class="result-box">
     <div class="kv"><span>Parcela mensal</span><b>${brl(parcela)}</b></div>
     <div class="kv"><span>Data-base da liberação</span><b>${fmtDate(calculo.dataBaseCalculo)}</b></div>
@@ -1949,6 +1968,8 @@ async function onCalcular(){
     <div class="kv"><span>Última parcela</span><b>${fmtDate(dataUltima)}</b></div>
     <div class="kv"><span>CET</span><b>${cet.toFixed(2)}% a.m. · ${cetAnual.toFixed(2)}% a.a.</b></div>
     <div class="kv"><span>Total a pagar</span><b>${brl(parcela*prazo)}</b></div>
+    <div class="kv"><span>Retorno bruto da Crediti (interno)</span><b>${brl(arredondarCentavos(calculo.totalPagar - valor))}</b></div>
+    <p class="hint">Total a receber menos o valor liberado, antes de despesas, impostos e inadimplência. Esta informação não aparece no PDF do cliente.</p>
   </div>
   <button class="btn btn-outline" id="btn-enviar">Enviar simulação ao cliente</button>
   <button class="btn btn-primary" id="btn-salvar">Salvar simulação</button>
@@ -1960,6 +1981,7 @@ async function onCalcular(){
   const btnContratar = document.getElementById('btn-contratar');
 
   btnSalvar.onclick = async ()=>{
+    if(!cdcProntoParaEnviar()) return;
     btnSalvar.disabled = true; btnSalvar.textContent = 'Salvando...';
     try{
       window.__simTemp.status = 'salvo';
@@ -1971,6 +1993,7 @@ async function onCalcular(){
     }
   };
   btnEnviar.onclick = async ()=>{
+    if(!cdcProntoParaEnviar()) return;
     btnEnviar.disabled = true; btnEnviar.textContent = 'Preparando...';
     try{
       await saveSim(window.__simTemp);
@@ -1999,6 +2022,7 @@ async function onCalcular(){
     btnEnviar.disabled = false; btnEnviar.textContent = 'Enviar simulação ao cliente';
   };
   btnContratar.onclick = async ()=>{
+    if(!cdcProntoParaEnviar()) return;
     btnContratar.disabled = true; btnContratar.textContent = 'Abrindo...';
     try{
       window.__simTemp.status = 'contratando';
