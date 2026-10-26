@@ -150,6 +150,14 @@
   .check-row input{width:19px;height:19px;margin:1px 0 0;accent-color:var(--ink);flex:0 0 auto;}
   .check-row label{margin:0;cursor:pointer;line-height:1.4;}
   .result-highlight{font-size:23px;font-weight:900;color:var(--ok);}
+  .result-edit-wrap{padding-top:13px;text-align:center;}
+  .result-edit-label{font-size:12px;font-weight:900;color:#3a3a3a;letter-spacing:.2px;}
+  .result-edit-input{
+    width:100%;margin:8px 0 4px;padding:10px 12px;text-align:center;
+    font-size:23px;font-weight:900;color:var(--ok);background:#fff;
+    border:2px solid var(--gold-deep);border-radius:11px;
+  }
+  .result-edit-help{font-size:11px;font-weight:700;color:#6a6a6a;line-height:1.35;}
   .result-section{background:#fff;border:1px solid var(--line);border-radius:12px;padding:11px 13px;margin-top:12px;}
   .result-section-title{font-size:12px;font-weight:900;text-transform:uppercase;letter-spacing:.35px;color:var(--warn);margin-bottom:4px;}
   .result-section .kv b{white-space:nowrap;padding-left:10px;}
@@ -759,15 +767,19 @@ function onCalcularDecimoTerceiro(){
   const segunda = arredondarCentavos(Math.max(0, salario - primeira - inssAplicado));
   const parcelaFutura = parcelaEscolhida === 'segunda' ? segunda : primeira;
   const percentualTotal = (taxa / 100) * meses;
-  const custo = arredondarCentavos(parcelaFutura * percentualTotal);
-  const valorLiberado = arredondarCentavos(parcelaFutura - custo);
-  const cetMensal = valorLiberado > 0
-    ? (Math.pow(parcelaFutura / valorLiberado, 1 / meses) - 1) * 100
+  const fatorLiquido = 1 - percentualTotal;
+  const custoMaximo = arredondarCentavos(parcelaFutura * percentualTotal);
+  const valorLiberadoMaximo = arredondarCentavos(parcelaFutura - custoMaximo);
+  let valorLiberado = valorLiberadoMaximo;
+  let valorQuitacao = parcelaFutura;
+  let custo = custoMaximo;
+  let cetMensal = valorLiberado > 0
+    ? (Math.pow(valorQuitacao / valorLiberado, 1 / meses) - 1) * 100
     : 0;
   const nomeParcela = parcelaEscolhida === 'segunda' ? '2ª parcela' : '1ª parcela';
   const inssStatus = aplicarInss ? brl(inss.valor) : `${brl(0)} (desativado)`;
 
-  if(valorLiberado <= 0){
+  if(fatorLiquido <= 0 || valorLiberadoMaximo <= 0){
     resultado.innerHTML = '';
     toast('A taxa e o prazo consomem todo o valor da parcela. Reduza o prazo ou a taxa.');
     return;
@@ -793,23 +805,55 @@ function onCalcularDecimoTerceiro(){
         <div class="kv"><span>Valor disponível da parcela</span><b>${brl(parcelaFutura)}</b></div>
         <div class="kv"><span>Prazo até receber</span><b>${meses} ${meses===1?'mês':'meses'}</b></div>
         <div class="kv"><span>Taxa sobre a parcela</span><b>${taxa.toFixed(2).replace('.',',')}% a.m.</b></div>
-        <div class="kv"><span>Cálculo do desconto</span><b>${brl(parcelaFutura)} × ${taxa.toFixed(2).replace('.',',')}% × ${meses}</b></div>
-        <div class="kv"><span>Custo da antecipação</span><b>${brl(custo)}</b></div>
-        <div style="padding-top:13px;text-align:center;">
-          <div class="muted" style="font-size:12px;font-weight:700;">VALOR ESTIMADO LIBERADO HOJE</div>
-          <div class="result-highlight">${brl(valorLiberado)}</div>
+        <div class="kv"><span>Valor máximo liberável hoje</span><b>${brl(valorLiberadoMaximo)}</b></div>
+        <div class="result-edit-wrap">
+          <label class="result-edit-label" for="d13-valor-liberado">VALOR A LIBERAR HOJE (EDITÁVEL)</label>
+          <input class="result-edit-input" id="d13-valor-liberado" inputmode="numeric" value="${valorLiberadoMaximo.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})}">
+          <div class="result-edit-help">O valor máximo real já vem preenchido. Reduza somente se o cliente quiser receber menos.</div>
         </div>
+        <div class="kv"><span>Valor a cobrar no vencimento</span><b id="d13-valor-quitacao">${brl(valorQuitacao)}</b></div>
+        <div class="kv"><span>Cálculo do retorno</span><b id="d13-calculo-retorno">${brl(valorQuitacao)} × ${taxa.toFixed(2).replace('.',',')}% × ${meses}</b></div>
+        <div class="kv"><span>Retorno da Crediti</span><b id="d13-retorno-crediti">${brl(custo)}</b></div>
       </div>
     </div>
-    <div class="disclaimer">Estimativa para salário fixo e 13º integral. A 2ª parcela real também pode ter IRRF e outros ajustes. O desconto foi calculado diretamente sobre o valor da parcela: valor da parcela × taxa mensal × quantidade de meses.</div>
+    <div class="disclaimer">Estimativa para salário fixo e 13º integral. A 2ª parcela real também pode ter IRRF e outros ajustes. O valor máximo é calculado automaticamente. Se a Crediti liberar um valor menor, o valor para quitação e o retorno são recalculados pela mesma taxa e pelo mesmo prazo.</div>
     <button class="btn btn-outline" id="btn-d13-pdf">Gerar PDF da simulação</button>
     <button class="btn btn-primary" id="btn-d13-contratar">Contratar e continuar</button>`;
+
+  const valorLiberadoEl = document.getElementById('d13-valor-liberado');
+  wireMoedaMask(valorLiberadoEl);
+  const recalcularPeloValorLiberado = ()=>{
+    let valorInformado = parseMoedaBR(valorLiberadoEl.value);
+    if(valorInformado > valorLiberadoMaximo){
+      valorInformado = valorLiberadoMaximo;
+      valorLiberadoEl.value = valorLiberadoMaximo.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+      toast('O valor liberado não pode ultrapassar o máximo calculado.');
+    }
+    valorLiberado = arredondarCentavos(valorInformado);
+    valorQuitacao = valorLiberado > 0
+      ? arredondarCentavos(Math.min(parcelaFutura, valorLiberado / fatorLiquido))
+      : 0;
+    custo = arredondarCentavos(Math.max(0, valorQuitacao - valorLiberado));
+    cetMensal = valorLiberado > 0
+      ? (Math.pow(valorQuitacao / valorLiberado, 1 / meses) - 1) * 100
+      : 0;
+    document.getElementById('d13-valor-quitacao').textContent = brl(valorQuitacao);
+    document.getElementById('d13-calculo-retorno').textContent = `${brl(valorQuitacao)} × ${taxa.toFixed(2).replace('.',',')}% × ${meses}`;
+    document.getElementById('d13-retorno-crediti').textContent = brl(custo);
+    return valorLiberado > 0;
+  };
+  valorLiberadoEl.addEventListener('input', recalcularPeloValorLiberado);
 
   document.getElementById('btn-d13-pdf').onclick = ()=>{
     const cliente = document.getElementById('d13-cliente').value.trim();
     if(!cliente){
       toast('Informe o nome completo do cliente para gerar o PDF.');
       document.getElementById('d13-cliente').focus();
+      return;
+    }
+    if(!recalcularPeloValorLiberado()){
+      toast('Informe um valor para liberar ao cliente.');
+      valorLiberadoEl.focus();
       return;
     }
     gerarPDFSimulacaoDecimoTerceiro({
@@ -826,6 +870,8 @@ function onCalcularDecimoTerceiro(){
       parcelaEscolhida,
       nomeParcela,
       parcelaFutura,
+      valorLiberadoMaximo,
+      valorQuitacao,
       meses,
       taxa,
       cetMensal,
@@ -839,6 +885,11 @@ function onCalcularDecimoTerceiro(){
     if(!cliente){
       toast('Informe o nome completo do cliente.');
       document.getElementById('d13-cliente').focus();
+      return;
+    }
+    if(!recalcularPeloValorLiberado()){
+      toast('Informe um valor para liberar ao cliente.');
+      valorLiberadoEl.focus();
       return;
     }
     const btn = document.getElementById('btn-d13-contratar');
@@ -856,7 +907,7 @@ function onCalcularDecimoTerceiro(){
       taxa,
       cet: cetMensal,
       cetAnual,
-      parcela: parcelaFutura,
+      parcela: valorQuitacao,
       dataPrimeira: vencimento,
       dataUltima: vencimento,
       salarioBruto: salario,
@@ -869,6 +920,10 @@ function onCalcularDecimoTerceiro(){
       aliquotaInssNominal: inss.aliquotaNominal,
       aliquotaInssEfetiva: inss.aliquotaEfetiva,
       custoAntecipacao: custo,
+      retornoCrediti: custo,
+      valorDisponivelParcela: parcelaFutura,
+      valorLiberadoMaximo,
+      valorQuitacao,
       regraCalculoAntecipacao: 'desconto_direto_sobre_parcela',
       criadoEm: Date.now(),
       status: 'contratando'
@@ -1345,16 +1400,19 @@ function gerarPDFSimulacaoDecimoTerceiro(s){
       linha('Valor da 1ª parcela (50%)', brl(s.primeiraParcela));
     }
     linha('Valor disponível da parcela', brl(s.parcelaFutura));
+    linha('Valor máximo liberável hoje', brl(s.valorLiberadoMaximo));
+    linha('Valor escolhido para liberar', brl(s.valorLiberado));
+    linha('Valor a cobrar no vencimento', brl(s.valorQuitacao));
     linha('Prazo até receber', s.meses + (s.meses===1 ? ' mês' : ' meses'));
     linha('Taxa sobre o valor da parcela', s.taxa.toFixed(2).replace('.',',') + '% a.m.');
-    linha('Cálculo do desconto', `${brl(s.parcelaFutura)} × ${s.taxa.toFixed(2).replace('.',',')}% × ${s.meses}`);
+    linha('Cálculo do custo', `${brl(s.valorQuitacao)} × ${s.taxa.toFixed(2).replace('.',',')}% × ${s.meses}`);
     linha('Custo da antecipação', brl(s.custo));
 
     y += 10;
     doc.setDrawColor(226,155,0); doc.setLineWidth(1.2);
     doc.roundedRect(margem, y, pageW-(margem*2), 62, 7, 7, 'S');
     doc.setFont('helvetica','bold'); doc.setFontSize(10); doc.setTextColor(58,58,58);
-    doc.text('VALOR ESTIMADO LIBERADO HOJE', pageW/2, y+21, {align:'center'});
+    doc.text('VALOR A LIBERAR HOJE', pageW/2, y+21, {align:'center'});
     doc.setFontSize(20); doc.setTextColor(28,124,63);
     doc.text(brl(s.valorLiberado), pageW/2, y+47, {align:'center'});
     doc.setTextColor(20,20,20);
@@ -1364,7 +1422,7 @@ function gerarPDFSimulacaoDecimoTerceiro(s){
     const avisoParcela = s.parcelaEscolhida === 'segunda'
       ? ' A 2ª parcela real pode ter IRRF e outros ajustes da folha de pagamento.'
       : '';
-    const aviso = `Simulação informativa para salário fixo e 13º integral. O desconto é calculado diretamente sobre o valor da parcela: valor da parcela × taxa mensal × quantidade de meses.${avisoParcela} As condições estão sujeitas à análise de crédito e esta simulação não representa contratação nem CCB.`;
+    const aviso = `Simulação informativa para salário fixo e 13º integral. O valor para quitação e o custo foram calculados sobre o valor escolhido, usando a taxa mensal e o prazo informados.${avisoParcela} As condições estão sujeitas à análise de crédito e esta simulação não representa contratação nem CCB.`;
     doc.text(doc.splitTextToSize(aviso, pageW-(margem*2)), margem, y);
     y += 42;
     doc.setFont('helvetica','normal'); doc.setFontSize(8); doc.setTextColor(120,120,120);
