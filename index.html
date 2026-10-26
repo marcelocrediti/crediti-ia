@@ -687,10 +687,14 @@ function viewDecimoTerceiro(){
         </select>
       </div>
       <div>
-        <label>Meses até receber</label>
-        <input type="number" id="d13-meses" min="1" max="12" step="1" value="1">
+        <label>Data prevista do 13º</label>
+        <input type="date" id="d13-data-recebimento">
       </div>
     </div>
+
+    <label>Meses usados no cálculo</label>
+    <input type="number" id="d13-meses" min="1" max="12" step="1" value="1" readonly>
+    <p class="hint" style="margin-top:6px;">Calculado automaticamente pela data prevista. A data pode ser alterada se a empresa pagar antes.</p>
 
     <label>Taxa de antecipação (% ao mês)</label>
     <input type="number" id="d13-taxa" min="10" step="0.01" value="10">
@@ -743,6 +747,54 @@ function arredondarCentavos(valor){
   return Math.round((Number(valor) + 0.00000001) * 100) / 100;
 }
 
+function hojeFortalezaIso(){
+  const partes = new Intl.DateTimeFormat('en-US', {
+    timeZone: 'America/Fortaleza', year: 'numeric', month: '2-digit', day: '2-digit'
+  }).formatToParts(new Date());
+  const mapa = Object.fromEntries(partes.map(p=>[p.type,p.value]));
+  return `${mapa.year}-${mapa.month}-${mapa.day}`;
+}
+
+function isoDataUtc(data){
+  return data.toISOString().slice(0,10);
+}
+
+function ajustarParaDiaUtilAnterior(data){
+  const ajustada = new Date(data.getTime());
+  while(ajustada.getUTCDay() === 0 || ajustada.getUTCDay() === 6){
+    ajustada.setUTCDate(ajustada.getUTCDate() - 1);
+  }
+  return ajustada;
+}
+
+function dataPadraoParcela13(parcela){
+  const hojeIso = hojeFortalezaIso();
+  let ano = Number(hojeIso.slice(0,4));
+  const criar = (y)=> ajustarParaDiaUtilAnterior(
+    parcela === 'segunda' ? new Date(Date.UTC(y,11,20)) : new Date(Date.UTC(y,10,30))
+  );
+  let data = criar(ano);
+  if(isoDataUtc(data) < hojeIso) data = criar(ano + 1);
+  return isoDataUtc(data);
+}
+
+function mesesAteData13(dataIso){
+  if(!dataIso) return 1;
+  const hoje = new Date(hojeFortalezaIso() + 'T00:00:00Z');
+  const destino = new Date(dataIso + 'T00:00:00Z');
+  const dias = Math.max(1, Math.ceil((destino - hoje) / 86400000));
+  return Math.max(1, Math.min(12, Math.ceil(dias / 30)));
+}
+
+function atualizarPrazoD13(forcarData){
+  const parcelaEl = document.getElementById('d13-parcela');
+  const dataEl = document.getElementById('d13-data-recebimento');
+  const mesesEl = document.getElementById('d13-meses');
+  if(!parcelaEl || !dataEl || !mesesEl) return;
+  if(forcarData || !dataEl.value) dataEl.value = dataPadraoParcela13(parcelaEl.value);
+  mesesEl.value = mesesAteData13(dataEl.value);
+}
+
 function onCalcularDecimoTerceiro(){
   const salario = parseMoedaBR(document.getElementById('d13-salario').value);
   const parcelaEscolhida = document.getElementById('d13-parcela').value;
@@ -751,6 +803,7 @@ function onCalcularDecimoTerceiro(){
   const taxaInformada = Number(taxaEl.value);
   const taxa = Number.isFinite(taxaInformada) ? Math.max(10, taxaInformada) : 10;
   const aplicarInss = document.getElementById('d13-aplicar-inss').checked;
+  const dataRecebimento = document.getElementById('d13-data-recebimento').value;
   const resultado = document.getElementById('d13-resultado');
 
   taxaEl.value = taxa.toFixed(2).replace('.00','');
@@ -803,6 +856,7 @@ function onCalcularDecimoTerceiro(){
       <div class="result-section result-section-selected">
         <div class="result-section-title">Antecipação da ${nomeParcela}</div>
         <div class="kv"><span>Valor disponível da parcela</span><b>${brl(parcelaFutura)}</b></div>
+        <div class="kv"><span>Data prevista para receber</span><b>${fmtDate(dataRecebimento)}</b></div>
         <div class="kv"><span>Prazo até receber</span><b>${meses} ${meses===1?'mês':'meses'}</b></div>
         <div class="kv"><span>Taxa sobre a parcela</span><b>${taxa.toFixed(2).replace('.',',')}% a.m.</b></div>
         <div class="kv"><span>Valor máximo liberável hoje</span><b>${brl(valorLiberadoMaximo)}</b></div>
@@ -872,6 +926,7 @@ function onCalcularDecimoTerceiro(){
       parcelaFutura,
       valorLiberadoMaximo,
       valorQuitacao,
+      dataRecebimento,
       meses,
       taxa,
       cetMensal,
@@ -895,8 +950,7 @@ function onCalcularDecimoTerceiro(){
     const btn = document.getElementById('btn-d13-contratar');
     btn.disabled = true;
     btn.textContent = 'Abrindo contratação...';
-    const hojeIso = new Date().toISOString().slice(0,10);
-    const vencimento = addMonths(hojeIso, meses);
+    const vencimento = dataRecebimento;
     const cetAnual = (Math.pow(1 + cetMensal / 100, 12) - 1) * 100;
     const proposta = {
       id: uid(),
@@ -913,6 +967,7 @@ function onCalcularDecimoTerceiro(){
       salarioBruto: salario,
       parcela13: parcelaEscolhida,
       mesesAntecipacao: meses,
+      dataPrevistaRecebimento13: dataRecebimento,
       primeiraParcela13: primeira,
       segundaParcela13: segunda,
       inssCalculado: inss.valor,
@@ -1403,6 +1458,7 @@ function gerarPDFSimulacaoDecimoTerceiro(s){
     linha('Valor máximo liberável hoje', brl(s.valorLiberadoMaximo));
     linha('Valor escolhido para liberar', brl(s.valorLiberado));
     linha('Valor a cobrar no vencimento', brl(s.valorQuitacao));
+    linha('Data prevista para receber', fmtDate(s.dataRecebimento));
     linha('Prazo até receber', s.meses + (s.meses===1 ? ' mês' : ' meses'));
     linha('Taxa sobre o valor da parcela', s.taxa.toFixed(2).replace('.',',') + '% a.m.');
     linha('Cálculo do custo', `${brl(s.valorQuitacao)} × ${s.taxa.toFixed(2).replace('.',',')}% × ${s.meses}`);
@@ -1748,13 +1804,20 @@ function wireEvents(view){
   }
   if(view==='decimo-terceiro'){
     wireMoedaMask(document.getElementById('d13-salario'));
+    atualizarPrazoD13(true);
     document.getElementById('btn-d13-calcular').onclick = onCalcularDecimoTerceiro;
     document.getElementById('d13-salario').addEventListener('input', ()=>{
       if(parseMoedaBR(document.getElementById('d13-salario').value)) onCalcularDecimoTerceiro();
       else document.getElementById('d13-resultado').innerHTML = '';
     });
-    document.getElementById('d13-parcela').addEventListener('change', onCalcularDecimoTerceiro);
-    document.getElementById('d13-meses').addEventListener('change', onCalcularDecimoTerceiro);
+    document.getElementById('d13-parcela').addEventListener('change', ()=>{
+      atualizarPrazoD13(true);
+      if(parseMoedaBR(document.getElementById('d13-salario').value)) onCalcularDecimoTerceiro();
+    });
+    document.getElementById('d13-data-recebimento').addEventListener('change', ()=>{
+      atualizarPrazoD13(false);
+      if(parseMoedaBR(document.getElementById('d13-salario').value)) onCalcularDecimoTerceiro();
+    });
     document.getElementById('d13-taxa').addEventListener('change', onCalcularDecimoTerceiro);
     document.getElementById('d13-aplicar-inss').addEventListener('change', onCalcularDecimoTerceiro);
   }
