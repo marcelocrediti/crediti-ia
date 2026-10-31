@@ -476,6 +476,16 @@ const EDUCATION_PARTNERS = [
 ];
 
 const PARTNER_PRODUCTS = {
+  facio: {
+    name: "Empréstimo pessoal",
+    partner: "Facio",
+    logo: "/partners/facio.png",
+    logoTone: "facio",
+    url: "https://site.facio.com/credito-facio-crs?utm_source=crs&utm_campaign=crediti_financeira",
+    button: "SIMULAR",
+    shortText: "Para autônomos, aposentados, agricultores, domésticas e trabalhadores CLT. Negativados também podem solicitar, sujeito à análise.",
+    note: "A aprovação depende da análise da Facio. Confira taxas, prazo e valor total na proposta antes de contratar. A Crediti não cobra valores antecipados para liberar crédito."
+  },
   "emprestimo-pessoal": {
     name: "Empréstimo pessoal",
     partner: "FinanZero",
@@ -885,6 +895,7 @@ const products = [
 ];
 
 const DIRECT_PRODUCT_KEYS = [
+  "facio",
   "fgts",
   "clt",
   "energia",
@@ -905,6 +916,11 @@ const CREDIT_FILTERS = [
 ];
 
 const CREDIT_META = {
+  facio: {
+    category: "outros",
+    audience: "Autônomos, negativados, aposentados, agricultores, domésticas e CLT, sujeitos à análise.",
+    detail: "Simule seu empréstimo pessoal no ambiente da Facio."
+  },
   "emprestimo-pessoal": {
     category: "outros",
     audience: "Negativados, CLT, MEI, autônomos e outros perfis.",
@@ -6411,6 +6427,10 @@ function App() {
                       <p className="direct-card-copy">
                         {product.shortText}
                       </p>
+                    )}
+
+                    {productKey === "facio" && (
+                      <p className="facio-credit-note">Sujeito à análise de crédito. Consulte as condições na Facio. Sem cobrança antecipada pela Crediti.</p>
                     )}
 
                     {product.options?.length > 0 && (
