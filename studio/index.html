@@ -58,31 +58,80 @@ index=0;render();msg("Carrossel criado! Edite os textos e baixe cada card.");
 function wrapText(ctx,text,maxWidth){var words=String(text||"").split(/\s+/),lines=[],line="";for(var i=0;i<words.length;i++){var test=line?line+" "+words[i]:words[i];if(ctx.measureText(test).width>maxWidth&&line){lines.push(line);line=words[i]}else{line=test}}if(line)lines.push(line);return lines}
 function lines(ctx,arr,x,y,height){arr.forEach(function(s){ctx.fillText(s,x,y);y+=height});return y}
 function draw(canvas,slide,pos,all,mini){
-var c=canvas.getContext("2d"),W=1080,H=1350;c.clearRect(0,0,W,H);
-var isCover=slide.kind==="cover",isCta=slide.kind==="cta",layout=slide.layout!=="auto"?slide.layout:(isCover?(current.style==="photo"&&current.photo?"photo":current.style==="dark"?"dark":"cover"):isCta?"cta":"clean");
-var dark=layout==="dark",photo=layout==="photo"&&current.photo,accent=layout==="yellow",background=dark?"#101a2c":accent?"#fdca01":"#ffffff";
-c.fillStyle=background;c.fillRect(0,0,W,H);
-if(photo){var img=new Image();img.onload=function(){var scale=Math.max(W/img.width,H/img.height),w=img.width*scale,h=img.height*scale;c.drawImage(img,(W-w)/2,(H-h)/2,w,h);var g=c.createLinearGradient(0,250,0,1350);g.addColorStop(0,"rgba(0,0,0,.08)");g.addColorStop(.5,"rgba(0,0,0,.52)");g.addColorStop(1,"rgba(0,0,0,.82)");c.fillStyle=g;c.fillRect(0,0,W,H);drawLabels()};img.src=current.photo; if(img.complete&&img.naturalWidth){/* onload paints */}else{drawLabels();}return}
-drawLabels();
-function drawLabels(){
-var white=dark||photo,ink=white?"#ffffff":"#111b2d",gray=white?"#eff1f4":"#465269",gold="#fdca01";
-c.textBaseline="top";
-if(!photo){if(isCover){c.fillStyle=dark?"#fdca01":"#f7f8fa";c.fillRect(0,0,W,14);if(!dark){c.fillStyle="#fdca01";c.fillRect(82,300,78,9)}}if(isCta){c.fillStyle="#fdca01";c.fillRect(505,315,70,7)}}
-c.fillStyle=gold;c.beginPath();c.arc(103,115,37,0,Math.PI*2);c.fill();c.fillStyle="#101a2c";c.font="800 39px Sora, Arial";c.textAlign="center";c.fillText("C",103,94);c.textAlign="left";
-c.fillStyle=ink;c.font="800 25px Sora,Arial";c.fillText(($("#brandName").value||"Crediti | Empréstimos e Financiamentos").slice(0,38),160,89);
-c.font="500 19px Montserrat,Arial";c.fillStyle=gray;c.fillText(($("#handle").value||"@crediti.oficial").slice(0,38),160,125);
-if(isCover){
-c.fillStyle=ink;c.font="800 74px Sora,Arial";var ls=wrapText(c,slide.title,880).slice(0,6);
-var sy=Math.max(390,830-ls.length*83);lines(c,ls,85,sy,93);
-c.font="600 32px Montserrat,Arial";var by=sy+ls.length*93+25;c.fillStyle=gray;lines(c,wrapText(c,slide.body,860).slice(0,4),86,by,47);
-}else if(isCta){
-c.fillStyle=ink;c.textAlign="center";c.font="800 65px Sora,Arial";var cl=wrapText(c,slide.title,860).slice(0,6);lines(c,cl,540,450,82);c.font="500 30px Montserrat,Arial";c.fillStyle=gray;lines(c,wrapText(c,slide.body,780).slice(0,6),540,475+cl.length*84,51);c.textAlign="left";
-}else{
-c.fillStyle=ink;c.font="800 62px Sora,Arial";var tl=wrapText(c,slide.title,890).slice(0,5);var ty=Math.max(425,680-tl.length*58);lines(c,tl,88,ty,79);
-c.font="500 36px Montserrat,Arial";c.fillStyle=gray;lines(c,wrapText(c,slide.body,875).slice(0,9),89,ty+tl.length*79+65,60);
+var c=canvas.getContext("2d"),W=1080,H=1350;
+c.clearRect(0,0,W,H);
+var isCover=slide.kind==="cover",isCta=slide.kind==="cta";
+var layout=slide.layout!=="auto"?slide.layout:(isCover?(current.style==="photo"&&current.photo?"photo":current.style==="dark"?"dark":"cover"):isCta?"cta":"clean");
+var dark=layout==="dark",photo=layout==="photo"&&current.photo,accent=layout==="yellow";
+c.fillStyle=dark?"#101a2c":accent?"#fdca01":"#ffffff";c.fillRect(0,0,W,H);
+function paint(){
+  var white=dark||photo,ink=white?"#ffffff":"#111b2d",gray=white?"#f1f3f6":"#35445b",gold="#fdca01";
+  c.textBaseline="top";c.textAlign="left";
+  if(isCover&&!photo&&!dark){c.fillStyle="#fdca01";c.fillRect(0,0,W,12);}
+  if(isCta&&!dark){c.fillStyle="#fdca01";c.fillRect(505,245,70,7);}
+  // Cabeçalho fixo, sempre no mesmo lugar.
+  c.fillStyle=gold;c.beginPath();c.arc(102,113,37,0,Math.PI*2);c.fill();
+  c.fillStyle="#101a2c";c.textAlign="center";c.font="800 39px Sora,Arial";
+  c.fillText("C",102,91);
+  c.fillStyle=ink;c.textAlign="left";c.font="800 26px Sora,Arial";
+  var brand=($("#brandName").value||"Crediti | Empréstimos e Financiamentos").slice(0,43);
+  c.fillText(brand,160,88);
+  c.font="600 21px Montserrat,Arial";c.fillStyle=gray;
+  c.fillText(($("#handle").value||"@crediti.oficial").slice(0,38),160,129);
+  // Espaço útil idêntico para capas, conteúdos e CTA. Todo o bloco fica centralizado.
+  var top=290,bottom=1155,maxHeight=bottom-top,maxWidth=880;
+  var title=String(slide.title||"").trim(),body=String(slide.body||"").trim();
+  var titleSize=isCover?79:isCta?72:70;
+  var bodySize=isCover?40:isCta?39:40;
+  var titleLines=[],bodyLines=[],titleLead=0,bodyLead=0,gap=47,total=0;
+  for(var attempt=0;attempt<32;attempt++){
+    c.font="800 "+titleSize+"px Sora,Arial";
+    titleLines=wrapText(c,title,maxWidth);
+    c.font="500 "+bodySize+"px Montserrat,Arial";
+    bodyLines=body?wrapText(c,body,maxWidth):[];
+    titleLead=Math.round(titleSize*1.19);
+    bodyLead=Math.round(bodySize*1.46);
+    gap=bodyLines.length?Math.round(Math.max(40,titleSize*.65)):0;
+    total=titleLines.length*titleLead+gap+bodyLines.length*bodyLead;
+    if(total<=maxHeight&&titleLines.length<=5&&bodyLines.length<=8)break;
+    if(titleLines.length>5&&titleSize>48){titleSize-=2;continue}
+    if(bodyLines.length>8&&bodySize>29){bodySize-=1;continue}
+    if(total>maxHeight){if(bodySize>29)bodySize-=1;else if(titleSize>48)titleSize-=2;else break}
+    else break;
+  }
+  // Protege a área de edição contra textos excepcionalmente longos.
+  if(total>maxHeight){
+    while(bodyLines.length>0&&total>maxHeight){
+      bodyLines.pop();
+      total=titleLines.length*titleLead+gap+bodyLines.length*bodyLead;
+    }
+    if(bodyLines.length&&bodyLines.join(" ")!==body){
+      var last=bodyLines.length-1;
+      bodyLines[last]=bodyLines[last].replace(/[.,;:\s]+$/,"")+"…";
+    }
+  }
+  var y=top+(maxHeight-total)/2;
+  c.textAlign="center";c.fillStyle=ink;
+  c.font="800 "+titleSize+"px Sora,Arial";
+  for(var i=0;i<titleLines.length;i++){c.fillText(titleLines[i],W/2,y);y+=titleLead}
+  y+=gap;c.fillStyle=gray;c.font="500 "+bodySize+"px Montserrat,Arial";
+  for(var j=0;j<bodyLines.length;j++){c.fillText(bodyLines[j],W/2,y);y+=bodyLead}
+  // Rodapé fixo para todos os cards.
+  c.textAlign="left";c.fillStyle=white?"#f4f5f6":"#778193";c.font="700 20px Montserrat,Arial";
+  c.fillText("CREDITI • CONTEÚDO EDUCATIVO",87,1260);
+  c.textAlign="right";c.fillText((pos+1)+" / "+all,992,1260);c.textAlign="left";
 }
-c.fillStyle=white?"#f4f4f4":"#778193";c.font="700 20px Montserrat,Arial";c.fillText("CREDITI • CONTEÚDO EDUCATIVO",86,1260);c.textAlign="right";c.fillText((pos+1)+" / "+all,993,1260);c.textAlign="left";
-}
+if(photo){
+  var img=new Image();
+  img.onload=function(){
+    var scale=Math.max(W/img.width,H/img.height),w=img.width*scale,h=img.height*scale;
+    c.drawImage(img,(W-w)/2,(H-h)/2,w,h);
+    var shade=c.createLinearGradient(0,100,0,H);shade.addColorStop(0,"rgba(0,0,0,.38)");shade.addColorStop(.4,"rgba(0,0,0,.58)");shade.addColorStop(1,"rgba(0,0,0,.75)");
+    c.fillStyle=shade;c.fillRect(0,0,W,H);paint();
+  };
+  img.src=current.photo;
+  if(!img.complete)paint();
+}else paint();
 }
 function drawAll(){if(!current)return;var num=current.slides.length;$("#countBadge").textContent=num+" cards";$("#pagePos").textContent="Card "+(index+1)+" de "+num+" • Toque nas miniaturas para editar";$("#thumbs").innerHTML="";current.slides.forEach(function(sl,i){var b=document.createElement("button");b.className="thumb"+(index===i?" selected":"");b.setAttribute("aria-label","Ver card "+(i+1));var cn=document.createElement("canvas");cn.width=1080;cn.height=1350;b.appendChild(cn);var sp=document.createElement("span");sp.textContent=i===0?"CAPA":i===num-1?"CTA":i;b.appendChild(sp);b.addEventListener("click",function(){index=i;render()});$("#thumbs").appendChild(b);draw(cn,sl,i,num,true)});
 draw($("#preview"),current.slides[index],index,num,false)
