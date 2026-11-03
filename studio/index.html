@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><meta name="theme-color" content="#f8f9fa"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="default"><title>Crediti Studio | Crie carrosséis</title><meta name="description" content="Crie carrosséis de Instagram com a identidade da Crediti."><link rel="manifest" href="manifest.webmanifest"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Sora:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-:root{--ink:#101a2c;--muted:#69748a;--line:#e5e9ee;--gold:#fdca01;--bg:#f7f8fa;--white:#fff}*{box-sizing:border-box}html{scroll-behavior:smooth}body{background:var(--bg);color:var(--ink);font-family:Montserrat,system-ui,sans-serif;margin:0;padding-bottom:70px}button,input,select,textarea{font:inherit}button{cursor:pointer}button:disabled{opacity:.45;cursor:not-allowed}button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{outline:3px solid #ffdb50;outline-offset:2px}.top{background:white;border-bottom:1px solid var(--line)}.topin{max-width:1260px;margin:auto;display:flex;justify-content:space-between;align-items:center;padding:18px 25px}.logo{display:flex;align-items:center;gap:10px}.logoicon{background:var(--gold);color:#111;width:38px;height:38px;border-radius:12px;font-family:Sora;font-size:21px;font-weight:800;display:grid;place-items:center}.logo b{font-family:Sora;font-size:18px;font-weight:800;letter-spacing:-1px}.logo b span{font-weight:500}.logo small{color:var(--muted);font-size:10px;display:block;letter-spacing:2px;font-weight:700}.status{color:#40516a;font-size:12px;display:flex;align-items:center;gap:7px}.dot{background:#42a679;width:8px;height:8px;border-radius:50%}.wrap{max-width:1260px;margin:0 auto;padding:25px}.hero{background:#111b2d;border-radius:18px;color:#fff;padding:35px 40px;display:flex;align-items:flex-end;justify-content:space-between;gap:20px;min-height:170px}.eyebrow{font-size:10px;letter-spacing:2px;color:#9faec3;font-weight:800;margin:0 0 12px}.hero h1{font-family:Sora,sans-serif;font-size:clamp(25px,4vw,36px);letter-spacing:-1.4px;line-height:1.2;margin:0 0 10px}.hero p{font-size:13px;color:#d5dce6;line-height:1.7;margin:0}.hero .pill{color:var(--ink);font-size:12px;background:var(--gold);border-radius:50px;padding:12px 17px;white-space:nowrap;font-weight:800}.tabs{display:flex;gap:10px;margin:26px 0 20px;overflow:auto}.tab{border:1px solid var(--line);background:#fff;padding:12px 19px;border-radius:10px;color:#5c6878;font-size:13px;font-weight:800;white-space:nowrap}.tab.active{background:var(--ink);color:#fff;border-color:var(--ink)}.section{display:none}.section.active{display:block}.cols{display:grid;grid-template-columns:minmax(0,380px) minmax(0,1fr);gap:20px;align-items:start}.panel{background:#fff;border:1px solid var(--line);border-radius:17px;padding:22px;box-shadow:0 3px 15px #14253c08}.panel h2{font-family:Sora;font-size:17px;letter-spacing:-.6px;margin:0 0 6px}.panel .hint{font-size:12px;color:var(--muted);line-height:1.7;margin:0 0 22px}label{font-size:12px;font-weight:800;display:block;margin-top:15px;margin-bottom:7px}input[type=text],textarea,select,input[type=number]{border:1px solid #dce2e9;background:#fff;border-radius:10px;width:100%;padding:13px;font-size:14px;color:var(--ink);min-height:46px}textarea{resize:vertical;line-height:1.5}input[type=file]{width:100%;font-size:12px;color:var(--muted)}.inline{display:grid;grid-template-columns:1fr 1fr;gap:12px}.primary,.secondary,.ghost{border-radius:10px;padding:13px 16px;font-weight:800;font-size:13px;border:1px solid transparent}.primary{background:var(--gold);color:var(--ink)}.secondary{background:var(--ink);color:#fff}.ghost{background:#fff;color:var(--ink);border:1px solid #dce2e9}.wide{width:100%;margin-top:20px}.fine{font-size:11px;color:#718092;line-height:1.7}.smallcap{font-size:10px;color:#78869a;letter-spacing:1.5px;font-weight:800;margin:23px 0 11px}.previewpanel{padding:20px}.previewhead{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:16px}.previewhead h2{margin:0}.chip{background:#f4f6f8;border:1px solid var(--line);border-radius:50px;color:#637287;padding:7px 10px;font-size:11px;font-weight:700}.thumbs{display:flex;gap:10px;overflow:auto;padding:5px 3px 17px}.thumb{flex:0 0 75px;height:93px;border:2px solid #e4e7e9;border-radius:10px;overflow:hidden;padding:0;background:white;position:relative;box-shadow:0 2px 4px #15203510}.thumb.selected{border:3px solid var(--gold);box-shadow:0 0 0 2px #ffe27b40}.thumb canvas{width:100%;height:100%;object-fit:contain}.thumb span{position:absolute;bottom:5px;right:5px;color:white;background:#263345c7;border-radius:4px;padding:3px 4px;font-size:9px;font-weight:800}.workarea{display:flex;justify-content:center;align-items:center;gap:14px;background:#f0f2f4;padding:20px 12px;border:1px solid #e8ebef;border-radius:12px}.art{width:min(100%,450px);aspect-ratio:4/5;box-shadow:0 4px 10px #1f2b331c;background:white}#preview{display:block;width:100%;height:100%}.arrow{border:1px solid #dee5ed;background:white;border-radius:50%;width:38px;height:38px;flex:0 0 38px;color:#213248;font-size:22px}.cardactions{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}.cardactions>*{flex:1}.format{width:100px!important;flex:0 0 100px!important}.editbox{border-top:1px solid var(--line);padding-top:15px;margin-top:17px}.editbox h3{font-size:13px;margin:5px 0 12px}.editbox textarea{min-height:70px}.savehint{font-size:11px;color:#69748a;text-align:center;padding-top:12px}.library{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:18px}.library article{border:1px solid var(--line);background:white;padding:14px;border-radius:13px}.library canvas{width:100%;aspect-ratio:4/5;border-radius:5px;background:#fff;display:block}.library h3{font-size:13px;line-height:1.4;min-height:37px}.library .actions{display:flex;gap:7px}.library .actions button{flex:1}.subheadline{font-family:Sora;letter-spacing:-.6px;margin:7px 0 15px;font-size:21px}.empty{border:1px dashed #cbd4df;text-align:center;border-radius:14px;padding:35px;background:white;color:var(--muted);font-size:13px}.photo-choice{margin:18px 0 13px;border:1px solid #dce2e9;border-radius:12px;padding:13px 14px 14px}.photo-choice legend{padding:0 7px;font-size:13px;font-weight:800}.photo-option{display:flex;align-items:center;gap:12px;border:1px solid #e6e9ee;border-radius:9px;padding:12px 11px;margin:8px 0 0;font-size:12px;cursor:pointer}.photo-option:has(input:checked){background:#fffbe6;border-color:#e8bf0e}.photo-option input{width:18px;height:18px;accent-color:#ca9d00;margin:0;flex-shrink:0}.photo-option span{display:flex;flex-direction:column;gap:4px}.photo-option b{font-size:12px}.photo-option small{color:#64748b;font-size:11px;line-height:1.5}.photo-status{color:#58697e;font-size:11px;line-height:1.6;margin:9px 0}.callout{background:#fffbea;border-radius:10px;padding:14px;color:#504831;font-size:12px;line-height:1.65;margin-top:15px}.brandcolors{display:flex;gap:12px;margin:15px 0}.swatch{width:70px;height:70px;border-radius:13px;border:1px solid #e4e4e4}.tags{display:flex;gap:8px;flex-wrap:wrap;margin:15px 0}.tags span{font-size:11px;padding:8px 10px;border-radius:50px;background:#f3f5f7;color:#556378}.foot{text-align:center;color:#8190a3;font-size:11px;margin-top:25px;line-height:1.7}.toast{position:fixed;bottom:25px;left:50%;transform:translateX(-50%);padding:12px 18px;border-radius:8px;background:#132034;color:white;font-size:12px;z-index:5;box-shadow:0 6px 20px #1115;max-width:calc(100vw - 30px);display:none}.toast.show{display:block}.sr{position:absolute;clip:rect(0 0 0 0);width:1px;height:1px;overflow:hidden}
+:root{--ink:#101a2c;--muted:#69748a;--line:#e5e9ee;--gold:#fdca01;--bg:#f7f8fa;--white:#fff}*{box-sizing:border-box}html{scroll-behavior:smooth}body{background:var(--bg);color:var(--ink);font-family:Montserrat,system-ui,sans-serif;margin:0;padding-bottom:70px}button,input,select,textarea{font:inherit}button{cursor:pointer}button:disabled{opacity:.45;cursor:not-allowed}button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{outline:3px solid #ffdb50;outline-offset:2px}.top{background:white;border-bottom:1px solid var(--line)}.topin{max-width:1260px;margin:auto;display:flex;justify-content:space-between;align-items:center;padding:18px 25px}.logo{display:flex;align-items:center;gap:10px}.logoicon{background:var(--gold);color:#111;width:38px;height:38px;border-radius:12px;font-family:Sora;font-size:21px;font-weight:800;display:grid;place-items:center}.logo b{font-family:Sora;font-size:18px;font-weight:800;letter-spacing:-1px}.logo b span{font-weight:500}.logo small{color:var(--muted);font-size:10px;display:block;letter-spacing:2px;font-weight:700}.status{color:#40516a;font-size:12px;display:flex;align-items:center;gap:7px}.dot{background:#42a679;width:8px;height:8px;border-radius:50%}.wrap{max-width:1260px;margin:0 auto;padding:25px}.hero{background:#111b2d;border-radius:18px;color:#fff;padding:35px 40px;display:flex;align-items:flex-end;justify-content:space-between;gap:20px;min-height:170px}.eyebrow{font-size:10px;letter-spacing:2px;color:#9faec3;font-weight:800;margin:0 0 12px}.hero h1{font-family:Sora,sans-serif;font-size:clamp(25px,4vw,36px);letter-spacing:-1.4px;line-height:1.2;margin:0 0 10px}.hero p{font-size:13px;color:#d5dce6;line-height:1.7;margin:0}.hero .pill{color:var(--ink);font-size:12px;background:var(--gold);border-radius:50px;padding:12px 17px;white-space:nowrap;font-weight:800}.tabs{display:flex;gap:10px;margin:26px 0 20px;overflow:auto}.tab{border:1px solid var(--line);background:#fff;padding:12px 19px;border-radius:10px;color:#5c6878;font-size:13px;font-weight:800;white-space:nowrap}.tab.active{background:var(--ink);color:#fff;border-color:var(--ink)}.section{display:none}.section.active{display:block}.cols{display:grid;grid-template-columns:minmax(0,380px) minmax(0,1fr);gap:20px;align-items:start}.panel{background:#fff;border:1px solid var(--line);border-radius:17px;padding:22px;box-shadow:0 3px 15px #14253c08}.panel h2{font-family:Sora;font-size:17px;letter-spacing:-.6px;margin:0 0 6px}.panel .hint{font-size:12px;color:var(--muted);line-height:1.7;margin:0 0 22px}label{font-size:12px;font-weight:800;display:block;margin-top:15px;margin-bottom:7px}input[type=text],textarea,select,input[type=number]{border:1px solid #dce2e9;background:#fff;border-radius:10px;width:100%;padding:13px;font-size:14px;color:var(--ink);min-height:46px}textarea{resize:vertical;line-height:1.5}input[type=file]{width:100%;font-size:12px;color:var(--muted)}.inline{display:grid;grid-template-columns:1fr 1fr;gap:12px}.primary,.secondary,.ghost{border-radius:10px;padding:13px 16px;font-weight:800;font-size:13px;border:1px solid transparent}.primary{background:var(--gold);color:var(--ink)}.secondary{background:var(--ink);color:#fff}.ghost{background:#fff;color:var(--ink);border:1px solid #dce2e9}.wide{width:100%;margin-top:20px}.fine{font-size:11px;color:#718092;line-height:1.7}.smallcap{font-size:10px;color:#78869a;letter-spacing:1.5px;font-weight:800;margin:23px 0 11px}.previewpanel{padding:20px}.previewhead{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:16px}.previewhead h2{margin:0}.chip{background:#f4f6f8;border:1px solid var(--line);border-radius:50px;color:#637287;padding:7px 10px;font-size:11px;font-weight:700}.thumbs{display:flex;gap:10px;overflow:auto;padding:5px 3px 17px}.thumb{flex:0 0 75px;height:93px;border:2px solid #e4e7e9;border-radius:10px;overflow:hidden;padding:0;background:white;position:relative;box-shadow:0 2px 4px #15203510}.thumb.selected{border:3px solid var(--gold);box-shadow:0 0 0 2px #ffe27b40}.thumb canvas{width:100%;height:100%;object-fit:contain}.thumb span{position:absolute;bottom:5px;right:5px;color:white;background:#263345c7;border-radius:4px;padding:3px 4px;font-size:9px;font-weight:800}.workarea{display:flex;justify-content:center;align-items:center;gap:14px;background:#f0f2f4;padding:20px 12px;border:1px solid #e8ebef;border-radius:12px}.art{width:min(100%,450px);aspect-ratio:4/5;box-shadow:0 4px 10px #1f2b331c;background:white}#preview{display:block;width:100%;height:100%}.arrow{border:1px solid #dee5ed;background:white;border-radius:50%;width:38px;height:38px;flex:0 0 38px;color:#213248;font-size:22px}.cardactions{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}.cardactions>*{flex:1}.format{width:100px!important;flex:0 0 100px!important}.editbox{border-top:1px solid var(--line);padding-top:15px;margin-top:17px}.editbox h3{font-size:13px;margin:5px 0 12px}.editbox textarea{min-height:70px}.savehint{font-size:11px;color:#69748a;text-align:center;padding-top:12px}.library{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:18px}.library article{border:1px solid var(--line);background:white;padding:14px;border-radius:13px}.library canvas{width:100%;aspect-ratio:4/5;border-radius:5px;background:#fff;display:block}.library h3{font-size:13px;line-height:1.4;min-height:37px}.library .actions{display:flex;gap:7px}.library .actions button{flex:1}.subheadline{font-family:Sora;letter-spacing:-.6px;margin:7px 0 15px;font-size:21px}.empty{border:1px dashed #cbd4df;text-align:center;border-radius:14px;padding:35px;background:white;color:var(--muted);font-size:13px}.galleryintro{display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:15px}.galleryintro h2{margin:0 0 7px}.galleryintro p{font-size:12px;line-height:1.6;color:#6c798d;margin:0;max-width:680px}.gallerysearch{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:9px;align-items:end}.gallerysearch label{margin:0 0 5px}.gallerysearch button{height:46px}.photo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(145px,1fr));gap:10px;margin:16px 0}.gallery-photo{padding:0;border:1px solid #e0e4e9;background:white;border-radius:10px;overflow:hidden;text-align:left;min-width:0;cursor:pointer}.gallery-photo:hover,.gallery-photo:focus-visible{border-color:#d3aa00;box-shadow:0 0 0 2px #fdca0140}.gallery-photo img{display:block;width:100%;aspect-ratio:4 / 5;object-fit:cover;background:#f4f5f6}.gallery-photo span{display:block;font-size:10px;font-weight:700;color:#5b697b;padding:8px;min-height:42px;line-height:1.35}.gallery-foot{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap}.gallery-foot p{font-size:11px;color:#69758a;line-height:1.5;margin:0}.gallery-foot button{flex:none}@media(max-width:600px){.gallerysearch{grid-template-columns:1fr}.photo-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.gallerysearch button{width:100%}}.photo-choice{margin:18px 0 13px;border:1px solid #dce2e9;border-radius:12px;padding:13px 14px 14px}.photo-choice legend{padding:0 7px;font-size:13px;font-weight:800}.photo-option{display:flex;align-items:center;gap:12px;border:1px solid #e6e9ee;border-radius:9px;padding:12px 11px;margin:8px 0 0;font-size:12px;cursor:pointer}.photo-option:has(input:checked){background:#fffbe6;border-color:#e8bf0e}.photo-option input{width:18px;height:18px;accent-color:#ca9d00;margin:0;flex-shrink:0}.photo-option span{display:flex;flex-direction:column;gap:4px}.photo-option b{font-size:12px}.photo-option small{color:#64748b;font-size:11px;line-height:1.5}.photo-status{color:#58697e;font-size:11px;line-height:1.6;margin:9px 0}.callout{background:#fffbea;border-radius:10px;padding:14px;color:#504831;font-size:12px;line-height:1.65;margin-top:15px}.brandcolors{display:flex;gap:12px;margin:15px 0}.swatch{width:70px;height:70px;border-radius:13px;border:1px solid #e4e4e4}.tags{display:flex;gap:8px;flex-wrap:wrap;margin:15px 0}.tags span{font-size:11px;padding:8px 10px;border-radius:50px;background:#f3f5f7;color:#556378}.foot{text-align:center;color:#8190a3;font-size:11px;margin-top:25px;line-height:1.7}.toast{position:fixed;bottom:25px;left:50%;transform:translateX(-50%);padding:12px 18px;border-radius:8px;background:#132034;color:white;font-size:12px;z-index:5;box-shadow:0 6px 20px #1115;max-width:calc(100vw - 30px);display:none}.toast.show{display:block}.sr{position:absolute;clip:rect(0 0 0 0);width:1px;height:1px;overflow:hidden}
 @media(max-width:830px){.cols{grid-template-columns:1fr}.wrap{padding:13px}.topin{padding:13px 16px}.status{font-size:10px}.hero{border-radius:12px;padding:24px;min-height:unset;display:block}.hero .pill{display:inline-flex;margin-top:15px}.tabs{margin:16px 0}.panel{padding:16px}.previewpanel{padding:12px}.workarea{gap:6px;padding:10px 5px}.arrow{width:28px;height:28px;flex-basis:28px;font-size:17px}.art{width:min(100%,390px)}.cardactions{display:grid;grid-template-columns:1fr 1fr}.cardactions .format{width:100%!important;flex:auto!important}.cardactions #downloadBtn{grid-column:span 2}.hero h1{font-size:26px}}
 </style></head><body>
 <header class="top"><div class="topin"><div class="logo"><div class="logoicon">C</div><div><b>crediti<span>studio</span></b><small>ESTÚDIO DE CONTEÚDO</small></div></div><div class="status"><span class="dot"></span>Carrosséis 4:5</div></div></header>
@@ -24,6 +24,12 @@
 <p class="fine">Textos gerados por modelos locais editáveis. A geração com IA externa ainda depende de conexão segura. As fotos são de um banco público, não são desenhos criados por IA. Revise as condições financeiras e os créditos das fotos antes de publicar.</p>
 <div class="editbox"><h3>Editar o card selecionado</h3><label for="cardTitle">Título</label><textarea id="cardTitle" rows="3"></textarea><label for="cardText">Texto explicativo</label><textarea id="cardText" rows="4"></textarea><div class="inline"><div><label for="cardLayout">Modelo</label><select id="cardLayout"><option value="auto">Padrão</option><option value="clean">Fundo branco</option><option value="dark">Fundo escuro</option><option value="yellow">Destaque amarelo</option></select></div><div><label for="name">Nome da campanha</label><input type="text" id="name" placeholder="Nome"></div></div><button class="ghost wide" id="replacePhoto">Pesquisar outras fotos sobre o assunto</button><button class="ghost wide" id="save">Salvar carrossel</button></div></div>
 <div class="panel previewpanel"><div class="previewhead"><h2>Prévia dos cards</h2><span class="chip" id="countBadge">6 cards</span></div><div class="thumbs" id="thumbs" aria-label="Selecione um card"></div><div class="workarea"><button class="arrow" id="prev" aria-label="Voltar card">‹</button><div class="art"><canvas id="preview" width="1080" height="1350"></canvas></div><button class="arrow" id="next" aria-label="Avançar card">›</button></div><div class="cardactions"><select class="format" id="format" aria-label="Formato de imagem"><option value="png">PNG</option><option value="jpg">JPG</option><option value="jpeg">JPEG</option></select><button class="secondary" id="downloadBtn">Baixar este card</button><button class="ghost" id="downloadAll">Baixar imagens uma a uma</button></div><p class="savehint" id="pagePos">Card 1 de 6 • Toque em qualquer miniatura para editar</p><p class="fine">No iPhone, se o arquivo abrir em uma nova aba, toque e segure a imagem para salvá-la em Fotos. Não há exportação ZIP.</p></div></div>
+<div class="panel" id="galleryPanel" style="margin-top:20px" hidden>
+<div class="galleryintro"><div><h2>Banco de fotos reais</h2><p>Busque pelo assunto e escolha uma fotografia para a capa ou para o card selecionado. Acervo público Wikimedia Commons, com milhões de mídias e licenças verificáveis.</p></div><span class="chip">Sem desenhos ou cartoons</span></div>
+<div class="gallerysearch"><div><label for="photoQuery">Pesquisar fotos sobre</label><input id="photoQuery" type="text" placeholder="Ex.: concessionária de carros"></div><button class="secondary" id="searchPhotos">Buscar fotografias</button></div>
+<p id="galleryStatus" class="fine" role="status" aria-live="polite">Escolha um assunto para pesquisar fotografias.</p>
+<div id="photoGrid" class="photo-grid" aria-label="Fotos disponíveis"></div>
+<div class="gallery-foot"><p>As imagens podem exigir crédito ao fotógrafo. Nem todo assunto terá milhares de fotos relevantes.</p><button class="ghost" id="morePhotos" hidden>Mostrar mais fotos</button></div></div>
 <div class="panel" style="margin-top:20px"><h2>Legenda para a publicação</h2><p class="hint">Copie e adapte ao conteúdo do carrossel.</p><textarea id="caption" rows="4"></textarea><button class="ghost" id="copy">Copiar legenda</button></div>
 </section>
 <section id="library" class="section"><h2 class="subheadline">Meus carrosséis</h2><div id="saved" class="library"></div></section>
@@ -51,6 +57,21 @@ var topics={
 "educacao":[["Comece pelo básico","Anote entradas e saídas de dinheiro do mês."],["Separe o essencial","Priorize moradia, alimentação, água, energia e transporte."],["Olhe todas as parcelas","O valor comprometido importa tanto quanto o que ainda está livre."],["Compare antes de decidir","Confira custo, prazo e necessidades reais."],["Faça escolhas possíveis","Pequenas mudanças de hábito podem melhorar a organização."]]
 };
 function classify(s){s=s.toLowerCase();if(/black friday|promoç|compra|parcel/.test(s))return "black";if(/fgts|saque.anivers/.test(s))return "fgts";if(/cons[óo]rc/.test(s))return "consorcio";if(/financi|carro|moto|veículo/.test(s))return "financiamento";if(/cart[aã]o|fatura|limite/.test(s))return "cartao";if(/inss|aposentad|consignado|bpc/.test(s))return "inss";if(/energia|conta de luz/.test(s))return "luz";if(/fraude|golpe|pix/.test(s))return "golpe";return "educacao"}
+var galleryState={query:"",terms:[],termIndex:0,continueToken:null,items:[],seen:new Set(),loading:false,exhausted:false};
+function imageQueriesFor(topic){
+ var t=String(topic||"").toLowerCase();
+ if(/carro|autom[oó]vel|ve[ií]culo/.test(t))return ["car dealership showroom","new car car key buyer","car showroom customers","automobile dealership"];
+ if(/moto|motociclet/.test(t))return ["motorcycle dealership","motorcycle showroom","motorcycle customer"];
+ if(/bolsa fam[ií]lia|benef[ií]cio social/.test(t))return ["Brazilian family household","Brazil family rural","Brazil mother children home","family using mobile phone"];
+ if(/conta de luz|energia el[eé]trica|empr[eé]stimo na luz/.test(t))return ["electricity bill household","electric meter house","electricity bill paper","family electric bill"];
+ if(/fgts|saque.anivers/.test(t))return ["Brazil construction worker","Brazilian workers","worker mobile phone home"];
+ if(/inss|aposentadoria|consignado/.test(t))return ["senior couple home Brazil","senior person mobile phone","retired people home"];
+ if(/cart[aã]o/.test(t))return ["credit card payment","woman credit card shopping","bills calculator table"];
+ if(/cons[oó]rcio/.test(t))return ["car showroom","motorcycle dealership","family car purchase"];
+ if(/financiamento/.test(t))return ["car dealership","vehicle purchase","automobile showroom"];
+ if(/black friday|parcel/.test(t))return ["woman calculator bills household","shopping credit card","home finance bills"];
+ return [String(topic||"").trim().slice(0,70),"family finance household","people smartphone home"];
+}
 var imageSearchWords={black:"woman shopping bills calculator photograph",fgts:"Brazil worker family home photograph",consorcio:"motorcycle car showroom photograph",financiamento:"car motorcycle dealership photograph",cartao:"woman credit card bills photograph",inss:"Brazil senior couple home photograph",luz:"electricity bill electric meter home photograph",golpe:"person mobile phone security photograph",educacao:"family household calculator bills photograph"};
 function imageModeFor(post,pos){
  var mode=post.photoMode||"none";
@@ -58,34 +79,109 @@ function imageModeFor(post,pos){
 }
 function updatePhotoControls(){
  var mode=selectedImageMode();
- $("#photoOptions").hidden=mode==="none";
+ $("#photoOptions").hidden=mode==="none";$("#galleryPanel").hidden=mode==="none";
  $("#photoStatus").textContent=mode==="none"?"Somente frases. Nenhuma foto de fundo será incluída.":mode==="cover"?"Apenas a capa terá foto. Os outros cards serão claros e sem imagens.":"Todos os cards receberão fotografias relacionadas ao tema, quando disponíveis.";
 }
 function stripHtml(value){return String(value||"").replace(/<[^>]*>/g," ").replace(/&(?:amp|quot|lt|gt|nbsp);/gi," ").replace(/\s+/g," ").trim()}
+function licensedPhoto(page){
+ var data=page.imageinfo?.[0];if(!data)return null;
+ var license=stripHtml(data.extmetadata?.LicenseShortName?.value||"");
+ var permit=/CC0|Public domain|PDM|CC BY(?:\s*[234]\.?\d|$)/i.test(license) && !/NC|ND|BY-SA/i.test(license);
+ var title=page.title||"",url=data.thumburl||data.url;
+ if(!permit||!/^image\/jpeg$/i.test(data.mime||"")||!url)return null;
+ if(/logo|illustration|drawing|comic|advertis|poster|cartoon|map|painting|icon|scan|diagram|signage|chart|screenshot|sketch/i.test(title))return null;
+ if(Number(data.width||0)<600||Number(data.height||0)<500)return null;
+ return {url:url,title:title,license:license,creator:stripHtml(data.extmetadata?.Artist?.value||"").slice(0,120),source:data.descriptionurl||"https://commons.wikimedia.org/"};
+}
+async function commonsPage(query,continuation){
+ var params=new URLSearchParams({action:"query",generator:"search",gsrsearch:query+" filetype:bitmap",gsrnamespace:"6",gsrlimit:"50",prop:"imageinfo",iiprop:"url|extmetadata|mime|size",iiurlwidth:"1200",format:"json",origin:"*"});
+ if(continuation)params.set("gsrcontinue",continuation);
+ var res=await fetch("https://commons.wikimedia.org/w/api.php?"+params.toString(),{mode:"cors",credentials:"omit"});
+ if(!res.ok)throw new Error("A pesquisa não respondeu ("+res.status+")");
+ var data=await res.json();
+ if(data.error)throw new Error(data.error.info||"Erro no acervo");
+ return {images:Object.values(data.query?.pages||{}).map(licensedPhoto).filter(Boolean),next:data.continue?.gsrcontinue||null};
+}
 async function fetchRealPhotos(topic,cat,wanted){
- var queries=[imageSearchWords[cat]||"family money finances photograph",cleanTopic(topic).slice(0,90)+" photograph","woman family home photograph"];
- var found=[], seen=new Set();
- for(var qi=0;qi<queries.length&&found.length<wanted;qi++){
-  try{
-   var params=new URLSearchParams({action:"query",generator:"search",gsrsearch:queries[qi]+" filetype:bitmap",gsrnamespace:"6",gsrlimit:"30",prop:"imageinfo",iiprop:"url|extmetadata|mime|size",iiurlwidth:"1080",format:"json",origin:"*"});
-   var res=await fetch("https://commons.wikimedia.org/w/api.php?"+params.toString(),{mode:"cors",credentials:"omit"});
-   if(!res.ok)continue;
-   var data=await res.json(),pages=Object.values(data.query?.pages||{});
-   for(var page of pages){
-    var d=page.imageinfo?.[0];if(!d)continue;
-    var license=stripHtml(d.extmetadata?.LicenseShortName?.value||"");
-    var publicAllowed=/CC0|Public domain|PDM|CC BY\s*\d/i.test(license);
-    var name=page.title||"",imageUrl=d.thumburl||d.url;
-    if(!publicAllowed||!/^image\/jpeg$/i.test(d.mime||"")||!imageUrl||seen.has(imageUrl))continue;
-    if(/logo|illustration|drawing|comic|advertis|poster|cartoon|map|painting|icon|scan|diagram|signage/i.test(name))continue;
-    if(d.width&&d.width<640)continue;
-    seen.add(imageUrl);
-    found.push({url:imageUrl,title:name,license:license,creator:stripHtml(d.extmetadata?.Artist?.value||"").slice(0,120),source:d.descriptionurl||"https://commons.wikimedia.org/"});
-    if(found.length>=wanted)break;
-   }
-  }catch(err){console.warn("Busca de fotos indisponível:",err?.message||err)}
+ var queries=imageQueriesFor(topic),found=[],seen=new Set();
+ for(var q of queries){
+  if(found.length>=wanted)break;
+  var cursor=null;
+  for(var page=0;page<3&&found.length<wanted;page++){
+   try{
+    var result=await commonsPage(q,cursor);
+    for(var p of result.images){if(!seen.has(p.url)){seen.add(p.url);found.push(p)}}
+    cursor=result.next;if(!cursor)break;
+   }catch(err){console.warn("Pesquisa fotográfica:",err?.message||err);break}
+  }
  }
- return found;
+ return found.slice(0,wanted+4);
+}
+function resetGallery(query){
+ galleryState={query:String(query||"").trim(),terms:[],termIndex:0,continueToken:null,items:[],seen:new Set(),loading:false,exhausted:false};
+ var primary=galleryState.query,translated=imageQueriesFor(primary);
+ galleryState.terms=(primary.length>2?[primary]:[]).concat(translated.filter(function(x){return x.toLowerCase()!==primary.toLowerCase()}));
+ $("#photoGrid").replaceChildren();
+ $("#morePhotos").hidden=true;
+}
+function galleryNotice(text){$("#galleryStatus").textContent=text}
+function addPhotoItem(item){
+ var button=document.createElement("button");button.type="button";button.className="gallery-photo";
+ button.title="Usar esta foto no card selecionado";
+ var pic=document.createElement("img");pic.loading="lazy";pic.src=item.url;pic.alt=item.title.replace(/^File:/,"").slice(0,100);
+ var label=document.createElement("span");label.textContent="Usar no "+(current?.photoMode==="cover"?"card de capa":"card selecionado")+" • "+item.license;
+ button.appendChild(pic);button.appendChild(label);button.onclick=function(){applyGalleryPhoto(item)};
+ $("#photoGrid").appendChild(button);
+}
+async function moreGalleryPhotos(){
+ if(galleryState.loading||galleryState.exhausted)return;
+ galleryState.loading=true;$("#searchPhotos").disabled=true;$("#morePhotos").disabled=true;
+ var before=galleryState.items.length,tries=0;
+ galleryNotice("Pesquisando fotografias reais…");
+ try{
+  while(galleryState.termIndex<galleryState.terms.length&&galleryState.items.length-before<18&&tries<5){
+   tries++;
+   var query=galleryState.terms[galleryState.termIndex];
+   var data=await commonsPage(query,galleryState.continueToken);
+   for(var item of data.images){
+    if(galleryState.seen.has(item.url))continue;
+    galleryState.seen.add(item.url);galleryState.items.push(item);addPhotoItem(item);
+   }
+   if(data.next)galleryState.continueToken=data.next;
+   else{galleryState.continueToken=null;galleryState.termIndex++}
+  }
+  galleryState.exhausted=galleryState.termIndex>=galleryState.terms.length;
+  galleryNotice(galleryState.items.length+" fotografias encontradas até agora. Toque em uma foto para usá-la no carrossel.");
+ }catch(err){galleryNotice("A pesquisa de fotos não respondeu. Tente novamente ou envie sua própria imagem.");console.warn(err)}
+ finally{
+  galleryState.loading=false;$("#searchPhotos").disabled=false;$("#morePhotos").disabled=false;
+  $("#morePhotos").hidden=galleryState.exhausted||galleryState.items.length===0;
+ }
+}
+async function searchGallery(){
+ var query=$("#photoQuery").value.trim()||current?.topic||$("#topic").value.trim();
+ if(query.length<3){galleryNotice("Escreva um assunto para buscar.");return}
+ resetGallery(query);await moreGalleryPhotos();
+}
+function updatePhotoCaption(post){
+ var notes=Object.entries(post.imageCredits||{}).map(function(entry){var i=Number(entry[0])+1,photo=entry[1];return "Card "+i+": "+(photo.creator||photo.title.replace(/^File:/,""))+" • "+photo.license+" • "+photo.source});
+ post.caption=post.captionBase||post.caption.split("\n\nCréditos das fotos:")[0];
+ if(notes.length)post.caption+="\n\nCréditos das fotos:\n"+notes.join("\n");
+}
+async function applyGalleryPhoto(item){
+ if(!current)return;
+ var post=current,slot=post.photoMode==="cover"?0:index;
+ if(post.photoMode==="none"){msg("Selecione uma opção com fotos primeiro.");return}
+ galleryNotice("Preparando foto real para o card "+(slot+1)+"…");
+ try{
+  var bitmap=await cachePicture(item);
+  if(current!==post)return;
+  post.images=post.images||[];post.images[slot]=bitmap;
+  post.imageCredits=post.imageCredits||{};post.imageCredits[slot]=item;
+  updatePhotoCaption(post);
+  render();galleryNotice("Foto aplicada ao card "+(slot+1)+". Você pode escolher outra a qualquer momento.");
+  msg("Fotografia incluída no card "+(slot+1)+".");
+ }catch(err){galleryNotice("Não foi possível usar esta imagem. Escolha outra ou envie uma foto original.");console.warn(err)}
 }
 function cachedPhoto(dataUrl){return new Promise(function(resolve,reject){var image=new Image();image.crossOrigin="anonymous";image.onload=function(){resolve(image)};image.onerror=function(){reject(new Error("Fotografia indisponível"))};image.src=dataUrl})}
 async function cachePicture(found){
@@ -103,7 +199,7 @@ async function populatePhotos(post,customQuery){
  $("#generate").disabled=true;$("#replacePhoto").disabled=true;
  $("#photoStatus").textContent="Pesquisando fotografias reais para "+post.topic+"…";
  try{
-  var originals=await fetchRealPhotos(customQuery||post.topic,classify(post.topic),goal+3);
+  var originals=post.photo&&goal===1?[]:await fetchRealPhotos(customQuery||post.topic,classify(post.topic),goal+3);
   for(var item of originals){
    if(result.length>=goal)break;
    try{
@@ -114,16 +210,15 @@ async function populatePhotos(post,customQuery){
   }
   if(current!==post)return;
   post.images=post.images||[];
-  post.credits=[];
+  post.credits=[];post.imageCredits={};
   for(var i=0;i<goal;i++){
    if(post.photo&&i===0){post.images[i]=post.photo;continue}
-   if(result[i]){post.images[i]=result[i].data;post.credits.push(result[i].credit)}
+   if(result[i]){post.images[i]=result[i].data;post.credits.push(result[i].credit);post.imageCredits[i]=result[i].credit}
   }
   if(result.length){
-   var footer=post.credits.map(function(k){return(k.creator||k.title.replace(/^File:/,""))+" ("+k.license+"): "+k.source}).join("\n");
    post.captionBase=post.captionBase||post.caption;
-   post.caption=post.captionBase+(footer?"\n\nCréditos das fotos:\n"+footer:"");
-   $("#photoStatus").textContent="Fotografias reais incluídas: "+(post.photo?1:0+result.length)+". Confira as fotos e os créditos na legenda.";
+   updatePhotoCaption(post);
+   $("#photoStatus").textContent="Fotografias reais incluídas: "+((post.photo?1:0)+result.length)+". Confira as fotos e os créditos na legenda.";
   }else{
    $("#photoStatus").textContent=post.photo?"Sua foto foi aplicada à capa.":"Não encontrei fotos adequadas agora. Você pode enviar uma fotografia original ou gerar sem imagens.";
   }
@@ -140,10 +235,10 @@ slides.push({title:head.charAt(0).toUpperCase()+head.slice(1),body:"Entenda os p
 var n=qty-2;for(var i=0;i<n;i++){var v=points[i%points.length];slides.push({title:(i+1)+". "+v[0],body:v[1],kind:"content",layout:"auto"})}
 slides.push({title:"Quer entender melhor esse assunto?",body:"Salve este conteúdo e compartilhe. Para conhecer as opções da Crediti, fale com nossa equipe.",kind:"cta",layout:"auto"});
 current={id:"p"+Date.now(),name:head,topic:topic,slides:slides,style:$("#style").value,photoMode:selectedImageMode(),photo:coverImage,images:[],credits:[],caption:head+". Informação ajuda a decidir melhor. Salve e compartilhe. Consulte as condições na Crediti. #Crediti #EducaçãoFinanceira #CréditoConsciente #Itapajé",createdAt:new Date().toISOString()};
-var post=current;index=0;
+var post=current;index=0;$("#photoQuery").value=topic;resetGallery(topic);
 if(post.photo&&post.photoMode!=="none"){post.images[0]=post.photo}
 render();msg("Carrossel criado. Você pode editar todos os textos.");
-if(post.photoMode!=="none")await populatePhotos(post);
+if(post.photoMode!=="none"){await populatePhotos(post);moreGalleryPhotos()}
 }
 function wrapText(ctx,text,maxWidth){var words=String(text||"").split(/\s+/),lines=[],line="";for(var i=0;i<words.length;i++){var test=line?line+" "+words[i]:words[i];if(ctx.measureText(test).width>maxWidth&&line){lines.push(line);line=words[i]}else{line=test}}if(line)lines.push(line);return lines}
 function lines(ctx,arr,x,y,height){arr.forEach(function(s){ctx.fillText(s,x,y);y+=height});return y}
@@ -218,11 +313,13 @@ function save(){if(!current){msg("Crie um carrossel primeiro.");return}var i=pos
 async function exportCard(i,extension){var cn=document.createElement("canvas");cn.width=1080;cn.height=1350;await brandHeader.decode().catch(function(){});await draw(cn,current.slides[i],i,current.slides.length,false);var type=extension==="png"?"image/png":"image/jpeg";return await new Promise(function(resolve){cn.toBlob(resolve,type,.94)})}
 async function download(i){if(!current)return;var ext=$("#format").value;var blob=await exportCard(i,ext);if(!blob){msg("Não foi possível gerar imagem.");return}var url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download="crediti-card-"+String(i+1).padStart(2,"0")+"."+ext;document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(url)},25000);msg("Card "+(i+1)+" exportado em "+ext.toUpperCase()+".")}
 function changeTab(n){document.querySelectorAll(".tab").forEach(function(b){b.classList.toggle("active",b.dataset.tab===n)});document.querySelectorAll(".section").forEach(function(el){el.classList.toggle("active",el.id===n)});if(n==="library")drawLibrary()}
-function drawLibrary(){var dst=$("#saved");dst.innerHTML="";if(!posts.length){dst.innerHTML='<div class="empty">Seus carrosséis salvos aparecerão aqui.</div>';return}posts.forEach(function(p){var div=document.createElement("article"),cn=document.createElement("canvas");cn.width=1080;cn.height=1350;div.appendChild(cn);var h=document.createElement("h3");h.textContent=p.name;div.appendChild(h);var act=document.createElement("div");act.className="actions";var edit=document.createElement("button");edit.className="secondary";edit.textContent="Editar";edit.onclick=function(){current=p;index=0;coverImage=p.photo||null;$("#topic").value=p.topic;$("#style").value=p.style==="dark"?"dark":"clean";$("#count").value=String(p.slides.length);var m=document.querySelector('input[name="photoMode"][value="'+(p.photoMode||"none")+'"]');if(m)m.checked=true;updatePhotoControls();changeTab("create");render()};var del=document.createElement("button");del.className="ghost";del.textContent="Excluir";del.onclick=function(){if(confirm("Excluir este carrossel?")){posts=posts.filter(function(x){return x.id!==p.id});persist();drawLibrary()}};act.appendChild(edit);act.appendChild(del);div.appendChild(act);dst.appendChild(div);var old=current;current=p;draw(cn,p.slides[0],0,p.slides.length,true);current=old})}
+function drawLibrary(){var dst=$("#saved");dst.innerHTML="";if(!posts.length){dst.innerHTML='<div class="empty">Seus carrosséis salvos aparecerão aqui.</div>';return}posts.forEach(function(p){var div=document.createElement("article"),cn=document.createElement("canvas");cn.width=1080;cn.height=1350;div.appendChild(cn);var h=document.createElement("h3");h.textContent=p.name;div.appendChild(h);var act=document.createElement("div");act.className="actions";var edit=document.createElement("button");edit.className="secondary";edit.textContent="Editar";edit.onclick=function(){current=p;index=0;coverImage=p.photo||null;$("#photoQuery").value=p.topic;resetGallery(p.topic);$("#topic").value=p.topic;$("#style").value=p.style==="dark"?"dark":"clean";$("#count").value=String(p.slides.length);var m=document.querySelector('input[name="photoMode"][value="'+(p.photoMode||"none")+'"]');if(m)m.checked=true;updatePhotoControls();changeTab("create");render();if(p.photoMode&&p.photoMode!=="none"){moreGalleryPhotos()}};var del=document.createElement("button");del.className="ghost";del.textContent="Excluir";del.onclick=function(){if(confirm("Excluir este carrossel?")){posts=posts.filter(function(x){return x.id!==p.id});persist();drawLibrary()}};act.appendChild(edit);act.appendChild(del);div.appendChild(act);dst.appendChild(div);var old=current;current=p;draw(cn,p.slides[0],0,p.slides.length,true);current=old})}
 document.querySelectorAll(".tab").forEach(function(b){b.addEventListener("click",function(){changeTab(b.dataset.tab)})});
 $("#generate").addEventListener("click",generate);
 document.querySelectorAll('input[name="photoMode"]').forEach(function(r){r.addEventListener("change",function(){updatePhotoControls()})});
-$("#replacePhoto").onclick=function(){if(!current){msg("Crie um carrossel primeiro.");return}if(current.photoMode==="none"){msg("Escolha uma opção com imagens primeiro.");return}current.images=[];current.credits=[];current.caption=current.captionBase||current.caption;populatePhotos(current)};
+$("#searchPhotos").onclick=searchGallery;
+$("#morePhotos").onclick=moreGalleryPhotos;
+$("#replacePhoto").onclick=function(){if(!current){msg("Crie um carrossel primeiro.");return}if(current.photoMode==="none"){msg("Escolha uma opção com imagens primeiro.");return}current.images=[];current.credits=[];current.imageCredits={};current.caption=current.captionBase||current.caption;populatePhotos(current);searchGallery()};
 updatePhotoControls();
 $("#prev").onclick=function(){if(current){index=Math.max(0,index-1);render()}};
 $("#next").onclick=function(){if(current){index=Math.min(current.slides.length-1,index+1);render()}};
@@ -235,7 +332,7 @@ $("#save").onclick=save;
 $("#downloadBtn").onclick=function(){download(index)};
 $("#downloadAll").onclick=async function(){if(!current)return;msg("O navegador poderá solicitar permissão para baixar várias imagens.");for(var i=0;i<current.slides.length;i++){await download(i);await new Promise(function(r){setTimeout(r,650)})}};
 $("#copy").onclick=async function(){try{await navigator.clipboard.writeText($("#caption").value);msg("Legenda copiada.")}catch(e){$("#caption").select();msg("Selecione e copie a legenda.")}};
-$("#photo").onchange=function(){var f=this.files&&this.files[0];if(!f)return;if(f.size>3500000){msg("Escolha foto com até 3,5 MB para guardar no aparelho.");return}var r=new FileReader();r.onload=function(){coverImage=r.result;$("#style").value="photo";if(current){current.photo=coverImage;current.images=current.images||[];current.images[0]=coverImage;drawAll()}msg("Foto original preservada e aplicada à capa.")};r.readAsDataURL(f)};
+$("#photo").onchange=function(){var f=this.files&&this.files[0];if(!f)return;if(f.size>3500000){msg("Escolha foto com até 3,5 MB para guardar no aparelho.");return}var r=new FileReader();r.onload=function(){coverImage=r.result;if(current){current.photo=coverImage;current.images=current.images||[];current.images[0]=coverImage;drawAll()}msg("Foto original preservada e aplicada à capa.")};r.readAsDataURL(f)};
 $("#saveBrand").onclick=function(){try{localStorage.setItem("crediti-studio-brand",JSON.stringify({handle:$("#handle").value,name:$("#brandName").value}))}catch(e){}drawAll();msg("Identidade salva.")};
 try{var brand=JSON.parse(localStorage.getItem("crediti-studio-brand")||"null");if(brand){$("#handle").value=brand.handle||"@crediti.oficial";$("#brandName").value=brand.name||"Crediti | Empréstimos e Financiamentos"}}catch(e){}
 // Exemplo de abertura sem consultar banco de imagens antes da escolha do usuário.
