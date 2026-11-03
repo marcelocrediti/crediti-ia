@@ -1,4 +1,5 @@
 import O from "express";
+import { timingSafeEqual } from "node:crypto";
 import h from "cors";
 import E from "openai";
 import {
@@ -7,7 +8,7 @@ import {
 } from "./meta-conversions.js";
 
 const s = O();
-s.use(h({ origin: "*", methods: ["GET", "POST", "OPTIONS"], allowedHeaders: ["Content-Type"] })), s.use(O.json({ limit: "1mb" }));
+s.use(h({ origin: "*", methods: ["GET", "POST", "OPTIONS"], allowedHeaders: ["Content-Type", "X-Studio-Code"] })), s.use(O.json({ limit: "1mb" }));
 
 s.post("/api/meta/events", async (o, a) => {
   try {
@@ -575,6 +576,116 @@ AVISO DE HOR\xC1RIO: nosso atendimento humano funciona de segunda a sexta, das 7
   }
   return { reply: u, showAnalysts: i, analystKey: d, partnerProduct: c, routes };
 }
+
+// Estúdio de imagens da Crediti. A chave da OpenAI nunca é enviada ao navegador.
+const studioLimit = new Map();
+const studioOwnerOrigin = "https://crediti-studio.onrender.com";
+let studioGenerating = false;
+function studioCodeValid(input) {
+  const expected = Buffer.from(String(process.env.STUDIO_AI_ACCESS_CODE || ""), "utf8");
+  const supplied = Buffer.from(String(input || ""), "utf8");
+  return expected.length >= 14 && supplied.length === expected.length &&
+    timingSafeEqual(supplied, expected);
+}
+s.get("/api/studio/status", (req, res) => {
+  res.set("Cache-Control", "no-store");
+  res.json({
+    success: true,
+    configured: Boolean(process.env.OPENAI_API_KEY && process.env.STUDIO_AI_ACCESS_CODE),
+    requiresCode: true,
+    limitPerDay: 12,
+    model: "gpt-image-2.5-flare"
+  });
+});
+s.post("/api/studio/image", async (req, res) => {
+  res.set("Cache-Control", "no-store");
+  if (req.headers.origin && req.headers.origin !== studioOwnerOrigin) {
+    return res.status(403).json({ error: "Origem não autorizada para geração de imagens." });
+  }
+  if (!process.env.STUDIO_AI_ACCESS_CODE || !process.env.OPENAI_API_KEY) {
+    return res.status(503).json({ error: "O gerador de imagens ainda precisa ser habilitado no servidor da Crediti." });
+  }
+  if (!studioCodeValid(req.get("X-Studio-Code"))) {
+    return res.status(401).json({ error: "Código de acesso à IA incorreto." });
+  }
+  const title = typeof req.body?.title === "string" ? req.body.title.trim().slice(0, 180) : "";
+  const body = typeof req.body?.body === "string" ? req.body.body.trim().slice(0, 400) : "";
+  const topic = typeof req.body?.topic === "string" ? req.body.topic.trim().slice(0, 180) : "";
+  const cardPosition = req.body?.cardPosition === "cover" ? "cover" : "interior";
+  if (!title || !topic || title.length < 3) {
+    return res.status(400).json({ error: "Informe o assunto e o título do card." });
+  }
+  // Limite de custo global da Crediti, além do código de acesso.
+  const day = new Date().toISOString().slice(0, 10);
+  const today = studioLimit.get(day) || { count: 0, lastAt: 0 };
+  if (today.count >= 12) {
+    return res.status(429).json({ error: "Limite diário de 12 imagens atingido. Tente no próximo dia." });
+  }
+  if (Date.now() - today.lastAt < 20000 || studioGenerating) {
+    return res.status(429).json({ error: "Já existe uma imagem em geração. Aguarde concluir antes de pedir outra." });
+  }
+  today.count += 1;
+  today.lastAt = Date.now();
+  studioLimit.clear();
+  studioLimit.set(day, today);
+  studioGenerating = true;
+  const prompt = [
+    "Generate ONE authentic-looking, professional PHOTOGRAPHIC editorial image for a Brazilian financial education Instagram carousel.",
+    "The scene must unmistakably take place in contemporary Brazil, with contextually accurate Brazilian everyday environments, objects and realistic people when applicable.",
+    "Depict a plausible real-world situation related to the EXACT card topic. The people are fictional, not identifiable real customers or actual benefit recipients.",
+    "No drawings, cartoons, illustrations, 3D graphics, fake logos, government seals, documents with readable personal information, watermarks or any written words.",
+    "Natural skin texture, believable expressions, documentary photographic lighting, restrained colors. Neutral framing suitable for a serious financial institution.",
+    "Compose as vertical portrait with generous safe area for title text overlay, subject slightly away from the center; no text in image.",
+    "Main campaign topic: " + topic,
+    "Card heading: " + title,
+    "Card explanation: " + body,
+    "This is a " + (cardPosition === "cover" ? "strong cover photograph" : "supporting photograph for the card") + ".",
+    "Do not infer that someone receives or has been approved for any government benefit or loan."
+  ].join("\n");
+  try {
+    const abort = new AbortController();
+    const timer = setTimeout(() => abort.abort(), 115000);
+    let response;
+    try {
+      response = await fetch("https://api.openai.com/v1/images/generations", {
+        method: "POST",
+        signal: abort.signal,
+        headers: {
+          "Authorization": "Bearer " + process.env.OPENAI_API_KEY,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          model: "gpt-image-2.5-flare",
+          prompt,
+          size: "1024x1536",
+          quality: "medium",
+          output_format: "jpeg"
+        })
+      });
+    } finally { clearTimeout(timer); }
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      console.error("Crediti Studio Image API error status:", response.status);
+      return res.status(response.status === 429 ? 429 : 502).json({
+        error: response.status === 429 ?
+          "Limite da API OpenAI atingido. Confira os créditos e tente novamente." :
+          "A API de imagens não conseguiu concluir a geração. Confira acesso ao modelo e faturamento da API."
+      });
+    }
+    const generated = data.data?.[0]?.b64_json;
+    if (typeof generated !== "string" || generated.length < 1000) {
+      return res.status(502).json({ error: "A IA não retornou uma imagem válida." });
+    }
+    return res.json({ success: true, image: "data:image/jpeg;base64," + generated,
+      model: "gpt-image-2.5-flare", fictional: true });
+  } catch (err) {
+    console.error("Crediti Studio image request failed:", err?.name || "error");
+    return res.status(502).json({ error: "A geração de imagem não foi concluída. Tente novamente." });
+  } finally {
+    studioGenerating = false;
+  }
+});
+
 s.get("/", (o, a) => {
   a.json({ status: "online", app: "Crediti IA", assistant: "Creditin", model: m });
 }), s.get("/health", (o, a) => {
