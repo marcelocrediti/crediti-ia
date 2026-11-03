@@ -18,18 +18,18 @@
 <label class="photo-option"><input type="radio" name="photoMode" value="cover" checked><span><b>Imagem somente na capa</b><small>Capa com foto real, demais cards só texto</small></span></label>
 <label class="photo-option"><input type="radio" name="photoMode" value="all"><span><b>Imagens em todos os cards</b><small>Cada card com foto real e texto legível</small></span></label>
 </fieldset>
-<div id="photoOptions"><label for="photo">Sua foto original (opcional)</label><input type="file" id="photo" accept="image/jpeg,image/png,image/webp"><p class="fine" id="photoHelp">O app pesquisa fotografias relacionadas ao assunto em um banco público. Se você enviar uma foto, ela será usada na capa.</p></div>
+<div id="photoOptions"><label for="photo">Sua foto original (opcional)</label><input type="file" id="photo" accept="image/jpeg,image/png,image/webp"><p class="fine" id="photoHelp">O aplicativo busca fotos reais identificadas como brasileiras no acervo. Se você enviar uma foto original, ela terá prioridade na capa.</p></div>
 <p id="photoStatus" class="photo-status" role="status" aria-live="polite">Escolha como quer usar imagens.</p>
 <button class="primary wide" id="generate">✦ Gerar carrossel sobre esse assunto</button>
-<p class="fine">Textos gerados por modelos locais editáveis. A geração com IA externa ainda depende de conexão segura. As fotos são de um banco público, não são desenhos criados por IA. Revise as condições financeiras e os créditos das fotos antes de publicar.</p>
+<p class="fine">Textos gerados por modelos locais editáveis. A geração com IA externa ainda depende de conexão segura. As fotografias vêm de um acervo público, com origem brasileira identificada e atribuição das licenças. Nenhuma foto é gerada por IA. Revise as condições financeiras e os créditos das fotos antes de publicar.</p>
 <div class="editbox"><h3>Editar o card selecionado</h3><label for="cardTitle">Título</label><textarea id="cardTitle" rows="3"></textarea><label for="cardText">Texto explicativo</label><textarea id="cardText" rows="4"></textarea><div class="inline"><div><label for="cardLayout">Modelo</label><select id="cardLayout"><option value="auto">Padrão</option><option value="clean">Fundo branco</option><option value="dark">Fundo escuro</option><option value="yellow">Destaque amarelo</option></select></div><div><label for="name">Nome da campanha</label><input type="text" id="name" placeholder="Nome"></div></div><button class="ghost wide" id="replacePhoto">Pesquisar outras fotos sobre o assunto</button><button class="ghost wide" id="save">Salvar carrossel</button></div></div>
 <div class="panel previewpanel"><div class="previewhead"><h2>Prévia dos cards</h2><span class="chip" id="countBadge">6 cards</span></div><div class="thumbs" id="thumbs" aria-label="Selecione um card"></div><div class="workarea"><button class="arrow" id="prev" aria-label="Voltar card">‹</button><div class="art"><canvas id="preview" width="1080" height="1350"></canvas></div><button class="arrow" id="next" aria-label="Avançar card">›</button></div><div class="cardactions"><select class="format" id="format" aria-label="Formato de imagem"><option value="png">PNG</option><option value="jpg">JPG</option><option value="jpeg">JPEG</option></select><button class="secondary" id="downloadBtn">Baixar este card</button><button class="ghost" id="downloadAll">Baixar imagens uma a uma</button></div><p class="savehint" id="pagePos">Card 1 de 6 • Toque em qualquer miniatura para editar</p><p class="fine">No iPhone, se o arquivo abrir em uma nova aba, toque e segure a imagem para salvá-la em Fotos. Não há exportação ZIP.</p></div></div>
 <div class="panel" id="galleryPanel" style="margin-top:20px" hidden>
-<div class="galleryintro"><div><h2>Banco de fotos reais</h2><p>Busque pelo assunto e escolha uma fotografia para a capa ou para o card selecionado. Acervo público Wikimedia Commons, com milhões de mídias e licenças verificáveis.</p></div><span class="chip">Sem desenhos ou cartoons</span></div>
+<div class="galleryintro"><div><h2>Banco de fotos reais</h2><p>Busque fotografias documentadas no Brasil e relacionadas a cada assunto. O app só sugere imagens com referência brasileira nos dados do acervo e licença adequada.</p></div><span class="chip">Fotos com origem brasileira identificada</span></div>
 <div class="gallerysearch"><div><label for="photoQuery">Pesquisar fotos sobre</label><input id="photoQuery" type="text" placeholder="Ex.: concessionária de carros"></div><button class="secondary" id="searchPhotos">Buscar fotografias</button></div>
 <p id="galleryStatus" class="fine" role="status" aria-live="polite">Escolha um assunto para pesquisar fotografias.</p>
 <div id="photoGrid" class="photo-grid" aria-label="Fotos disponíveis"></div>
-<div class="gallery-foot"><p>As imagens podem exigir crédito ao fotógrafo. Nem todo assunto terá milhares de fotos relevantes.</p><button class="ghost" id="morePhotos" hidden>Mostrar mais fotos</button></div></div>
+<div class="gallery-foot"><p>Fotografias devem ter contexto brasileiro documentado. Se não existir foto adequada, o card ficará sem imagem. Os créditos e a licença aparecem na legenda.</p><button class="ghost" id="morePhotos" hidden>Mostrar mais fotos</button></div></div>
 <div class="panel" style="margin-top:20px"><h2>Legenda para a publicação</h2><p class="hint">Copie e adapte ao conteúdo do carrossel.</p><textarea id="caption" rows="4"></textarea><button class="ghost" id="copy">Copiar legenda</button></div>
 </section>
 <section id="library" class="section"><h2 class="subheadline">Meus carrosséis</h2><div id="saved" class="library"></div></section>
@@ -58,21 +58,60 @@ var topics={
 };
 function classify(s){s=s.toLowerCase();if(/black friday|promoç|compra|parcel/.test(s))return "black";if(/fgts|saque.anivers/.test(s))return "fgts";if(/cons[óo]rc/.test(s))return "consorcio";if(/financi|carro|moto|veículo/.test(s))return "financiamento";if(/cart[aã]o|fatura|limite/.test(s))return "cartao";if(/inss|aposentad|consignado|bpc/.test(s))return "inss";if(/energia|conta de luz/.test(s))return "luz";if(/fraude|golpe|pix/.test(s))return "golpe";return "educacao"}
 var galleryState={query:"",terms:[],termIndex:0,continueToken:null,items:[],seen:new Set(),loading:false,exhausted:false};
-function imageQueriesFor(topic){
- var t=String(topic||"").toLowerCase();
- if(/carro|autom[oó]vel|ve[ií]culo/.test(t))return ["car dealership","car showroom","automobile","car buying"];
- if(/moto|motociclet/.test(t))return ["motorcycle","motorcycle showroom","motorbike"];
- if(/bolsa fam[ií]lia|benef[ií]cio social/.test(t))return ["Brazilian family","family Brazil","rural family","mother child"];
- if(/conta de luz|energia el[eé]trica|empr[eé]stimo na luz/.test(t))return ["electricity meter","electric bill","electricity household","home electricity"];
- if(/fgts|saque.anivers/.test(t))return ["Brazilian worker","construction worker","workers home"];
- if(/inss|aposentadoria|consignado/.test(t))return ["senior couple","senior people","retired people"];
- if(/cart[aã]o/.test(t))return ["credit card","credit card payment","bills calculator"];
- if(/cons[oó]rcio/.test(t))return ["car showroom","motorcycle","automobile"];
- if(/financiamento/.test(t))return ["car dealership","automobile","vehicle"];
- if(/black friday|parcel/.test(t))return ["woman calculator bills household","shopping credit card","home finance bills"];
- return [String(topic||"").trim().slice(0,70),"family finance household","people smartphone home"];
+// As buscas são contextualizadas por assunto e pelo texto de cada card.
+function normalizePT(s){
+ return String(s||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase();
 }
-var imageSearchWords={black:"woman shopping bills calculator photograph",fgts:"Brazil worker family home photograph",consorcio:"motorcycle car showroom photograph",financiamento:"car motorcycle dealership photograph",cartao:"woman credit card bills photograph",inss:"Brazil senior couple home photograph",luz:"electricity bill electric meter home photograph",golpe:"person mobile phone security photograph",educacao:"family household calculator bills photograph"};
+function imageQueriesFor(topic,slide){
+ var t=normalizePT(topic+" "+(slide?.title||"")+" "+(slide?.body||""));
+ var q=[];
+ function add(){for(var item of arguments){if(item&&!q.includes(item))q.push(item)}}
+ var car=/carro|automovel|veiculo|concessionaria|financiamento de carro/.test(t);
+ var bike=/moto|motociclet|motobike/.test(t);
+ var family=/bolsa familia|beneficio social|familia|mae|crianca|renda baixa/.test(t);
+ var energy=/energia|luz|fatura de energia|conta de luz|eletric/.test(t);
+ var fgts=/fgts|trabalhador|saque aniversario|clt/.test(t);
+ var seniors=/inss|aposentad|consignado|idoso|pensionista/.test(t);
+ var costs=/parcela|custo|juros|taxa|orcamento|financa|c e t|total pago|compara|preco|limite/.test(t);
+ var contract=/contrato|assinatura|document|cadastro|solicita|simulacao|credito/.test(t);
+ if(costs)add("Brasil contas de casa calculadora","Brazil household bills money","Brasil planejamento financeiro");
+ if(contract)add("Brasil agência bancária atendimento","Brazil people mobile phone banking");
+ if(energy)add("Brasil medidor de energia elétrica","Brazil electricity meter","Brasil conta de luz");
+ if(family)add("Bolsa Família Brasil famílias","família brasileira zona rural","Brazilian family Brazil home");
+ if(seniors)add("aposentados Brasil","idosos brasileiros","Brazil elderly people");
+ if(fgts)add("trabalhadores brasileiros","Brazil construction worker","Brasil carteira de trabalho");
+ if(car)add("concessionária carros Brasil","Brazil car dealership","concessionária São Paulo");
+ if(bike)add("concessionária motos Brasil","Brazil motorcycles shop","motocicletas Brasil");
+ if(/cartao|pix/.test(t))add("Brasil cartão de crédito","Brazil payment card","Banco do Brasil cartão");
+ if(/casa|habitacao|moradia/.test(t))add("casas brasileiras","habitação Brasil");
+ if(/agricultor|rural/.test(t))add("agricultor Brasil Ceará","agricultura familiar Brasil");
+ if(!q.length)add("vida cotidiana Brasil","famílias brasileiras");
+ // Somente pesquisas com contexto brasileiro. Não recorrer a pessoas de outros países.
+ return q.slice(0,7);
+}
+function strongBrazilEvidence(metadata){
+ // Localização extraída dos dados e categorias da própria fotografia, não da aparência das pessoas.
+ var x=normalizePT(metadata||"");
+ return /(?:\bbrazil\b|\bbrasil\b|\bbrazilian\b|\bbrasileir[oa]s?\b|\bsao paulo\b|\brio de janeiro\b|\bbrasilia\b|\bfortaleza\b|\bceara\b|\bbahia\b|\bpernambuco\b|\bminas gerais\b|\bporto alegre\b|\bcuritiba\b|\brecife\b|\bsalvador\b|\bparaiba\b|\bmaranhao\b|\bamazonas\b|\bmato grosso\b|\bgoias\b|\bparana\b|\brio grande do sul\b|\bpiaui\b|\bsergipe\b|\balagoas\b)/.test(x);
+}
+function photoSubjectTerms(topic,slide){
+ var raw=normalizePT((slide?.title||"")+" "+(slide?.body||"")+" "+topic);
+ var terms=[];
+ if(/carro|veiculo|automovel|concessionaria/.test(raw))terms.push("car","carro","automobile","dealership","concessionaria","veiculo");
+ if(/moto|motocicleta/.test(raw))terms.push("motorcycle","moto","motocicleta");
+ if(/luz|energia|fatura/.test(raw))terms.push("electricity","energia","medidor","electric","fatura");
+ if(/familia|bolsa familia|beneficio|rural/.test(raw))terms.push("family","familia","home","casa","mother","mae","children","crianca","rural");
+ if(/aposentad|inss|pension|idoso/.test(raw))terms.push("elderly","senior","idoso","aposentad");
+ if(/custo|taxa|parcela|dinheiro|orcamento|credito|financ|cartao|banco|pix|contrato|compra|pagamento|simulacao/.test(raw))terms.push("bank","money","banco","dinheiro","financ","payment","pagamento","cartao","credit","compra","loja","shopping","business","financas","family","familia","vehicle","carro","moto");
+ return terms;
+}
+function photoFitsSubject(photo,topic,slide){
+ var subject=photoSubjectTerms(topic,slide);
+ if(!subject.length)return true;
+ var x=normalizePT(photo.title+" "+photo.description+" "+photo.categories);
+ // Exige coerência com o tema geral, sem transformar uma foto qualquer em prova de benefício.
+ return subject.some(function(word){return x.includes(word)});
+}
 function imageModeFor(post,pos){
  var mode=post.photoMode||"none";
  return mode==="all"||(mode==="cover"&&pos===0);
@@ -80,7 +119,7 @@ function imageModeFor(post,pos){
 function updatePhotoControls(){
  var mode=selectedImageMode();
  $("#photoOptions").hidden=mode==="none";$("#galleryPanel").hidden=mode==="none";
- $("#photoStatus").textContent=mode==="none"?"Somente frases. Nenhuma foto de fundo será incluída.":mode==="cover"?"Apenas a capa terá foto. Os outros cards serão claros e sem imagens.":"Todos os cards receberão fotografias relacionadas ao tema, quando disponíveis.";
+ $("#photoStatus").textContent=mode==="none"?"Somente frases. Nenhuma foto de fundo será incluída.":mode==="cover"?"Apenas a capa terá foto. Os outros cards serão claros e sem imagens.":"Cada card receberá uma foto feita no Brasil, relacionada à sua explicação, quando houver opção documentada.";
 }
 function stripHtml(value){return String(value||"").replace(/<[^>]*>/g," ").replace(/&(?:amp|quot|lt|gt|nbsp);/gi," ").replace(/\s+/g," ").trim()}
 function licensedPhoto(page){
@@ -89,12 +128,17 @@ function licensedPhoto(page){
  var allowed=/CC0|Public domain|PDM|CC BY(?:-SA)?(?:\s*[1-9](?:\.\d)?)?/i.test(license)&&!/CC BY-NC|CC BY-ND/i.test(license);
  var title=String(page.title||""),url=d.thumburl||d.url;
  if(!allowed||!/^image\/(jpeg|png|webp)$/i.test(d.mime||"")||!url)return null;
- if(/logo|illustration|drawing|comic|advertis|poster|cartoon|map|painting|icon|scan|diagram|signage|chart|screenshot|sketch|infographic|svg/i.test(title))return null;
+ if(/logo|illustration|drawing|comic|advertis|poster|cartoon|map|painting|icon|scan|diagram|signage|chart|screenshot|sketch|infographic|svg|flag|coat of arms/i.test(title))return null;
  if(Number(d.width||0)<480||Number(d.height||0)<480)return null;
- return {url:url,title:title,license:license,creator:stripHtml(d.extmetadata?.Artist?.value||"").slice(0,120),source:d.descriptionurl||"https://commons.wikimedia.org/",licenseUrl:stripHtml(d.extmetadata?.LicenseUrl?.value||"")};
+ var desc=stripHtml(d.extmetadata?.ImageDescription?.value||"").slice(0,900);
+ var cats=(page.categories||[]).map(function(q){return String(q.title||"").replace(/^Category:/,"")}).join(" ").slice(0,1300);
+ if(!strongBrazilEvidence(title+" "+desc+" "+cats))return null;
+ return {url:url,title:title,description:desc,categories:cats,country:"Brasil",license:license,
+  creator:stripHtml(d.extmetadata?.Artist?.value||"").slice(0,120),source:d.descriptionurl||"https://commons.wikimedia.org/",
+  licenseUrl:stripHtml(d.extmetadata?.LicenseUrl?.value||"")};
 }
 async function commonsPage(query,continuation){
- var params=new URLSearchParams({action:"query",generator:"search",gsrsearch:query+" filetype:bitmap",gsrnamespace:"6",gsrlimit:"15",prop:"imageinfo",iiprop:"url|extmetadata|mime|size",iiurlwidth:"1200",format:"json",origin:"*"});
+ var params=new URLSearchParams({action:"query",generator:"search",gsrsearch:query+" filetype:bitmap",gsrnamespace:"6",gsrlimit:"12",prop:"imageinfo|categories",cllimit:"30",iiprop:"url|extmetadata|mime|size",iiurlwidth:"1200",format:"json",origin:"*"});
  if(continuation)params.set("gsrcontinue",continuation);
  var res=await fetch("https://commons.wikimedia.org/w/api.php?"+params.toString(),{mode:"cors",credentials:"omit"});
  if(!res.ok)throw new Error("A pesquisa não respondeu ("+res.status+")");
@@ -102,27 +146,30 @@ async function commonsPage(query,continuation){
  if(data.error)throw new Error(data.error.info||"Erro no acervo");
  return {images:Object.values(data.query?.pages||{}).map(licensedPhoto).filter(Boolean),next:data.continue?.gsrcontinue||null};
 }
-async function fetchRealPhotos(topic,cat,wanted){
- var queries=imageQueriesFor(topic).concat(["people","family"]);
- var found=[],seen=new Set(),failed=0;
+async function fetchRealPhotos(topic,cat,wanted,slide,excluded){
+ var queries=imageQueriesFor(topic,slide),found=[],seen=excluded||new Set(),failed=0;
  for(var query of queries){
   if(found.length>=wanted)break;
   var cursor=null;
-  for(var page=0;page<2&&found.length<wanted;page++){
+  for(var p=0;p<2&&found.length<wanted;p++){
    try{
-    var r=await commonsPage(query,cursor);
-    for(var photo of r.images){if(!seen.has(photo.url)){seen.add(photo.url);found.push(photo);if(found.length>=wanted)break}}
-    cursor=r.next;if(!cursor)break;
-   }catch(e){failed++;console.warn("Busca de fotografias:",query,e);break}
+    var response=await commonsPage(query,cursor);
+    for(var image of response.images){
+     if(seen.has(image.url)||!photoFitsSubject(image,topic,slide))continue;
+     seen.add(image.url);found.push(image);
+     if(found.length>=wanted)break;
+    }
+    cursor=response.next;if(!cursor)break;
+   }catch(e){failed++;console.warn("Pesquisa de fotos brasileiras:",query,e);break}
   }
   if(failed>=3&&found.length===0)break;
  }
- return found.slice(0,wanted);
+ return found;
 }
 function resetGallery(query){
  galleryState={query:String(query||"").trim(),terms:[],termIndex:0,continueToken:null,items:[],seen:new Set(),loading:false,exhausted:false};
- var primary=galleryState.query,translated=imageQueriesFor(primary);
- galleryState.terms=translated.concat(primary.length>2?[primary]:[]).filter(function(x,i,a){return a.findIndex(function(y){return y.toLowerCase()===x.toLowerCase()})===i});
+ var primary=galleryState.query,translated=imageQueriesFor(current?.topic||primary,current?.slides?.[index]);
+ galleryState.terms=translated.filter(function(x,i,a){return a.indexOf(x)===i});
  $("#photoGrid").replaceChildren();
  $("#morePhotos").hidden=true;
 }
@@ -146,15 +193,15 @@ async function moreGalleryPhotos(){
    var query=galleryState.terms[galleryState.termIndex];
    var data=await commonsPage(query,galleryState.continueToken);
    for(var item of data.images){
-    if(galleryState.seen.has(item.url))continue;
+    if(galleryState.seen.has(item.url)||!photoFitsSubject(item,current?.topic||galleryState.query,current?.slides?.[index]))continue;
     galleryState.seen.add(item.url);galleryState.items.push(item);addPhotoItem(item);
    }
    if(data.next)galleryState.continueToken=data.next;
    else{galleryState.continueToken=null;galleryState.termIndex++}
   }
   galleryState.exhausted=galleryState.termIndex>=galleryState.terms.length;
-  galleryNotice(galleryState.items.length+" fotografias encontradas até agora. Toque em uma foto para usá-la no carrossel.");
- }catch(err){galleryNotice("A pesquisa de fotos não respondeu. Tente novamente ou envie sua própria imagem.");console.warn(err)}
+  galleryNotice(galleryState.items.length+" fotografias com contexto brasileiro encontrado. Toque em uma foto para usar no card.");
+ }catch(err){galleryNotice("O acervo de fotografias brasileiras não respondeu. Tente novamente ou envie sua foto original.");console.warn(err)}
  finally{
   galleryState.loading=false;$("#searchPhotos").disabled=false;$("#morePhotos").disabled=false;
   $("#morePhotos").hidden=galleryState.exhausted||galleryState.items.length===0;
@@ -166,7 +213,7 @@ async function searchGallery(){
  resetGallery(query);await moreGalleryPhotos();
 }
 function updatePhotoCaption(post){
- var notes=Object.entries(post.imageCredits||{}).map(function(entry){var i=Number(entry[0])+1,photo=entry[1];return "Card "+i+": "+(photo.creator||photo.title.replace(/^File:/,""))+" • "+photo.license+" • "+photo.source});
+ var notes=Object.entries(post.imageCredits||{}).map(function(entry){var i=Number(entry[0])+1,photo=entry[1];return "Card "+i+" (Brasil): "+(photo.creator||photo.title.replace(/^File:/,""))+" • "+photo.license+" • "+photo.source});
  post.caption=post.captionBase||post.caption.split("\n\nCréditos das fotos:")[0];
  if(notes.length)post.caption+="\n\nCréditos das fotos:\n"+notes.join("\n");
 }
@@ -174,7 +221,7 @@ async function applyGalleryPhoto(item){
  if(!current)return;
  var post=current,slot=post.photoMode==="cover"?0:index;
  if(post.photoMode==="none"){msg("Selecione uma opção com fotos primeiro.");return}
- galleryNotice("Preparando foto real para o card "+(slot+1)+"…");
+ galleryNotice("Preparando foto brasileira para o card "+(slot+1)+"…");
  try{
   var bitmap=await cachePicture(item);
   if(current!==post)return;
@@ -203,39 +250,41 @@ async function cachePicture(found){
 }
 async function populatePhotos(post,customQuery){
  if(!post||post.photoMode==="none")return;
- var goal=post.photoMode==="all"?post.slides.length:1,manual=post.photo?1:0;
- var target=Math.max(0,goal-manual),found=[];
+ var goal=post.photoMode==="all"?post.slides.length:1,applied=0,seen=new Set();
  $("#generate").disabled=true;$("#replacePhoto").disabled=true;
- $("#photoStatus").textContent="Pesquisando fotografias reais para "+post.topic+"…";
+ $("#photoStatus").textContent="Procurando fotografias brasileiras relacionadas a cada card…";
  try{
-  if(target>0){
-   var originals=await fetchRealPhotos(customQuery||post.topic,classify(post.topic),Math.max(target*3,9));
-   for(var item of originals){
-    if(found.length>=target)break;
+  post.images=post.images||[];post.imageCredits=post.imageCredits||{};
+  for(var i=0;i<goal;i++){
+   if(current!==post)return;
+   // Foto original enviada pelo usuário tem prioridade na capa.
+   if(i===0&&post.photo){post.images[0]=post.photo;delete post.imageCredits[0];applied++;continue}
+   var slide=post.slides[i];
+   $("#photoStatus").textContent="Buscando imagem brasileira para card "+(i+1)+" de "+goal+"…";
+   var candidates=await fetchRealPhotos(post.topic,classify(post.topic),8,slide,seen);
+   var chosen=null;
+   for(var photo of candidates){
     try{
-     var data=await cachePicture(item);
-     found.push({data:data,credit:item});
-     $("#photoStatus").textContent="Carregadas "+found.length+" de "+target+" fotografias.";
-    }catch(err){console.warn("Foto não carregada:",item.url,err)}
+     var bitmap=await cachePicture(photo);chosen={data:bitmap,credit:photo};break;
+    }catch(error){console.warn("Foto brasileira indisponível:",photo.url,error)}
    }
+   if(chosen){post.images[i]=chosen.data;post.imageCredits[i]=chosen.credit;applied++}
+   else{delete post.images[i];delete post.imageCredits[i]}
+   render();
   }
   if(current!==post)return;
-  post.images=post.images||[];post.imageCredits=post.imageCredits||{};
-  var next=0;
-  for(var i=0;i<goal;i++){
-   if(post.photo&&i===0){post.images[i]=post.photo;delete post.imageCredits[i];continue}
-   if(next<found.length){post.images[i]=found[next].data;post.imageCredits[i]=found[next].credit;next++}
-   else{delete post.images[i];delete post.imageCredits[i]}
-  }
   post.captionBase=post.captionBase||post.caption.split("\n\nCréditos das fotos:")[0];
   updatePhotoCaption(post);
-  var count=manual+found.length;
-  var message=count===goal?"Pronto! "+count+" foto(s) reais aplicadas automaticamente."
-   :count?"Foram aplicadas "+count+" de "+goal+" fotos. Use 'Pesquisar outras fotos' para completar."
-   :"Não foi possível obter fotos agora. Tente 'Pesquisar outras fotos' ou selecione uma na galeria.";
-  render();$("#photoStatus").textContent=message;
- }catch(err){console.error("Erro carregando fotos",err);$("#photoStatus").textContent="Falha na pesquisa. Toque em 'Pesquisar outras fotos' para tentar novamente."}
- finally{$("#generate").disabled=false;$("#replacePhoto").disabled=false}
+  render();
+  $("#photoStatus").textContent=applied===goal
+   ?"Fotos brasileiras aplicadas automaticamente aos "+goal+" cards."
+   :applied
+    ?applied+" de "+goal+" cards receberam fotos brasileiras adequadas. Os outros continuam com texto."
+    :"Nenhuma foto brasileira adequada foi encontrada para esse tema. Mantive os textos e não usei fotos estrangeiras.";
+ }catch(error){
+  console.warn("Erro buscando fotografias brasileiras",error);
+  $("#photoStatus").textContent="Não consegui completar a busca de fotos brasileiras. Os cards sem foto foram preservados.";
+ }finally{$("#generate").disabled=false;$("#replacePhoto").disabled=false}
 }
 function cleanTopic(s){return s.trim().replace(/[.!?]+$/,"")}
 async function generate(){
