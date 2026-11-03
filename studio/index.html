@@ -74,18 +74,18 @@ function imageQueriesFor(topic,slide){
  var seniors=/inss|aposentad|consignado|idoso|pensionista/.test(t);
  var costs=/parcela|custo|juros|taxa|orcamento|financa|c e t|total pago|compara|preco|limite/.test(t);
  var contract=/contrato|assinatura|document|cadastro|solicita|simulacao|credito/.test(t);
- if(costs)add("Brasil contas de casa calculadora","Brazil household bills money","Brasil planejamento financeiro");
- if(contract)add("Brasil agência bancária atendimento","Brazil people mobile phone banking");
- if(energy)add("Brasil medidor de energia elétrica","Brazil electricity meter","Brasil conta de luz");
- if(family)add("Bolsa Família Brasil famílias","família brasileira zona rural","Brazilian family Brazil home");
- if(seniors)add("aposentados Brasil","idosos brasileiros","Brazil elderly people");
- if(fgts)add("trabalhadores brasileiros","Brazil construction worker","Brasil carteira de trabalho");
- if(car)add("concessionária carros Brasil","Brazil car dealership","concessionária São Paulo");
- if(bike)add("concessionária motos Brasil","Brazil motorcycles shop","motocicletas Brasil");
- if(/cartao|pix/.test(t))add("Brasil cartão de crédito","Brazil payment card","Banco do Brasil cartão");
- if(/casa|habitacao|moradia/.test(t))add("casas brasileiras","habitação Brasil");
- if(/agricultor|rural/.test(t))add("agricultor Brasil Ceará","agricultura familiar Brasil");
- if(!q.length)add("vida cotidiana Brasil","famílias brasileiras");
+ if(costs)add("Brasil calculadora","Brazil bills","Brasil finanças");
+ if(contract)add("agência bancária Brasil","Brazil bank");
+ if(energy)add("medidor energia Brasil","electricity Brazil","Brasil energia");
+ if(family)add("Bolsa Família Brasil","família brasileira","Brazilian family");
+ if(seniors)add("aposentados Brasil","idosos Brasil","Brazil elderly");
+ if(fgts)add("trabalhadores Brasil","Brazil worker","Brasil trabalho");
+ if(car)add("concessionária Brasil","Brazil cars","automóveis Brasil");
+ if(bike)add("motos Brasil","Brazil motorcycles","motocicletas Brasil");
+ if(/cartao|pix/.test(t))add("cartão Brasil","credit card Brazil","banco Brasil");
+ if(/casa|habitacao|moradia/.test(t))add("casas Brasil","habitação Brasil");
+ if(/agricultor|rural/.test(t))add("agricultor Ceará","agricultura Brasil");
+ if(!q.length)add("família Brasil","Brasil cotidiano");
  // Somente pesquisas com contexto brasileiro. Não recorrer a pessoas de outros países.
  return q.slice(0,7);
 }
