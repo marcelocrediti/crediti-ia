@@ -319,8 +319,8 @@ function paint(){
  if(isCta&&!photo&&layout!=="dark"){c.fillStyle="#fdca01";c.fillRect(505,245,70,7)}
  // Cabeçalho aprovado é idêntico em todos os cards.
  c.fillStyle="#ffffff";c.fillRect(0,0,W,248);
- if(brandHeader.complete&&brandHeader.naturalWidth){// Cabeçalho compacto no padrão Ravia: 720 × 115 px, proporção original 1050:168.
- if(brandHeader.complete&&brandHeader.naturalWidth){c.drawImage(brandHeader,180,80,720,115)}}
+ // Cabeçalho compacto como no exemplo: 720 × 115 px, mantendo a proporção original.
+ if(brandHeader.complete&&brandHeader.naturalWidth){c.drawImage(brandHeader,180,80,720,115)}
  // Texto do card inteiro alinhado ao centro. Área de respiro fixa.
  var top=290,bottom=1155,maxHeight=bottom-top,maxWidth=870;
  var title=String(slide.title||"").trim(),body=String(slide.body||"").trim();
