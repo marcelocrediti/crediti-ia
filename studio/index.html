@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><meta name="theme-color" content="#f8f9fa"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="default"><title>Crediti Studio | Crie carrosséis</title><meta name="description" content="Crie carrosséis de Instagram com a identidade da Crediti."><link rel="manifest" href="manifest.webmanifest"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Sora:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-:root{--ink:#101a2c;--muted:#69748a;--line:#e5e9ee;--gold:#fdca01;--bg:#f7f8fa;--white:#fff}*{box-sizing:border-box}html{scroll-behavior:smooth}body{background:var(--bg);color:var(--ink);font-family:Montserrat,system-ui,sans-serif;margin:0;padding-bottom:70px}button,input,select,textarea{font:inherit}button{cursor:pointer}button:disabled{opacity:.45;cursor:not-allowed}button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{outline:3px solid #ffdb50;outline-offset:2px}.top{background:white;border-bottom:1px solid var(--line)}.topin{max-width:1260px;margin:auto;display:flex;justify-content:space-between;align-items:center;padding:18px 25px}.logo{display:flex;align-items:center;gap:10px}.logoicon{background:var(--gold);color:#111;width:38px;height:38px;border-radius:12px;font-family:Sora;font-size:21px;font-weight:800;display:grid;place-items:center}.logo b{font-family:Sora;font-size:18px;font-weight:800;letter-spacing:-1px}.logo b span{font-weight:500}.logo small{color:var(--muted);font-size:10px;display:block;letter-spacing:2px;font-weight:700}.status{color:#40516a;font-size:12px;display:flex;align-items:center;gap:7px}.dot{background:#42a679;width:8px;height:8px;border-radius:50%}.wrap{max-width:1260px;margin:0 auto;padding:25px}.hero{background:#111b2d;border-radius:18px;color:#fff;padding:35px 40px;display:flex;align-items:flex-end;justify-content:space-between;gap:20px;min-height:170px}.eyebrow{font-size:10px;letter-spacing:2px;color:#9faec3;font-weight:800;margin:0 0 12px}.hero h1{font-family:Sora,sans-serif;font-size:clamp(25px,4vw,36px);letter-spacing:-1.4px;line-height:1.2;margin:0 0 10px}.hero p{font-size:13px;color:#d5dce6;line-height:1.7;margin:0}.hero .pill{color:var(--ink);font-size:12px;background:var(--gold);border-radius:50px;padding:12px 17px;white-space:nowrap;font-weight:800}.tabs{display:flex;gap:10px;margin:26px 0 20px;overflow:auto}.tab{border:1px solid var(--line);background:#fff;padding:12px 19px;border-radius:10px;color:#5c6878;font-size:13px;font-weight:800;white-space:nowrap}.tab.active{background:var(--ink);color:#fff;border-color:var(--ink)}.section{display:none}.section.active{display:block}.cols{display:grid;grid-template-columns:minmax(0,380px) minmax(0,1fr);gap:20px;align-items:start}.panel{background:#fff;border:1px solid var(--line);border-radius:17px;padding:22px;box-shadow:0 3px 15px #14253c08}.panel h2{font-family:Sora;font-size:17px;letter-spacing:-.6px;margin:0 0 6px}.panel .hint{font-size:12px;color:var(--muted);line-height:1.7;margin:0 0 22px}label{font-size:12px;font-weight:800;display:block;margin-top:15px;margin-bottom:7px}input[type=text],textarea,select,input[type=number]{border:1px solid #dce2e9;background:#fff;border-radius:10px;width:100%;padding:13px;font-size:14px;color:var(--ink);min-height:46px}textarea{resize:vertical;line-height:1.5}input[type=file]{width:100%;font-size:12px;color:var(--muted)}.inline{display:grid;grid-template-columns:1fr 1fr;gap:12px}.primary,.secondary,.ghost{border-radius:10px;padding:13px 16px;font-weight:800;font-size:13px;border:1px solid transparent}.primary{background:var(--gold);color:var(--ink)}.secondary{background:var(--ink);color:#fff}.ghost{background:#fff;color:var(--ink);border:1px solid #dce2e9}.wide{width:100%;margin-top:20px}.fine{font-size:11px;color:#718092;line-height:1.7}.smallcap{font-size:10px;color:#78869a;letter-spacing:1.5px;font-weight:800;margin:23px 0 11px}.previewpanel{padding:20px}.previewhead{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:16px}.previewhead h2{margin:0}.chip{background:#f4f6f8;border:1px solid var(--line);border-radius:50px;color:#637287;padding:7px 10px;font-size:11px;font-weight:700}.thumbs{display:flex;gap:10px;overflow:auto;padding:5px 3px 17px}.thumb{flex:0 0 75px;height:93px;border:2px solid #e4e7e9;border-radius:10px;overflow:hidden;padding:0;background:white;position:relative;box-shadow:0 2px 4px #15203510}.thumb.selected{border:3px solid var(--gold);box-shadow:0 0 0 2px #ffe27b40}.thumb canvas{width:100%;height:100%;object-fit:contain}.thumb span{position:absolute;bottom:5px;right:5px;color:white;background:#263345c7;border-radius:4px;padding:3px 4px;font-size:9px;font-weight:800}.workarea{display:flex;justify-content:center;align-items:center;gap:14px;background:#f0f2f4;padding:20px 12px;border:1px solid #e8ebef;border-radius:12px}.art{width:min(100%,450px);aspect-ratio:4/5;box-shadow:0 4px 10px #1f2b331c;background:white}#preview{display:block;width:100%;height:100%}.arrow{border:1px solid #dee5ed;background:white;border-radius:50%;width:38px;height:38px;flex:0 0 38px;color:#213248;font-size:22px}.cardactions{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}.cardactions>*{flex:1}.format{width:100px!important;flex:0 0 100px!important}.editbox{border-top:1px solid var(--line);padding-top:15px;margin-top:17px}.editbox h3{font-size:13px;margin:5px 0 12px}.editbox textarea{min-height:70px}.savehint{font-size:11px;color:#69748a;text-align:center;padding-top:12px}.library{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:18px}.library article{border:1px solid var(--line);background:white;padding:14px;border-radius:13px}.library canvas{width:100%;aspect-ratio:4/5;border-radius:5px;background:#fff;display:block}.library h3{font-size:13px;line-height:1.4;min-height:37px}.library .actions{display:flex;gap:7px}.library .actions button{flex:1}.subheadline{font-family:Sora;letter-spacing:-.6px;margin:7px 0 15px;font-size:21px}.empty{border:1px dashed #cbd4df;text-align:center;border-radius:14px;padding:35px;background:white;color:var(--muted);font-size:13px}.callout{background:#fffbea;border-radius:10px;padding:14px;color:#504831;font-size:12px;line-height:1.65;margin-top:15px}.brandcolors{display:flex;gap:12px;margin:15px 0}.swatch{width:70px;height:70px;border-radius:13px;border:1px solid #e4e4e4}.tags{display:flex;gap:8px;flex-wrap:wrap;margin:15px 0}.tags span{font-size:11px;padding:8px 10px;border-radius:50px;background:#f3f5f7;color:#556378}.foot{text-align:center;color:#8190a3;font-size:11px;margin-top:25px;line-height:1.7}.toast{position:fixed;bottom:25px;left:50%;transform:translateX(-50%);padding:12px 18px;border-radius:8px;background:#132034;color:white;font-size:12px;z-index:5;box-shadow:0 6px 20px #1115;max-width:calc(100vw - 30px);display:none}.toast.show{display:block}.sr{position:absolute;clip:rect(0 0 0 0);width:1px;height:1px;overflow:hidden}
+:root{--ink:#101a2c;--muted:#69748a;--line:#e5e9ee;--gold:#fdca01;--bg:#f7f8fa;--white:#fff}*{box-sizing:border-box}html{scroll-behavior:smooth}body{background:var(--bg);color:var(--ink);font-family:Montserrat,system-ui,sans-serif;margin:0;padding-bottom:70px}button,input,select,textarea{font:inherit}button{cursor:pointer}button:disabled{opacity:.45;cursor:not-allowed}button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{outline:3px solid #ffdb50;outline-offset:2px}.top{background:white;border-bottom:1px solid var(--line)}.topin{max-width:1260px;margin:auto;display:flex;justify-content:space-between;align-items:center;padding:18px 25px}.logo{display:flex;align-items:center;gap:10px}.logoicon{background:var(--gold);color:#111;width:38px;height:38px;border-radius:12px;font-family:Sora;font-size:21px;font-weight:800;display:grid;place-items:center}.logo b{font-family:Sora;font-size:18px;font-weight:800;letter-spacing:-1px}.logo b span{font-weight:500}.logo small{color:var(--muted);font-size:10px;display:block;letter-spacing:2px;font-weight:700}.status{color:#40516a;font-size:12px;display:flex;align-items:center;gap:7px}.dot{background:#42a679;width:8px;height:8px;border-radius:50%}.wrap{max-width:1260px;margin:0 auto;padding:25px}.hero{background:#111b2d;border-radius:18px;color:#fff;padding:35px 40px;display:flex;align-items:flex-end;justify-content:space-between;gap:20px;min-height:170px}.eyebrow{font-size:10px;letter-spacing:2px;color:#9faec3;font-weight:800;margin:0 0 12px}.hero h1{font-family:Sora,sans-serif;font-size:clamp(25px,4vw,36px);letter-spacing:-1.4px;line-height:1.2;margin:0 0 10px}.hero p{font-size:13px;color:#d5dce6;line-height:1.7;margin:0}.hero .pill{color:var(--ink);font-size:12px;background:var(--gold);border-radius:50px;padding:12px 17px;white-space:nowrap;font-weight:800}.tabs{display:flex;gap:10px;margin:26px 0 20px;overflow:auto}.tab{border:1px solid var(--line);background:#fff;padding:12px 19px;border-radius:10px;color:#5c6878;font-size:13px;font-weight:800;white-space:nowrap}.tab.active{background:var(--ink);color:#fff;border-color:var(--ink)}.section{display:none}.section.active{display:block}.cols{display:grid;grid-template-columns:minmax(0,380px) minmax(0,1fr);gap:20px;align-items:start}.panel{background:#fff;border:1px solid var(--line);border-radius:17px;padding:22px;box-shadow:0 3px 15px #14253c08}.panel h2{font-family:Sora;font-size:17px;letter-spacing:-.6px;margin:0 0 6px}.panel .hint{font-size:12px;color:var(--muted);line-height:1.7;margin:0 0 22px}label{font-size:12px;font-weight:800;display:block;margin-top:15px;margin-bottom:7px}input[type=text],textarea,select,input[type=number]{border:1px solid #dce2e9;background:#fff;border-radius:10px;width:100%;padding:13px;font-size:14px;color:var(--ink);min-height:46px}textarea{resize:vertical;line-height:1.5}input[type=file]{width:100%;font-size:12px;color:var(--muted)}.inline{display:grid;grid-template-columns:1fr 1fr;gap:12px}.primary,.secondary,.ghost{border-radius:10px;padding:13px 16px;font-weight:800;font-size:13px;border:1px solid transparent}.primary{background:var(--gold);color:var(--ink)}.secondary{background:var(--ink);color:#fff}.ghost{background:#fff;color:var(--ink);border:1px solid #dce2e9}.wide{width:100%;margin-top:20px}.fine{font-size:11px;color:#718092;line-height:1.7}.smallcap{font-size:10px;color:#78869a;letter-spacing:1.5px;font-weight:800;margin:23px 0 11px}.previewpanel{padding:20px}.previewhead{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:16px}.previewhead h2{margin:0}.chip{background:#f4f6f8;border:1px solid var(--line);border-radius:50px;color:#637287;padding:7px 10px;font-size:11px;font-weight:700}.thumbs{display:flex;gap:10px;overflow:auto;padding:5px 3px 17px}.thumb{flex:0 0 75px;height:93px;border:2px solid #e4e7e9;border-radius:10px;overflow:hidden;padding:0;background:white;position:relative;box-shadow:0 2px 4px #15203510}.thumb.selected{border:3px solid var(--gold);box-shadow:0 0 0 2px #ffe27b40}.thumb canvas{width:100%;height:100%;object-fit:contain}.thumb span{position:absolute;bottom:5px;right:5px;color:white;background:#263345c7;border-radius:4px;padding:3px 4px;font-size:9px;font-weight:800}.workarea{display:flex;justify-content:center;align-items:center;gap:14px;background:#f0f2f4;padding:20px 12px;border:1px solid #e8ebef;border-radius:12px}.art{width:min(100%,450px);aspect-ratio:4/5;box-shadow:0 4px 10px #1f2b331c;background:white}#preview{display:block;width:100%;height:100%}.arrow{border:1px solid #dee5ed;background:white;border-radius:50%;width:38px;height:38px;flex:0 0 38px;color:#213248;font-size:22px}.cardactions{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}.cardactions>*{flex:1}.format{width:100px!important;flex:0 0 100px!important}.editbox{border-top:1px solid var(--line);padding-top:15px;margin-top:17px}.editbox h3{font-size:13px;margin:5px 0 12px}.editbox textarea{min-height:70px}.savehint{font-size:11px;color:#69748a;text-align:center;padding-top:12px}.library{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:18px}.library article{border:1px solid var(--line);background:white;padding:14px;border-radius:13px}.library canvas{width:100%;aspect-ratio:4/5;border-radius:5px;background:#fff;display:block}.library h3{font-size:13px;line-height:1.4;min-height:37px}.library .actions{display:flex;gap:7px}.library .actions button{flex:1}.subheadline{font-family:Sora;letter-spacing:-.6px;margin:7px 0 15px;font-size:21px}.empty{border:1px dashed #cbd4df;text-align:center;border-radius:14px;padding:35px;background:white;color:var(--muted);font-size:13px}.photo-choice{margin:18px 0 13px;border:1px solid #dce2e9;border-radius:12px;padding:13px 14px 14px}.photo-choice legend{padding:0 7px;font-size:13px;font-weight:800}.photo-option{display:flex;align-items:center;gap:12px;border:1px solid #e6e9ee;border-radius:9px;padding:12px 11px;margin:8px 0 0;font-size:12px;cursor:pointer}.photo-option:has(input:checked){background:#fffbe6;border-color:#e8bf0e}.photo-option input{width:18px;height:18px;accent-color:#ca9d00;margin:0;flex-shrink:0}.photo-option span{display:flex;flex-direction:column;gap:4px}.photo-option b{font-size:12px}.photo-option small{color:#64748b;font-size:11px;line-height:1.5}.photo-status{color:#58697e;font-size:11px;line-height:1.6;margin:9px 0}.callout{background:#fffbea;border-radius:10px;padding:14px;color:#504831;font-size:12px;line-height:1.65;margin-top:15px}.brandcolors{display:flex;gap:12px;margin:15px 0}.swatch{width:70px;height:70px;border-radius:13px;border:1px solid #e4e4e4}.tags{display:flex;gap:8px;flex-wrap:wrap;margin:15px 0}.tags span{font-size:11px;padding:8px 10px;border-radius:50px;background:#f3f5f7;color:#556378}.foot{text-align:center;color:#8190a3;font-size:11px;margin-top:25px;line-height:1.7}.toast{position:fixed;bottom:25px;left:50%;transform:translateX(-50%);padding:12px 18px;border-radius:8px;background:#132034;color:white;font-size:12px;z-index:5;box-shadow:0 6px 20px #1115;max-width:calc(100vw - 30px);display:none}.toast.show{display:block}.sr{position:absolute;clip:rect(0 0 0 0);width:1px;height:1px;overflow:hidden}
 @media(max-width:830px){.cols{grid-template-columns:1fr}.wrap{padding:13px}.topin{padding:13px 16px}.status{font-size:10px}.hero{border-radius:12px;padding:24px;min-height:unset;display:block}.hero .pill{display:inline-flex;margin-top:15px}.tabs{margin:16px 0}.panel{padding:16px}.previewpanel{padding:12px}.workarea{gap:6px;padding:10px 5px}.arrow{width:28px;height:28px;flex-basis:28px;font-size:17px}.art{width:min(100%,390px)}.cardactions{display:grid;grid-template-columns:1fr 1fr}.cardactions .format{width:100%!important;flex:auto!important}.cardactions #downloadBtn{grid-column:span 2}.hero h1{font-size:26px}}
 </style></head><body>
 <header class="top"><div class="topin"><div class="logo"><div class="logoicon">C</div><div><b>crediti<span>studio</span></b><small>ESTÚDIO DE CONTEÚDO</small></div></div><div class="status"><span class="dot"></span>Carrosséis 4:5</div></div></header>
@@ -12,11 +12,17 @@
 <div class="cols">
 <div class="panel"><h2>Qual é o assunto?</h2><p class="hint">Escreva o tema. O estúdio prepara títulos, explicações e uma chamada final, tudo editável.</p>
 <label for="topic">Assunto do carrossel</label><textarea id="topic" rows="3" maxlength="180" placeholder="Ex.: 5 cuidados antes de contratar um financiamento de moto">5 erros que deixam sua Black Friday mais cara</textarea>
-<div class="inline"><div><label for="count">Quantidade de cards</label><select id="count"><option value="5">5 cards</option><option value="6" selected>6 cards</option><option value="7">7 cards</option><option value="8">8 cards</option></select></div><div><label for="style">Estilo da capa</label><select id="style"><option value="clean">Editorial claro</option><option value="dark">Escuro elegante</option><option value="photo">Foto real</option></select></div></div>
-<label for="photo">Foto original para capa (opcional)</label><input type="file" id="photo" accept="image/jpeg,image/png,image/webp">
+<div class="inline"><div><label for="count">Quantidade de cards</label><select id="count"><option value="5">5 cards</option><option value="6" selected>6 cards</option><option value="7">7 cards</option><option value="8">8 cards</option></select></div><div><label for="style">Estilo</label><select id="style"><option value="clean">Editorial claro</option><option value="dark">Escuro elegante</option></select></div></div>
+<fieldset class="photo-choice" aria-describedby="photoHelp"><legend>Quer imagens no carrossel?</legend>
+<label class="photo-option"><input type="radio" name="photoMode" value="none"><span><b>Sem imagens</b><small>Todos os cards apenas com textos</small></span></label>
+<label class="photo-option"><input type="radio" name="photoMode" value="cover" checked><span><b>Imagem somente na capa</b><small>Capa com foto real, demais cards só texto</small></span></label>
+<label class="photo-option"><input type="radio" name="photoMode" value="all"><span><b>Imagens em todos os cards</b><small>Cada card com foto real e texto legível</small></span></label>
+</fieldset>
+<div id="photoOptions"><label for="photo">Sua foto original (opcional)</label><input type="file" id="photo" accept="image/jpeg,image/png,image/webp"><p class="fine" id="photoHelp">O app pesquisa fotografias relacionadas ao assunto em um banco público. Se você enviar uma foto, ela será usada na capa.</p></div>
+<p id="photoStatus" class="photo-status" role="status" aria-live="polite">Escolha como quer usar imagens.</p>
 <button class="primary wide" id="generate">✦ Gerar carrossel sobre esse assunto</button>
-<p class="fine">O gerador local cria rascunhos adaptados ao tema. A geração por modelo de IA externo será habilitada quando houver uma integração segura. Revise informações, taxas e regras antes de publicar.</p>
-<div class="editbox"><h3>Editar o card selecionado</h3><label for="cardTitle">Título</label><textarea id="cardTitle" rows="3"></textarea><label for="cardText">Texto explicativo</label><textarea id="cardText" rows="4"></textarea><div class="inline"><div><label for="cardLayout">Modelo</label><select id="cardLayout"><option value="auto">Padrão</option><option value="clean">Fundo branco</option><option value="dark">Fundo escuro</option><option value="yellow">Destaque amarelo</option></select></div><div><label for="name">Nome da campanha</label><input type="text" id="name" placeholder="Nome"></div></div><button class="ghost wide" id="save">Salvar carrossel</button></div></div>
+<p class="fine">Textos gerados por modelos locais editáveis. A geração com IA externa ainda depende de conexão segura. As fotos são de um banco público, não são desenhos criados por IA. Revise as condições financeiras e os créditos das fotos antes de publicar.</p>
+<div class="editbox"><h3>Editar o card selecionado</h3><label for="cardTitle">Título</label><textarea id="cardTitle" rows="3"></textarea><label for="cardText">Texto explicativo</label><textarea id="cardText" rows="4"></textarea><div class="inline"><div><label for="cardLayout">Modelo</label><select id="cardLayout"><option value="auto">Padrão</option><option value="clean">Fundo branco</option><option value="dark">Fundo escuro</option><option value="yellow">Destaque amarelo</option></select></div><div><label for="name">Nome da campanha</label><input type="text" id="name" placeholder="Nome"></div></div><button class="ghost wide" id="replacePhoto">Pesquisar outras fotos sobre o assunto</button><button class="ghost wide" id="save">Salvar carrossel</button></div></div>
 <div class="panel previewpanel"><div class="previewhead"><h2>Prévia dos cards</h2><span class="chip" id="countBadge">6 cards</span></div><div class="thumbs" id="thumbs" aria-label="Selecione um card"></div><div class="workarea"><button class="arrow" id="prev" aria-label="Voltar card">‹</button><div class="art"><canvas id="preview" width="1080" height="1350"></canvas></div><button class="arrow" id="next" aria-label="Avançar card">›</button></div><div class="cardactions"><select class="format" id="format" aria-label="Formato de imagem"><option value="png">PNG</option><option value="jpg">JPG</option><option value="jpeg">JPEG</option></select><button class="secondary" id="downloadBtn">Baixar este card</button><button class="ghost" id="downloadAll">Baixar imagens uma a uma</button></div><p class="savehint" id="pagePos">Card 1 de 6 • Toque em qualquer miniatura para editar</p><p class="fine">No iPhone, se o arquivo abrir em uma nova aba, toque e segure a imagem para salvá-la em Fotos. Não há exportação ZIP.</p></div></div>
 <div class="panel" style="margin-top:20px"><h2>Legenda para a publicação</h2><p class="hint">Copie e adapte ao conteúdo do carrossel.</p><textarea id="caption" rows="4"></textarea><button class="ghost" id="copy">Copiar legenda</button></div>
 </section>
@@ -27,7 +33,7 @@
 (function(){
 "use strict";
 var $=function(s){return document.querySelector(s)};
-var STORE="crediti-studio-live-v1",posts=[],current=null,index=0,coverImage=null;
+var STORE="crediti-studio-live-v1",posts=[],current=null,index=0,coverImage=null;var selectedImageMode=function(){return document.querySelector('input[name="photoMode"]:checked')?.value||"none"};
 var brandHeader=new Image();brandHeader.onload=function(){if(current)drawAll()};brandHeader.src="data:image/png;base64,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";
 var safe=function(s){return String(s||"").replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})};
 function msg(s){var t=$("#toast");t.textContent=s;t.classList.add("show");clearTimeout(msg.timer);msg.timer=setTimeout(function(){t.classList.remove("show")},3500)}
@@ -45,100 +51,179 @@ var topics={
 "educacao":[["Comece pelo básico","Anote entradas e saídas de dinheiro do mês."],["Separe o essencial","Priorize moradia, alimentação, água, energia e transporte."],["Olhe todas as parcelas","O valor comprometido importa tanto quanto o que ainda está livre."],["Compare antes de decidir","Confira custo, prazo e necessidades reais."],["Faça escolhas possíveis","Pequenas mudanças de hábito podem melhorar a organização."]]
 };
 function classify(s){s=s.toLowerCase();if(/black friday|promoç|compra|parcel/.test(s))return "black";if(/fgts|saque.anivers/.test(s))return "fgts";if(/cons[óo]rc/.test(s))return "consorcio";if(/financi|carro|moto|veículo/.test(s))return "financiamento";if(/cart[aã]o|fatura|limite/.test(s))return "cartao";if(/inss|aposentad|consignado|bpc/.test(s))return "inss";if(/energia|conta de luz/.test(s))return "luz";if(/fraude|golpe|pix/.test(s))return "golpe";return "educacao"}
+var imageSearchWords={black:"woman shopping bills calculator photograph",fgts:"Brazil worker family home photograph",consorcio:"motorcycle car showroom photograph",financiamento:"car motorcycle dealership photograph",cartao:"woman credit card bills photograph",inss:"Brazil senior couple home photograph",luz:"electricity bill electric meter home photograph",golpe:"person mobile phone security photograph",educacao:"family household calculator bills photograph"};
+function imageModeFor(post,pos){
+ var mode=post.photoMode||"none";
+ return mode==="all"||(mode==="cover"&&pos===0);
+}
+function updatePhotoControls(){
+ var mode=selectedImageMode();
+ $("#photoOptions").hidden=mode==="none";
+ $("#photoStatus").textContent=mode==="none"?"Somente frases. Nenhuma foto de fundo será incluída.":mode==="cover"?"Apenas a capa terá foto. Os outros cards serão claros e sem imagens.":"Todos os cards receberão fotografias relacionadas ao tema, quando disponíveis.";
+}
+function stripHtml(value){return String(value||"").replace(/<[^>]*>/g," ").replace(/&(?:amp|quot|lt|gt|nbsp);/gi," ").replace(/\s+/g," ").trim()}
+async function fetchRealPhotos(topic,cat,wanted){
+ var queries=[imageSearchWords[cat]||"family money finances photograph",cleanTopic(topic).slice(0,90)+" photograph","woman family home photograph"];
+ var found=[], seen=new Set();
+ for(var qi=0;qi<queries.length&&found.length<wanted;qi++){
+  try{
+   var params=new URLSearchParams({action:"query",generator:"search",gsrsearch:queries[qi]+" filetype:bitmap",gsrnamespace:"6",gsrlimit:"30",prop:"imageinfo",iiprop:"url|extmetadata|mime|size",iiurlwidth:"1080",format:"json",origin:"*"});
+   var res=await fetch("https://commons.wikimedia.org/w/api.php?"+params.toString(),{mode:"cors",credentials:"omit"});
+   if(!res.ok)continue;
+   var data=await res.json(),pages=Object.values(data.query?.pages||{});
+   for(var page of pages){
+    var d=page.imageinfo?.[0];if(!d)continue;
+    var license=stripHtml(d.extmetadata?.LicenseShortName?.value||"");
+    var publicAllowed=/CC0|Public domain|PDM|CC BY\s*\d/i.test(license);
+    var name=page.title||"",imageUrl=d.thumburl||d.url;
+    if(!publicAllowed||!/^image\/jpeg$/i.test(d.mime||"")||!imageUrl||seen.has(imageUrl))continue;
+    if(/logo|illustration|drawing|comic|advertis|poster|cartoon|map|painting|icon|scan|diagram|signage/i.test(name))continue;
+    if(d.width&&d.width<640)continue;
+    seen.add(imageUrl);
+    found.push({url:imageUrl,title:name,license:license,creator:stripHtml(d.extmetadata?.Artist?.value||"").slice(0,120),source:d.descriptionurl||"https://commons.wikimedia.org/"});
+    if(found.length>=wanted)break;
+   }
+  }catch(err){console.warn("Busca de fotos indisponível:",err?.message||err)}
+ }
+ return found;
+}
+function cachedPhoto(dataUrl){return new Promise(function(resolve,reject){var image=new Image();image.crossOrigin="anonymous";image.onload=function(){resolve(image)};image.onerror=function(){reject(new Error("Fotografia indisponível"))};image.src=dataUrl})}
+async function cachePicture(found){
+ var image=await cachedPhoto(found.url);
+ var c=document.createElement("canvas");c.width=1080;c.height=1350;
+ var context=c.getContext("2d"),scale=Math.max(1080/image.width,1350/image.height),width=image.width*scale,height=image.height*scale;
+ context.fillStyle="#ffffff";context.fillRect(0,0,1080,1350);
+ context.drawImage(image,(1080-width)/2,(1350-height)/2,width,height);
+ return c.toDataURL("image/jpeg",.72);
+}
+async function populatePhotos(post,customQuery){
+ if(!post||post.photoMode==="none"){return}
+ var goal=post.photoMode==="all"?post.slides.length:1;
+ var result=[];
+ $("#generate").disabled=true;$("#replacePhoto").disabled=true;
+ $("#photoStatus").textContent="Pesquisando fotografias reais para "+post.topic+"…";
+ try{
+  var originals=await fetchRealPhotos(customQuery||post.topic,classify(post.topic),goal+3);
+  for(var item of originals){
+   if(result.length>=goal)break;
+   try{
+    var data=await cachePicture(item);
+    result.push({data:data,credit:item});
+    $("#photoStatus").textContent="Fotos encontradas: "+result.length+" de "+goal+".";
+   }catch(err){console.warn("Foto pulada:",err?.message)}
+  }
+  if(current!==post)return;
+  post.images=post.images||[];
+  post.credits=[];
+  for(var i=0;i<goal;i++){
+   if(post.photo&&i===0){post.images[i]=post.photo;continue}
+   if(result[i]){post.images[i]=result[i].data;post.credits.push(result[i].credit)}
+  }
+  if(result.length){
+   var footer=post.credits.map(function(k){return(k.creator||k.title.replace(/^File:/,""))+" ("+k.license+"): "+k.source}).join("\n");
+   post.captionBase=post.captionBase||post.caption;
+   post.caption=post.captionBase+(footer?"\n\nCréditos das fotos:\n"+footer:"");
+   $("#photoStatus").textContent="Fotografias reais incluídas: "+(post.photo?1:0+result.length)+". Confira as fotos e os créditos na legenda.";
+  }else{
+   $("#photoStatus").textContent=post.photo?"Sua foto foi aplicada à capa.":"Não encontrei fotos adequadas agora. Você pode enviar uma fotografia original ou gerar sem imagens.";
+  }
+  render();
+ }finally{$("#generate").disabled=false;$("#replacePhoto").disabled=false}
+}
 function cleanTopic(s){return s.trim().replace(/[.!?]+$/,"")}
-function generate(){
-var topic=cleanTopic($("#topic").value);if(topic.length<5){msg("Escreva um assunto com pelo menos cinco letras.");return}
+async function generate(){
+var topic=cleanTopic($("#topic").value);
+if(topic.length<5){msg("Escreva um assunto com pelo menos cinco letras.");return}
 var qty=Number($("#count").value),cat=classify(topic),points=topics[cat],slides=[];
 var head=topic.length>78?topic.slice(0,75).replace(/\s+\S*$/,"")+"…":topic;
 slides.push({title:head.charAt(0).toUpperCase()+head.slice(1),body:"Entenda os pontos que merecem atenção antes de decidir.",kind:"cover",layout:"auto"});
 var n=qty-2;for(var i=0;i<n;i++){var v=points[i%points.length];slides.push({title:(i+1)+". "+v[0],body:v[1],kind:"content",layout:"auto"})}
 slides.push({title:"Quer entender melhor esse assunto?",body:"Salve este conteúdo e compartilhe. Para conhecer as opções da Crediti, fale com nossa equipe.",kind:"cta",layout:"auto"});
-current={id:"p"+Date.now(),name:head,topic:topic,slides:slides,style:$("#style").value,photo:coverImage,caption:head+". Informação ajuda a decidir melhor. Salve e compartilhe. Consulte as condições na Crediti. #Crediti #EducaçãoFinanceira #CréditoConsciente #Itapajé",createdAt:new Date().toISOString()};
-index=0;render();msg("Carrossel criado! Edite os textos e baixe cada card.");
+current={id:"p"+Date.now(),name:head,topic:topic,slides:slides,style:$("#style").value,photoMode:selectedImageMode(),photo:coverImage,images:[],credits:[],caption:head+". Informação ajuda a decidir melhor. Salve e compartilhe. Consulte as condições na Crediti. #Crediti #EducaçãoFinanceira #CréditoConsciente #Itapajé",createdAt:new Date().toISOString()};
+var post=current;index=0;
+if(post.photo&&post.photoMode!=="none"){post.images[0]=post.photo}
+render();msg("Carrossel criado. Você pode editar todos os textos.");
+if(post.photoMode!=="none")await populatePhotos(post);
 }
 function wrapText(ctx,text,maxWidth){var words=String(text||"").split(/\s+/),lines=[],line="";for(var i=0;i<words.length;i++){var test=line?line+" "+words[i]:words[i];if(ctx.measureText(test).width>maxWidth&&line){lines.push(line);line=words[i]}else{line=test}}if(line)lines.push(line);return lines}
 function lines(ctx,arr,x,y,height){arr.forEach(function(s){ctx.fillText(s,x,y);y+=height});return y}
 function draw(canvas,slide,pos,all,mini){
-var c=canvas.getContext("2d"),W=1080,H=1350;
+var c=canvas.getContext("2d"),W=1080,H=1350,post=current;
+if(!post)return Promise.resolve();
 c.clearRect(0,0,W,H);
 var isCover=slide.kind==="cover",isCta=slide.kind==="cta";
-var layout=slide.layout!=="auto"?slide.layout:(isCover?(current.style==="photo"&&current.photo?"photo":current.style==="dark"?"dark":"cover"):isCta?"cta":"clean");
-var dark=layout==="dark",photo=layout==="photo"&&current.photo,accent=layout==="yellow";
-c.fillStyle=dark?"#101a2c":accent?"#fdca01":"#ffffff";c.fillRect(0,0,W,H);
+var layout=slide.layout!=="auto"?slide.layout:(isCover&&post.style==="dark"?"dark":isCta?"cta":"clean");
+var wantsPhoto=imageModeFor(post,pos)&&(!slide.layout||slide.layout==="auto");
+var photoSource=wantsPhoto?(post.images?.[pos]||(pos===0?post.photo:null)):null;
+var photo=!!photoSource,white=photo||layout==="dark",ink=white?"#ffffff":"#111b2d",gray=white?"#f1f3f6":"#35445b";
+c.fillStyle=layout==="dark"?"#101a2c":layout==="yellow"?"#fdca01":"#ffffff";c.fillRect(0,0,W,H);
 function paint(){
-  var white=dark||photo,ink=white?"#ffffff":"#111b2d",gray=white?"#f1f3f6":"#35445b",gold="#fdca01";
-  c.textBaseline="top";c.textAlign="left";
-  if(isCover&&!photo&&!dark){c.fillStyle="#fdca01";c.fillRect(0,0,W,12);}
-  if(isCta&&!dark){c.fillStyle="#fdca01";c.fillRect(505,245,70,7);}
-  // Cabeçalho oficial preservado da imagem enviada: foto, marca e arroba.
-  c.fillStyle="#ffffff";c.fillRect(0,0,W,248);
-  if(brandHeader.complete&&brandHeader.naturalWidth){c.drawImage(brandHeader,69,56,942,171)}
-  // Espaço útil idêntico para capas, conteúdos e CTA. Todo o bloco fica centralizado.
-  var top=290,bottom=1155,maxHeight=bottom-top,maxWidth=880;
-  var title=String(slide.title||"").trim(),body=String(slide.body||"").trim();
-  var titleSize=isCover?79:isCta?72:70;
-  var bodySize=isCover?40:isCta?39:40;
-  var titleLines=[],bodyLines=[],titleLead=0,bodyLead=0,gap=47,total=0;
-  for(var attempt=0;attempt<32;attempt++){
-    c.font="800 "+titleSize+"px Sora,Arial";
-    titleLines=wrapText(c,title,maxWidth);
-    c.font="500 "+bodySize+"px Montserrat,Arial";
-    bodyLines=body?wrapText(c,body,maxWidth):[];
-    titleLead=Math.round(titleSize*1.19);
-    bodyLead=Math.round(bodySize*1.46);
-    gap=bodyLines.length?Math.round(Math.max(40,titleSize*.65)):0;
-    total=titleLines.length*titleLead+gap+bodyLines.length*bodyLead;
-    if(total<=maxHeight&&titleLines.length<=5&&bodyLines.length<=8)break;
-    if(titleLines.length>5&&titleSize>48){titleSize-=2;continue}
-    if(bodyLines.length>8&&bodySize>29){bodySize-=1;continue}
-    if(total>maxHeight){if(bodySize>29)bodySize-=1;else if(titleSize>48)titleSize-=2;else break}
-    else break;
-  }
-  // Protege a área de edição contra textos excepcionalmente longos.
-  if(total>maxHeight){
-    while(bodyLines.length>0&&total>maxHeight){
-      bodyLines.pop();
-      total=titleLines.length*titleLead+gap+bodyLines.length*bodyLead;
-    }
-    if(bodyLines.length&&bodyLines.join(" ")!==body){
-      var last=bodyLines.length-1;
-      bodyLines[last]=bodyLines[last].replace(/[.,;:\s]+$/,"")+"…";
-    }
-  }
-  var y=top+(maxHeight-total)/2;
-  c.textAlign="center";c.fillStyle=ink;
-  c.font="800 "+titleSize+"px Sora,Arial";
-  for(var i=0;i<titleLines.length;i++){c.fillText(titleLines[i],W/2,y);y+=titleLead}
-  y+=gap;c.fillStyle=gray;c.font="500 "+bodySize+"px Montserrat,Arial";
-  for(var j=0;j<bodyLines.length;j++){c.fillText(bodyLines[j],W/2,y);y+=bodyLead}
-  // Rodapé fixo para todos os cards.
-  c.textAlign="left";c.fillStyle=white?"#f4f5f6":"#778193";c.font="700 20px Montserrat,Arial";
-  c.fillText("CREDITI • CONTEÚDO EDUCATIVO",87,1260);
-  c.textAlign="right";c.fillText((pos+1)+" / "+all,992,1260);c.textAlign="left";
+ c.textBaseline="top";c.textAlign="left";
+ if(isCover&&!photo&&layout!=="dark"){c.fillStyle="#fdca01";c.fillRect(0,0,W,12)}
+ if(isCta&&!photo&&layout!=="dark"){c.fillStyle="#fdca01";c.fillRect(505,245,70,7)}
+ // Cabeçalho aprovado é idêntico em todos os cards.
+ c.fillStyle="#ffffff";c.fillRect(0,0,W,248);
+ if(brandHeader.complete&&brandHeader.naturalWidth){c.drawImage(brandHeader,69,56,942,171)}
+ // Texto do card inteiro alinhado ao centro. Área de respiro fixa.
+ var top=290,bottom=1155,maxHeight=bottom-top,maxWidth=870;
+ var title=String(slide.title||"").trim(),body=String(slide.body||"").trim();
+ var titleSize=isCover?79:isCta?72:70,bodySize=isCover?40:isCta?39:40;
+ var titleLines=[],bodyLines=[],titleLead=0,bodyLead=0,gap=45,total=0;
+ for(var attempt=0;attempt<45;attempt++){
+  c.font="800 "+titleSize+"px Sora,Arial";titleLines=wrapText(c,title,maxWidth);
+  c.font="500 "+bodySize+"px Montserrat,Arial";bodyLines=body?wrapText(c,body,maxWidth):[];
+  titleLead=Math.round(titleSize*1.19);bodyLead=Math.round(bodySize*1.46);
+  gap=bodyLines.length?Math.round(Math.max(40,titleSize*.65)):0;
+  total=titleLines.length*titleLead+gap+bodyLines.length*bodyLead;
+  if(total<=maxHeight&&titleLines.length<=5&&bodyLines.length<=8)break;
+  if(titleLines.length>5&&titleSize>48){titleSize-=2;continue}
+  if(bodyLines.length>8&&bodySize>29){bodySize-=1;continue}
+  if(total>maxHeight&&bodySize>29){bodySize-=1;continue}
+  if(total>maxHeight&&titleSize>48){titleSize-=2;continue}
+  break;
+ }
+ if(total>maxHeight){
+  while(bodyLines.length&&total>maxHeight){bodyLines.pop();total=titleLines.length*titleLead+gap+bodyLines.length*bodyLead}
+  if(bodyLines.length&&bodyLines.join(" ")!==body){bodyLines[bodyLines.length-1]=bodyLines[bodyLines.length-1].replace(/[.,;:\s]+$/,"")+"…"}
+ }
+ var y=top+Math.max(0,maxHeight-total)/2;
+ c.textAlign="center";c.fillStyle=ink;c.font="800 "+titleSize+"px Sora,Arial";
+ for(var i=0;i<titleLines.length;i++){c.fillText(titleLines[i],W/2,y);y+=titleLead}
+ y+=gap;c.fillStyle=gray;c.font="500 "+bodySize+"px Montserrat,Arial";
+ for(var j=0;j<bodyLines.length;j++){c.fillText(bodyLines[j],W/2,y);y+=bodyLead}
+ c.textAlign="left";c.fillStyle=white?"#f4f5f6":"#778193";c.font="700 20px Montserrat,Arial";
+ c.fillText("CREDITI • CONTEÚDO EDUCATIVO",87,1260);
+ c.textAlign="right";c.fillText((pos+1)+" / "+all,992,1260);c.textAlign="left";
 }
 if(photo){
-  var img=new Image();
-  img.onload=function(){
-    var scale=Math.max(W/img.width,H/img.height),w=img.width*scale,h=img.height*scale;
-    c.drawImage(img,(W-w)/2,(H-h)/2,w,h);
-    var shade=c.createLinearGradient(0,100,0,H);shade.addColorStop(0,"rgba(0,0,0,.38)");shade.addColorStop(.4,"rgba(0,0,0,.58)");shade.addColorStop(1,"rgba(0,0,0,.75)");
-    c.fillStyle=shade;c.fillRect(0,0,W,H);paint();
+ return new Promise(function(resolve){
+  var image=new Image();image.onload=function(){
+   var scale=Math.max(W/image.width,H/image.height),w=image.width*scale,h=image.height*scale;
+   c.drawImage(image,(W-w)/2,(H-h)/2,w,h);
+   var shade=c.createLinearGradient(0,150,0,H);
+   shade.addColorStop(0,"rgba(0,0,0,.38)");shade.addColorStop(.4,"rgba(0,0,0,.58)");shade.addColorStop(1,"rgba(0,0,0,.75)");
+   c.fillStyle=shade;c.fillRect(0,0,W,H);paint();resolve();
   };
-  img.src=current.photo;
-  if(!img.complete)paint();
-}else paint();
+  image.onerror=function(){paint();resolve()};
+  image.src=photoSource;
+ });
+}
+paint();return Promise.resolve();
 }
 function drawAll(){if(!current)return;var num=current.slides.length;$("#countBadge").textContent=num+" cards";$("#pagePos").textContent="Card "+(index+1)+" de "+num+" • Toque nas miniaturas para editar";$("#thumbs").innerHTML="";current.slides.forEach(function(sl,i){var b=document.createElement("button");b.className="thumb"+(index===i?" selected":"");b.setAttribute("aria-label","Ver card "+(i+1));var cn=document.createElement("canvas");cn.width=1080;cn.height=1350;b.appendChild(cn);var sp=document.createElement("span");sp.textContent=i===0?"CAPA":i===num-1?"CTA":i;b.appendChild(sp);b.addEventListener("click",function(){index=i;render()});$("#thumbs").appendChild(b);draw(cn,sl,i,num,true)});
 draw($("#preview"),current.slides[index],index,num,false)
 }
-function render(){if(!current)return;$("#cardTitle").value=current.slides[index].title;$("#cardText").value=current.slides[index].body;$("#cardLayout").value=current.slides[index].layout||"auto";$("#name").value=current.name;$("#caption").value=current.caption;drawAll()}
+function render(){if(!current)return;$("#cardTitle").value=current.slides[index].title;$("#cardText").value=current.slides[index].body;$("#cardLayout").value=current.slides[index].layout||"auto";$("#name").value=current.name;$("#caption").value=current.caption;document.querySelector('input[name="photoMode"][value="'+(current.photoMode||"none")+'"]').checked=true;updatePhotoControls();drawAll()}
 function save(){if(!current){msg("Crie um carrossel primeiro.");return}var i=posts.findIndex(function(p){return p.id===current.id});if(i>=0)posts[i]=current;else posts.unshift(current);persist();msg("Carrossel salvo neste dispositivo.")}
-function exportCard(i,extension){return new Promise(function(resolve){var cn=document.createElement("canvas");cn.width=1080;cn.height=1350;draw(cn,current.slides[i],i,current.slides.length,false);var type=extension==="png"?"image/png":"image/jpeg";setTimeout(function(){cn.toBlob(function(blob){resolve(blob)},type,.94)},300)})}
+async function exportCard(i,extension){var cn=document.createElement("canvas");cn.width=1080;cn.height=1350;await brandHeader.decode().catch(function(){});await draw(cn,current.slides[i],i,current.slides.length,false);var type=extension==="png"?"image/png":"image/jpeg";return await new Promise(function(resolve){cn.toBlob(resolve,type,.94)})}
 async function download(i){if(!current)return;var ext=$("#format").value;var blob=await exportCard(i,ext);if(!blob){msg("Não foi possível gerar imagem.");return}var url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download="crediti-card-"+String(i+1).padStart(2,"0")+"."+ext;document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(url)},25000);msg("Card "+(i+1)+" exportado em "+ext.toUpperCase()+".")}
 function changeTab(n){document.querySelectorAll(".tab").forEach(function(b){b.classList.toggle("active",b.dataset.tab===n)});document.querySelectorAll(".section").forEach(function(el){el.classList.toggle("active",el.id===n)});if(n==="library")drawLibrary()}
-function drawLibrary(){var dst=$("#saved");dst.innerHTML="";if(!posts.length){dst.innerHTML='<div class="empty">Seus carrosséis salvos aparecerão aqui.</div>';return}posts.forEach(function(p){var div=document.createElement("article"),cn=document.createElement("canvas");cn.width=1080;cn.height=1350;div.appendChild(cn);var h=document.createElement("h3");h.textContent=p.name;div.appendChild(h);var act=document.createElement("div");act.className="actions";var edit=document.createElement("button");edit.className="secondary";edit.textContent="Editar";edit.onclick=function(){current=p;index=0;coverImage=p.photo||null;$("#topic").value=p.topic;$("#style").value=p.style;$("#count").value=String(p.slides.length);changeTab("create");render()};var del=document.createElement("button");del.className="ghost";del.textContent="Excluir";del.onclick=function(){if(confirm("Excluir este carrossel?")){posts=posts.filter(function(x){return x.id!==p.id});persist();drawLibrary()}};act.appendChild(edit);act.appendChild(del);div.appendChild(act);dst.appendChild(div);var old=current;current=p;draw(cn,p.slides[0],0,p.slides.length,true);current=old})}
+function drawLibrary(){var dst=$("#saved");dst.innerHTML="";if(!posts.length){dst.innerHTML='<div class="empty">Seus carrosséis salvos aparecerão aqui.</div>';return}posts.forEach(function(p){var div=document.createElement("article"),cn=document.createElement("canvas");cn.width=1080;cn.height=1350;div.appendChild(cn);var h=document.createElement("h3");h.textContent=p.name;div.appendChild(h);var act=document.createElement("div");act.className="actions";var edit=document.createElement("button");edit.className="secondary";edit.textContent="Editar";edit.onclick=function(){current=p;index=0;coverImage=p.photo||null;$("#topic").value=p.topic;$("#style").value=p.style==="dark"?"dark":"clean";$("#count").value=String(p.slides.length);var m=document.querySelector('input[name="photoMode"][value="'+(p.photoMode||"none")+'"]');if(m)m.checked=true;updatePhotoControls();changeTab("create");render()};var del=document.createElement("button");del.className="ghost";del.textContent="Excluir";del.onclick=function(){if(confirm("Excluir este carrossel?")){posts=posts.filter(function(x){return x.id!==p.id});persist();drawLibrary()}};act.appendChild(edit);act.appendChild(del);div.appendChild(act);dst.appendChild(div);var old=current;current=p;draw(cn,p.slides[0],0,p.slides.length,true);current=old})}
 document.querySelectorAll(".tab").forEach(function(b){b.addEventListener("click",function(){changeTab(b.dataset.tab)})});
 $("#generate").addEventListener("click",generate);
+document.querySelectorAll('input[name="photoMode"]').forEach(function(r){r.addEventListener("change",function(){updatePhotoControls()})});
+$("#replacePhoto").onclick=function(){if(!current){msg("Crie um carrossel primeiro.");return}if(current.photoMode==="none"){msg("Escolha uma opção com imagens primeiro.");return}current.images=[];current.credits=[];current.caption=current.captionBase||current.caption;populatePhotos(current)};
+updatePhotoControls();
 $("#prev").onclick=function(){if(current){index=Math.max(0,index-1);render()}};
 $("#next").onclick=function(){if(current){index=Math.min(current.slides.length-1,index+1);render()}};
 $("#cardTitle").oninput=function(){if(current){current.slides[index].title=this.value;drawAll()}};
@@ -150,10 +235,13 @@ $("#save").onclick=save;
 $("#downloadBtn").onclick=function(){download(index)};
 $("#downloadAll").onclick=async function(){if(!current)return;msg("O navegador poderá solicitar permissão para baixar várias imagens.");for(var i=0;i<current.slides.length;i++){await download(i);await new Promise(function(r){setTimeout(r,650)})}};
 $("#copy").onclick=async function(){try{await navigator.clipboard.writeText($("#caption").value);msg("Legenda copiada.")}catch(e){$("#caption").select();msg("Selecione e copie a legenda.")}};
-$("#photo").onchange=function(){var f=this.files&&this.files[0];if(!f)return;if(f.size>3500000){msg("Escolha foto com até 3,5 MB para guardar no aparelho.");return}var r=new FileReader();r.onload=function(){coverImage=r.result;$("#style").value="photo";if(current){current.photo=coverImage;current.style="photo";drawAll()}msg("Foto original adicionada.")};r.readAsDataURL(f)};
+$("#photo").onchange=function(){var f=this.files&&this.files[0];if(!f)return;if(f.size>3500000){msg("Escolha foto com até 3,5 MB para guardar no aparelho.");return}var r=new FileReader();r.onload=function(){coverImage=r.result;$("#style").value="photo";if(current){current.photo=coverImage;current.images=current.images||[];current.images[0]=coverImage;drawAll()}msg("Foto original preservada e aplicada à capa.")};r.readAsDataURL(f)};
 $("#saveBrand").onclick=function(){try{localStorage.setItem("crediti-studio-brand",JSON.stringify({handle:$("#handle").value,name:$("#brandName").value}))}catch(e){}drawAll();msg("Identidade salva.")};
 try{var brand=JSON.parse(localStorage.getItem("crediti-studio-brand")||"null");if(brand){$("#handle").value=brand.handle||"@crediti.oficial";$("#brandName").value=brand.name||"Crediti | Empréstimos e Financiamentos"}}catch(e){}
+// Exemplo de abertura sem consultar banco de imagens antes da escolha do usuário.
+document.querySelector('input[name="photoMode"][value="none"]').checked=true;
 generate();
+document.querySelector('input[name="photoMode"][value="cover"]').checked=true;updatePhotoControls();
 if("serviceWorker" in navigator){window.addEventListener("load",function(){navigator.serviceWorker.register("./sw.js").catch(function(){})})}
 })();
 </script></body></html>
