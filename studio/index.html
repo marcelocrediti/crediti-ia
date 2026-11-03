@@ -60,15 +60,15 @@ function classify(s){s=s.toLowerCase();if(/black friday|promoç|compra|parcel/.t
 var galleryState={query:"",terms:[],termIndex:0,continueToken:null,items:[],seen:new Set(),loading:false,exhausted:false};
 function imageQueriesFor(topic){
  var t=String(topic||"").toLowerCase();
- if(/carro|autom[oó]vel|ve[ií]culo/.test(t))return ["car dealership showroom","new car car key buyer","car showroom customers","automobile dealership"];
- if(/moto|motociclet/.test(t))return ["motorcycle dealership","motorcycle showroom","motorcycle customer"];
- if(/bolsa fam[ií]lia|benef[ií]cio social/.test(t))return ["Brazilian family household","Brazil family rural","Brazil mother children home","family using mobile phone"];
- if(/conta de luz|energia el[eé]trica|empr[eé]stimo na luz/.test(t))return ["electricity bill household","electric meter house","electricity bill paper","family electric bill"];
- if(/fgts|saque.anivers/.test(t))return ["Brazil construction worker","Brazilian workers","worker mobile phone home"];
- if(/inss|aposentadoria|consignado/.test(t))return ["senior couple home Brazil","senior person mobile phone","retired people home"];
- if(/cart[aã]o/.test(t))return ["credit card payment","woman credit card shopping","bills calculator table"];
- if(/cons[oó]rcio/.test(t))return ["car showroom","motorcycle dealership","family car purchase"];
- if(/financiamento/.test(t))return ["car dealership","vehicle purchase","automobile showroom"];
+ if(/carro|autom[oó]vel|ve[ií]culo/.test(t))return ["car dealership","car showroom","automobile","car buying"];
+ if(/moto|motociclet/.test(t))return ["motorcycle","motorcycle showroom","motorbike"];
+ if(/bolsa fam[ií]lia|benef[ií]cio social/.test(t))return ["Brazilian family","family Brazil","rural family","mother child"];
+ if(/conta de luz|energia el[eé]trica|empr[eé]stimo na luz/.test(t))return ["electricity meter","electric bill","electricity household","home electricity"];
+ if(/fgts|saque.anivers/.test(t))return ["Brazilian worker","construction worker","workers home"];
+ if(/inss|aposentadoria|consignado/.test(t))return ["senior couple","senior people","retired people"];
+ if(/cart[aã]o/.test(t))return ["credit card","credit card payment","bills calculator"];
+ if(/cons[oó]rcio/.test(t))return ["car showroom","motorcycle","automobile"];
+ if(/financiamento/.test(t))return ["car dealership","automobile","vehicle"];
  if(/black friday|parcel/.test(t))return ["woman calculator bills household","shopping credit card","home finance bills"];
  return [String(topic||"").trim().slice(0,70),"family finance household","people smartphone home"];
 }
@@ -84,17 +84,17 @@ function updatePhotoControls(){
 }
 function stripHtml(value){return String(value||"").replace(/<[^>]*>/g," ").replace(/&(?:amp|quot|lt|gt|nbsp);/gi," ").replace(/\s+/g," ").trim()}
 function licensedPhoto(page){
- var data=page.imageinfo?.[0];if(!data)return null;
- var license=stripHtml(data.extmetadata?.LicenseShortName?.value||"");
- var permit=/CC0|Public domain|PDM|CC BY(?:\s*[234]\.?\d|$)/i.test(license) && !/NC|ND|BY-SA/i.test(license);
- var title=page.title||"",url=data.thumburl||data.url;
- if(!permit||!/^image\/jpeg$/i.test(data.mime||"")||!url)return null;
- if(/logo|illustration|drawing|comic|advertis|poster|cartoon|map|painting|icon|scan|diagram|signage|chart|screenshot|sketch/i.test(title))return null;
- if(Number(data.width||0)<600||Number(data.height||0)<500)return null;
- return {url:url,title:title,license:license,creator:stripHtml(data.extmetadata?.Artist?.value||"").slice(0,120),source:data.descriptionurl||"https://commons.wikimedia.org/"};
+ var d=page.imageinfo?.[0];if(!d)return null;
+ var license=stripHtml(d.extmetadata?.LicenseShortName?.value||"");
+ var allowed=/CC0|Public domain|PDM|CC BY(?:-SA)?(?:\s*[1-9](?:\.\d)?)?/i.test(license)&&!/CC BY-NC|CC BY-ND/i.test(license);
+ var title=String(page.title||""),url=d.thumburl||d.url;
+ if(!allowed||!/^image\/(jpeg|png|webp)$/i.test(d.mime||"")||!url)return null;
+ if(/logo|illustration|drawing|comic|advertis|poster|cartoon|map|painting|icon|scan|diagram|signage|chart|screenshot|sketch|infographic|svg/i.test(title))return null;
+ if(Number(d.width||0)<480||Number(d.height||0)<480)return null;
+ return {url:url,title:title,license:license,creator:stripHtml(d.extmetadata?.Artist?.value||"").slice(0,120),source:d.descriptionurl||"https://commons.wikimedia.org/",licenseUrl:stripHtml(d.extmetadata?.LicenseUrl?.value||"")};
 }
 async function commonsPage(query,continuation){
- var params=new URLSearchParams({action:"query",generator:"search",gsrsearch:query+" filetype:bitmap",gsrnamespace:"6",gsrlimit:"50",prop:"imageinfo",iiprop:"url|extmetadata|mime|size",iiurlwidth:"1200",format:"json",origin:"*"});
+ var params=new URLSearchParams({action:"query",generator:"search",gsrsearch:query+" filetype:bitmap",gsrnamespace:"6",gsrlimit:"15",prop:"imageinfo",iiprop:"url|extmetadata|mime|size",iiurlwidth:"1200",format:"json",origin:"*"});
  if(continuation)params.set("gsrcontinue",continuation);
  var res=await fetch("https://commons.wikimedia.org/w/api.php?"+params.toString(),{mode:"cors",credentials:"omit"});
  if(!res.ok)throw new Error("A pesquisa não respondeu ("+res.status+")");
@@ -103,24 +103,26 @@ async function commonsPage(query,continuation){
  return {images:Object.values(data.query?.pages||{}).map(licensedPhoto).filter(Boolean),next:data.continue?.gsrcontinue||null};
 }
 async function fetchRealPhotos(topic,cat,wanted){
- var queries=imageQueriesFor(topic),found=[],seen=new Set();
- for(var q of queries){
+ var queries=imageQueriesFor(topic).concat(["people","family"]);
+ var found=[],seen=new Set(),failed=0;
+ for(var query of queries){
   if(found.length>=wanted)break;
   var cursor=null;
-  for(var page=0;page<3&&found.length<wanted;page++){
+  for(var page=0;page<2&&found.length<wanted;page++){
    try{
-    var result=await commonsPage(q,cursor);
-    for(var p of result.images){if(!seen.has(p.url)){seen.add(p.url);found.push(p)}}
-    cursor=result.next;if(!cursor)break;
-   }catch(err){console.warn("Pesquisa fotográfica:",err?.message||err);break}
+    var r=await commonsPage(query,cursor);
+    for(var photo of r.images){if(!seen.has(photo.url)){seen.add(photo.url);found.push(photo);if(found.length>=wanted)break}}
+    cursor=r.next;if(!cursor)break;
+   }catch(e){failed++;console.warn("Busca de fotografias:",query,e);break}
   }
+  if(failed>=3&&found.length===0)break;
  }
- return found.slice(0,wanted+4);
+ return found.slice(0,wanted);
 }
 function resetGallery(query){
  galleryState={query:String(query||"").trim(),terms:[],termIndex:0,continueToken:null,items:[],seen:new Set(),loading:false,exhausted:false};
  var primary=galleryState.query,translated=imageQueriesFor(primary);
- galleryState.terms=(primary.length>2?[primary]:[]).concat(translated.filter(function(x){return x.toLowerCase()!==primary.toLowerCase()}));
+ galleryState.terms=translated.concat(primary.length>2?[primary]:[]).filter(function(x,i,a){return a.findIndex(function(y){return y.toLowerCase()===x.toLowerCase()})===i});
  $("#photoGrid").replaceChildren();
  $("#morePhotos").hidden=true;
 }
@@ -183,7 +185,14 @@ async function applyGalleryPhoto(item){
   msg("Fotografia incluída no card "+(slot+1)+".");
  }catch(err){galleryNotice("Não foi possível usar esta imagem. Escolha outra ou envie uma foto original.");console.warn(err)}
 }
-function cachedPhoto(dataUrl){return new Promise(function(resolve,reject){var image=new Image();image.crossOrigin="anonymous";image.onload=function(){resolve(image)};image.onerror=function(){reject(new Error("Fotografia indisponível"))};image.src=dataUrl})}
+function cachedPhoto(url){return new Promise(function(resolve,reject){
+ var image=new Image(),settled=false;
+ var timer=setTimeout(function(){if(!settled){settled=true;image.src="";reject(new Error("A fotografia demorou para carregar"))}},9000);
+ image.crossOrigin="anonymous";
+ image.onload=function(){if(settled)return;settled=true;clearTimeout(timer);resolve(image)};
+ image.onerror=function(){if(settled)return;settled=true;clearTimeout(timer);reject(new Error("Fotografia indisponível"))};
+ image.src=url;
+})}
 async function cachePicture(found){
  var image=await cachedPhoto(found.url);
  var c=document.createElement("canvas");c.width=1080;c.height=1350;
@@ -193,37 +202,40 @@ async function cachePicture(found){
  return c.toDataURL("image/jpeg",.72);
 }
 async function populatePhotos(post,customQuery){
- if(!post||post.photoMode==="none"){return}
- var goal=post.photoMode==="all"?post.slides.length:1;
- var result=[];
+ if(!post||post.photoMode==="none")return;
+ var goal=post.photoMode==="all"?post.slides.length:1,manual=post.photo?1:0;
+ var target=Math.max(0,goal-manual),found=[];
  $("#generate").disabled=true;$("#replacePhoto").disabled=true;
  $("#photoStatus").textContent="Pesquisando fotografias reais para "+post.topic+"…";
  try{
-  var originals=post.photo&&goal===1?[]:await fetchRealPhotos(customQuery||post.topic,classify(post.topic),goal+3);
-  for(var item of originals){
-   if(result.length>=goal)break;
-   try{
-    var data=await cachePicture(item);
-    result.push({data:data,credit:item});
-    $("#photoStatus").textContent="Fotos encontradas: "+result.length+" de "+goal+".";
-   }catch(err){console.warn("Foto pulada:",err?.message)}
+  if(target>0){
+   var originals=await fetchRealPhotos(customQuery||post.topic,classify(post.topic),Math.max(target*3,9));
+   for(var item of originals){
+    if(found.length>=target)break;
+    try{
+     var data=await cachePicture(item);
+     found.push({data:data,credit:item});
+     $("#photoStatus").textContent="Carregadas "+found.length+" de "+target+" fotografias.";
+    }catch(err){console.warn("Foto não carregada:",item.url,err)}
+   }
   }
   if(current!==post)return;
-  post.images=post.images||[];
-  post.credits=[];post.imageCredits={};
+  post.images=post.images||[];post.imageCredits=post.imageCredits||{};
+  var next=0;
   for(var i=0;i<goal;i++){
-   if(post.photo&&i===0){post.images[i]=post.photo;continue}
-   if(result[i]){post.images[i]=result[i].data;post.credits.push(result[i].credit);post.imageCredits[i]=result[i].credit}
+   if(post.photo&&i===0){post.images[i]=post.photo;delete post.imageCredits[i];continue}
+   if(next<found.length){post.images[i]=found[next].data;post.imageCredits[i]=found[next].credit;next++}
+   else{delete post.images[i];delete post.imageCredits[i]}
   }
-  if(result.length){
-   post.captionBase=post.captionBase||post.caption;
-   updatePhotoCaption(post);
-   $("#photoStatus").textContent="Fotografias reais incluídas: "+((post.photo?1:0)+result.length)+". Confira as fotos e os créditos na legenda.";
-  }else{
-   $("#photoStatus").textContent=post.photo?"Sua foto foi aplicada à capa.":"Não encontrei fotos adequadas agora. Você pode enviar uma fotografia original ou gerar sem imagens.";
-  }
-  render();
- }finally{$("#generate").disabled=false;$("#replacePhoto").disabled=false}
+  post.captionBase=post.captionBase||post.caption.split("\n\nCréditos das fotos:")[0];
+  updatePhotoCaption(post);
+  var count=manual+found.length;
+  var message=count===goal?"Pronto! "+count+" foto(s) reais aplicadas automaticamente."
+   :count?"Foram aplicadas "+count+" de "+goal+" fotos. Use 'Pesquisar outras fotos' para completar."
+   :"Não foi possível obter fotos agora. Tente 'Pesquisar outras fotos' ou selecione uma na galeria.";
+  render();$("#photoStatus").textContent=message;
+ }catch(err){console.error("Erro carregando fotos",err);$("#photoStatus").textContent="Falha na pesquisa. Toque em 'Pesquisar outras fotos' para tentar novamente."}
+ finally{$("#generate").disabled=false;$("#replacePhoto").disabled=false}
 }
 function cleanTopic(s){return s.trim().replace(/[.!?]+$/,"")}
 async function generate(){
