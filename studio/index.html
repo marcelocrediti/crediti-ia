@@ -22,7 +22,17 @@
 <p id="photoStatus" class="photo-status" role="status" aria-live="polite">Escolha como quer usar imagens.</p>
 <button class="primary wide" id="generate">✦ Gerar carrossel sobre esse assunto</button>
 <p class="fine">Textos gerados por modelos locais editáveis. A geração com IA externa ainda depende de conexão segura. As fotografias vêm de um acervo público, com origem brasileira identificada e atribuição das licenças. Nenhuma foto é gerada por IA. Revise as condições financeiras e os créditos das fotos antes de publicar.</p>
-<div class="editbox"><h3>Editar o card selecionado</h3><label for="cardTitle">Título</label><textarea id="cardTitle" rows="3"></textarea><label for="cardText">Texto explicativo</label><textarea id="cardText" rows="4"></textarea><div class="inline"><div><label for="cardLayout">Modelo</label><select id="cardLayout"><option value="auto">Padrão</option><option value="clean">Fundo branco</option><option value="dark">Fundo escuro</option><option value="yellow">Destaque amarelo</option></select></div><div><label for="name">Nome da campanha</label><input type="text" id="name" placeholder="Nome"></div></div><button class="ghost wide" id="replacePhoto">Pesquisar outras fotos sobre o assunto</button><button class="ghost wide" id="save">Salvar carrossel</button></div></div>
+<div class="editbox"><h3>Editar o card selecionado</h3><label for="cardTitle">Título</label><textarea id="cardTitle" rows="3"></textarea><label for="cardText">Texto explicativo</label><textarea id="cardText" rows="4"></textarea><div class="inline"><div><label for="cardLayout">Modelo</label><select id="cardLayout"><option value="auto">Padrão</option><option value="clean">Fundo branco</option><option value="dark">Fundo escuro</option><option value="yellow">Destaque amarelo</option></select></div><div><label for="name">Nome da campanha</label><input type="text" id="name" placeholder="Nome"></div></div>
+<button class="ghost wide" id="replacePhoto">Pesquisar outras fotos sobre o assunto</button>
+<button class="primary wide" id="aiGenerateBtn" type="button">✦ Gerar imagem realista com IA</button>
+<div id="aiAccessBox" hidden>
+<label for="aiAccessCode">Código de acesso ao gerador de IA</label>
+<input type="password" id="aiAccessCode" autocomplete="off" placeholder="Cole seu código de acesso da Crediti" spellcheck="false">
+<button class="secondary wide" id="aiAccessSave" type="button">Ativar IA neste aparelho</button>
+<p class="fine">O código protege o gerador contra uso não autorizado. Ele não é sua chave da OpenAI.</p>
+</div>
+<p class="fine" id="aiStatus" role="status" aria-live="polite">Crie uma fotografia realista para o card selecionado. Cada geração usa créditos da API.</p>
+<button class="ghost wide" id="save">Salvar carrossel</button></div></div>
 <div class="panel previewpanel"><div class="previewhead"><h2>Prévia dos cards</h2><span class="chip" id="countBadge">6 cards</span></div><div class="thumbs" id="thumbs" aria-label="Selecione um card"></div><div class="workarea"><button class="arrow" id="prev" aria-label="Voltar card">‹</button><div class="art"><canvas id="preview" width="1080" height="1350"></canvas></div><button class="arrow" id="next" aria-label="Avançar card">›</button></div><div class="cardactions"><select class="format" id="format" aria-label="Formato de imagem"><option value="png">PNG</option><option value="jpg">JPG</option><option value="jpeg">JPEG</option></select><button class="secondary" id="downloadBtn">Baixar este card</button><button class="ghost" id="downloadAll">Baixar imagens uma a uma</button></div><p class="savehint" id="pagePos">Card 1 de 6 • Toque em qualquer miniatura para editar</p><p class="fine">No iPhone, se o arquivo abrir em uma nova aba, toque e segure a imagem para salvá-la em Fotos. Não há exportação ZIP.</p></div></div>
 <div class="panel" id="galleryPanel" style="margin-top:20px" hidden>
 <div class="galleryintro"><div><h2>Banco de fotos reais</h2><p>Busque fotografias documentadas no Brasil e relacionadas a cada assunto. O app só sugere imagens com referência brasileira nos dados do acervo e licença adequada.</p></div><span class="chip">Fotos com origem brasileira identificada</span></div>
@@ -123,7 +133,7 @@ function photoFitsSubject(photo,topic,slide){
 }
 function imageModeFor(post,pos){
  var mode=post.photoMode||"none";
- return mode==="all"||(mode==="cover"&&pos===0);
+ return !!(post.forceImages&&post.forceImages[pos])||mode==="all"||(mode==="cover"&&pos===0);
 }
 function updatePhotoControls(){
  var mode=selectedImageMode();
@@ -318,7 +328,7 @@ if(!post)return Promise.resolve();
 c.clearRect(0,0,W,H);
 var isCover=slide.kind==="cover",isCta=slide.kind==="cta";
 var layout=slide.layout!=="auto"?slide.layout:(isCover&&post.style==="dark"?"dark":isCta?"cta":"clean");
-var wantsPhoto=imageModeFor(post,pos)&&(!slide.layout||slide.layout==="auto");
+var wantsPhoto=imageModeFor(post,pos)&&((post.forceImages&&post.forceImages[pos])||!slide.layout||slide.layout==="auto");
 var photoSource=wantsPhoto?(post.images?.[pos]||(pos===0?post.photo:null)):null;
 var photo=!!photoSource,white=photo||layout==="dark",ink=white?"#ffffff":"#111b2d",gray=white?"#f1f3f6":"#35445b";
 c.fillStyle=layout==="dark"?"#101a2c":layout==="yellow"?"#fdca01":"#ffffff";c.fillRect(0,0,W,H);
@@ -402,6 +412,52 @@ $("#generate").addEventListener("click",generate);
 document.querySelectorAll('input[name="photoMode"]').forEach(function(r){r.addEventListener("change",function(){updatePhotoControls()})});
 $("#searchPhotos").onclick=searchGallery;
 $("#morePhotos").onclick=moreGalleryPhotos;
+var aiApiUrl="https://crediti-ia-api.onrender.com/api/studio/image";
+var aiBusy=false;
+async function generateAiImage(){
+ if(!current){msg("Primeiro crie um carrossel.");return}
+ if(aiBusy)return;
+ var access="";
+ try{access=localStorage.getItem("crediti-studio-ai-code")||""}catch(e){}
+ if(!access){$("#aiAccessBox").hidden=false;$("#aiStatus").textContent="Para gerar imagens, informe o código de acesso uma única vez.";$("#aiAccessCode").focus();return}
+ var post=current,slot=index,slide=post.slides[slot],button=$("#aiGenerateBtn");
+ aiBusy=true;button.disabled=true;
+ button.textContent="Gerando imagem…";
+ $("#aiStatus").textContent="Criando uma fotografia realista brasileira para o card "+(slot+1)+". A imagem será aplicada automaticamente.";
+ var controller=new AbortController(),timer=setTimeout(function(){controller.abort()},124000);
+ try{
+  var response=await fetch(aiApiUrl,{method:"POST",headers:{"Content-Type":"application/json","X-Studio-Code":access},body:JSON.stringify({topic:post.topic,title:slide.title,body:slide.body,cardPosition:slot===0?"cover":"interior"}),signal:controller.signal,cache:"no-store"});
+  var result=await response.json().catch(function(){return {}});
+  if(!response.ok||!result.success){
+   if(response.status===401){try{localStorage.removeItem("crediti-studio-ai-code")}catch(e){}$("#aiAccessBox").hidden=false}
+   throw new Error(result.error||"Não foi possível gerar a imagem agora.");
+  }
+  if(!result.image||!/^data:image\/jpeg;base64,/.test(result.image))throw new Error("A API retornou imagem inválida.");
+  $("#aiStatus").textContent="Fotografia recebida. Ajustando para o formato 4:5…";
+  var formatted=await cachePicture({url:result.image});
+  if(current!==post){msg("Imagem gerada. Abra o carrossel original para aplicá-la.");return}
+  post.images=post.images||[];post.images[slot]=formatted;
+  post.forceImages=post.forceImages||{};post.forceImages[slot]=true;
+  post.imageCredits=post.imageCredits||{};delete post.imageCredits[slot];
+  post.captionBase=post.captionBase||post.caption;
+  updatePhotoCaption(post);
+  render();
+  $("#aiStatus").textContent="Imagem realista criada por IA e aplicada no card "+(slot+1)+" em formato 4:5. É uma cena fictícia, não uma foto documental.";
+  msg("Imagem gerada por IA e colocada no card "+(slot+1)+".");
+ }catch(e){
+  $("#aiStatus").textContent=e.name==="AbortError"?"A geração ultrapassou o tempo permitido. Tente novamente.":(e.message||"Falha ao gerar imagem.");
+  msg("A imagem não foi gerada. Veja o aviso abaixo do botão.");
+ }finally{clearTimeout(timer);aiBusy=false;button.disabled=false;button.textContent="✦ Gerar imagem realista com IA";}
+}
+$("#aiGenerateBtn").onclick=generateAiImage;
+$("#aiAccessSave").onclick=function(){
+ var code=$("#aiAccessCode").value.trim();
+ if(code.length<14){$("#aiStatus").textContent="Digite o código completo de acesso à IA.";return}
+ try{localStorage.setItem("crediti-studio-ai-code",code)}catch(e){$("#aiStatus").textContent="Não foi possível guardar o código neste navegador.";return}
+ $("#aiAccessCode").value="";$("#aiAccessBox").hidden=true;
+ $("#aiStatus").textContent="Acesso configurado. Gerando a imagem do card…";
+ generateAiImage();
+};
 $("#replacePhoto").onclick=function(){if(!current){msg("Crie um carrossel primeiro.");return}if(current.photoMode==="none"){msg("Escolha uma opção com imagens primeiro.");return}current.images=[];current.credits=[];current.imageCredits={};current.caption=current.captionBase||current.caption;populatePhotos(current);searchGallery()};
 updatePhotoControls();
 $("#prev").onclick=function(){if(current){index=Math.max(0,index-1);render()}};
