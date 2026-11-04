@@ -460,7 +460,8 @@ async function gallerySaveAll(){
   galleryBatchNotice("Todas as "+count+" imagens estão prontas. Abrindo o compartilhamento do iPhone…");
   await gallerySharePreparedFiles();
  }catch(err){
-  galleryBatchInvalidate();
+  galleryBatchFiles=null;galleryBatchPost=null;
+  $("#galleryShareReady").hidden=true;$("#galleryDownloadFiles").hidden=true;
   galleryBatchNotice(err.message||"Não foi possível preparar as imagens.");
   msg("Não foi possível exportar todos os cards.");
  }finally{
