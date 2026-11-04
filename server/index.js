@@ -1,5 +1,4 @@
 import O from "express";
-import { timingSafeEqual } from "node:crypto";
 import h from "cors";
 import E from "openai";
 import {
@@ -581,32 +580,26 @@ AVISO DE HOR\xC1RIO: nosso atendimento humano funciona de segunda a sexta, das 7
 const studioLimit = new Map();
 const studioOwnerOrigin = "https://crediti-studio.onrender.com";
 let studioGenerating = false;
-function studioCodeValid(input) {
-  const expected = Buffer.from(String(process.env.STUDIO_AI_ACCESS_CODE || ""), "utf8");
-  const supplied = Buffer.from(String(input || ""), "utf8");
-  return expected.length >= 14 && supplied.length === expected.length &&
-    timingSafeEqual(supplied, expected);
-}
 s.get("/api/studio/status", (req, res) => {
   res.set("Cache-Control", "no-store");
   res.json({
     success: true,
-    configured: Boolean(process.env.OPENAI_API_KEY && process.env.STUDIO_AI_ACCESS_CODE),
-    requiresCode: true,
+    configured: Boolean(process.env.OPENAI_API_KEY),
+    requiresCode: false,
     limitPerDay: 12,
     model: "gpt-image-2.5-flare"
   });
 });
 s.post("/api/studio/image", async (req, res) => {
   res.set("Cache-Control", "no-store");
-  if (req.headers.origin && req.headers.origin !== studioOwnerOrigin) {
-    return res.status(403).json({ error: "Origem não autorizada para geração de imagens." });
+  // O acesso do Studio é automático, sem inserir segredo no JavaScript público.
+  // Requisições de outros sites e sem Origin são recusadas.
+  // O controle de custos continua com limite global de 12 imagens/dia e intervalo mínimo.
+  if (req.headers.origin !== studioOwnerOrigin) {
+    return res.status(403).json({ error: "A geração deve ser iniciada pelo Crediti Studio." });
   }
-  if (!process.env.STUDIO_AI_ACCESS_CODE || !process.env.OPENAI_API_KEY) {
-    return res.status(503).json({ error: "O gerador de imagens ainda precisa ser habilitado no servidor da Crediti." });
-  }
-  if (!studioCodeValid(req.get("X-Studio-Code"))) {
-    return res.status(401).json({ error: "Código de acesso à IA incorreto." });
+  if (!process.env.OPENAI_API_KEY) {
+    return res.status(503).json({ error: "A API de imagens ainda não está habilitada no servidor da Crediti." });
   }
   const title = typeof req.body?.title === "string" ? req.body.title.trim().slice(0, 180) : "";
   const body = typeof req.body?.body === "string" ? req.body.body.trim().slice(0, 400) : "";
