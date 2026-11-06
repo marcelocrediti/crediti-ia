@@ -443,7 +443,8 @@ function toast(msg){
 }
 
 // Parcelas iguais pelo valor presente nas datas reais, mês financeiro de 30 dias.
-function calcularCdcPorDatas(valor, taxa, prazo, dataBase, dataPrimeira){
+function calcularCdcPorDatas(valor, taxa, prazo, dataBase, dataPrimeira, modoCalculo = 'valor'){
+  if(!['valor','parcela'].includes(modoCalculo)) throw new Error('Escolha como calcular a simulação.');
   const diaUtc = (iso)=>{
     if(!/^\d{4}-\d{2}-\d{2}$/.test(iso || '')) throw new Error('Informe uma data válida.');
     const ms = Date.parse(iso + 'T00:00:00Z');
@@ -465,9 +466,11 @@ function calcularCdcPorDatas(valor, taxa, prazo, dataBase, dataPrimeira){
   });
   const diasVencimento = datasVencimento.map(d=>(diaUtc(d)-inicio)/86400000);
   const somaFatores = diasVencimento.reduce((s,d)=>s+Math.pow(1+taxa/100,-d/30),0);
-  const parcela = arredondarCentavos(valor/somaFatores);
+  const parcela = arredondarCentavos(modoCalculo === 'parcela' ? valor : valor/somaFatores);
+  const valorLiberado = arredondarCentavos(modoCalculo === 'parcela' ? parcela*somaFatores : valor);
+  if(!Number.isFinite(valorLiberado) || valorLiberado <= 0) throw new Error('O valor liberado deve ser maior que zero.');
   if(!Number.isFinite(parcela) || parcela <= 0) throw new Error('Não foi possível calcular. Confira as condições.');
-  return {parcela, dataBaseCalculo:dataBase, diasAtePrimeira:diasVencimento[0],
+  return {parcela, valorLiberado, modoCalculo, dataBaseCalculo:dataBase, diasAtePrimeira:diasVencimento[0],
     datasVencimento, dataUltima:datasVencimento[prazo-1],
     totalPagar:arredondarCentavos(parcela*prazo), regraCalculo:'cdc_composto_dias_base30'};
 }
@@ -679,11 +682,14 @@ function viewNovo(){
   </div>
   <div class="card">
     <h2>Nova simulação de CDC</h2>
-    <p class="hint">Digite o valor do crédito abaixo — a taxa e o prazo sugeridos aparecem automaticamente conforme a faixa (${CONFIG.prazoMin} a ${CONFIG.prazoMax} meses).</p>
+    <p class="hint">Calcule pelo valor do crédito ou pela parcela que o cliente deseja pagar. Confira o prazo, a taxa e o vencimento antes de calcular.</p>
     <label>Nome completo do cliente</label>
     <input type="text" id="f-cliente" placeholder="Ex: João da Silva">
+    <label for="f-modo">Como deseja calcular?</label>
+    <select id="f-modo"><option value="valor">Pelo valor do crédito</option><option value="parcela">Pelo valor da parcela</option></select>
     <div class="row2">
-      <div><label>Valor do crédito (R$)</label><input type="text" inputmode="numeric" id="f-valor" placeholder="5.000"></div>
+      <div id="campo-valor"><label for="f-valor">Valor do crédito (R$)</label><input type="text" inputmode="numeric" id="f-valor" placeholder="5.000"></div>
+      <div id="campo-parcela" hidden><label for="f-parcela">Parcela desejada (R$)</label><input type="text" inputmode="decimal" id="f-parcela" placeholder="0,00" disabled></div>
       <div><label>Prazo (meses)</label><select id="f-prazo">${opcoesPrazo}</select></div>
     </div>
     <label>Taxa de juros (% a.m.)</label>
@@ -1141,6 +1147,12 @@ window.abrirDetalhe = async function(id){
       <div class="kv"><span>Última parcela</span><b>${fmtDate(s.dataUltima)}</b></div>`}
     <div class="kv"><span>${isDecimoTerceiro(s)?'Taxa sobre a parcela':'Taxa'}</span><b>${s.taxa}% a.m.</b></div>
     <div class="kv"><span>CET</span><b>${fmtPercentual(s.cet)}% a.m.</b></div>
+    ${isDecimoTerceiro(s) ? '' : `<div class="kv"><span>Total a pagar</span><b>${brl(arredondarCentavos(s.parcela*s.prazo))}</b></div>
+    <div class="kv"><span>Retorno bruto da Crediti (interno)</span><b>${brl(arredondarCentavos(s.parcela*s.prazo-s.valor))}</b></div>
+    <p class="hint">Retorno antes de despesas, impostos e inadimplência. Não aparece no PDF do cliente.</p>
+    <button class="btn btn-outline" id="btn-pdf-salva">Gerar PDF da simulação</button>
+    <button class="btn btn-ok" id="btn-compartilhar-salva">Compartilhar PDF com o cliente</button>
+    <p class="hint">Compartilhe pelo WhatsApp ou outro aplicativo. Se o navegador não permitir, baixe o PDF e anexe na conversa.</p>`}
     ${dadosClienteBlock}
     ${signBlock}
   </div>
@@ -1148,6 +1160,10 @@ window.abrirDetalhe = async function(id){
   <div class="card">
     <button class="btn btn-outline" style="border-color:var(--danger);color:var(--danger);" onclick="excluirSimulacao('${s.id}')">🗑️ Excluir esta simulação</button>
   </div>`;
+  if(!isDecimoTerceiro(s)){
+    document.getElementById('btn-pdf-salva').onclick = ()=> gerarPDFSimulacao(s.id, false, s);
+    document.getElementById('btn-compartilhar-salva').onclick = ()=> gerarPDFSimulacao(s.id, true, s);
+  }
   if(documentosBlock) carregarDocumentosDetalhe(s.id);
 };
 
@@ -1383,10 +1399,10 @@ function salvarOuAbrirPdf(doc, filename){
   }
 }
 
-function gerarPDFSimulacao(id){
-  loadSim(id).then(s=>{
-    if(!s) return;
+async function gerarPDFSimulacao(id, compartilhar = false, simulacao = null){
     try{
+    const s = simulacao || await loadSim(id);
+    if(!s) throw new Error('Simulação não encontrada. Abra novamente pelo painel.');
     if(!window.jspdf){ throw new Error('Biblioteca de PDF não carregou (sem internet ou bloqueada).'); }
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF({unit:'pt', format:'a4'});
@@ -1426,12 +1442,23 @@ function gerarPDFSimulacao(id){
     const aviso = 'Esta é apenas uma simulação informativa e ainda não representa uma contratação. As condições estão sujeitas à análise de crédito do banco/instituição financeira parceira e podem ser alteradas após a avaliação cadastral.';
     const avisoLines = doc.splitTextToSize(aviso, pageW-80);
     doc.text(avisoLines, 40, y);
-    salvarOuAbrirPdf(doc, `Simulacao_CDC_Crediti_${(s.cliente||'cliente').replace(/\s+/g,'_')}.pdf`);
+    const filename = `Simulacao_CDC_Crediti_${(s.cliente||'cliente').replace(/[^\p{L}\p{N}_-]+/gu,'_')}.pdf`;
+    if(compartilhar && navigator.share && navigator.canShare && typeof File !== 'undefined'){
+      const arquivo = new File([doc.output('blob')], filename, {type:'application/pdf'});
+      if(navigator.canShare({files:[arquivo]})){
+        try{
+          await navigator.share({files:[arquivo], title:'Simulação CDC Crediti'});
+          return;
+        }catch(e){
+          if(e.name === 'AbortError') return;
+        }
+      }
+    }
+    if(salvarOuAbrirPdf(doc, filename) && compartilhar) toast('PDF preparado. Anexe o arquivo na conversa do WhatsApp com o cliente.');
     }catch(e){
       console.error('Erro ao montar PDF da simulação:', e);
       toast('Erro ao gerar PDF: ' + (e.message||e));
     }
-  });
 }
 
 function gerarPDFSimulacaoDecimoTerceiro(s){
@@ -1835,8 +1862,16 @@ function wireEvents(view){
     document.getElementById('f-data1').value = hoje.toISOString().slice(0,10);
     document.getElementById('btn-calcular').onclick = onCalcular;
     wireMilharMask(document.getElementById('f-valor'));
+    wireMoedaMask(document.getElementById('f-parcela'));
     wireFaixaSugestao();
-    for(const id of ['f-cliente','f-valor','f-prazo','f-taxa','f-data1']){
+    document.getElementById('f-modo').addEventListener('change', ()=>{
+      const porParcela = document.getElementById('f-modo').value === 'parcela';
+      document.getElementById('campo-valor').hidden = porParcela;
+      document.getElementById('campo-parcela').hidden = !porParcela;
+      document.getElementById('f-valor').disabled = porParcela;
+      document.getElementById('f-parcela').disabled = !porParcela;
+    });
+    for(const id of ['f-cliente','f-modo','f-parcela','f-valor','f-prazo','f-taxa','f-data1']){
       for(const evento of ['input','change']) document.getElementById(id).addEventListener(evento, ()=>{
         marcarCdcPendente();
       });
@@ -1890,6 +1925,7 @@ function wireFaixaSugestao(){
     if(!prazoTocado) prazoEl.value = f.prazoMax;
     atualizarSugestaoDoPrazo(false);
   });
+  atualizarSugestaoDoPrazo(false);
 }
 
 function wireMilharMask(input){
@@ -1931,13 +1967,16 @@ async function onCalcular(){
   window.__simTemp = null;
   document.getElementById('resultado').innerHTML = '';
   const cliente = document.getElementById('f-cliente').value.trim();
-  const valor = parseMilhar(document.getElementById('f-valor').value);
+  const modoCalculo = document.getElementById('f-modo').value;
+  const entrada = modoCalculo === 'parcela'
+    ? parseMoedaBR(document.getElementById('f-parcela').value)
+    : parseMilhar(document.getElementById('f-valor').value);
   const prazo = Number(document.getElementById('f-prazo').value);
   const taxaTexto = document.getElementById('f-taxa').value;
-  const taxa = taxaTexto === '' ? getFaixa(valor || 0).taxa : Number(taxaTexto);
+  const taxa = taxaTexto === '' ? getTaxaSugeridaPorPrazo(prazo) : Number(taxaTexto);
   const data1 = document.getElementById('f-data1').value;
-  if(!cliente || !valor || !prazo || !data1){
-    toast('Preencha nome, valor, prazo e data da 1ª parcela.');
+  if(!cliente || !entrada || !prazo || !data1){
+    toast('Preencha nome, valor do crédito ou da parcela, prazo e data da 1ª parcela.');
     return;
   }
   if(prazo < CONFIG.prazoMin || prazo > CONFIG.prazoMax){
@@ -1946,9 +1985,10 @@ async function onCalcular(){
   }
   const cet = taxa; // CET aproximado (sem tarifas adicionais)
   let calculo;
-  try{ calculo = calcularCdcPorDatas(valor, taxa, prazo, hojeFortalezaIso(), data1); }
+  try{ calculo = calcularCdcPorDatas(entrada, taxa, prazo, hojeFortalezaIso(), data1, modoCalculo); }
   catch(e){ toast(e.message); return; }
   const {parcela, dataUltima} = calculo;
+  const valor = calculo.valorLiberado;
   const cetAnual = (Math.pow(1+cet/100,12)-1)*100;
   const id = uid();
   window.__simTemp = {
@@ -1961,6 +2001,7 @@ async function onCalcular(){
   document.getElementById('resultado').innerHTML = `
   <p id="cdc-recalcular-aviso" class="hint" role="status" hidden style="color:var(--warn);font-weight:700;">Dados alterados. O resumo abaixo ainda é do último cálculo. Toque em Calcular simulação para atualizar.</p>
   <div class="result-box">
+    <div class="kv"><span>Valor liberado ao cliente</span><b>${brl(valor)}</b></div>
     <div class="kv"><span>Parcela mensal</span><b>${brl(parcela)}</b></div>
     <div class="kv"><span>Data-base da liberação</span><b>${fmtDate(calculo.dataBaseCalculo)}</b></div>
     <div class="kv"><span>Dias até a 1ª parcela</span><b>${calculo.diasAtePrimeira} dias</b></div>
@@ -2383,3 +2424,4 @@ render();
 </script>
 </body>
 </html>
+
