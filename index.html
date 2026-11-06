@@ -688,7 +688,7 @@ function viewNovo(){
     <label for="f-modo">Como deseja calcular?</label>
     <select id="f-modo"><option value="valor">Pelo valor do crédito</option><option value="parcela">Pelo valor da parcela</option></select>
     <div class="row2">
-      <div id="campo-valor"><label for="f-valor">Valor do crédito (R$)</label><input type="text" inputmode="numeric" id="f-valor" placeholder="5.000"></div>
+      <div id="campo-valor"><label for="f-valor">Valor do crédito (R$)</label><input type="text" inputmode="decimal" id="f-valor" placeholder="5.000,00"></div>
       <div id="campo-parcela" hidden><label for="f-parcela">Parcela desejada (R$)</label><input type="text" inputmode="decimal" id="f-parcela" placeholder="0,00" disabled></div>
       <div><label>Prazo (meses)</label><select id="f-prazo">${opcoesPrazo}</select></div>
     </div>
@@ -1231,40 +1231,88 @@ window.apagarAssinatura = async function(id){
 window.editarSimulacaoInline = async function(id){
   const s = await loadSim(id);
   if(!s) return;
+  let calculoEditado = null;
+  const dataBase = s.dataBaseCalculo || hojeFortalezaIso(s.criadoEm || Date.now());
   const opcoesPrazo = Array.from({length: CONFIG.prazoMax-CONFIG.prazoMin+1}, (_,i)=>i+CONFIG.prazoMin)
     .map(n=>`<option value="${n}" ${n===s.prazo?'selected':''}>${n}x</option>`).join('');
   document.getElementById('detalhe').innerHTML = `
   <div class="card">
     <h2>Editar simulação — ${s.cliente}</h2>
     ${s.aceite ? `<p class="hint" style="color:var(--danger);font-weight:700;">⚠️ Esta CCB já foi assinada. Se você salvar uma alteração, a assinatura atual será invalidada e o cliente vai precisar assinar de novo.</p>` : ''}
-    <label>Valor do crédito (R$)</label>
-    <input type="text" inputmode="numeric" id="ei-valor" value="${Math.round(s.valor).toLocaleString('pt-BR')}">
+    <p class="hint">Escolha a forma do cálculo, altere as condições e toque em Recalcular simulação. O sistema só permitirá salvar depois de atualizar todos os valores.</p>
+    <label for="ei-modo">Como deseja recalcular?</label>
+    <select id="ei-modo"><option value="valor">Pelo valor do empréstimo</option><option value="parcela">Pelo valor da parcela</option></select>
+    <div id="ei-campo-valor">
+      <label for="ei-valor">Valor do crédito (R$)</label>
+      <input type="text" inputmode="decimal" id="ei-valor" value="${Number(s.valor).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})}">
+    </div>
+    <div id="ei-campo-parcela" hidden>
+      <label for="ei-parcela">Valor da parcela (R$)</label>
+      <input type="text" inputmode="decimal" id="ei-parcela" value="${Number(s.parcela).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})}" disabled>
+    </div>
     <label>Prazo (meses)</label>
     <select id="ei-prazo">${opcoesPrazo}</select>
     <label>Taxa de juros (% a.m.)</label>
     <input type="number" min="9" step="0.01" id="ei-taxa" value="${s.taxa}">
     <label>Data da 1ª parcela</label>
     <input type="date" id="ei-data1" value="${s.dataPrimeira}">
-    <button class="btn btn-gold" id="btn-salvar-inline" style="margin-top:14px;">💾 Salvar alterações</button>
+    <button class="btn btn-gold" id="btn-recalcular-inline" style="margin-top:14px;">Recalcular simulação</button>
+    <div id="ei-resultado"></div>
+    <button class="btn btn-primary" id="btn-salvar-inline" style="margin-top:14px;" disabled>💾 Salvar alterações</button>
     <button class="btn btn-outline" style="margin-top:10px;" onclick="abrirDetalhe('${s.id}')">Cancelar</button>
   </div>`;
-  wireMilharMask(document.getElementById('ei-valor'));
-  document.getElementById('btn-salvar-inline').onclick = async ()=>{
-    const btn = document.getElementById('btn-salvar-inline');
-    btn.disabled = true; btn.textContent = 'Salvando...';
+  wireValorCreditoMask(document.getElementById('ei-valor'));
+  wireValorCreditoMask(document.getElementById('ei-parcela'));
+  const invalidarCalculo = ()=>{
+    calculoEditado = null;
+    document.getElementById('ei-resultado').innerHTML = '<p class="hint" style="color:var(--warn);font-weight:700;">Condições alteradas. Toque em Recalcular simulação para liberar o salvamento.</p>';
+    document.getElementById('btn-salvar-inline').disabled = true;
+  };
+  const alternarModoEdicao = ()=>{
+    const porParcela = document.getElementById('ei-modo').value === 'parcela';
+    document.getElementById('ei-campo-valor').hidden = porParcela;
+    document.getElementById('ei-campo-parcela').hidden = !porParcela;
+    document.getElementById('ei-valor').disabled = porParcela;
+    document.getElementById('ei-parcela').disabled = !porParcela;
+    invalidarCalculo();
+  };
+  document.getElementById('ei-modo').addEventListener('change', alternarModoEdicao);
+  for(const campo of ['ei-valor','ei-parcela','ei-prazo','ei-taxa','ei-data1']){
+    for(const evento of ['input','change']) document.getElementById(campo).addEventListener(evento, invalidarCalculo);
+  }
+  document.getElementById('btn-recalcular-inline').onclick = ()=>{
     try{
-      const valor = parseMilhar(document.getElementById('ei-valor').value);
+      const modoCalculo = document.getElementById('ei-modo').value;
+      const entrada = parseValorCreditoBR(document.getElementById(modoCalculo==='parcela'?'ei-parcela':'ei-valor').value);
       const prazo = Number(document.getElementById('ei-prazo').value);
       const taxa = Number(document.getElementById('ei-taxa').value);
       const data1 = document.getElementById('ei-data1').value;
-      if(!valor || !prazo || !data1){
-        toast('Preencha valor, prazo e data da 1ª parcela.');
-        btn.disabled = false; btn.textContent = '💾 Salvar alterações';
-        return;
-      }
+      if(!entrada || !prazo || !data1) throw new Error('Preencha valor, prazo e data da 1ª parcela.');
+      const calculo = calcularCdcPorDatas(entrada, taxa, prazo, dataBase, data1, modoCalculo);
+      const valor = calculo.valorLiberado;
+      const retorno = arredondarCentavos(calculo.totalPagar-valor);
+      calculoEditado = {valor, prazo, taxa, data1, calculo};
+      document.getElementById('ei-resultado').innerHTML = `
+        <div class="result-box" style="margin-top:14px;">
+          <div class="kv"><span>Valor liberado ao cliente</span><b>${brl(valor)}</b></div>
+          <div class="kv"><span>Parcela mensal</span><b>${brl(calculo.parcela)}</b></div>
+          <div class="kv"><span>Última parcela</span><b>${fmtDate(calculo.dataUltima)}</b></div>
+          <div class="kv"><span>Total a pagar</span><b>${brl(calculo.totalPagar)}</b></div>
+          <div class="kv"><span>Retorno bruto da Crediti (interno)</span><b>${brl(retorno)}</b></div>
+        </div>`;
+      document.getElementById('btn-salvar-inline').disabled = false;
+    }catch(e){
+      invalidarCalculo();
+      toast(e.message || String(e));
+    }
+  };
+  document.getElementById('btn-salvar-inline').onclick = async ()=>{
+    const btn = document.getElementById('btn-salvar-inline');
+    if(!calculoEditado){ toast('Recalcule a simulação antes de salvar.'); return; }
+    btn.disabled = true; btn.textContent = 'Salvando...';
+    try{
+      const {valor, prazo, taxa, data1, calculo} = calculoEditado;
       const jaEstavaAssinado = !!s.aceite;
-      const dataBase = s.dataBaseCalculo || hojeFortalezaIso(s.criadoEm || Date.now());
-      const calculo = calcularCdcPorDatas(valor, taxa, prazo, dataBase, data1);
       s.valor = valor; s.prazo = prazo; s.taxa = taxa; s.cet = taxa;
       s.dataPrimeira = data1;
       Object.assign(s, calculo);
@@ -1282,6 +1330,7 @@ window.editarSimulacaoInline = async function(id){
       btn.disabled = false; btn.textContent = '💾 Salvar alterações';
     }
   };
+  invalidarCalculo();
 };
 
 function dataUrlParaBlob(dataUrl){
@@ -1859,8 +1908,8 @@ function wireEvents(view){
     hoje.setUTCDate(hoje.getUTCDate()+30);
     document.getElementById('f-data1').value = hoje.toISOString().slice(0,10);
     document.getElementById('btn-calcular').onclick = onCalcular;
-    wireMilharMask(document.getElementById('f-valor'));
-    wireMoedaMask(document.getElementById('f-parcela'));
+    wireValorCreditoMask(document.getElementById('f-valor'));
+    wireValorCreditoMask(document.getElementById('f-parcela'));
     wireFaixaSugestao();
     document.getElementById('f-modo').addEventListener('change', ()=>{
       const porParcela = document.getElementById('f-modo').value === 'parcela';
@@ -1917,7 +1966,7 @@ function wireFaixaSugestao(){
     atualizarSugestaoDoPrazo(true);
   });
   valorEl.addEventListener('input', ()=>{
-    const valor = parseMilhar(valorEl.value);
+    const valor = parseValorCreditoBR(valorEl.value);
     if(!valor){ hintEl.textContent=''; return; }
     const f = getFaixa(valor);
     if(!prazoTocado) prazoEl.value = f.prazoMax;
@@ -1935,6 +1984,35 @@ function wireMilharMask(input){
 }
 function parseMilhar(str){
   return Number(String(str||'').replace(/\D/g,''));
+}
+// Valor do crédito: aceita 11386,50, 11.386,50, 11386.50 ou valor inteiro.
+function parseValorCreditoBR(str){
+  let valor = String(str||'').trim().replace(/\s/g,'').replace(/R\$/gi,'');
+  if(!valor) return 0;
+  if(valor.includes(',')){
+    valor = valor.replace(/\./g,'').replace(',','.');
+  }else{
+    const pontos = (valor.match(/\./g)||[]).length;
+    if(pontos > 1 || (pontos === 1 && /\.\d{3}$/.test(valor))) valor = valor.replace(/\./g,'');
+  }
+  valor = valor.replace(/[^\d.-]/g,'');
+  const numero = Number(valor);
+  return Number.isFinite(numero) ? Math.round(numero*100)/100 : 0;
+}
+function wireValorCreditoMask(input){
+  if(!input) return;
+  input.addEventListener('input', ()=>{
+    let valor = input.value.replace(/[^\d.,]/g,'');
+    const primeiraVirgula = valor.indexOf(',');
+    if(primeiraVirgula >= 0){
+      valor = valor.slice(0,primeiraVirgula+1) + valor.slice(primeiraVirgula+1).replace(/,/g,'').slice(0,2);
+    }
+    input.value = valor;
+  });
+  input.addEventListener('blur', ()=>{
+    const valor = parseValorCreditoBR(input.value);
+    input.value = valor ? valor.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}) : '';
+  });
 }
 function parseMoedaBR(str){
   const digits = String(str||'').replace(/\D/g,'');
@@ -1967,8 +2045,8 @@ async function onCalcular(){
   const cliente = document.getElementById('f-cliente').value.trim();
   const modoCalculo = document.getElementById('f-modo').value;
   const entrada = modoCalculo === 'parcela'
-    ? parseMoedaBR(document.getElementById('f-parcela').value)
-    : parseMilhar(document.getElementById('f-valor').value);
+    ? parseValorCreditoBR(document.getElementById('f-parcela').value)
+    : parseValorCreditoBR(document.getElementById('f-valor').value);
   const prazo = Number(document.getElementById('f-prazo').value);
   const taxaTexto = document.getElementById('f-taxa').value;
   const taxa = taxaTexto === '' ? getTaxaSugeridaPorPrazo(prazo) : Number(taxaTexto);
