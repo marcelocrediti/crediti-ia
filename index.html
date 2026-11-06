@@ -1151,8 +1151,7 @@ window.abrirDetalhe = async function(id){
     <div class="kv"><span>Retorno bruto da Crediti (interno)</span><b>${brl(arredondarCentavos(s.parcela*s.prazo-s.valor))}</b></div>
     <p class="hint">Retorno antes de despesas, impostos e inadimplência. Não aparece no PDF do cliente.</p>
     <button class="btn btn-outline" id="btn-pdf-salva">Gerar PDF da simulação</button>
-    <button class="btn btn-ok" id="btn-compartilhar-salva">Compartilhar PDF com o cliente</button>
-    <p class="hint">Compartilhe pelo WhatsApp ou outro aplicativo. Se o navegador não permitir, baixe o PDF e anexe na conversa.</p>`}
+    `}
     ${dadosClienteBlock}
     ${signBlock}
   </div>
@@ -1162,7 +1161,6 @@ window.abrirDetalhe = async function(id){
   </div>`;
   if(!isDecimoTerceiro(s)){
     document.getElementById('btn-pdf-salva').onclick = ()=> gerarPDFSimulacao(s.id, false, s);
-    document.getElementById('btn-compartilhar-salva').onclick = ()=> gerarPDFSimulacao(s.id, true, s);
   }
   if(documentosBlock) carregarDocumentosDetalhe(s.id);
 };
