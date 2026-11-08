@@ -67,7 +67,49 @@ var brandAvatarReady=Promise.all(["./brand-avatar-a.txt","./brand-avatar-b.txt"]
 var safe=function(s){return String(s||"").replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})};
 function msg(s){var t=$("#toast");t.textContent=s;t.classList.add("show");clearTimeout(msg.timer);msg.timer=setTimeout(function(){t.classList.remove("show")},3500)}
 try{posts=JSON.parse(localStorage.getItem(STORE)||"[]")||[]}catch(e){posts=[]}
-function persist(){try{localStorage.setItem(STORE,JSON.stringify(posts))}catch(e){msg("Memória do navegador cheia. Reduza o tamanho das fotos.")}}
+var libraryChanged=false,libraryDBPromise=null;
+function openLibraryDB(){
+ if(libraryDBPromise)return libraryDBPromise;
+ libraryDBPromise=new Promise(function(resolve,reject){
+  if(!("indexedDB" in window)){reject(new Error("IndexedDB indisponível"));return}
+  var req=indexedDB.open("crediti-studio-library",1);
+  req.onupgradeneeded=function(){if(!req.result.objectStoreNames.contains("posts"))req.result.createObjectStore("posts")};
+  req.onsuccess=function(){resolve(req.result)};
+  req.onerror=function(){reject(req.error||new Error("Banco de dados indisponível"))};
+ }).catch(function(err){libraryDBPromise=null;throw err});
+ return libraryDBPromise;
+}
+async function persist(){
+ try{
+  var db=await openLibraryDB();
+  await new Promise(function(resolve,reject){
+   var tx=db.transaction("posts","readwrite");
+   tx.objectStore("posts").put(posts,"all");
+   tx.oncomplete=resolve;
+   tx.onerror=function(){reject(tx.error||new Error("Falha ao salvar"))};
+   tx.onabort=function(){reject(tx.error||new Error("Gravação interrompida"))};
+  });
+  return true;
+ }catch(err){
+  try{localStorage.setItem(STORE,JSON.stringify(posts));return true}
+  catch(error){console.warn("Biblioteca cheia",err,error);msg("Não há espaço para salvar as fotos. Exporte seus cards antes de sair.");return false}
+ }
+}
+async function loadSavedLibrary(){
+ try{
+  var db=await openLibraryDB();
+  var saved=await new Promise(function(resolve,reject){
+   var request=db.transaction("posts","readonly").objectStore("posts").get("all");
+   request.onsuccess=function(){resolve(request.result)};
+   request.onerror=function(){reject(request.error)};
+  });
+  if(libraryChanged)return;
+  if(Array.isArray(saved)){posts=saved}
+  else if(posts.length){await persist()}
+  if(document.querySelector("#library.section.active"))drawLibrary();
+ }catch(error){console.warn("Biblioteca local alternativa",error)}
+}
+loadSavedLibrary();
 var topics={
 "fgts":[["Entenda as regras","Confira as regras atuais para o saque-aniversário e a antecipação antes de decidir."],["Veja quanto recebe","O valor liberado pode ser diferente do saldo total que aparece no aplicativo."],["Compare os custos","Confira juros, custo efetivo total e condições da operação."],["Pense no futuro","A antecipação compromete valores de saques futuros. Leia o contrato."],["Segurança em primeiro lugar","Nunca pague Pix antecipado para liberar crédito."]],
 "consorcio":[["Como funciona","O consórcio reúne participantes em um grupo com regras para contemplação."],["O que é contemplação?","A utilização da carta depende de sorteio ou lance, conforme o contrato."],["Não confunda modalidades","Consórcio e financiamento são diferentes. Compare as condições."],["Confira os custos","Entenda taxa de administração, fundo de reserva, seguro e prazo, quando houver."],["Planejamento faz diferença","Leia as regras de pagamento e contemplação antes de aderir."]],
@@ -586,7 +628,7 @@ function drawAll(){galleryBatchInvalidate();if(!current)return;var num=current.s
 draw($("#preview"),current.slides[index],index,num,false)
 }
 function render(){if(!current)return;renderUploadList();$("#cardTitle").value=current.slides[index].title;$("#cardText").value=current.slides[index].body;$("#cardLayout").value=current.slides[index].layout||"auto";$("#name").value=current.name;$("#caption").value=current.caption;document.querySelector('input[name="photoMode"][value="'+(current.photoMode||"none")+'"]').checked=true;updatePhotoControls();drawAll()}
-function save(){if(!current){msg("Crie um carrossel primeiro.");return}var i=posts.findIndex(function(p){return p.id===current.id});if(i>=0)posts[i]=current;else posts.unshift(current);persist();msg("Carrossel salvo neste dispositivo.")}
+async function save(){if(!current){msg("Crie um carrossel primeiro.");return}var i=posts.findIndex(function(p){return p.id===current.id});if(i>=0)posts[i]=current;else posts.unshift(current);libraryChanged=true;var ok=await persist();if(ok)msg("Carrossel salvo neste dispositivo, com suas fotos anexadas.");}
 async function exportCard(i,extension){var cn=document.createElement("canvas");cn.width=1080;cn.height=1350;await brandAvatarReady;await draw(cn,current.slides[i],i,current.slides.length,false);var type=extension==="png"?"image/png":"image/jpeg";return await new Promise(function(resolve){cn.toBlob(resolve,type,.94)})}
 async function download(i){if(!current)return;var ext=$("#format").value;var blob=await exportCard(i,ext);if(!blob){msg("Não foi possível gerar imagem.");return}var url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download="crediti-card-"+String(i+1).padStart(2,"0")+"."+ext;document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(url)},25000);msg("Card "+(i+1)+" exportado em "+ext.toUpperCase()+".")}
 
@@ -659,7 +701,7 @@ async function gallerySaveAll(){
  }
 }
 function changeTab(n){document.querySelectorAll(".tab").forEach(function(b){b.classList.toggle("active",b.dataset.tab===n)});document.querySelectorAll(".section").forEach(function(el){el.classList.toggle("active",el.id===n)});if(n==="library")drawLibrary()}
-function drawLibrary(){var dst=$("#saved");dst.innerHTML="";if(!posts.length){dst.innerHTML='<div class="empty">Seus carrosséis salvos aparecerão aqui.</div>';return}posts.forEach(function(p){var div=document.createElement("article"),cn=document.createElement("canvas");cn.width=1080;cn.height=1350;div.appendChild(cn);var h=document.createElement("h3");h.textContent=p.name;div.appendChild(h);var act=document.createElement("div");act.className="actions";var edit=document.createElement("button");edit.className="secondary";edit.textContent="Editar";edit.onclick=function(){current=p;index=0;coverImage=p.photo||null;stagedUploads=Array(10).fill(null);for(var si=0;si<Math.min(10,p.slides.length);si++){if(p.uploadedNames?.[si]&&p.images?.[si])stagedUploads[si]={name:p.uploadedNames[si],data:p.images[si]}};$("#photoQuery").value=p.topic;resetGallery(p.topic);$("#topic").value=p.topic;$("#style").value=p.style==="dark"?"dark":"clean";$("#count").value=String(p.slides.length);var m=document.querySelector('input[name="photoMode"][value="'+(p.photoMode||"none")+'"]');if(m)m.checked=true;updatePhotoControls();changeTab("create");render();if(p.photoMode&&p.photoMode!=="none"){moreGalleryPhotos()}};var del=document.createElement("button");del.className="ghost";del.textContent="Excluir";del.onclick=function(){if(confirm("Excluir este carrossel?")){posts=posts.filter(function(x){return x.id!==p.id});persist();drawLibrary()}};act.appendChild(edit);act.appendChild(del);div.appendChild(act);dst.appendChild(div);var old=current;current=p;draw(cn,p.slides[0],0,p.slides.length,true);current=old})}
+function drawLibrary(){var dst=$("#saved");dst.innerHTML="";if(!posts.length){dst.innerHTML='<div class="empty">Seus carrosséis salvos aparecerão aqui.</div>';return}posts.forEach(function(p){var div=document.createElement("article"),cn=document.createElement("canvas");cn.width=1080;cn.height=1350;div.appendChild(cn);var h=document.createElement("h3");h.textContent=p.name;div.appendChild(h);var act=document.createElement("div");act.className="actions";var edit=document.createElement("button");edit.className="secondary";edit.textContent="Editar";edit.onclick=function(){current=p;index=0;coverImage=p.photo||null;stagedUploads=Array(10).fill(null);for(var si=0;si<Math.min(10,p.slides.length);si++){if(p.uploadedNames?.[si]&&p.images?.[si])stagedUploads[si]={name:p.uploadedNames[si],data:p.images[si]}};$("#photoQuery").value=p.topic;resetGallery(p.topic);$("#topic").value=p.topic;$("#style").value=p.style==="dark"?"dark":"clean";$("#count").value=String(p.slides.length);var m=document.querySelector('input[name="photoMode"][value="'+(p.photoMode||"none")+'"]');if(m)m.checked=true;updatePhotoControls();changeTab("create");render();if(p.photoMode&&p.photoMode!=="none"){moreGalleryPhotos()}};var del=document.createElement("button");del.className="ghost";del.textContent="Excluir";del.onclick=async function(){if(confirm("Excluir este carrossel?")){posts=posts.filter(function(x){return x.id!==p.id});libraryChanged=true;await persist();drawLibrary()}};act.appendChild(edit);act.appendChild(del);div.appendChild(act);dst.appendChild(div);var old=current;current=p;draw(cn,p.slides[0],0,p.slides.length,true);current=old})}
 document.querySelectorAll(".tab").forEach(function(b){b.addEventListener("click",function(){changeTab(b.dataset.tab)})});
 $("#generate").addEventListener("click",generate);
 document.querySelectorAll('input[name="photoMode"]').forEach(function(r){r.addEventListener("change",function(){updatePhotoControls()})});
