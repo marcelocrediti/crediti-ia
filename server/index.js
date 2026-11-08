@@ -795,12 +795,13 @@ async function studioReadImages(topic,photos){
    "Analise estas fotografias apenas como apoio ao tema proposto.",
    "TEMA OBRIGATÓRIO: "+topic,
    "Para cada foto, descreva objetos e ações observáveis, sem inventar pessoas, cidades, produtos, preços ou situação econômica.",
+   "No JSON, slot usa numeração começando em ZERO. Card 1 corresponde a slot 0, card 2 a slot 1, e assim por diante.",
    "Julgue se a fotografia é realmente pertinente AO TEMA. Marque unrelated só se for claramente incompatível.",
    "Não assuma que o tema é aquele que você vê na foto se o título do usuário indica outra coisa.",
    "Responda em português do Brasil e JSON do esquema."
   ].join("\n")}];
  for(const p of photos){
-  content.push({type:"input_text",text:"FOTO DO CARD "+(p.slot+1)+":"});
+  content.push({type:"input_text",text:"FOTO DO CARD "+(p.slot+1)+" (slot "+p.slot+"): descreva e classifique esta imagem."});
   content.push({type:"input_image",image_url:p.image,detail:"low"});
  }
  const abort=new AbortController(),timer=setTimeout(()=>abort.abort(),40000);
