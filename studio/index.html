@@ -407,6 +407,29 @@ async function localMediaDeleteForPost(postId){
  }catch(err){console.warn("Originais ainda no armazenamento local",err)}
 }
 
+async function localMediaDiscardPost(postId){
+ if(!postId)return;
+ await localMediaDeleteForPost(postId);
+ try{
+  var record=await localMediaGet("working-photos");
+  if(record?.projectId===postId){
+   var db=await openLibraryDB();
+   await new Promise(function(resolve,reject){
+    var tx=db.transaction("posts","readwrite");
+    tx.objectStore("posts").delete("working-photos");
+    tx.oncomplete=resolve;tx.onerror=function(){reject(tx.error)}
+   });
+   if(localMediaStateId===postId){
+    stagedUploads=Array(10).fill(null);
+    localMediaFiles=Array(10).fill(null);
+    localMediaStateId="pre-generation";
+    renderUploadList();
+    localPhotoStatus("Este trabalho foi excluído. As demais pastas e carrosséis continuam guardados.",false);
+   }
+  }
+ }catch(e){console.warn("Não foi possível limpar arquivo local excluído",e)}
+}
+
 async function localMediaDisplayOriginals(){
  var area=$("#localOriginalsList");area.innerHTML="";area.hidden=false;
  var found=localMediaFiles.slice(),id=current?.id||null;
@@ -425,9 +448,33 @@ async function localMediaDisplayOriginals(){
   button.onclick=function(){localMediaDownloadOriginal(slot,id)};
   div.appendChild(label);div.appendChild(button);area.appendChild(div);
  });
+ // Também verifica fotografias enviadas em versões anteriores do aplicativo,
+ // quando o backup em nuvem ainda dependia de uma conta e podia ficar pendente.
+ try{
+  var pending=await localMediaGet("pending-originals");
+  if(Array.isArray(pending)){
+   var seen=new Set();
+   pending.filter(function(item){return item?.file&&item?.id}).slice(-100).reverse().forEach(function(item){
+    if(seen.has(item.id))return;seen.add(item.id);count++;
+    var div=document.createElement("div");div.className="local-original";
+    var label=document.createElement("small");
+    label.textContent="Envio antigo • "+item.file.name+" • "+Math.round(item.file.size/1024)+" KB";
+    div.appendChild(label);
+    var button=document.createElement("button");button.className="ghost";button.type="button";button.textContent="Baixar";
+    button.onclick=function(){
+     var href=URL.createObjectURL(item.file),a=document.createElement("a");a.href=href;
+     a.download=item.file.name||"foto-recuperada.jpg";document.body.appendChild(a);a.click();a.remove();
+     setTimeout(function(){URL.revokeObjectURL(href)},30000);
+    };
+    var apply=document.createElement("button");apply.className="secondary";apply.type="button";apply.textContent="Usar no card";
+    apply.onclick=function(){handleUploadedPhotos([item.file],current?index:Math.min(9,item.slot||0))};
+    div.appendChild(button);div.appendChild(apply);area.appendChild(div);
+   });
+  }
+ }catch(e){console.warn("Cópias pendentes anteriores não disponíveis",e)}
  if(!count){
   var info=document.createElement("p");info.className="fine";
-  info.textContent="Não há arquivos originais guardados para este trabalho. As fotos convertidas continuam nos cards salvos.";
+  info.textContent="Não há originais disponíveis para este trabalho neste navegador. As fotos convertidas permanecem nos cards salvos.";
   area.appendChild(info);
  }
 }
@@ -520,7 +567,9 @@ function showDrafts(){
    if(!confirm("Descartar o rascunho “"+title.textContent+"”? Isso não exclui carrosséis já salvos em pastas."))return;
    drafts=drafts.filter(function(d){return d.id!==post.id});
    if(current?.id===post.id&&!(posts||[]).some(function(p){return p.id===post.id}))current=null;
-   await persistDrafts();showDrafts();msg("Rascunho descartado.");
+   await persistDrafts();
+   if(!posts.some(function(p){return p.id===post.id}))await localMediaDiscardPost(post.id);
+   showDrafts();msg("Rascunho descartado.");
   };
   actions.appendChild(open);actions.appendChild(remove);card.appendChild(actions);list.appendChild(card);
  });
@@ -1896,6 +1945,7 @@ async function deleteFolder(folderId){
  if(activeFolderId===folderId)activeFolderId=null;
  libraryChanged=true;
  if(!await persist()){folders=oldFolders;posts=oldPosts;drawLibrary();return}
+ for(var item of items)await localMediaDiscardPost(item.id);
  if(current&&current.folderId===folderId)current.folderId=null;
  drawLibrary();refreshFolderSelect();msg("Pasta excluída.");
 }
@@ -2041,6 +2091,7 @@ function drawLibrary(){
    if(!confirm("Excluir este carrossel da pasta “"+opened.name+"”?"))return;
    var previous=posts.slice();posts=posts.filter(function(x){return x.id!==p.id});libraryChanged=true;
    if(!await persist()){posts=previous;return}
+   await localMediaDiscardPost(p.id);
    drawLibrary();
   };
   act.appendChild(edit);act.appendChild(del);div.appendChild(act);list.appendChild(div);
