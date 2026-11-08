@@ -679,6 +679,161 @@ s.post("/api/studio/image", async (req, res) => {
   }
 });
 
+
+// Textos inéditos com pesquisa em fontes reais do Brasil. Nunca reutiliza modelos fixos.
+const studioTextUsage = { day: "", count: 0, lastAt: 0, busy: false };
+const studioSourceDomains = [
+ "gov.br","ibge.gov.br","bcb.gov.br","planalto.gov.br",
+ "caixa.gov.br","inss.gov.br","procon.sp.gov.br",
+ "procon.ce.gov.br","senado.leg.br","camara.leg.br",
+ "ipea.gov.br","serpro.gov.br","agenciabrasil.ebc.com.br",
+ "consumidor.gov.br","anatel.gov.br","aneel.gov.br",
+ "anvisa.gov.br","fiocruz.br"
+];
+function studioOfficialSource(url) {
+ try {
+  const u = new URL(url);
+  return u.protocol === "https:" &&
+    studioSourceDomains.some(d => u.hostname === d || u.hostname.endsWith("."+d));
+ } catch { return false; }
+}
+function studioClean(str, max=220) {
+ return String(str||"").replace(/[\u0000-\u001f]+/g," ").replace(/\s+/g," ").trim().slice(0,max);
+}
+function studioNorm(str) {
+ return String(str||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"")
+   .toLowerCase().replace(/^\d+[\.\)]\s*/,"").replace(/[^a-z0-9 ]/g," ")
+   .replace(/\b(o|a|de|do|da|dos|das|um|uma|e|em|para|por|com|no|na)\b/g," ")
+   .replace(/\s+/g," ").trim();
+}
+function studioValidateCarousel(obj,topic,total) {
+ if(!obj||typeof obj!=="object"||!Array.isArray(obj.cards)||obj.cards.length!==total-2)return null;
+ const cover={title:studioClean(obj.cover?.title,115),body:studioClean(obj.cover?.body,220)};
+ const end={title:studioClean(obj.closing?.title,115),body:studioClean(obj.closing?.body,220)};
+ const cards=obj.cards.map(c=>({title:studioClean(c?.title,115),body:studioClean(c?.body,250)}));
+ const caption=studioClean(obj.caption,900);
+ const all=[cover,...cards,end];
+ if(all.some(c=>c.title.length<8||c.body.length<30))return null;
+ const topics=new Set();
+ for (const c of all) {
+  const title=studioNorm(c.title), key=title.split(" ").filter(Boolean).join(" ");
+  if(!key||topics.has(key))return null;
+  topics.add(key);
+ }
+ // Título e tema são validados também pelo prompt; o servidor confere a estrutura.
+ if(!studioNorm(topic))return null;
+ return {slides:[
+  {title:cover.title,body:cover.body,kind:"cover",layout:"auto"},
+  ...cards.map(c=>({...c,kind:"content",layout:"auto"})),
+  {title:end.title,body:end.body,kind:"cta",layout:"auto"}
+ ],caption};
+}
+const studioSlideSchema={type:"object",additionalProperties:false,
+ properties:{title:{type:"string"},body:{type:"string"}},
+ required:["title","body"]};
+const studioCarouselSchema={
+ type:"object",additionalProperties:false,
+ properties:{
+  cover:studioSlideSchema,
+  cards:{type:"array",items:studioSlideSchema},
+  closing:studioSlideSchema,
+  caption:{type:"string"}
+ },required:["cover","cards","closing","caption"]
+};
+s.post("/api/studio/carousel",async(req,res)=>{
+ res.set("Cache-Control","no-store");
+ if(req.get("Origin")!=="https://crediti-studio.onrender.com") {
+  return res.status(403).json({error:"Abra o gerador pelo Crediti Studio."});
+ }
+ if(!process.env.OPENAI_API_KEY)return res.status(503).json({
+  error:"A geração com IA ainda não está habilitada no servidor da Crediti."
+ });
+ const topic=studioClean(req.body?.topic,180);
+ const total=Number(req.body?.count);
+ const avoid=Array.isArray(req.body?.avoid) ? req.body.avoid.slice(0,16).map(v=>studioClean(v,95)) : [];
+ if(topic.length<5||!Number.isInteger(total)||total<5||total>10){
+  return res.status(400).json({error:"Informe um tema de pelo menos 5 caracteres e de 5 a 10 cards."});
+ }
+ const day=new Date().toISOString().slice(0,10);
+ if(studioTextUsage.day!==day){studioTextUsage.day=day;studioTextUsage.count=0;studioTextUsage.lastAt=0}
+ if(studioTextUsage.count>=30)return res.status(429).json({error:"Limite diário de 30 carrosséis com IA atingido."});
+ if(studioTextUsage.busy||Date.now()-studioTextUsage.lastAt<9000)return res.status(429).json({
+  error:"Aguarde a geração anterior terminar antes de solicitar outro carrossel."
+ });
+ studioTextUsage.busy=true;studioTextUsage.count++;studioTextUsage.lastAt=Date.now();
+ const points=total-2;
+ const prompt=[
+  "Você é redator e pesquisador de carrosséis brasileiros extremamente interessantes.",
+  "Pesquise NA WEB fontes oficiais ou jornalismo público brasileiro, realmente relacionadas ao tema fornecido. Baseie o conteúdo nos dados localizados; NÃO invente dados, números, regras, programas, preços, datas ou CIDs.",
+  "Tema ÚNICO e OBRIGATÓRIO fornecido pelo usuário: "+JSON.stringify(topic),
+  "Use SOMENTE esse tema. Nunca reutilize roteiros de Black Friday, investimentos, financiamento, INSS ou outro tema sem conexão explícita com a pergunta.",
+  "Antes de escrever, pense em "+points+" ângulos diferentes, específicos e úteis para esse tema. Cada card ensina algo novo; não repita conceitos, conselhos, alertas ou títulos. Use a pesquisa para embasar as orientações.",
+  "Gere exatamente "+total+" slides: 1 capa forte que reflita o tema, "+points+" cards educativos distintos e 1 encerramento com CTA gentil.",
+  "Formato: português brasileiro natural, curioso, prático, claro e compartilhável, sem jargões e sem frases vazias.",
+  "Títulos dos cards com 10-85 caracteres; textos explicativos com 55-190 caracteres. Títulos da capa e final também curtos; textos com 50-170 caracteres.",
+  "Nada de numerar repetidamente os títulos; nada de emojis; nada de prometer aprovação, liberar benefício ou sugerir crédito garantido.",
+  "Quando fizer referência a números ou normas atuais, só faça isso se a busca trouxer uma fonte oficial clara, verificável e correspondente. Sem referência clara, explique o conceito em vez de citar número.",
+  "Exemplo de distinção: tema 'compras do mercantil' deve falar de lista de compras, preço por quilo, validade, impulso, sazonalidade, comparação de embalagens, e não Black Friday.",
+  "Dê uma legenda atrativa em português brasileiro, até 650 caracteres, com até 4 hashtags relacionadas ao tema.",
+  avoid.length?"Evite ângulos semelhantes a estes títulos anteriores: "+JSON.stringify(avoid):"",
+  "Devolva apenas o JSON estruturado do esquema. Cada cartão precisa ser editorialmente distinto."
+ ].filter(Boolean).join("\n");
+ try{
+  const controller=new AbortController();
+  const timeout=setTimeout(()=>controller.abort(),85000);
+  let api;
+  try{
+   api=await fetch("https://api.openai.com/v1/responses",{
+    method:"POST",signal:controller.signal,
+    headers:{"Authorization":"Bearer "+process.env.OPENAI_API_KEY,"Content-Type":"application/json"},
+    body:JSON.stringify({
+     model:process.env.STUDIO_TEXT_MODEL || "gpt-6-sol",
+     instructions:"Você é um redator brasileiro cuidadoso, criativo e verificável. Use ferramentas de busca e entregue conteúdo único relacionado ao tema exato. Nada de inventar informações ou fontes.",
+     input:prompt,
+     tools:[{type:"web_search",search_context_size:"medium",filters:{allowed_domains:studioSourceDomains}}],
+     tool_choice:"required",
+     include:["web_search_call.action.sources"],
+     text:{format:{type:"json_schema",name:"crediti_carousel",strict:true,schema:studioCarouselSchema}},
+     max_output_tokens:2300,
+     store:false
+    })
+   });
+  }finally{clearTimeout(timeout)}
+  const data=await api.json().catch(()=>({}));
+  if(!api.ok){
+   console.error("Crediti Studio carousel API:",api.status,studioClean(data?.error?.message,160));
+   return res.status(api.status===429?429:502).json({error:api.status===429?
+    "A API de IA atingiu seu limite de uso ou créditos.":
+    "A API não conseguiu gerar o conteúdo. Confira o acesso à pesquisa e os créditos da conta."});
+  }
+  const outputs=Array.isArray(data.output)?data.output:[];
+  const searches=outputs.filter(o=>o.type==="web_search_call");
+  const sourceMap=new Map();
+  searches.forEach(o=>(o.action?.sources||[]).forEach(row=>{
+   const url=String(row.url||"");
+   if(studioOfficialSource(url)&&!sourceMap.has(url))sourceMap.set(url,{
+    title:studioClean(row.title||new URL(url).hostname,100),url
+   });
+  }));
+  const sources=[...sourceMap.values()].slice(0,6);
+  // Sem consulta real ao Brasil, não anuncia dados pesquisados nem publica conteúdo supostamente verificado.
+  if(searches.length<1||sources.length<1){
+   console.warn("Studio carousel: sem fontes oficiais encontradas");
+   return res.status(502).json({error:"A pesquisa não encontrou fontes brasileiras verificáveis. Tente especificar melhor o tema."});
+  }
+  const output=outputs.filter(o=>o.type==="message").flatMap(o=>o.content||[])
+   .filter(c=>c.type==="output_text").map(c=>c.text||"").join("\n").trim();
+  let parsed;
+  try{parsed=JSON.parse(output)}catch{parsed=null}
+  const verified=studioValidateCarousel(parsed,topic,total);
+  if(!verified)return res.status(502).json({error:"A IA não entregou cards diferentes e completos. Tente gerar novamente."});
+  return res.json({success:true,topic,slides:verified.slides,caption:verified.caption,sources,research:"Pesquisa em fontes brasileiras",model:process.env.STUDIO_TEXT_MODEL||"gpt-6-sol"});
+ }catch(error){
+  console.error("Crediti Studio carousel error:",error?.name||"Erro");
+  return res.status(502).json({error:"Não consegui completar a pesquisa agora. Tente novamente sem perder seu carrossel anterior."});
+ }finally{studioTextUsage.busy=false}
+});
+
 s.get("/", (o, a) => {
   a.json({ status: "online", app: "Crediti IA", assistant: "Creditin", model: m });
 }), s.get("/health", (o, a) => {
