@@ -322,30 +322,61 @@ if(!post)return Promise.resolve();
 c.clearRect(0,0,W,H);
 var isCover=slide.kind==="cover",isCta=slide.kind==="cta";
 var layout=slide.layout!=="auto"?slide.layout:(isCover&&post.style==="dark"?"dark":isCta?"cta":"clean");
-var wantsPhoto=imageModeFor(post,pos)&&((post.forceImages&&post.forceImages[pos])||!slide.layout||slide.layout==="auto");
+// Se o usuário escolheu uma foto, ela permanece visível independentemente do modelo do card.
+var hasAssignedPhoto=!!(post.images?.[pos]||(pos===0?post.photo:null));
+var wantsPhoto=imageModeFor(post,pos)&&hasAssignedPhoto;
 var photoSource=wantsPhoto?(post.images?.[pos]||(pos===0?post.photo:null)):null;
 var photo=!!photoSource,white=photo||layout==="dark",ink=white?"#ffffff":"#111b2d",gray=white?"#f1f3f6":"#35445b";
+var photoReady=false;
 c.fillStyle=layout==="dark"?"#101a2c":layout==="yellow"?"#fdca01":"#ffffff";c.fillRect(0,0,W,H);
+// Avalia a luminosidade real da área atrás do nome e do @ da Crediti.
+// Executa após aplicar a foto e a sobreposição, para refletir a cor que o usuário vê.
+function brandInkColor(){
+ if(!photoReady)return "#171717";
+ try{
+  var area=c.getImageData(230,75,730,110),data=area.data;
+  var total=0,samples=0;
+  for(var sy=0;sy<110;sy+=9){
+   for(var sx=0;sx<730;sx+=11){
+    var p=(sy*730+sx)*4;
+    total+=(data[p]*.2126+data[p+1]*.7152+data[p+2]*.0722);
+    samples++;
+   }
+  }
+  return total/samples<150?"#ffffff":"#171717";
+ }catch(err){
+  // Em fotos sem permissão de leitura dos pixels, prioriza contraste com fundo escuro.
+  return "#ffffff";
+ }
+}
 function paint(){
  c.textBaseline="top";c.textAlign="left";
  if(isCover&&!photo&&layout!=="dark"){c.fillStyle="#fdca01";c.fillRect(0,0,W,12)}
  if(isCta&&!photo&&layout!=="dark"){c.fillStyle="#fdca01";c.fillRect(505,245,70,7)}
- // Cabeçalho pequeno, igual em todos os cards, com fotografia oficial nítida.
- c.fillStyle="#ffffff";c.fillRect(0,0,W,218);
+ // A foto cobre o card inteiro: não há faixa branca por cima de cards com imagem.
+ if(!photoReady){c.fillStyle="#ffffff";c.fillRect(0,0,W,218)}
  if(brandAvatar.complete&&brandAvatar.naturalWidth){
    c.drawImage(brandAvatar,91,67,112,112);
  }
- c.textAlign="left";c.textBaseline="top";c.fillStyle="#171717";
+ var brandColor=brandInkColor();
  var brandTitle=($("#brandName").value||"Crediti | Empréstimos e Financiamentos");
  var brandFont=31;
+ c.save();
+ c.textAlign="left";c.textBaseline="top";c.fillStyle=brandColor;
+ if(photoReady){
+  c.shadowColor=brandColor==="#ffffff"?"rgba(0,0,0,.65)":"rgba(255,255,255,.55)";
+  c.shadowBlur=brandColor==="#ffffff"?9:5;
+  c.shadowOffsetY=1;
+ }
  do {
    c.font="700 "+brandFont+"px Montserrat,Arial";
    if(c.measureText(brandTitle).width<=752||brandFont<=24)break;
    brandFont--;
  }while(brandFont>24);
  c.fillText(brandTitle,222,88);
- c.font="600 25px Montserrat,Arial";c.fillStyle="#727272";
+ c.font="600 25px Montserrat,Arial";c.globalAlpha=photoReady?.93:.82;
  c.fillText($("#handle").value||"@crediti.oficial",222,137);
+ c.restore();
  // Texto do card inteiro alinhado ao centro. Área de respiro fixa.
  var top=290,bottom=1155,maxHeight=bottom-top,maxWidth=870;
  var title=String(slide.title||"").trim(),body=String(slide.body||"").trim();
@@ -382,9 +413,15 @@ if(photo){
   var image=new Image();image.onload=function(){
    var scale=Math.max(W/image.width,H/image.height),w=image.width*scale,h=image.height*scale;
    c.drawImage(image,(W-w)/2,(H-h)/2,w,h);
-   var shade=c.createLinearGradient(0,150,0,H);
-   shade.addColorStop(0,"rgba(0,0,0,.38)");shade.addColorStop(.4,"rgba(0,0,0,.58)");shade.addColorStop(1,"rgba(0,0,0,.75)");
-   c.fillStyle=shade;c.fillRect(0,0,W,H);paint();resolve();
+   // Fundo fotográfico integral, com topo preservado para contraste automático da marca
+   // e região central escurecida apenas para manter os títulos legíveis.
+   var shade=c.createLinearGradient(0,0,0,H);
+   shade.addColorStop(0,"rgba(0,0,0,.08)");
+   shade.addColorStop(.16,"rgba(0,0,0,.14)");
+   shade.addColorStop(.40,"rgba(0,0,0,.53)");
+   shade.addColorStop(1,"rgba(0,0,0,.75)");
+   c.fillStyle=shade;c.fillRect(0,0,W,H);
+   photoReady=true;paint();resolve();
   };
   image.onerror=function(){paint();resolve()};
   image.src=photoSource;
