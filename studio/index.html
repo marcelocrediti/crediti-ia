@@ -785,9 +785,12 @@ async function cloudRecoverOriginal(filename,apply){
    return;
   }
   cloudRestoreInProgress=true;
-  try{await handleUploadedPhotos([file],current?index:0)}
+  var applied=0;
+  try{applied=await handleUploadedPhotos([file],current?index:0)}
   finally{cloudRestoreInProgress=false}
-  cloudTell("Imagem original recuperada para o card selecionado. A cópia na nuvem continua guardada.");
+  cloudTell(applied?
+   "Imagem recuperada e aplicada ao card. A cópia privada permanece na nuvem.":
+   "Arquivo original recuperado, mas não pôde ser aberto neste formato. Use Baixar original para guardá-lo novamente no iPhone.");
  }catch(err){cloudTell("Não foi possível recuperar: "+err.message)}
 }
 async function cloudInitialize(){
@@ -866,6 +869,9 @@ async function handleUploadedPhotos(fileList,targetSlot){
    var pos=slots[i];
    $("#uploadStatus").textContent="Preparando foto "+(i+1)+" de "+files.length+"…";
    try{
+    // Arquivo ORIGINAL entra na fila de proteção antes de virar imagem 4:5.
+    // Remover foto do card ou apagar o carrossel não remove o backup privado.
+    await cloudQueueOriginal(files[i],pos);
     var processed=await decodeOriginalFile(files[i]);
     stagedUploads[pos]=processed;added++;
     syncStagedToCurrent();
@@ -893,6 +899,7 @@ async function handleUploadedPhotos(fileList,targetSlot){
  }finally{
   uploadBusy=false;$("#photo").disabled=false;$("#replaceCardPhoto").disabled=false;
  }
+ return added;
 }
 function stripHtml(value){return String(value||"").replace(/<[^>]*>/g," ").replace(/&(?:amp|quot|lt|gt|nbsp);/gi," ").replace(/\s+/g," ").trim()}
 function licensedPhoto(page){
