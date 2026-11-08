@@ -144,6 +144,138 @@ function updatePhotoControls(){
  $("#photoOptions").hidden=mode==="none";$("#galleryPanel").hidden=mode==="none";
  $("#photoStatus").textContent=mode==="none"?"Somente frases. Nenhuma foto de fundo será incluída.":mode==="cover"?"Apenas a capa terá foto. Os outros cards serão claros e sem imagens.":"Cada card receberá uma foto feita no Brasil, relacionada à sua explicação, quando houver opção documentada.";
 }
+
+function renderUploadList(){
+ var grid=$("#uploadList"),count=Number($("#count").value)||6;
+ if(!grid)return;
+ grid.innerHTML="";
+ var attached=stagedUploads.filter(Boolean).length;
+ $("#uploadStatus").textContent=attached+" de 10 fotos anexadas. "+(attached>count?"Selecione pelo menos "+attached+" cards para usar todas as fotos.":"Cada arquivo será usado no card correspondente.");
+ for(var i=0;i<count;i++){
+  (function(pos){
+   var obj=stagedUploads[pos];
+   var cell=document.createElement("div");cell.className="upload-slot"+(obj?"":" empty");
+   var title=document.createElement("b");title.textContent=pos===0?"CAPA":"CARD "+(pos+1);cell.appendChild(title);
+   if(obj){
+    var pic=document.createElement("img");pic.src=obj.data;pic.alt="Foto do "+(pos===0?"card da capa":"card "+(pos+1));cell.appendChild(pic);
+    var small=document.createElement("small");small.title=obj.name;small.textContent=obj.name;cell.appendChild(small);
+    var remove=document.createElement("button");remove.type="button";remove.textContent="Remover";remove.setAttribute("aria-label","Remover imagem do card "+(pos+1));remove.onclick=function(){removeUploadedSlot(pos)};cell.appendChild(remove);
+   }else{
+    var hint=document.createElement("small");hint.textContent="Sem foto anexada";cell.appendChild(hint);
+   }
+   grid.appendChild(cell);
+  })(i);
+ }
+ if(current){
+  var name=current.uploadedNames?.[index];
+  $("#selectedCardPhotoInfo").textContent=name?"Foto original do card "+(index+1)+": "+name+".":"Use “Trocar foto deste card” para anexar ou substituir a fotografia específica.";
+ }
+}
+function syncStagedToCurrent(){
+ if(!current)return;
+ current.images=current.images||[];
+ current.forceImages=current.forceImages||{};
+ current.uploadedNames=current.uploadedNames||{};
+ for(var slot=0;slot<Math.min(current.slides.length,10);slot++){
+  if(stagedUploads[slot]){
+   current.images[slot]=stagedUploads[slot].data;
+   current.uploadedNames[slot]=stagedUploads[slot].name;
+   current.forceImages[slot]=true;
+   if(current.imageCredits)delete current.imageCredits[slot];
+  }
+ }
+ // Evita que uma capa antiga substitua a fotografia recém-enviada.
+ if(stagedUploads[0]){current.photo=null;coverImage=null}
+}
+function removeUploadedSlot(slot){
+ if(uploadBusy)return;
+ if(slot<0||slot>9||!stagedUploads[slot])return;
+ stagedUploads[slot]=null;
+ if(current&&current.uploadedNames?.[slot]){
+  delete current.uploadedNames[slot];delete current.images[slot];delete current.forceImages?.[slot];
+  if(slot===0){current.photo=null;coverImage=null}
+  updatePhotoCaption(current);
+  drawAll();
+ }
+ renderUploadList();
+ msg("Foto do card "+(slot+1)+" retirada. Os demais anexos foram mantidos.");
+}
+function decodeOriginalFile(file){
+ return new Promise(function(resolve,reject){
+  if(!file||!file.size)return reject(new Error("Arquivo de foto vazio ou inválido."));
+  if(file.size>100*1024*1024)return reject(new Error("A foto excede 100 MB. Exporte uma versão JPEG ou PNG."));
+  var allowed=/^image\//i.test(file.type)||/\.(heic|heif|dng|jpg|jpeg|png|webp)$/i.test(file.name||"");
+  if(!allowed)return reject(new Error("Selecione somente fotografias JPG, PNG, HEIC ou outros formatos de imagem."));
+  var url=URL.createObjectURL(file),image=new Image();
+  var timeout=setTimeout(function(){image.src="";URL.revokeObjectURL(url);reject(new Error("A foto demorou para abrir. Tente exportar em JPG."))},18000);
+  image.onload=function(){
+   clearTimeout(timeout);
+   try{
+    var canvas=document.createElement("canvas");canvas.width=1080;canvas.height=1350;
+    var ctx=canvas.getContext("2d"),scale=Math.max(1080/image.naturalWidth,1350/image.naturalHeight);
+    var w=image.naturalWidth*scale,h=image.naturalHeight*scale;
+    ctx.drawImage(image,(1080-w)/2,(1350-h)/2,w,h);
+    var result=canvas.toDataURL("image/jpeg",.70);
+    resolve({data:result,name:file.name||"Foto original"});
+   }catch(err){reject(new Error("Não consegui preparar a imagem. Exporte a foto em JPEG ou PNG."))}
+   finally{URL.revokeObjectURL(url)}
+  };
+  image.onerror=function(){
+   clearTimeout(timeout);URL.revokeObjectURL(url);
+   reject(new Error("Este formato não abriu no Safari. Se for um arquivo DNG/RAW, exporte antes para JPG ou HEIC."));
+  };
+  image.src=url;
+ });
+}
+async function handleUploadedPhotos(fileList,targetSlot){
+ if(uploadBusy)return;
+ var files=Array.from(fileList||[]);
+ if(!files.length)return;
+ if(files.length>10){msg("Escolha no máximo 10 fotos por envio.");$("#uploadStatus").textContent="Limite de 10 fotos por carrossel. Selecione novamente.";return}
+ var slots=[];
+ if(Number.isInteger(targetSlot)){
+  if(files.length!==1){msg("Escolha uma foto para substituir o card selecionado.");return}
+  slots=[targetSlot];
+ }else{
+  var empty=[];
+  for(var n=0;n<10;n++)if(!stagedUploads[n])empty.push(n);
+  if(files.length>empty.length){$("#uploadStatus").textContent="Limite de 10 anexos. Remova uma foto antes de incluir outra.";msg("O carrossel aceita até 10 fotos.");return}
+  slots=empty.slice(0,files.length);
+ }
+ uploadBusy=true;$("#photo").disabled=true;$("#replaceCardPhoto").disabled=true;
+ var errors=[],added=0;
+ try{
+  for(var i=0;i<files.length;i++){
+   var pos=slots[i];
+   $("#uploadStatus").textContent="Preparando foto "+(i+1)+" de "+files.length+"…";
+   try{
+    var processed=await decodeOriginalFile(files[i]);
+    stagedUploads[pos]=processed;added++;
+    syncStagedToCurrent();
+    renderUploadList();
+   }catch(err){errors.push((files[i].name||"Arquivo "+(i+1))+": "+err.message)}
+  }
+  var highest=-1;for(var ix=0;ix<10;ix++)if(stagedUploads[ix])highest=ix;
+  var totalCards=Number($("#count").value)||6;
+  if(highest+1>totalCards){$("#count").value=String(highest+1);totalCards=highest+1}
+  if(added>0){
+   var mode=stagedUploads.filter(Boolean).length>1?"all":"cover";
+   var selector=document.querySelector('input[name="photoMode"][value="'+mode+'"]');
+   if(selector)selector.checked=true;
+   if(current)current.photoMode=mode;
+   syncStagedToCurrent();
+   updatePhotoControls();
+   drawAll();
+   msg(added+" foto(s) anexada(s) aos cards.");
+  }
+  renderUploadList();
+  $("#uploadStatus").textContent=errors.length?
+   "Anexadas "+stagedUploads.filter(Boolean).length+" de 10 fotos. Não foi possível abrir: "+errors.slice(0,2).join(" | "):
+   stagedUploads.filter(Boolean).length+" de 10 fotos prontas, uma por card, sem alterar rostos.";
+ }finally{
+  uploadBusy=false;$("#photo").disabled=false;$("#replaceCardPhoto").disabled=false;
+ }
+}
 function stripHtml(value){return String(value||"").replace(/<[^>]*>/g," ").replace(/&(?:amp|quot|lt|gt|nbsp);/gi," ").replace(/\s+/g," ").trim()}
 function licensedPhoto(page){
  var d=page.imageinfo?.[0];if(!d)return null;
@@ -292,6 +424,8 @@ async function populatePhotos(post,customQuery){
      var bitmap=await cachePicture(photo);chosen={data:bitmap,credit:photo};break;
     }catch(error){console.warn("Foto brasileira indisponível:",photo.url,error)}
    }
+   // Prioridade absoluta para anexo original, inclusive se foi enviado durante a busca.
+   if(post.images?.[i]&&post.uploadedNames?.[i]){render();continue}
    if(chosen){post.images[i]=chosen.data;post.imageCredits[i]=chosen.credit;applied++}
    else{delete post.images[i];delete post.imageCredits[i]}
    render();
@@ -525,7 +659,7 @@ async function gallerySaveAll(){
  }
 }
 function changeTab(n){document.querySelectorAll(".tab").forEach(function(b){b.classList.toggle("active",b.dataset.tab===n)});document.querySelectorAll(".section").forEach(function(el){el.classList.toggle("active",el.id===n)});if(n==="library")drawLibrary()}
-function drawLibrary(){var dst=$("#saved");dst.innerHTML="";if(!posts.length){dst.innerHTML='<div class="empty">Seus carrosséis salvos aparecerão aqui.</div>';return}posts.forEach(function(p){var div=document.createElement("article"),cn=document.createElement("canvas");cn.width=1080;cn.height=1350;div.appendChild(cn);var h=document.createElement("h3");h.textContent=p.name;div.appendChild(h);var act=document.createElement("div");act.className="actions";var edit=document.createElement("button");edit.className="secondary";edit.textContent="Editar";edit.onclick=function(){current=p;index=0;coverImage=p.photo||null;$("#photoQuery").value=p.topic;resetGallery(p.topic);$("#topic").value=p.topic;$("#style").value=p.style==="dark"?"dark":"clean";$("#count").value=String(p.slides.length);var m=document.querySelector('input[name="photoMode"][value="'+(p.photoMode||"none")+'"]');if(m)m.checked=true;updatePhotoControls();changeTab("create");render();if(p.photoMode&&p.photoMode!=="none"){moreGalleryPhotos()}};var del=document.createElement("button");del.className="ghost";del.textContent="Excluir";del.onclick=function(){if(confirm("Excluir este carrossel?")){posts=posts.filter(function(x){return x.id!==p.id});persist();drawLibrary()}};act.appendChild(edit);act.appendChild(del);div.appendChild(act);dst.appendChild(div);var old=current;current=p;draw(cn,p.slides[0],0,p.slides.length,true);current=old})}
+function drawLibrary(){var dst=$("#saved");dst.innerHTML="";if(!posts.length){dst.innerHTML='<div class="empty">Seus carrosséis salvos aparecerão aqui.</div>';return}posts.forEach(function(p){var div=document.createElement("article"),cn=document.createElement("canvas");cn.width=1080;cn.height=1350;div.appendChild(cn);var h=document.createElement("h3");h.textContent=p.name;div.appendChild(h);var act=document.createElement("div");act.className="actions";var edit=document.createElement("button");edit.className="secondary";edit.textContent="Editar";edit.onclick=function(){current=p;index=0;coverImage=p.photo||null;stagedUploads=Array(10).fill(null);for(var si=0;si<Math.min(10,p.slides.length);si++){if(p.uploadedNames?.[si]&&p.images?.[si])stagedUploads[si]={name:p.uploadedNames[si],data:p.images[si]}};$("#photoQuery").value=p.topic;resetGallery(p.topic);$("#topic").value=p.topic;$("#style").value=p.style==="dark"?"dark":"clean";$("#count").value=String(p.slides.length);var m=document.querySelector('input[name="photoMode"][value="'+(p.photoMode||"none")+'"]');if(m)m.checked=true;updatePhotoControls();changeTab("create");render();if(p.photoMode&&p.photoMode!=="none"){moreGalleryPhotos()}};var del=document.createElement("button");del.className="ghost";del.textContent="Excluir";del.onclick=function(){if(confirm("Excluir este carrossel?")){posts=posts.filter(function(x){return x.id!==p.id});persist();drawLibrary()}};act.appendChild(edit);act.appendChild(del);div.appendChild(act);dst.appendChild(div);var old=current;current=p;draw(cn,p.slides[0],0,p.slides.length,true);current=old})}
 document.querySelectorAll(".tab").forEach(function(b){b.addEventListener("click",function(){changeTab(b.dataset.tab)})});
 $("#generate").addEventListener("click",generate);
 document.querySelectorAll('input[name="photoMode"]').forEach(function(r){r.addEventListener("change",function(){updatePhotoControls()})});
@@ -580,7 +714,10 @@ $("#downloadAll").onclick=gallerySaveAll;
 $("#galleryShareReady").onclick=gallerySharePreparedFiles;
 $("#galleryDownloadFiles").onclick=galleryDownloadPreparedFiles;
 $("#copy").onclick=async function(){try{await navigator.clipboard.writeText($("#caption").value);msg("Legenda copiada.")}catch(e){$("#caption").select();msg("Selecione e copie a legenda.")}};
-$("#photo").onchange=function(){var f=this.files&&this.files[0];if(!f)return;if(f.size>3500000){msg("Escolha foto com até 3,5 MB para guardar no aparelho.");return}var r=new FileReader();r.onload=function(){coverImage=r.result;if(current){current.photo=coverImage;current.images=current.images||[];current.images[0]=coverImage;drawAll()}msg("Foto original preservada e aplicada à capa.")};r.readAsDataURL(f)};
+$("#photo").onchange=function(){var files=Array.from(this.files||[]);this.value="";handleUploadedPhotos(files)};
+$("#replaceCardPhoto").onclick=function(){if(!current){msg("Gere seu carrossel primeiro.");return}$("#cardPhoto").click()};
+$("#cardPhoto").onchange=function(){var files=Array.from(this.files||[]);this.value="";handleUploadedPhotos(files,index)};
+$("#count").onchange=renderUploadList;
 $("#saveBrand").onclick=function(){try{localStorage.setItem("crediti-studio-brand",JSON.stringify({handle:$("#handle").value,name:$("#brandName").value}))}catch(e){}drawAll();msg("Identidade salva.")};
 try{var brand=JSON.parse(localStorage.getItem("crediti-studio-brand")||"null");if(brand){$("#handle").value=brand.handle||"@crediti.oficial";$("#brandName").value=brand.name||"Crediti | Empréstimos e Financiamentos"}}catch(e){}
 // Exemplo de abertura sem consultar banco de imagens antes da escolha do usuário.
