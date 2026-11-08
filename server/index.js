@@ -700,6 +700,16 @@ function studioOfficialSource(url) {
 function studioClean(str, max=220) {
  return String(str||"").replace(/[\u0000-\u001f]+/g," ").replace(/\s+/g," ").trim().slice(0,max);
 }
+// Proteção editorial: endereços, URLs, marcadores de citações e notas de fonte não entram nas artes.
+function studioCardCopy(str,max=220){
+ return String(str||"")
+  .replace(/\[[^\]]{0,110}\]\((?:https?:\/\/|www\.)[^)]+\)/gi," ")
+  .replace(/\b(?:https?:\/\/|www\.)[^\s<>"'()\[\]{}]+/gi," ")
+  .replace(/【[^】]{1,140}】/g," ")
+  .replace(/\[\s*\d{1,3}\s*\]/g," ")
+  .replace(/\b(?:fontes?|referências?|links?)(?:\s+consultad[oa]s?)?\s*:\s*[^.!?\n]{0,240}/gi," ")
+  .replace(/\s+/g," ").trim().slice(0,max);
+}
 function studioNorm(str) {
  return String(str||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"")
    .toLowerCase().replace(/^\d+[\.\)]\s*/,"").replace(/[^a-z0-9 ]/g," ")
@@ -708,10 +718,10 @@ function studioNorm(str) {
 }
 function studioValidateCarousel(obj,topic,total) {
  if(!obj||typeof obj!=="object"||!Array.isArray(obj.cards)||obj.cards.length!==total-2)return null;
- const cover={title:studioClean(obj.cover?.title,115),body:studioClean(obj.cover?.body,220)};
- const end={title:studioClean(obj.closing?.title,115),body:studioClean(obj.closing?.body,220)};
- const cards=obj.cards.map(c=>({title:studioClean(c?.title,115),body:studioClean(c?.body,250)}));
- const caption=studioClean(obj.caption,900);
+ const cover={title:studioCardCopy(obj.cover?.title,110),body:studioCardCopy(obj.cover?.body,195)};
+ const end={title:studioCardCopy(obj.closing?.title,110),body:studioCardCopy(obj.closing?.body,195)};
+ const cards=obj.cards.map(c=>({title:studioCardCopy(c?.title,110),body:studioCardCopy(c?.body,205)}));
+ const caption=studioCardCopy(obj.caption,850);
  const all=[cover,...cards,end];
  if(all.some(c=>c.title.length<8||c.body.length<30))return null;
  const topics=new Set();
@@ -770,13 +780,14 @@ s.post("/api/studio/carousel",async(req,res)=>{
   "Antes de escrever, pense em "+points+" ângulos diferentes, específicos e úteis para esse tema. Cada card ensina algo novo; não repita conceitos, conselhos, alertas ou títulos. Use a pesquisa para embasar as orientações.",
   "Gere exatamente "+total+" slides: 1 capa forte que reflita o tema, "+points+" cards educativos distintos e 1 encerramento com CTA gentil.",
   "Formato: português brasileiro natural, curioso, prático, claro e compartilhável, sem jargões e sem frases vazias.",
-  "Títulos dos cards com 10-85 caracteres; textos explicativos com 55-190 caracteres. Títulos da capa e final também curtos; textos com 50-170 caracteres.",
+  "JAMAIS inclua links, domínios, URL, www, http, fonte, citação, referência, nota de rodapé ou marcador bibliográfico nos títulos ou textos dos cards. Faça a pesquisa por trás, sem poluir a arte. O sistema guarda as fontes separadamente para conferência.",
+  "Títulos curtos e fortes, idealmente 20-60 caracteres, sem listas numeradas. Textos explicativos entre 70 e 165 caracteres, em no máximo duas frases claras. Capa e chamada final também curtas, para ótima leitura em celular.",
   "Nada de numerar repetidamente os títulos; nada de emojis; nada de prometer aprovação, liberar benefício ou sugerir crédito garantido.",
   "Quando fizer referência a números ou normas atuais, só faça isso se a busca trouxer uma fonte oficial clara, verificável e correspondente. Sem referência clara, explique o conceito em vez de citar número.",
   "Exemplo de distinção: tema 'compras do mercantil' deve falar de lista de compras, preço por quilo, validade, impulso, sazonalidade, comparação de embalagens, e não Black Friday.",
   "Dê uma legenda atrativa em português brasileiro, até 650 caracteres, com até 4 hashtags relacionadas ao tema.",
   avoid.length?"Evite ângulos semelhantes a estes títulos anteriores: "+JSON.stringify(avoid):"",
-  "Devolva apenas o JSON estruturado do esquema. Cada cartão precisa ser editorialmente distinto."
+  "Devolva apenas o JSON estruturado do esquema. Cada cartão precisa ser editorialmente distinto, sem links ou indicações de fontes no texto visual."
  ].filter(Boolean).join("\n");
  try{
   const controller=new AbortController();
