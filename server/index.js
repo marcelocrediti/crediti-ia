@@ -794,7 +794,8 @@ s.post("/api/studio/carousel",async(req,res)=>{
      tool_choice:"required",
      include:["web_search_call.action.sources"],
      text:{format:{type:"json_schema",name:"crediti_carousel",strict:true,schema:studioCarouselSchema}},
-     max_output_tokens:2300,
+     reasoning:{effort:"low"},
+     max_output_tokens:4000,
      store:false
     })
    });
