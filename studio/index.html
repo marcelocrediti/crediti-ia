@@ -107,11 +107,11 @@
  </div>
  <button type="button" id="cloudForgotPassword" class="cloud-text-btn" hidden>Esqueci minha senha</button>
  <div id="cloudRecoveryBox" hidden>
-  <p class="fine">Solicite um novo link. Enquanto o Supabase estiver redirecionando para localhost, <strong>não abra o link do e-mail</strong>. Toque e segure no botão ou link, escolha <strong>Copiar link</strong> e cole abaixo. O endereço fica oculto porque funciona como uma senha temporária. Não o compartilhe com ninguém. A verificação é feita diretamente com o Supabase.</p>
+  <p class="fine">O Supabase ainda pode abrir <strong>localhost</strong>. Você pode recuperar de duas maneiras: copiar o link diretamente do e-mail <strong>sem abrir</strong> ou, se já abriu e apareceu o erro, copiar o <strong>endereço completo da barra do navegador</strong> e colá-lo abaixo. Não compartilhe o endereço, pois ele dá acesso temporário à conta.</p>
   <button type="button" id="cloudSendRecovery" class="secondary">Enviar novo link de recuperação</button>
   <div class="cloud-link-recovery">
    <label for="cloudRecoveryLink">Cole o link do e-mail aqui</label>
-   <input id="cloudRecoveryLink" type="password" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Cole o link de recuperação copiado do e-mail, sem abrir">
+   <input id="cloudRecoveryLink" type="password" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Cole o link do e-mail ou o endereço completo do localhost">
    <button type="button" id="cloudVerifyRecoveryLink" class="secondary wide">Confirmar link e criar nova senha</button>
   </div>
   <button type="button" id="cloudCancelRecovery" class="ghost">Voltar ao login</button>
@@ -761,64 +761,86 @@ async function cloudSendPasswordRecovery(){
   });
   var result=await response.json().catch(()=>({}));
   if(!response.ok){cloudTell(cloudFriendlyError(result,"recovery"));return}
-  cloudTell("Link solicitado. Enquanto a configuração de redirecionamento não for corrigida no Supabase, NÃO clique no link. No e-mail, toque e segure nele, escolha Copiar link e cole no campo acima. O link anterior que já foi aberto não serve mais.");
+  cloudTell("Novo link solicitado. Preferencialmente copie-o do e-mail sem clicar. Se ele já abriu localhost, copie todo o endereço da barra e cole abaixo. Um token não pode ser usado duas vezes.");
  }catch(err){cloudTell("Falha ao pedir recuperação. Confira sua conexão e tente novamente.")}
  finally{cloudAuthBusy=false;$("#cloudSendRecovery").disabled=false}
 }
 
 function cloudParseRecoveryEmailLink(raw) {
  var value=String(raw||"").trim().replace(/&amp;/gi,"&");
- if(value.length<40||value.length>7000)throw new Error("Cole o link completo do e-mail de recuperação.");
+ if(value.length<40||value.length>8500)throw new Error("Cole o link completo, sem cortar o final.");
+ if(/^localhost:3000[/?#]/i.test(value))value="http://"+value;
  var u;
- try { u=new URL(value); }
- catch(e){throw new Error("O texto não parece um link válido. Copie o link diretamente do e-mail.");}
- if(u.origin!==CLOUD_URL||u.pathname.replace(/\/$/,"")!=="/auth/v1/verify"){
-  throw new Error("Esse endereço não é o link de recuperação oficial do Supabase da Crediti.");
+ try{u=new URL(value)}
+ catch(err){throw new Error("O texto não é um endereço válido. Copie o link completo da barra do navegador ou do e-mail.")}
+ const originIsSupabase=u.origin===CLOUD_URL;
+ const originIsLocal=u.origin==="http://localhost:3000"||u.origin==="https://localhost:3000";
+ if(originIsLocal){
+  // Quando o e-mail já foi aberto, o OTP foi consumido no redirect do Supabase.
+  // A sessão da recuperação pode sobreviver no fragmento # do URL de localhost.
+  var hash=new URLSearchParams(u.hash.replace(/^#/,""));
+  var access=hash.get("access_token"),refresh=hash.get("refresh_token");
+  if(hash.get("type")!=="recovery"||!access||!refresh){
+   throw new Error("O endereço localhost não contém uma sessão de recuperação. Peça um novo link e copie o link do e-mail ANTES de abri-lo.");
+  }
+  if(access.length>4400||refresh.length>2400||!/^[A-Za-z0-9._-]+$/.test(access)||!/^[A-Za-z0-9._-]+$/.test(refresh)){
+   throw new Error("O endereço de recuperação está incompleto.");
+  }
+  return {mode:"already-verified",access_token:access,refresh_token:refresh,
+   expires_in:Number(hash.get("expires_in"))||3600};
+ }
+ if(!originIsSupabase||u.pathname.replace(/\/$/,"")!=="/auth/v1/verify"){
+  throw new Error("Cole o link de recuperação enviado pelo Supabase da Crediti, sem clicar nele. Também aceito o endereço localhost completo após o erro.");
  }
  if(u.searchParams.get("type")!=="recovery"){
-  throw new Error("O link copiado não é de recuperação de senha.");
+  throw new Error("Este link não foi enviado para recuperação de senha.");
  }
- var token=u.searchParams.get("token_hash")||u.searchParams.get("token");
- if(!token||!/^[A-Za-z0-9_-]{8,512}$/.test(token)){
-  throw new Error("O link está incompleto. Copie o endereço inteiro, sem abrir.");
+ var hashOrToken=u.searchParams.get("token_hash")||u.searchParams.get("token");
+ if(!hashOrToken||!/^[A-Za-z0-9_-]{8,512}$/.test(hashOrToken)){
+  throw new Error("Este link não contém um código válido de recuperação. Solicite outro.");
  }
- return {type:"recovery",token_hash:token};
+ return {mode:"email-link",type:"recovery",token_hash:hashOrToken};
 }
-async function cloudVerifyRecoveryLink() {
+async function cloudAcceptRecoverySession(data){
+ if(!data?.access_token||!data?.refresh_token)throw new Error("O Supabase não devolveu uma sessão de recuperação válida.");
+ var response=await fetch(CLOUD_URL+"/auth/v1/user",{headers:cloudHeaders(data.access_token),cache:"no-store"});
+ var user=await response.json().catch(()=>({}));
+ if(!response.ok||!user.id)throw new Error("A sessão já expirou. Solicite um novo link de recuperação.");
+ cloudStoreSession({access_token:data.access_token,refresh_token:data.refresh_token,user,
+  expires_at:Date.now()+Number(data.expires_in||3600)*1000});
+ $("#cloudRecoveryLink").value="";
+ $("#cloudLoginBox").hidden=true;
+ $("#cloudConnectedBox").hidden=true;
+ $("#cloudResetPasswordBox").hidden=false;
+ cloudTell("Acesso confirmado. Digite e confirme a nova senha abaixo.");
+ $("#cloudNewPassword").focus();
+}
+async function cloudVerifyRecoveryLink(){
  if(cloudAuthBusy)return;
- var request;
- try{request=cloudParseRecoveryEmailLink($("#cloudRecoveryLink").value)}
+ var input;
+ try{input=cloudParseRecoveryEmailLink($("#cloudRecoveryLink").value)}
  catch(err){cloudTell(err.message);return}
  cloudAuthBusy=true;$("#cloudVerifyRecoveryLink").disabled=true;
- cloudTell("Conferindo link com o Supabase. Não feche o aplicativo.");
- try {
-  // POST evita o redirecionamento configurado incorretamente para localhost.
+ cloudTell(input.mode==="already-verified"?"Verificando a sessão recuperada do endereço localhost…":"Verificando o link sem abrir o endereço localhost…");
+ try{
+  if(input.mode==="already-verified"){
+   await cloudAcceptRecoverySession(input);
+   return;
+  }
   var response=await fetch(CLOUD_URL+"/auth/v1/verify",{
    method:"POST",cache:"no-store",
    headers:cloudHeaders(null,{"Content-Type":"application/json"}),
-   body:JSON.stringify(request)
+   body:JSON.stringify({type:"recovery",token_hash:input.token_hash})
   });
   var data=await response.json().catch(()=>({}));
   if(!response.ok){
-   cloudTell(response.status===403||response.status===422?
-    "Este link já foi usado ou expirou. Solicite um novo e COPIE antes de clicar. Não abra o endereço localhost.":
-    "O Supabase não aceitou este link. Peça um novo e copie o endereço completo do e-mail.");
-   return;
+   if(data.error_code==="otp_expired"||response.status===403||response.status===422){
+    throw new Error("O código de recuperação já foi utilizado ou expirou. Peça outro e copie o link sem abri-lo. Se abriu localhost, copie o endereço COMPLETO da barra, com o final após #.");
+   }
+   throw new Error(cloudFriendlyError(data,"recovery"));
   }
-  // Valida o resultado antes de aceitar o acesso à troca de senha.
-  if(!data.access_token||!data.refresh_token)throw new Error("O Supabase não devolveu uma sessão válida.");
-  var who=await fetch(CLOUD_URL+"/auth/v1/user",{headers:cloudHeaders(data.access_token)});
-  var user=await who.json().catch(()=>({}));
-  if(!who.ok||!user.id)throw new Error("Não consegui confirmar a identidade da conta.");
-  cloudStoreSession({access_token:data.access_token,refresh_token:data.refresh_token,user:user,
-   expires_at:Date.now()+Number(data.expires_in||3600)*1000});
-  $("#cloudRecoveryLink").value="";
-  $("#cloudLoginBox").hidden=true;
-  $("#cloudConnectedBox").hidden=true;
-  $("#cloudResetPasswordBox").hidden=false;
-  cloudTell("Link confirmado com segurança. Agora informe e confirme sua nova senha abaixo.");
-  $("#cloudNewPassword").focus();
- }catch(err){cloudTell(err.message||"Não foi possível conferir o link. Tente com um link novo.")}
+  await cloudAcceptRecoverySession(data);
+ }catch(err){cloudTell(err.message||"Não foi possível verificar o link. Peça outro.")}
  finally{cloudAuthBusy=false;$("#cloudVerifyRecoveryLink").disabled=false}
 }
 async function cloudProcessRecoveryCallback(){
