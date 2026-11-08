@@ -11,8 +11,8 @@
 <nav class="tabs"><button class="tab active" data-tab="create">Criar carrossel</button><button class="tab" data-tab="library">Meus carrosséis</button><button class="tab" data-tab="brand">Identidade visual</button></nav>
 <section id="create" class="section active">
 <div class="cols">
-<div class="panel"><h2>Qual é o assunto?</h2><p class="hint">Escreva o tema. O estúdio prepara títulos, explicações e uma chamada final, tudo editável.</p>
-<label for="topic">Assunto do carrossel</label><textarea id="topic" rows="3" maxlength="180" placeholder="Ex.: 5 cuidados antes de contratar um financiamento de moto">5 erros que deixam sua Black Friday mais cara</textarea>
+<div class="panel"><h2>Qual é o assunto?</h2><p class="hint">Escreva um tema. A IA pesquisa fontes brasileiras e cria um carrossel educativo exclusivo, com assuntos diferentes em cada card.</p>
+<label for="topic">Assunto do carrossel</label><textarea id="topic" rows="3" maxlength="180" placeholder="Ex.: 5 cuidados antes de contratar um financiamento de moto"></textarea>
 <div class="inline"><div><label for="count">Quantidade de cards</label><select id="count"><option value="5">5 cards</option><option value="6" selected>6 cards</option><option value="7">7 cards</option><option value="8">8 cards</option><option value="9">9 cards</option><option value="10">10 cards</option></select></div><div><label for="style">Estilo</label><select id="style"><option value="clean">Editorial claro</option><option value="dark">Escuro elegante</option></select></div></div>
 <fieldset class="photo-choice" aria-describedby="photoHelp"><legend>Quer imagens no carrossel?</legend>
 <label class="photo-option"><input type="radio" name="photoMode" value="none"><span><b>Sem imagens</b><small>Todos os cards apenas com textos</small></span></label>
@@ -27,8 +27,10 @@
 <div id="uploadList" aria-label="Fotos anexadas por card" class="upload-grid"></div>
 </div>
 <p id="photoStatus" class="photo-status" role="status" aria-live="polite">Escolha como quer usar imagens.</p>
-<button class="primary wide" id="generate">✦ Gerar carrossel sobre esse assunto</button>
-<p class="fine">Textos gerados por modelos locais editáveis. A geração com IA externa ainda depende de conexão segura. As fotografias vêm de um acervo público, com origem brasileira identificada e atribuição das licenças. Nenhuma foto é gerada por IA. Revise as condições financeiras e os créditos das fotos antes de publicar.</p>
+<button class="primary wide" id="generate">✦ Pesquisar e gerar carrossel com IA</button>
+<p class="fine" id="contentStatus" role="status" aria-live="polite">A IA pesquisa o assunto escolhido em fontes brasileiras antes de escrever, sem reutilizar roteiros de outros temas.</p>
+<div id="contentSources" style="font-size:12px;margin:10px 0 18px;display:grid;gap:6px" aria-label="Fontes consultadas pela IA"></div>
+<p class="fine">Os textos são criados por IA e podem ser editados. A pesquisa prioriza fontes oficiais do Brasil. Confira os dados atuais antes de publicar. Fotografias de acervo e imagens criadas por IA são opções diferentes.</p>
 <div class="editbox"><h3>Editar o card selecionado</h3><label for="cardTitle">Título</label><textarea id="cardTitle" rows="3"></textarea><label for="cardText">Texto explicativo</label><textarea id="cardText" rows="4"></textarea><label for="cardLayout">Modelo do card</label><select id="cardLayout"><option value="auto">Padrão</option><option value="clean">Fundo branco</option><option value="dark">Fundo escuro</option><option value="yellow">Destaque amarelo</option></select>
 <button class="ghost wide" id="replacePhoto">Pesquisar outras fotos sobre o assunto</button>
 <button class="ghost wide" id="replaceCardPhoto" type="button">Trocar foto deste card</button>
@@ -486,28 +488,94 @@ async function populatePhotos(post,customQuery){
   $("#photoStatus").textContent="Não consegui completar a busca de fotos brasileiras. Os cards sem foto foram preservados.";
  }finally{$("#generate").disabled=false;$("#replacePhoto").disabled=false}
 }
-function cleanTopic(s){return s.trim().replace(/[.!?]+$/,"")}
-async function generate(){
-var topic=cleanTopic($("#topic").value);
-if(topic.length<5){msg("Escreva um assunto com pelo menos cinco letras.");return}
-var qty=Math.max(5,Math.min(10,Number($("#count").value)||6)),cat=classify(topic),points=topics[cat].concat([
- ["Compare as alternativas","Avalie diferentes possibilidades e procure informações antes de decidir."],
- ["Leia todas as condições","Conheça as regras, os custos e as possíveis limitações antes de seguir."],
- ["Guarde os comprovantes","Organize registros e documentos importantes para futuras consultas."]
- ]),slides=[];
-var head=topic.length>78?topic.slice(0,75).replace(/\s+\S*$/,"")+"…":topic;
-slides.push({title:head.charAt(0).toUpperCase()+head.slice(1),body:"Entenda os pontos que merecem atenção antes de decidir.",kind:"cover",layout:"auto"});
-var n=qty-2;for(var i=0;i<n;i++){var v=points[i%points.length];slides.push({title:(i+1)+". "+v[0],body:v[1],kind:"content",layout:"auto"})}
-slides.push({title:"Quer entender melhor esse assunto?",body:"Salve este conteúdo e compartilhe. Para conhecer as opções da Crediti, fale com nossa equipe.",kind:"cta",layout:"auto"});
-current={id:"p"+Date.now(),name:head,topic:topic,slides:slides,style:$("#style").value,photoMode:selectedImageMode(),photo:null,images:[],uploadedNames:{},forceImages:{},credits:[],caption:head+". Informação ajuda a decidir melhor. Salve e compartilhe. Consulte as condições na Crediti. #Crediti #EducaçãoFinanceira #CréditoConsciente #Itapajé",createdAt:new Date().toISOString()};
-for(var ix=0;ix<Math.min(qty,10);ix++){
- var attachment=stagedUploads[ix];
- if(attachment){current.images[ix]=attachment.data;current.uploadedNames[ix]=attachment.name;current.forceImages[ix]=true;}
+function cleanTopic(s){return String(s||"").trim().replace(/[.!?]+$/,"")}
+var contentBusy=false;
+var carouselApiUrl="https://crediti-ia-api.onrender.com/api/studio/carousel";
+function renderResearchSources(post){
+ var el=$("#contentSources");if(!el)return;
+ el.innerHTML="";
+ var sources=post?.sources||[];
+ if(!sources.length)return;
+ var label=document.createElement("b");
+ label.textContent="Fontes brasileiras consultadas:";
+ el.appendChild(label);
+ sources.forEach(function(item){
+  try{
+   var url=new URL(item.url);
+   if(url.protocol!=="https:")return;
+   var a=document.createElement("a");
+   a.href=url.href;a.target="_blank";a.rel="noopener noreferrer";
+   a.textContent=item.title||url.hostname;a.style.color="#34495e";a.style.textDecoration="underline";
+   el.appendChild(a);
+  }catch(e){}
+ });
 }
-var post=current;index=0;$("#photoQuery").value=topic;resetGallery(topic);
-if(post.photo&&post.photoMode!=="none"){post.images[0]=post.photo}
-render();msg("Carrossel criado. Você pode editar todos os textos.");
-if(post.photoMode!=="none"){await populatePhotos(post);moreGalleryPhotos()}
+async function generate(){
+ if(contentBusy)return;
+ var topic=cleanTopic($("#topic").value);
+ if(topic.length<5){$("#contentStatus").textContent="Escreva um tema com pelo menos cinco caracteres.";msg("Informe o assunto que a IA deve pesquisar.");return}
+ var qty=Math.max(5,Math.min(10,Number($("#count").value)||6));
+ var prev=current,btn=$("#generate"),controller=new AbortController();
+ var timer=setTimeout(function(){controller.abort()},100000);
+ var related=(posts||[]).filter(function(p){
+  var q=cleanTopic(p.topic).toLowerCase(),t=topic.toLowerCase();
+  return q&&t&&(q.includes(t)||t.includes(q));
+ }).slice(0,4).flatMap(function(p){return (p.slides||[]).slice(1,-1).map(function(sl){return sl.title})}).slice(0,16);
+ contentBusy=true;btn.disabled=true;btn.textContent="Pesquisando fontes brasileiras…";
+ $("#contentStatus").textContent="Pesquisando informações do Brasil sobre: "+topic+". Cada card terá um assunto diferente.";
+ try{
+  var res=await fetch(carouselApiUrl,{
+   method:"POST",cache:"no-store",signal:controller.signal,
+   headers:{"Content-Type":"application/json"},
+   body:JSON.stringify({topic:topic,count:qty,avoid:related})
+  });
+  var result=await res.json().catch(function(){return {}});
+  if(!res.ok||!result.success){
+   throw new Error(result.error||"A IA não conseguiu preparar o conteúdo agora.");
+  }
+  if(!Array.isArray(result.slides)||result.slides.length!==qty||!Array.isArray(result.sources)||!result.sources.length){
+   throw new Error("A IA retornou um carrossel incompleto. Gere novamente.");
+  }
+  var slides=result.slides.map(function(sl,i){
+   return {title:String(sl.title||"").trim(),body:String(sl.body||"").trim(),
+    kind:i===0?"cover":i===qty-1?"cta":"content",layout:"auto"};
+  });
+  if(slides.some(function(sl){return !sl.title||!sl.body}))throw new Error("Um dos cards está sem texto.");
+  // Somente substitui o carrossel atual após a pesquisa terminar com sucesso.
+  var caption=String(result.caption||"").trim();
+  var sources=result.sources.slice(0,6).filter(function(o){try{return new URL(o.url).protocol==="https:"}catch(e){return false}});
+  var researchNotes="\n\nFontes consultadas:\n"+sources.map(function(o){return o.url}).join("\n");
+  var post={
+   id:"p"+Date.now(),name:slides[0].title,topic:topic,slides:slides,style:$("#style").value,
+   photoMode:selectedImageMode(),photo:null,images:[],uploadedNames:{},forceImages:{},
+   credits:[],imageCredits:{},sources:sources,captionBase:caption+researchNotes,
+   caption:caption+researchNotes,createdAt:new Date().toISOString()
+  };
+  for(var ix=0;ix<Math.min(qty,10);ix++){
+   var attachment=stagedUploads[ix];
+   if(attachment){
+    post.images[ix]=attachment.data;
+    post.uploadedNames[ix]=attachment.name;
+    post.forceImages[ix]=true;
+   }
+  }
+  current=post;index=0;
+  $("#photoQuery").value=topic;resetGallery(topic);
+  render();renderResearchSources(post);
+  $("#contentStatus").textContent="Carrossel com "+qty+" cards únicos, pesquisado em "+sources.length+" fonte(s) brasileira(s). Revise os dados antes de publicar.";
+  msg("Carrossel educativo criado pela IA. Você pode editar os cards.");
+  if(post.photoMode!=="none"){await populatePhotos(post);moreGalleryPhotos()}
+ }catch(error){
+  $("#contentStatus").textContent=error.name==="AbortError"?
+   "A pesquisa demorou mais que o permitido. Seu carrossel anterior foi preservado.":
+   (error.message||"Não foi possível pesquisar o tema. Seu carrossel anterior foi preservado.");
+  // Não usa modelos estáticos como se fossem resultado da pesquisa.
+  if(current===prev&&prev)renderResearchSources(prev);
+  msg("Não consegui gerar o conteúdo pela IA. Veja o aviso na tela.");
+ }finally{
+  clearTimeout(timer);
+  contentBusy=false;btn.disabled=false;btn.textContent="✦ Pesquisar e gerar carrossel com IA";
+ }
 }
 function wrapText(ctx,text,maxWidth){var words=String(text||"").split(/\s+/),lines=[],line="";for(var i=0;i<words.length;i++){var test=line?line+" "+words[i]:words[i];if(ctx.measureText(test).width>maxWidth&&line){lines.push(line);line=words[i]}else{line=test}}if(line)lines.push(line);return lines}
 function lines(ctx,arr,x,y,height){arr.forEach(function(s){ctx.fillText(s,x,y);y+=height});return y}
@@ -627,7 +695,7 @@ paint();return Promise.resolve();
 function drawAll(){galleryBatchInvalidate();if(!current)return;var num=current.slides.length;$("#countBadge").textContent=num+" cards";$("#pagePos").textContent="Card "+(index+1)+" de "+num+" • Toque nas miniaturas para editar";$("#thumbs").innerHTML="";current.slides.forEach(function(sl,i){var b=document.createElement("button");b.className="thumb"+(index===i?" selected":"");b.setAttribute("aria-label","Ver card "+(i+1));var cn=document.createElement("canvas");cn.width=1080;cn.height=1350;b.appendChild(cn);var sp=document.createElement("span");sp.textContent=i===0?"CAPA":i===num-1?"CTA":i;b.appendChild(sp);b.addEventListener("click",function(){index=i;render()});$("#thumbs").appendChild(b);draw(cn,sl,i,num,true)});
 draw($("#preview"),current.slides[index],index,num,false)
 }
-function render(){if(!current)return;renderUploadList();$("#cardTitle").value=current.slides[index].title;$("#cardText").value=current.slides[index].body;$("#cardLayout").value=current.slides[index].layout||"auto";$("#caption").value=current.caption;document.querySelector('input[name="photoMode"][value="'+(current.photoMode||"none")+'"]').checked=true;updatePhotoControls();drawAll()}
+function render(){if(!current)return;renderUploadList();renderResearchSources(current);$("#cardTitle").value=current.slides[index].title;$("#cardText").value=current.slides[index].body;$("#cardLayout").value=current.slides[index].layout||"auto";$("#caption").value=current.caption;document.querySelector('input[name="photoMode"][value="'+(current.photoMode||"none")+'"]').checked=true;updatePhotoControls();drawAll()}
 async function save(){if(!current){msg("Crie um carrossel primeiro.");return}current.name=String(current.slides?.[0]?.title||current.topic||current.name||"Carrossel Crediti").trim();var i=posts.findIndex(function(p){return p.id===current.id});if(i>=0)posts[i]=current;else posts.unshift(current);libraryChanged=true;var ok=await persist();if(ok)msg("Carrossel salvo neste dispositivo, com suas fotos anexadas.");}
 async function exportCard(i,extension){var cn=document.createElement("canvas");cn.width=1080;cn.height=1350;await brandAvatarReady;await draw(cn,current.slides[i],i,current.slides.length,false);var type=extension==="png"?"image/png":"image/jpeg";return await new Promise(function(resolve){cn.toBlob(resolve,type,.94)})}
 async function download(i){if(!current)return;var ext=$("#format").value;var blob=await exportCard(i,ext);if(!blob){msg("Não foi possível gerar imagem.");return}var url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download="crediti-card-"+String(i+1).padStart(2,"0")+"."+ext;document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(url)},25000);msg("Card "+(i+1)+" exportado em "+ext.toUpperCase()+".")}
@@ -761,10 +829,9 @@ $("#cardPhoto").onchange=function(){var files=Array.from(this.files||[]);this.va
 $("#count").onchange=renderUploadList;
 $("#saveBrand").onclick=function(){try{localStorage.setItem("crediti-studio-brand",JSON.stringify({handle:$("#handle").value,name:$("#brandName").value}))}catch(e){}drawAll();msg("Identidade salva.")};
 try{var brand=JSON.parse(localStorage.getItem("crediti-studio-brand")||"null");if(brand){$("#handle").value=brand.handle||"@crediti.oficial";$("#brandName").value=brand.name||"Crediti | Empréstimos e Financiamentos"}}catch(e){}
-// Exemplo de abertura sem consultar banco de imagens antes da escolha do usuário.
-document.querySelector('input[name="photoMode"][value="none"]').checked=true;
-generate();
-document.querySelector('input[name="photoMode"][value="cover"]').checked=true;updatePhotoControls();
+// O app só gera conteúdo após o usuário informar um tema e clicar no botão.
+document.querySelector('input[name="photoMode"][value="cover"]').checked=true;
+updatePhotoControls();renderUploadList();
 if("serviceWorker" in navigator){window.addEventListener("load",function(){navigator.serviceWorker.register("./sw.js").catch(function(){})})}
 })();
 </script></body></html>
