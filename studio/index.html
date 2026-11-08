@@ -29,7 +29,7 @@
 <p id="photoStatus" class="photo-status" role="status" aria-live="polite">Escolha como quer usar imagens.</p>
 <button class="primary wide" id="generate">✦ Gerar carrossel sobre esse assunto</button>
 <p class="fine">Textos gerados por modelos locais editáveis. A geração com IA externa ainda depende de conexão segura. As fotografias vêm de um acervo público, com origem brasileira identificada e atribuição das licenças. Nenhuma foto é gerada por IA. Revise as condições financeiras e os créditos das fotos antes de publicar.</p>
-<div class="editbox"><h3>Editar o card selecionado</h3><label for="cardTitle">Título</label><textarea id="cardTitle" rows="3"></textarea><label for="cardText">Texto explicativo</label><textarea id="cardText" rows="4"></textarea><div class="inline"><div><label for="cardLayout">Modelo</label><select id="cardLayout"><option value="auto">Padrão</option><option value="clean">Fundo branco</option><option value="dark">Fundo escuro</option><option value="yellow">Destaque amarelo</option></select></div><div><label for="name">Nome da campanha</label><input type="text" id="name" placeholder="Nome"></div></div>
+<div class="editbox"><h3>Editar o card selecionado</h3><label for="cardTitle">Título</label><textarea id="cardTitle" rows="3"></textarea><label for="cardText">Texto explicativo</label><textarea id="cardText" rows="4"></textarea><label for="cardLayout">Modelo do card</label><select id="cardLayout"><option value="auto">Padrão</option><option value="clean">Fundo branco</option><option value="dark">Fundo escuro</option><option value="yellow">Destaque amarelo</option></select>
 <button class="ghost wide" id="replacePhoto">Pesquisar outras fotos sobre o assunto</button>
 <button class="ghost wide" id="replaceCardPhoto" type="button">Trocar foto deste card</button>
 <input type="file" id="cardPhoto" accept="image/*,.heic,.heif,.dng" hidden>
@@ -627,8 +627,8 @@ paint();return Promise.resolve();
 function drawAll(){galleryBatchInvalidate();if(!current)return;var num=current.slides.length;$("#countBadge").textContent=num+" cards";$("#pagePos").textContent="Card "+(index+1)+" de "+num+" • Toque nas miniaturas para editar";$("#thumbs").innerHTML="";current.slides.forEach(function(sl,i){var b=document.createElement("button");b.className="thumb"+(index===i?" selected":"");b.setAttribute("aria-label","Ver card "+(i+1));var cn=document.createElement("canvas");cn.width=1080;cn.height=1350;b.appendChild(cn);var sp=document.createElement("span");sp.textContent=i===0?"CAPA":i===num-1?"CTA":i;b.appendChild(sp);b.addEventListener("click",function(){index=i;render()});$("#thumbs").appendChild(b);draw(cn,sl,i,num,true)});
 draw($("#preview"),current.slides[index],index,num,false)
 }
-function render(){if(!current)return;renderUploadList();$("#cardTitle").value=current.slides[index].title;$("#cardText").value=current.slides[index].body;$("#cardLayout").value=current.slides[index].layout||"auto";$("#name").value=current.name;$("#caption").value=current.caption;document.querySelector('input[name="photoMode"][value="'+(current.photoMode||"none")+'"]').checked=true;updatePhotoControls();drawAll()}
-async function save(){if(!current){msg("Crie um carrossel primeiro.");return}var i=posts.findIndex(function(p){return p.id===current.id});if(i>=0)posts[i]=current;else posts.unshift(current);libraryChanged=true;var ok=await persist();if(ok)msg("Carrossel salvo neste dispositivo, com suas fotos anexadas.");}
+function render(){if(!current)return;renderUploadList();$("#cardTitle").value=current.slides[index].title;$("#cardText").value=current.slides[index].body;$("#cardLayout").value=current.slides[index].layout||"auto";$("#caption").value=current.caption;document.querySelector('input[name="photoMode"][value="'+(current.photoMode||"none")+'"]').checked=true;updatePhotoControls();drawAll()}
+async function save(){if(!current){msg("Crie um carrossel primeiro.");return}current.name=String(current.slides?.[0]?.title||current.topic||current.name||"Carrossel Crediti").trim();var i=posts.findIndex(function(p){return p.id===current.id});if(i>=0)posts[i]=current;else posts.unshift(current);libraryChanged=true;var ok=await persist();if(ok)msg("Carrossel salvo neste dispositivo, com suas fotos anexadas.");}
 async function exportCard(i,extension){var cn=document.createElement("canvas");cn.width=1080;cn.height=1350;await brandAvatarReady;await draw(cn,current.slides[i],i,current.slides.length,false);var type=extension==="png"?"image/png":"image/jpeg";return await new Promise(function(resolve){cn.toBlob(resolve,type,.94)})}
 async function download(i){if(!current)return;var ext=$("#format").value;var blob=await exportCard(i,ext);if(!blob){msg("Não foi possível gerar imagem.");return}var url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download="crediti-card-"+String(i+1).padStart(2,"0")+"."+ext;document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(url)},25000);msg("Card "+(i+1)+" exportado em "+ext.toUpperCase()+".")}
 
@@ -745,10 +745,9 @@ $("#replacePhoto").onclick=function(){if(!current){msg("Crie um carrossel primei
 updatePhotoControls();
 $("#prev").onclick=function(){if(current){index=Math.max(0,index-1);render()}};
 $("#next").onclick=function(){if(current){index=Math.min(current.slides.length-1,index+1);render()}};
-$("#cardTitle").oninput=function(){if(current){current.slides[index].title=this.value;drawAll()}};
+$("#cardTitle").oninput=function(){if(current){current.slides[index].title=this.value;if(index===0)current.name=this.value.trim()||current.topic||"Carrossel Crediti";drawAll()}};
 $("#cardText").oninput=function(){if(current){current.slides[index].body=this.value;drawAll()}};
 $("#cardLayout").onchange=function(){if(current){current.slides[index].layout=this.value;drawAll()}};
-$("#name").oninput=function(){if(current)current.name=this.value};
 $("#caption").oninput=function(){if(current)current.caption=this.value};
 $("#save").onclick=save;
 $("#downloadBtn").onclick=function(){download(index)};
