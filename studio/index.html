@@ -206,7 +206,7 @@ async function loadSavedLibrary(){
   if(document.querySelector("#library.section.active"))drawLibrary();
  }
 }
-loadSavedLibrary();
+var libraryLoadPromise=loadSavedLibrary();
 var topics={
 "fgts":[["Entenda as regras","Confira as regras atuais para o saque-aniversário e a antecipação antes de decidir."],["Veja quanto recebe","O valor liberado pode ser diferente do saldo total que aparece no aplicativo."],["Compare os custos","Confira juros, custo efetivo total e condições da operação."],["Pense no futuro","A antecipação compromete valores de saques futuros. Leia o contrato."],["Segurança em primeiro lugar","Nunca pague Pix antecipado para liberar crédito."]],
 "consorcio":[["Como funciona","O consórcio reúne participantes em um grupo com regras para contemplação."],["O que é contemplação?","A utilização da carta depende de sorteio ou lance, conforme o contrato."],["Não confunda modalidades","Consórcio e financiamento são diferentes. Compare as condições."],["Confira os custos","Entenda taxa de administração, fundo de reserva, seguro e prazo, quando houver."],["Planejamento faz diferença","Leia as regras de pagamento e contemplação antes de aderir."]],
@@ -887,6 +887,7 @@ function render(){if(!current)return;
 function folderNameText(value){return String(value||"").replace(/\s+/g," ").trim().slice(0,55)}
 function folderById(id){return folders.find(function(folder){return folder.id===id})}
 async function createFolderByName(rawName){
+ await libraryLoadPromise;
  var name=folderNameText(rawName);
  if(name.length<2){msg("Escreva um nome de pasta com pelo menos duas letras.");return null}
  if(folders.some(function(item){return item.name.toLocaleLowerCase("pt-BR")===name.toLocaleLowerCase("pt-BR")})){msg("Já existe uma pasta com esse nome.");return null}
@@ -906,7 +907,8 @@ function refreshFolderSelect(prefer){
  });
  if(folderById(previous))select.value=previous;
 }
-function save(){
+async function save(){
+ await libraryLoadPromise;
  if(!current){msg("Crie um carrossel primeiro.");return}
  fixUnsortedOldCarousels();
  refreshFolderSelect(current.folderId);
@@ -915,6 +917,7 @@ function save(){
  $("#folderPicker").scrollIntoView({behavior:"smooth",block:"center"});
 }
 async function finishSaveInFolder(){
+ await libraryLoadPromise;
  if(!current)return;
  var folder=folderById($("#folderSelect").value);
  if(!folder){$("#folderSaveStatus").textContent="Selecione uma pasta ou crie uma nova antes de salvar.";return}
@@ -930,6 +933,7 @@ async function finishSaveInFolder(){
  msg("Carrossel salvo na pasta “"+folder.name+"”.");
 }
 async function renameFolder(folderId){
+ await libraryLoadPromise;
  var folder=folderById(folderId);if(!folder)return;
  var input=prompt("Novo nome da pasta:",folder.name);
  if(input===null)return;
@@ -941,6 +945,7 @@ async function renameFolder(folderId){
  drawLibrary();refreshFolderSelect(folder.id);msg("Pasta renomeada para “"+name+"”.");
 }
 async function deleteFolder(folderId){
+ await libraryLoadPromise;
  var folder=folderById(folderId);if(!folder)return;
  var items=posts.filter(function(post){return post.folderId===folderId}),total=items.length;
  var question=total?
@@ -1032,7 +1037,8 @@ function changeTab(n){
  document.querySelectorAll(".section").forEach(function(el){el.classList.toggle("active",el.id===n)});
  if(n==="library")drawLibrary();
 }
-function openFolders(){
+async function openFolders(){
+ await libraryLoadPromise;
  activeFolderId=null;
  changeTab("library");
  document.querySelector("#library").scrollIntoView({behavior:"smooth",block:"start"});
