@@ -309,6 +309,111 @@ async function loadSavedLibrary(){
 }
 var libraryLoadPromise=loadSavedLibrary();
 
+
+var localMediaFiles=Array(10).fill(null),localMediaStateId="pre-generation",localMediaTouched=false,localMediaLoadDone=false;
+var localMediaWrite=Promise.resolve(),localMediaSaveOK=false;
+function localPhotoStatus(message,warning){
+ var el=$("#localSaveStatus");if(!el)return;
+ el.textContent=message;
+ el.style.color=warning?"#af3d26":"#286244";
+}
+async function localMediaGet(key){
+ var db=await openLibraryDB();
+ return await new Promise(function(resolve,reject){
+  var request=db.transaction("posts","readonly").objectStore("posts").get(key);
+  request.onsuccess=function(){resolve(request.result||null)};
+  request.onerror=function(){reject(request.error||new Error("Não consegui ler as fotos."))}
+ });
+}
+async function localMediaPut(working,projectId){
+ var db=await openLibraryDB();
+ return await new Promise(function(resolve,reject){
+  var tx=db.transaction("posts","readwrite"),store=tx.objectStore("posts");
+  store.put(working,"working-photos");
+  if(projectId&&projectId!=="pre-generation"){
+   var originals=working.originals||[];
+   // Gravação incremental sem descartar outras fotos do projeto.
+   var request=store.get("originals:"+projectId);
+   request.onsuccess=function(){
+    var older=Array.isArray(request.result)?request.result:[];
+    var merged=Array(10).fill(null);
+    for(var i=0;i<10;i++)merged[i]=originals[i]||older[i]||null;
+    store.put(merged,"originals:"+projectId);
+   };
+  }
+  tx.oncomplete=function(){resolve(true)};
+  tx.onerror=function(){reject(tx.error||new Error("Armazenamento indisponível."))};
+  tx.onabort=function(){reject(tx.error||new Error("Gravação interrompida."))}
+ });
+}
+async function localMediaPersist(){
+ localMediaTouched=true;
+ const imageCopy=stagedUploads.map(function(img){return img?{name:img.name,data:img.data}:null});
+ const originals=localMediaFiles.slice();
+ const projectId=current?.id||localMediaStateId||"pre-generation";
+ const record={images:imageCopy,originals:originals,projectId:projectId,
+  topic:$("#topic")?.value||"",cardCount:Number($("#count")?.value||6),updatedAt:new Date().toISOString()};
+ localPhotoStatus("Guardando suas fotos automaticamente neste aparelho…",false);
+ localMediaWrite=localMediaWrite.catch(function(){}).then(async function(){
+  try{
+   await localMediaPut(record,projectId);
+   localMediaSaveOK=true;
+   localPhotoStatus(imageCopy.filter(Boolean).length+" foto(s) do trabalho guardada(s) neste aparelho. Você pode sair e voltar sem precisar salvar numa pasta.",false);
+   return true;
+  }catch(err){
+   localMediaSaveOK=false;
+   console.warn("Falha no armazenamento de fotos do Crediti Studio",err);
+   localPhotoStatus("ATENÇÃO: não foi possível guardar suas fotos. Não saia do aplicativo antes de baixar os arquivos ou liberar espaço no iPhone.",true);
+   return false;
+  }
+ });
+ return localMediaWrite;
+}
+async function localMediaRestore(){
+ if(localMediaTouched)return;
+ try{
+  const record=await localMediaGet("working-photos");
+  if(!record||!Array.isArray(record.images)){localMediaLoadDone=true;localPhotoStatus("Pronto para receber fotos. Os anexos são guardados automaticamente neste aparelho.",false);return}
+  if(localMediaTouched)return;
+  const old=stagedUploads;
+  stagedUploads=record.images.slice(0,10);
+  while(stagedUploads.length<10)stagedUploads.push(null);
+  localMediaFiles=Array.isArray(record.originals)?record.originals.slice(0,10):Array(10).fill(null);
+  while(localMediaFiles.length<10)localMediaFiles.push(null);
+  localMediaStateId=record.projectId||"pre-generation";
+  if(!$("#topic").value.trim()&&record.topic)$("#topic").value=record.topic;
+  if(record.cardCount>=5&&record.cardCount<=10)$("#count").value=String(record.cardCount);
+  const count=stagedUploads.filter(Boolean).length;
+  renderUploadList();
+  localPhotoStatus(count?count+" foto(s) reencontrada(s) neste aparelho, mesmo sem terem sido salvas em uma pasta.":"Nenhum anexo pendente. Você pode continuar montando carrosséis normalmente.",false);
+ }catch(err){console.warn("Não foi possível restaurar anexos",err);
+  localPhotoStatus("Não consegui conferir as fotos deste aparelho. Evite apagar dados do Safari.",true)}
+ finally{localMediaLoadDone=true}
+}
+async function localMediaDeleteForPost(postId){
+ if(!postId)return;
+ try{
+  const db=await openLibraryDB();
+  await new Promise(function(resolve,reject){
+   const tx=db.transaction("posts","readwrite");
+   tx.objectStore("posts").delete("originals:"+postId);
+   tx.oncomplete=resolve;tx.onerror=function(){reject(tx.error)};
+  });
+ }catch(err){console.warn("Originais ainda no armazenamento local",err)}
+}
+async function localMediaDownloadOriginal(slot,postId){
+ var file=localMediaFiles[slot];
+ if((!file||postId&&localMediaStateId!==postId)&&postId){
+  try{const stored=await localMediaGet("originals:"+postId);file=stored?.[slot]||null}
+  catch(err){}
+ }
+ if(!file){localPhotoStatus("Não encontrei a versão original deste arquivo no aparelho.",true);return}
+ var href=URL.createObjectURL(file),a=document.createElement("a");
+ a.href=href;a.download=file.name||("foto-card-"+(slot+1)+".jpg");
+ document.body.appendChild(a);a.click();a.remove();
+ setTimeout(function(){URL.revokeObjectURL(href)},30000);
+}
+
 var DRAFT_STORE=STORE+"-drafts",draftsReady=false,draftsTouched=false,draftTimer=null,draftWriteQueue=Promise.resolve();
 var autosaveNoticeTimer=null;
 function draftBackupText(posts){
