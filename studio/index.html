@@ -13,6 +13,17 @@
 .draft-actions button{flex:1;padding:8px 10px;font-size:11px;border-radius:8px}
 .cloud-backup-panel{padding:15px!important;background:#fffefa;border-color:#f1db89}
 .cloud-backup-panel h2{font-size:15px}
+.cloud-auth-tabs{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:14px 0}
+.cloud-auth-tabs button{border:1px solid #d5dce6;border-radius:9px;padding:11px 6px;background:white;color:#263245;font-weight:800;font-size:12px}
+.cloud-auth-tabs button.active{background:#fdca01;border-color:#fdca01;color:#161616}
+.cloud-password-wrap{display:flex;align-items:stretch;gap:6px}
+.cloud-password-wrap input{min-width:0;flex:1}
+.cloud-password-wrap button{border:1px solid #cdd5df;border-radius:9px;padding:0 12px;background:white;color:#182333;font-size:13px;font-weight:700}
+.cloud-text-btn{background:transparent;border:0;color:#182f54;text-decoration:underline;margin:12px 0;padding:8px 0;font-size:12px}
+#cloudRecoveryBox[hidden],#cloudResetPasswordBox[hidden],#cloudSignIn[hidden],#cloudSignUp[hidden],#cloudForgotPassword[hidden],#cloudPasswordRow[hidden],#cloudConfirmRow[hidden]{display:none!important}
+#cloudRecoveryBox button{margin:6px 7px 6px 0;padding:11px;font-size:12px}
+#cloudResetPasswordBox h3{font-family:Sora;font-size:15px}
+
 .cloud-backup-panel input[type=email],.cloud-backup-panel input[type=password]{border:1px solid #dce2e9;background:white;border-radius:10px;width:100%;padding:12px;font-size:14px;min-height:46px}
 .cloud-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
 .cloud-actions button{flex:1;min-width:135px}
@@ -73,14 +84,40 @@
 <h2>Proteção automática das fotografias</h2>
 <p class="fine">Entre na sua conta uma vez. Toda foto original anexada será copiada para uma pasta privada na nuvem e poderá ser recuperada, mesmo depois de sair do app ou apagar o carrossel. A cópia só está protegida quando aparecer “Guardada na nuvem”.</p>
 <div id="cloudLoginBox">
-<label for="cloudEmail">Seu e-mail para recuperar os arquivos</label>
-<input type="email" id="cloudEmail" autocomplete="email" placeholder="Seu e-mail">
-<label for="cloudPassword">Senha da proteção das fotos</label>
-<input type="password" id="cloudPassword" autocomplete="current-password" placeholder="Use uma senha forte, com pelo menos 8 caracteres">
-<div class="cloud-actions">
-<button class="secondary" type="button" id="cloudSignIn">Entrar e proteger fotos</button>
-<button class="ghost" type="button" id="cloudSignUp">Criar acesso</button>
+ <div class="cloud-auth-tabs" role="group" aria-label="Etapas do acesso à proteção">
+  <button type="button" id="cloudTabSignup" class="active" aria-pressed="true">1. Criar acesso</button>
+  <button type="button" id="cloudTabLogin" aria-pressed="false">2. Entrar na conta</button>
+ </div>
+ <p class="fine" id="cloudInstructions">Primeiro, cadastre seu e-mail e crie uma senha. Depois entre com os mesmos dados para guardar suas fotos na nuvem.</p>
+ <label for="cloudEmail">E-mail da proteção das fotos</label>
+ <input type="email" id="cloudEmail" autocomplete="email" placeholder="Seu melhor e-mail">
+ <div id="cloudPasswordRow">
+  <label for="cloudPassword" id="cloudPasswordLabel">Crie sua senha (mínimo 8 caracteres)</label>
+  <div class="cloud-password-wrap"><input type="password" id="cloudPassword" autocomplete="new-password" placeholder="Digite sua senha"><button id="cloudShowPassword" type="button" aria-label="Mostrar senha">Ver</button></div>
+ </div>
+ <div id="cloudConfirmRow">
+  <label for="cloudConfirmPassword">Confirme a senha que criou</label>
+  <div class="cloud-password-wrap"><input type="password" id="cloudConfirmPassword" autocomplete="new-password" placeholder="Digite a mesma senha novamente"><button type="button" id="cloudShowConfirm" aria-label="Mostrar confirmação">Ver</button></div>
+ </div>
+ <div class="cloud-actions">
+  <button class="secondary" type="button" id="cloudSignUp">Criar minha conta</button>
+  <button class="secondary" type="button" id="cloudSignIn" hidden>Entrar e proteger fotos</button>
+ </div>
+ <button type="button" id="cloudForgotPassword" class="cloud-text-btn" hidden>Esqueci minha senha</button>
+ <div id="cloudRecoveryBox" hidden>
+  <p class="fine">Enviaremos um link ao e-mail informado. Abra o link para definir uma nova senha.</p>
+  <button type="button" id="cloudSendRecovery" class="secondary">Enviar link de recuperação</button>
+  <button type="button" id="cloudCancelRecovery" class="ghost">Voltar ao login</button>
+ </div>
 </div>
+<div id="cloudResetPasswordBox" hidden>
+ <h3>Defina sua nova senha</h3>
+ <p class="fine">Você abriu o link de recuperação. Escolha uma nova senha para sua conta.</p>
+ <label for="cloudNewPassword">Nova senha (mínimo 8 caracteres)</label>
+ <input type="password" id="cloudNewPassword" autocomplete="new-password" placeholder="Crie uma nova senha">
+ <label for="cloudNewPasswordConfirm">Repita a nova senha</label>
+ <input type="password" id="cloudNewPasswordConfirm" autocomplete="new-password" placeholder="Confirme sua nova senha">
+ <button class="secondary wide" type="button" id="cloudSetNewPassword">Alterar minha senha</button>
 </div>
 <div id="cloudConnectedBox" hidden>
 <p class="fine" id="cloudAccountName"></p>
