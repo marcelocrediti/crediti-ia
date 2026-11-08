@@ -374,8 +374,14 @@ async function loadDraftsOnStartup(){
  }catch(error){
   try{saved=JSON.parse(localStorage.getItem(DRAFT_STORE)||"[]")||[]}catch(e){saved=[]}
  }
- if(!draftsTouched&&Array.isArray(saved)){
-  drafts=saved.filter(function(p){return p&&p.id&&Array.isArray(p.slides)&&p.slides.length});
+ if(Array.isArray(saved)){
+  var validSaved=saved.filter(function(p){return p&&p.id&&Array.isArray(p.slides)&&p.slides.length});
+  if(!draftsTouched)drafts=validSaved;
+  else{
+   // Se o usuário começou um trabalho antes de terminar a leitura, mescla sem perder os anteriores.
+   drafts=validSaved.filter(function(p){return !drafts.some(function(d){return d.id===p.id})}).concat(drafts);
+   await persistDrafts();
+  }
  }
  draftsReady=true;
  showDrafts();
@@ -522,6 +528,7 @@ function removeUploadedSlot(slot){
   delete current.uploadedNames[slot];delete current.images[slot];delete current.forceImages?.[slot];
   if(slot===0){current.photo=null;coverImage=null}
   updatePhotoCaption(current);
+  rememberDraft(false);
   drawAll();
  }
  renderUploadList();
@@ -592,6 +599,7 @@ async function handleUploadedPhotos(fileList,targetSlot){
    if(current)current.photoMode=mode;
    syncStagedToCurrent();
    updatePhotoControls();
+   if(current)rememberDraft(false);
    drawAll();
    msg(added+" foto(s) anexada(s) aos cards.");
   }
@@ -710,7 +718,7 @@ async function applyGalleryPhoto(item){
   if(current!==post)return;
   post.images=post.images||[];post.images[slot]=bitmap;
   post.imageCredits=post.imageCredits||{};post.imageCredits[slot]=item;
-  updatePhotoCaption(post);
+  updatePhotoCaption(post);rememberDraft(false);
   render();galleryNotice("Foto aplicada ao card "+(slot+1)+". Você pode escolher outra a qualquer momento.");
   msg("Fotografia incluída no card "+(slot+1)+".");
  }catch(err){galleryNotice("Não foi possível usar esta imagem. Escolha outra ou envie uma foto original.");console.warn(err)}
@@ -754,7 +762,7 @@ async function populatePhotos(post,customQuery){
    }
    // Prioridade absoluta para anexo original, inclusive se foi enviado durante a busca.
    if(post.images?.[i]&&post.uploadedNames?.[i]){render();continue}
-   if(chosen){post.images[i]=chosen.data;post.imageCredits[i]=chosen.credit;applied++}
+   if(chosen){post.images[i]=chosen.data;post.imageCredits[i]=chosen.credit;applied++;rememberDraft(false)}
    else{delete post.images[i];delete post.imageCredits[i]}
    render();
   }
@@ -1064,7 +1072,10 @@ if(photo){
 paint();return Promise.resolve();
 }
 function drawAll(){galleryBatchInvalidate();if(!current)return;var num=current.slides.length;$("#countBadge").textContent=num+" cards";$("#pagePos").textContent="Card "+(index+1)+" de "+num+" • Toque nas miniaturas para editar";$("#thumbs").innerHTML="";current.slides.forEach(function(sl,i){var b=document.createElement("button");b.className="thumb"+(index===i?" selected":"");b.setAttribute("aria-label","Ver card "+(i+1));var cn=document.createElement("canvas");cn.width=1080;cn.height=1350;b.appendChild(cn);var sp=document.createElement("span");sp.textContent=i===0?"CAPA":i===num-1?"CTA":i;b.appendChild(sp);b.addEventListener("click",function(){index=i;render()});$("#thumbs").appendChild(b);draw(cn,sl,i,num,true)});
-draw($("#preview"),current.slides[index],index,num,false)
+draw($("#preview"),current.slides[index],index,num,false);
+ if(!current.folderId||drafts.some(function(d){return d.id===current.id})){
+  rememberDraft(false);
+ }
 }
 function render(){if(!current)return;
  // Limpa referências de carrosséis antigos, inclusive da biblioteca, sem alterar as fontes de pesquisa.
@@ -1118,6 +1129,7 @@ async function finishSaveInFolder(){
  var saved=await persist();
  if(!saved){posts=previous;current.folderId=originalFolderId;$("#folderSaveStatus").textContent="Não foi possível salvar. Libere espaço e tente novamente.";return}
  $("#folderPicker").hidden=true;
+ await removeDraftAfterSaving(current.id);
  msg("Carrossel salvo na pasta “"+folder.name+"”.");
 }
 async function renameFolder(folderId){
@@ -1325,6 +1337,7 @@ async function generateAiImage(){
   post.images=post.images||[];post.images[slot]=formatted;
   post.forceImages=post.forceImages||{};post.forceImages[slot]=true;
   post.imageCredits=post.imageCredits||{};delete post.imageCredits[slot];
+  rememberDraft(false);
   post.captionBase=post.captionBase||post.caption;
   updatePhotoCaption(post);
   render();
@@ -1336,14 +1349,14 @@ async function generateAiImage(){
  }finally{clearTimeout(timer);aiBusy=false;button.disabled=false;button.textContent="✦ Gerar imagem realista com IA";}
 }
 $("#aiGenerateBtn").onclick=generateAiImage;
-$("#replacePhoto").onclick=function(){if(!current){msg("Crie um carrossel primeiro.");return}if(current.photoMode==="none"){msg("Escolha uma opção com imagens primeiro.");return}current.images=(current.images||[]).map(function(img,i){return current.uploadedNames?.[i]?img:null});current.credits=[];current.imageCredits={};current.caption=current.captionBase||current.caption;populatePhotos(current);searchGallery()};
+$("#replacePhoto").onclick=function(){if(!current){msg("Crie um carrossel primeiro.");return}if(current.photoMode==="none"){msg("Escolha uma opção com imagens primeiro.");return}current.images=(current.images||[]).map(function(img,i){return current.uploadedNames?.[i]?img:null});current.credits=[];current.imageCredits={};current.caption=current.captionBase||current.caption;rememberDraft(false);populatePhotos(current);searchGallery()};
 updatePhotoControls();
 $("#prev").onclick=function(){if(current){index=Math.max(0,index-1);render()}};
 $("#next").onclick=function(){if(current){index=Math.min(current.slides.length-1,index+1);render()}};
-$("#cardTitle").oninput=function(){if(current){current.slides[index].title=this.value;if(index===0)current.name=this.value.trim()||current.topic||"Carrossel Crediti";drawAll()}};
-$("#cardText").oninput=function(){if(current){current.slides[index].body=this.value;drawAll()}};
-$("#cardLayout").onchange=function(){if(current){current.slides[index].layout=this.value;drawAll()}};
-$("#caption").oninput=function(){if(current)current.caption=this.value};
+$("#cardTitle").oninput=function(){if(current){current.slides[index].title=this.value;if(index===0)current.name=this.value.trim()||current.topic||"Carrossel Crediti";rememberDraft(false);drawAll()}};
+$("#cardText").oninput=function(){if(current){current.slides[index].body=this.value;rememberDraft(false);drawAll()}};
+$("#cardLayout").onchange=function(){if(current){current.slides[index].layout=this.value;rememberDraft(false);drawAll()}};
+$("#caption").oninput=function(){if(current){current.caption=this.value;rememberDraft(false)}};
 $("#save").onclick=save;
 $("#folderCancelSave").onclick=function(){$("#folderPicker").hidden=true};
 $("#folderConfirmSave").onclick=finishSaveInFolder;
