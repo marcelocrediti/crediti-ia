@@ -871,9 +871,10 @@ s.post("/api/studio/carousel",async(req,res)=>{
  try{
   photoReview=await studioReadImages(topic,photoPreviews);
  }catch(err){
+  studioTextUsage.busy=false;
   console.warn("Crediti Studio photo analysis unavailable",err?.name||"error");
   return res.status(err.status||502).json({error:err.message||"A leitura das fotografias não foi concluída."});
- }finally{ /* A trava de geração será liberada no bloco finally principal. */ }
+ }
  const unrelated=photoReview.photos.filter(p=>p.relation==="unrelated");
  if(unrelated.length){
   studioTextUsage.busy=false;
@@ -954,7 +955,7 @@ s.post("/api/studio/carousel",async(req,res)=>{
   try{parsed=JSON.parse(output)}catch{parsed=null}
   const verified=studioValidateCarousel(parsed,topic,total);
   if(!verified)return res.status(502).json({error:"A IA não entregou cards diferentes e completos. Tente gerar novamente."});
-  return res.json({success:true,topic,slides:verified.slides,caption:verified.caption,sources,research:"Pesquisa em fontes brasileiras",model:process.env.STUDIO_TEXT_MODEL||"gpt-6-sol"});
+  return res.json({success:true,topic,slides:verified.slides,caption:verified.caption,sources,research:"Pesquisa em fontes brasileiras",photosAnalyzed:photoReview.photos.length,visualFocus:photoReview.theme,model:process.env.STUDIO_TEXT_MODEL||"gpt-6-sol"});
  }catch(error){
   console.error("Crediti Studio carousel error:",error?.name||"Erro");
   return res.status(502).json({error:"Não consegui completar a pesquisa agora. Tente novamente sem perder seu carrossel anterior."});
