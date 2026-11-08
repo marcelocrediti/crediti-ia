@@ -629,11 +629,13 @@ async function cloudAuth(mode){
    cloudTell("Não foi possível entrar: "+String(data.msg||data.error_description||data.message||data.error||"Confira o e-mail e a senha.").slice(0,170));
    return;
   }
-  if(!data.access_token||!data.user?.id){
+  var resultSession=data.session?.access_token?
+   Object.assign({},data.session,{user:data.user||data.session.user}):data;
+  if(!resultSession.access_token||!resultSession.user?.id){
    cloudTell("Acesse seu e-mail para confirmar o cadastro e depois volte aqui para tocar em Entrar. Até lá, as fotos ficam somente na cópia local.");
    return;
   }
-  cloudStoreSession(Object.assign({},data,{expires_at:Date.now()+Number(data.expires_in||3600)*1000}));
+  cloudStoreSession(Object.assign({},resultSession,{expires_at:Date.now()+Number(resultSession.expires_in||3600)*1000}));
   $("#cloudPassword").value="";
   cloudTell("Nuvem conectada. As fotos originais serão guardadas automaticamente e poderão ser recuperadas por esta conta.");
   await cloudFlushPendingOriginals();
