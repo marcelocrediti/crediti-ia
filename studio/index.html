@@ -693,7 +693,8 @@ async function cloudAuth(mode){
  if(cloudAuthBusy)return;
  var email=$("#cloudEmail").value.trim().toLowerCase(),password=$("#cloudPassword").value;
  if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)){cloudTell("Digite um e-mail válido antes de continuar.");$("#cloudEmail").focus();return}
- if(password.length<8){cloudTell("O campo senha está vazio ou incompleto. Digite uma senha de pelo menos 8 caracteres antes de tocar no botão.");$("#cloudPassword").focus();return}
+ if(!password){cloudTell("Digite a senha antes de continuar.");$("#cloudPassword").focus();return}
+ if(mode==="signup"&&password.length<8){cloudTell("Para criar uma conta nova, escolha uma senha com pelo menos 8 caracteres.");$("#cloudPassword").focus();return}
  if(mode==="signup"){
   var confirm=$("#cloudConfirmPassword").value;
   if(!confirm){cloudTell("Confirme a senha no segundo campo antes de criar o acesso.");$("#cloudConfirmPassword").focus();return}
