@@ -82,64 +82,15 @@
 <label class="photo-option"><input type="radio" name="photoMode" value="cover" checked><span><b>Imagem somente na capa</b><small>Capa com foto real, demais cards só texto</small></span></label>
 <label class="photo-option"><input type="radio" name="photoMode" value="all"><span><b>Imagens em todos os cards</b><small>Cada card com foto real e texto legível</small></span></label>
 </fieldset>
-<div id="cloudBackupPanel" class="panel cloud-backup-panel" style="margin:18px 0">
-<h2>Proteção automática das fotografias</h2>
-<p class="fine">Entre na sua conta uma vez. Toda foto original anexada será copiada para uma pasta privada na nuvem e poderá ser recuperada, mesmo depois de sair do app ou apagar o carrossel. A cópia só está protegida quando aparecer “Guardada na nuvem”.</p>
-<div id="cloudLoginBox">
- <div class="cloud-auth-tabs" role="group" aria-label="Etapas do acesso à proteção">
-  <button type="button" id="cloudTabSignup" class="active" aria-pressed="true">1. Criar acesso</button>
-  <button type="button" id="cloudTabLogin" aria-pressed="false">2. Entrar na conta</button>
- </div>
- <p class="fine" id="cloudInstructions">Primeiro, cadastre seu e-mail e crie uma senha. Depois entre com os mesmos dados para guardar suas fotos na nuvem.</p>
- <label for="cloudEmail">E-mail da proteção das fotos</label>
- <input type="email" id="cloudEmail" autocomplete="email" placeholder="Seu melhor e-mail">
- <div id="cloudPasswordRow">
-  <label for="cloudPassword" id="cloudPasswordLabel">Crie sua senha (mínimo 8 caracteres)</label>
-  <div class="cloud-password-wrap"><input type="password" id="cloudPassword" autocomplete="new-password" placeholder="Digite sua senha"><button id="cloudShowPassword" type="button" aria-label="Mostrar senha">Ver</button></div>
- </div>
- <div id="cloudConfirmRow">
-  <label for="cloudConfirmPassword">Confirme a senha que criou</label>
-  <div class="cloud-password-wrap"><input type="password" id="cloudConfirmPassword" autocomplete="new-password" placeholder="Digite a mesma senha novamente"><button type="button" id="cloudShowConfirm" aria-label="Mostrar confirmação">Ver</button></div>
- </div>
- <div class="cloud-actions">
-  <button class="secondary" type="button" id="cloudSignUp">Criar minha conta</button>
-  <button class="secondary" type="button" id="cloudSignIn" hidden>Entrar e proteger fotos</button>
- </div>
- <button type="button" id="cloudForgotPassword" class="cloud-text-btn" hidden>Esqueci minha senha</button>
- <div id="cloudRecoveryBox" hidden>
-  <p class="fine">O Supabase ainda pode abrir <strong>localhost</strong>. Você pode recuperar de duas maneiras: copiar o link diretamente do e-mail <strong>sem abrir</strong> ou, se já abriu e apareceu o erro, copiar o <strong>endereço completo da barra do navegador</strong> e colá-lo abaixo. Não compartilhe o endereço, pois ele dá acesso temporário à conta.</p>
-  <button type="button" id="cloudSendRecovery" class="secondary">Enviar novo link de recuperação</button>
-  <div class="cloud-link-recovery">
-   <label for="cloudRecoveryLink">Cole o link do e-mail aqui</label>
-   <input id="cloudRecoveryLink" type="password" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Cole o link do e-mail ou o endereço completo do localhost">
-   <button type="button" id="cloudVerifyRecoveryLink" class="secondary wide">Confirmar link e criar nova senha</button>
-  </div>
-  <button type="button" id="cloudCancelRecovery" class="ghost">Voltar ao login</button>
- </div>
-</div>
-<div id="cloudResetPasswordBox" hidden>
- <h3>Defina sua nova senha</h3>
- <p class="fine">Você abriu o link de recuperação. Escolha uma nova senha para sua conta.</p>
- <label for="cloudNewPassword">Nova senha (mínimo 8 caracteres)</label>
- <input type="password" id="cloudNewPassword" autocomplete="new-password" placeholder="Crie uma nova senha">
- <label for="cloudNewPasswordConfirm">Repita a nova senha</label>
- <input type="password" id="cloudNewPasswordConfirm" autocomplete="new-password" placeholder="Confirme sua nova senha">
- <button class="secondary wide" type="button" id="cloudSetNewPassword">Alterar minha senha</button>
-</div>
-<div id="cloudConnectedBox" hidden>
-<p class="fine" id="cloudAccountName"></p>
-<div class="cloud-actions">
-<button class="secondary" type="button" id="cloudListPhotos">Recuperar minhas imagens</button>
-<button class="ghost" type="button" id="cloudSignOut">Sair da conta</button>
-</div>
-</div>
-<p id="cloudBackupStatus" class="photo-status" role="status" aria-live="polite">Proteção na nuvem não ativada. Suas fotos ainda dependem do armazenamento deste aparelho.</p>
-<div id="cloudBackupList" hidden aria-label="Fotos originais guardadas na nuvem"></div>
+<div class="panel" id="localPhotoProtection">
+ <h2>Suas fotos ficam guardadas enquanto você monta o carrossel</h2>
+ <p class="fine">Sem cadastro e sem senha. Ao anexar, cada foto é guardada automaticamente neste aparelho, mesmo antes de você gerar ou salvar o carrossel. Ela só sai do trabalho quando você decidir remover. Para evitar perdas, não apague os dados do Safari.</p>
+ <p class="photo-status" id="localSaveStatus" role="status" aria-live="polite">Verificando suas fotos guardadas neste aparelho…</p>
 </div>
 <div id="photoOptions">
 <label for="photo">Anexar até 10 fotos (capa + demais cards)</label>
 <input type="file" id="photo" accept="image/*,.heic,.heif,.dng" multiple>
-<p class="fine" id="photoHelp">Selecione até 10 fotos juntas, na ordem desejada. A primeira vai para a capa, a segunda para o card 2 e assim por diante. Ao gerar o carrossel com IA, cópias reduzidas dessas fotos serão analisadas pela OpenAI junto do seu título para criar conteúdo coerente. Evite anexar documentos e fotos sensíveis. As fotos originais não serão modificadas.</p>
+<p class="fine" id="photoHelp">Selecione até 10 fotos juntas, na ordem desejada. A primeira vai para a capa, a segunda para o card 2. As fotos são guardadas no armazenamento do aparelho antes de criar o carrossel. Ao gerar com IA, cópias reduzidas são analisadas para relacionar fotos e assunto. Evite documentos e fotos sensíveis.</p>
 <p class="photo-status" id="uploadStatus" role="status" aria-live="polite">Nenhuma foto anexada (0 de 10).</p>
 <div id="uploadList" aria-label="Fotos anexadas por card" class="upload-grid"></div>
 </div>
@@ -208,7 +159,65 @@
  </div>
  <p class="fine" style="margin-top:20px">As pastas ficam salvas neste navegador e aparelho. Excluir os dados do Safari também pode apagar os carrosséis armazenados nele.</p>
 </section>
-<section id="brand" class="section"><div class="panel"><h2>Identidade visual da Crediti</h2><p class="hint">O nome do perfil serve para referência de marca, não para consultar seguidores ou métricas.</p><label>Instagram (identidade oficial)</label><input type="text" id="handle" value="@crediti.oficial" readonly><label>Nome da marca (fixo no cabeçalho aprovado)</label><input type="text" id="brandName" value="Crediti | Empréstimos e Financiamentos" readonly><div class="brandcolors"><div class="swatch" style="background:#fdca01"></div><div class="swatch" style="background:#101a2c"></div><div class="swatch" style="background:#fff"></div><div class="swatch" style="background:#f7f8fa"></div></div><p class="fine">Cores: amarelo Crediti, preto, branco e branco gelo. Fonte Sora para títulos e Montserrat nos textos. Espaços livres, leitura clara e poucos elementos.</p><div class="tags"><span>FGTS</span><span>Consignado INSS</span><span>Financiamento</span><span>Consórcios</span><span>Educação financeira</span><span>Conta de luz</span></div><div class="callout">Informar um @, sozinho, não autoriza ler o feed automaticamente. O estúdio usa as referências visuais informadas e permite incorporar fotos originais.</div><button class="secondary wide" id="saveBrand">Salvar identidade</button></div></section>
+<section id="brand" class="section"><div class="panel"><h2>Identidade visual da Crediti</h2><p class="hint">O nome do perfil serve para referência de marca, não para consultar seguidores ou métricas.</p><label>Instagram (identidade oficial)</label><input type="text" id="handle" value="@crediti.oficial" readonly><label>Nome da marca (fixo no cabeçalho aprovado)</label><input type="text" id="brandName" value="Crediti | Empréstimos e Financiamentos" readonly><div class="brandcolors"><div class="swatch" style="background:#fdca01"></div><div class="swatch" style="background:#101a2c"></div><div class="swatch" style="background:#fff"></div><div class="swatch" style="background:#f7f8fa"></div></div><p class="fine">Cores: amarelo Crediti, preto, branco e branco gelo. Fonte Sora para títulos e Montserrat nos textos. Espaços livres, leitura clara e poucos elementos.</p><div class="tags"><span>FGTS</span><span>Consignado INSS</span><span>Financiamento</span><span>Consórcios</span><span>Educação financeira</span><span>Conta de luz</span></div><div class="callout">Informar um @, sozinho, não autoriza ler o feed automaticamente. O estúdio usa as referências visuais informadas e permite incorporar fotos originais.</div><button class="secondary wide" id="saveBrand">Salvar identidade</button><details id="optionalCloudBackup" style="margin-top:22px">
+ <summary style="cursor:pointer;font-size:12px;color:#52617c">Recuperar cópias antigas do backup em nuvem (opcional)</summary>
+ <p class="fine">O Crediti Studio funciona normalmente sem este acesso. Use apenas se tiver fotos já guardadas em uma conta de backup anterior.</p>
+ <div id="cloudBackupPanel" class="panel cloud-backup-panel" style="margin:18px 0">
+<h2>Proteção automática das fotografias</h2>
+<p class="fine">Entre na sua conta uma vez. Toda foto original anexada será copiada para uma pasta privada na nuvem e poderá ser recuperada, mesmo depois de sair do app ou apagar o carrossel. A cópia só está protegida quando aparecer “Guardada na nuvem”.</p>
+<div id="cloudLoginBox">
+ <div class="cloud-auth-tabs" role="group" aria-label="Etapas do acesso à proteção">
+  <button type="button" id="cloudTabSignup" class="active" aria-pressed="true">1. Criar acesso</button>
+  <button type="button" id="cloudTabLogin" aria-pressed="false">2. Entrar na conta</button>
+ </div>
+ <p class="fine" id="cloudInstructions">Primeiro, cadastre seu e-mail e crie uma senha. Depois entre com os mesmos dados para guardar suas fotos na nuvem.</p>
+ <label for="cloudEmail">E-mail da proteção das fotos</label>
+ <input type="email" id="cloudEmail" autocomplete="email" placeholder="Seu melhor e-mail">
+ <div id="cloudPasswordRow">
+  <label for="cloudPassword" id="cloudPasswordLabel">Crie sua senha (mínimo 8 caracteres)</label>
+  <div class="cloud-password-wrap"><input type="password" id="cloudPassword" autocomplete="new-password" placeholder="Digite sua senha"><button id="cloudShowPassword" type="button" aria-label="Mostrar senha">Ver</button></div>
+ </div>
+ <div id="cloudConfirmRow">
+  <label for="cloudConfirmPassword">Confirme a senha que criou</label>
+  <div class="cloud-password-wrap"><input type="password" id="cloudConfirmPassword" autocomplete="new-password" placeholder="Digite a mesma senha novamente"><button type="button" id="cloudShowConfirm" aria-label="Mostrar confirmação">Ver</button></div>
+ </div>
+ <div class="cloud-actions">
+  <button class="secondary" type="button" id="cloudSignUp">Criar minha conta</button>
+  <button class="secondary" type="button" id="cloudSignIn" hidden>Entrar e proteger fotos</button>
+ </div>
+ <button type="button" id="cloudForgotPassword" class="cloud-text-btn" hidden>Esqueci minha senha</button>
+ <div id="cloudRecoveryBox" hidden>
+  <p class="fine">O Supabase ainda pode abrir <strong>localhost</strong>. Você pode recuperar de duas maneiras: copiar o link diretamente do e-mail <strong>sem abrir</strong> ou, se já abriu e apareceu o erro, copiar o <strong>endereço completo da barra do navegador</strong> e colá-lo abaixo. Não compartilhe o endereço, pois ele dá acesso temporário à conta.</p>
+  <button type="button" id="cloudSendRecovery" class="secondary">Enviar novo link de recuperação</button>
+  <div class="cloud-link-recovery">
+   <label for="cloudRecoveryLink">Cole o link do e-mail aqui</label>
+   <input id="cloudRecoveryLink" type="password" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Cole o link do e-mail ou o endereço completo do localhost">
+   <button type="button" id="cloudVerifyRecoveryLink" class="secondary wide">Confirmar link e criar nova senha</button>
+  </div>
+  <button type="button" id="cloudCancelRecovery" class="ghost">Voltar ao login</button>
+ </div>
+</div>
+<div id="cloudResetPasswordBox" hidden>
+ <h3>Defina sua nova senha</h3>
+ <p class="fine">Você abriu o link de recuperação. Escolha uma nova senha para sua conta.</p>
+ <label for="cloudNewPassword">Nova senha (mínimo 8 caracteres)</label>
+ <input type="password" id="cloudNewPassword" autocomplete="new-password" placeholder="Crie uma nova senha">
+ <label for="cloudNewPasswordConfirm">Repita a nova senha</label>
+ <input type="password" id="cloudNewPasswordConfirm" autocomplete="new-password" placeholder="Confirme sua nova senha">
+ <button class="secondary wide" type="button" id="cloudSetNewPassword">Alterar minha senha</button>
+</div>
+<div id="cloudConnectedBox" hidden>
+<p class="fine" id="cloudAccountName"></p>
+<div class="cloud-actions">
+<button class="secondary" type="button" id="cloudListPhotos">Recuperar minhas imagens</button>
+<button class="ghost" type="button" id="cloudSignOut">Sair da conta</button>
+</div>
+</div>
+<p id="cloudBackupStatus" class="photo-status" role="status" aria-live="polite">Proteção na nuvem não ativada. Suas fotos ainda dependem do armazenamento deste aparelho.</p>
+<div id="cloudBackupList" hidden aria-label="Fotos originais guardadas na nuvem"></div>
+</div>
+
+</details></div></section>
 <p class="foot">Crediti Studio • Ferramenta de criação de conteúdo. Condições de crédito sempre sujeitas à análise.<br>Imagens individuais em PNG, JPG ou JPEG.</p></main><div id="toast" class="toast" role="status" aria-live="polite"></div>
 <script>
 (function(){
