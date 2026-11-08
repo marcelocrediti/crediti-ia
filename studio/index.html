@@ -29,7 +29,10 @@
 <p id="photoStatus" class="photo-status" role="status" aria-live="polite">Escolha como quer usar imagens.</p>
 <button class="primary wide" id="generate">✦ Pesquisar e gerar carrossel com IA</button>
 <p class="fine" id="contentStatus" role="status" aria-live="polite">A IA pesquisa o assunto escolhido em fontes brasileiras antes de escrever, sem reutilizar roteiros de outros temas.</p>
-<div id="contentSources" style="font-size:12px;margin:10px 0 18px;display:grid;gap:6px" aria-label="Fontes consultadas pela IA"></div>
+<details id="contentSourcesPanel" style="font-size:12px;margin:10px 0 18px;color:#536178">
+<summary style="cursor:pointer">Consultar fontes da pesquisa (opcional)</summary>
+<div id="contentSources" style="display:grid;gap:6px;padding:10px 0" aria-label="Fontes consultadas pela IA"></div>
+</details>
 <p class="fine">Os textos são criados por IA e podem ser editados. A pesquisa prioriza fontes oficiais do Brasil. Confira os dados atuais antes de publicar. Fotografias de acervo e imagens criadas por IA são opções diferentes.</p>
 <div class="editbox"><h3>Editar o card selecionado</h3><label for="cardTitle">Título</label><textarea id="cardTitle" rows="3"></textarea><label for="cardText">Texto explicativo</label><textarea id="cardText" rows="4"></textarea><label for="cardLayout">Modelo do card</label><select id="cardLayout"><option value="auto">Padrão</option><option value="clean">Fundo branco</option><option value="dark">Fundo escuro</option><option value="yellow">Destaque amarelo</option></select>
 <button class="ghost wide" id="replacePhoto">Pesquisar outras fotos sobre o assunto</button>
@@ -413,7 +416,8 @@ async function searchGallery(){
 }
 function updatePhotoCaption(post){
  var notes=Object.entries(post.imageCredits||{}).map(function(entry){var i=Number(entry[0])+1,photo=entry[1];return "Card "+i+" (Brasil): "+(photo.creator||photo.title.replace(/^File:/,""))+" • "+photo.license+" • "+photo.source});
- post.caption=post.captionBase||post.caption.split("\n\nCréditos das fotos:")[0];
+ post.captionBase=cleanResearchNotes(post.captionBase||post.caption.split("\n\nCréditos das fotos:")[0]);
+ post.caption=post.captionBase;
  if(notes.length)post.caption+="\n\nCréditos das fotos:\n"+notes.join("\n");
 }
 async function applyGalleryPhoto(item){
@@ -491,10 +495,23 @@ async function populatePhotos(post,customQuery){
 function cleanTopic(s){return String(s||"").trim().replace(/[.!?]+$/,"")}
 var contentBusy=false;
 var carouselApiUrl="https://crediti-ia-api.onrender.com/api/studio/carousel";
+function cleanCardCopy(value){
+ return String(value||"")
+  .replace(/\[[^\]]{0,110}\]\((?:https?:\/\/|www\.)[^)]+\)/gi," ")
+  .replace(/\b(?:https?:\/\/|www\.)[^\s<>"'()\[\]{}]+/gi," ")
+  .replace(/【[^】]{1,140}】/g," ")
+  .replace(/\[\s*\d{1,3}\s*\]/g," ")
+  .replace(/\b(?:fontes?|referências?|links?)(?:\s+consultad[oa]s?)?\s*:\s*[^.!?\n]{0,240}/gi," ")
+  .replace(/\s+/g," ").trim();
+}
+function cleanResearchNotes(value){
+ return String(value||"").replace(/\n{2,}Fontes consultadas:[\s\S]*?(?=\n{2,}Créditos das fotos:|$)/gi,"").trim();
+}
 function renderResearchSources(post){
  var el=$("#contentSources");if(!el)return;
  el.innerHTML="";
  var sources=post?.sources||[];
+ $("#contentSourcesPanel").hidden=!sources.length;
  if(!sources.length)return;
  var label=document.createElement("b");
  label.textContent="Fontes brasileiras consultadas:";
@@ -537,19 +554,19 @@ async function generate(){
    throw new Error("A IA retornou um carrossel incompleto. Gere novamente.");
   }
   var slides=result.slides.map(function(sl,i){
-   return {title:String(sl.title||"").trim(),body:String(sl.body||"").trim(),
+   return {title:cleanCardCopy(sl.title),body:cleanCardCopy(sl.body),
     kind:i===0?"cover":i===qty-1?"cta":"content",layout:"auto"};
   });
   if(slides.some(function(sl){return !sl.title||!sl.body}))throw new Error("Um dos cards está sem texto.");
   // Somente substitui o carrossel atual após a pesquisa terminar com sucesso.
   var caption=String(result.caption||"").trim();
   var sources=result.sources.slice(0,6).filter(function(o){try{return new URL(o.url).protocol==="https:"}catch(e){return false}});
-  var researchNotes="\n\nFontes consultadas:\n"+sources.map(function(o){return o.url}).join("\n");
+  // Referências ficam somente no painel de conferência. Não entram nos cards nem na legenda.
   var post={
    id:"p"+Date.now(),name:slides[0].title,topic:topic,slides:slides,style:$("#style").value,
    photoMode:selectedImageMode(),photo:null,images:[],uploadedNames:{},forceImages:{},
-   credits:[],imageCredits:{},sources:sources,captionBase:caption+researchNotes,
-   caption:caption+researchNotes,createdAt:new Date().toISOString()
+   credits:[],imageCredits:{},sources:sources,captionBase:caption,
+   caption:caption,createdAt:new Date().toISOString()
   };
   for(var ix=0;ix<Math.min(qty,10);ix++){
    var attachment=stagedUploads[ix];
@@ -577,7 +594,27 @@ async function generate(){
   contentBusy=false;btn.disabled=false;btn.textContent="✦ Pesquisar e gerar carrossel com IA";
  }
 }
-function wrapText(ctx,text,maxWidth){var words=String(text||"").split(/\s+/),lines=[],line="";for(var i=0;i<words.length;i++){var test=line?line+" "+words[i]:words[i];if(ctx.measureText(test).width>maxWidth&&line){lines.push(line);line=words[i]}else{line=test}}if(line)lines.push(line);return lines}
+function wrapText(ctx,text,maxWidth){
+ var words=String(text||"").trim().split(/\s+/).filter(Boolean),lines=[],line="";
+ for(var i=0;i<words.length;i++){
+  var word=words[i],pieces=[];
+  if(ctx.measureText(word).width>maxWidth){
+   var piece="";
+   for(var char of word){
+    if(piece&&ctx.measureText(piece+char).width>maxWidth){pieces.push(piece);piece=char}
+    else piece+=char;
+   }
+   if(piece)pieces.push(piece);
+  }else pieces=[word];
+  for(var part of pieces){
+   var test=line?line+" "+part:part;
+   if(line&&ctx.measureText(test).width>maxWidth){lines.push(line);line=part}
+   else line=test;
+  }
+ }
+ if(line)lines.push(line);
+ return lines;
+}
 function lines(ctx,arr,x,y,height){arr.forEach(function(s){ctx.fillText(s,x,y);y+=height});return y}
 function draw(canvas,slide,pos,all,mini){
 var c=canvas.getContext("2d"),W=1080,H=1350,post=current;
@@ -640,33 +677,48 @@ function paint(){
  c.font="600 25px Montserrat,Arial";c.globalAlpha=photoReady?.93:.82;
  c.fillText($("#handle").value||"@crediti.oficial",222,137);
  c.restore();
- // Texto do card inteiro alinhado ao centro. Área de respiro fixa.
- var top=290,bottom=1155,maxHeight=bottom-top,maxWidth=870;
- var title=String(slide.title||"").trim(),body=String(slide.body||"").trim();
- var titleSize=isCover?79:isCta?72:70,bodySize=isCover?40:isCta?39:40;
- var titleLines=[],bodyLines=[],titleLead=0,bodyLead=0,gap=45,total=0;
- for(var attempt=0;attempt<45;attempt++){
-  c.font="800 "+titleSize+"px Sora,Arial";titleLines=wrapText(c,title,maxWidth);
-  c.font="500 "+bodySize+"px Montserrat,Arial";bodyLines=body?wrapText(c,body,maxWidth):[];
-  titleLead=Math.round(titleSize*1.19);bodyLead=Math.round(bodySize*1.46);
-  gap=bodyLines.length?Math.round(Math.max(40,titleSize*.65)):0;
+ // Área segura para títulos e explicações. Nunca permitir texto fora das bordas.
+ var top=300,bottom=1150,maxHeight=bottom-top,titleWidth=880,bodyWidth=850;
+ var title=cleanCardCopy(slide.title),body=cleanCardCopy(slide.body);
+ var titleSize=isCover?82:isCta?76:74,bodySize=isCover?43:42;
+ var titleLines=[],bodyLines=[],titleLead=0,bodyLead=0,gap=0,total=0;
+ for(var attempt=0;attempt<90;attempt++){
+  c.font="800 "+titleSize+"px Sora,Arial";titleLines=wrapText(c,title,titleWidth);
+  c.font="500 "+bodySize+"px Montserrat,Arial";bodyLines=body?wrapText(c,body,bodyWidth):[];
+  titleLead=Math.round(titleSize*1.21);
+  bodyLead=Math.round(bodySize*1.51);
+  gap=bodyLines.length?Math.round(Math.max(36,titleSize*.60)):0;
   total=titleLines.length*titleLead+gap+bodyLines.length*bodyLead;
-  if(total<=maxHeight&&titleLines.length<=5&&bodyLines.length<=8)break;
-  if(titleLines.length>5&&titleSize>48){titleSize-=2;continue}
-  if(bodyLines.length>8&&bodySize>29){bodySize-=1;continue}
-  if(total>maxHeight&&bodySize>29){bodySize-=1;continue}
-  if(total>maxHeight&&titleSize>48){titleSize-=2;continue}
+  if(titleLines.length<=4&&bodyLines.length<=7&&total<=maxHeight)break;
+  if(titleLines.length>4&&titleSize>50){titleSize-=2;continue}
+  if(bodyLines.length>7&&bodySize>31){bodySize-=1;continue}
+  if(total>maxHeight&&bodySize>31){bodySize-=1;continue}
+  if(total>maxHeight&&titleSize>50){titleSize-=2;continue}
   break;
  }
+ // Segurança adicional para títulos ou explicações editados pelo usuário e muito longos.
+ if(titleLines.length>5){
+  titleLines=titleLines.slice(0,5);
+  titleLines[4]=titleLines[4].replace(/[.,;:\s]+$/,"")+"…";
+ }
+ total=titleLines.length*titleLead+gap+bodyLines.length*bodyLead;
  if(total>maxHeight){
-  while(bodyLines.length&&total>maxHeight){bodyLines.pop();total=titleLines.length*titleLead+gap+bodyLines.length*bodyLead}
-  if(bodyLines.length&&bodyLines.join(" ")!==body){bodyLines[bodyLines.length-1]=bodyLines[bodyLines.length-1].replace(/[.,;:\s]+$/,"")+"…"}
+  while(bodyLines.length>1&&total>maxHeight){
+   bodyLines.pop();
+   total=titleLines.length*titleLead+gap+bodyLines.length*bodyLead;
+  }
+  if(bodyLines.length&&bodyLines.join(" ")!==body){
+   bodyLines[bodyLines.length-1]=bodyLines[bodyLines.length-1].replace(/[.,;:\s]+$/,"")+"…";
+  }
  }
  var y=top+Math.max(0,maxHeight-total)/2;
- c.textAlign="center";c.fillStyle=ink;c.font="800 "+titleSize+"px Sora,Arial";
+ c.save();
+ c.textBaseline="top";c.textAlign="center";
+ c.fillStyle=ink;c.font="800 "+titleSize+"px Sora,Arial";
  for(var i=0;i<titleLines.length;i++){c.fillText(titleLines[i],W/2,y);y+=titleLead}
  y+=gap;c.fillStyle=gray;c.font="500 "+bodySize+"px Montserrat,Arial";
  for(var j=0;j<bodyLines.length;j++){c.fillText(bodyLines[j],W/2,y);y+=bodyLead}
+ c.restore();
  c.textAlign="left";c.fillStyle=white?"#f4f5f6":"#778193";c.font="700 20px Montserrat,Arial";
  c.fillText("CREDITI • CONTEÚDO EDUCATIVO",87,1260);
  c.textAlign="right";c.fillText((pos+1)+" / "+all,992,1260);c.textAlign="left";
@@ -695,7 +747,12 @@ paint();return Promise.resolve();
 function drawAll(){galleryBatchInvalidate();if(!current)return;var num=current.slides.length;$("#countBadge").textContent=num+" cards";$("#pagePos").textContent="Card "+(index+1)+" de "+num+" • Toque nas miniaturas para editar";$("#thumbs").innerHTML="";current.slides.forEach(function(sl,i){var b=document.createElement("button");b.className="thumb"+(index===i?" selected":"");b.setAttribute("aria-label","Ver card "+(i+1));var cn=document.createElement("canvas");cn.width=1080;cn.height=1350;b.appendChild(cn);var sp=document.createElement("span");sp.textContent=i===0?"CAPA":i===num-1?"CTA":i;b.appendChild(sp);b.addEventListener("click",function(){index=i;render()});$("#thumbs").appendChild(b);draw(cn,sl,i,num,true)});
 draw($("#preview"),current.slides[index],index,num,false)
 }
-function render(){if(!current)return;renderUploadList();renderResearchSources(current);$("#cardTitle").value=current.slides[index].title;$("#cardText").value=current.slides[index].body;$("#cardLayout").value=current.slides[index].layout||"auto";$("#caption").value=current.caption;document.querySelector('input[name="photoMode"][value="'+(current.photoMode||"none")+'"]').checked=true;updatePhotoControls();drawAll()}
+function render(){if(!current)return;
+ // Limpa referências de carrosséis antigos, inclusive da biblioteca, sem alterar as fontes de pesquisa.
+ current.slides.forEach(function(sl){sl.title=cleanCardCopy(sl.title);sl.body=cleanCardCopy(sl.body)});
+ current.captionBase=cleanResearchNotes(current.captionBase||current.caption);
+ current.caption=cleanResearchNotes(current.caption);
+ renderUploadList();renderResearchSources(current);$("#cardTitle").value=current.slides[index].title;$("#cardText").value=current.slides[index].body;$("#cardLayout").value=current.slides[index].layout||"auto";$("#caption").value=current.caption;document.querySelector('input[name="photoMode"][value="'+(current.photoMode||"none")+'"]').checked=true;updatePhotoControls();drawAll()}
 async function save(){if(!current){msg("Crie um carrossel primeiro.");return}current.name=String(current.slides?.[0]?.title||current.topic||current.name||"Carrossel Crediti").trim();var i=posts.findIndex(function(p){return p.id===current.id});if(i>=0)posts[i]=current;else posts.unshift(current);libraryChanged=true;var ok=await persist();if(ok)msg("Carrossel salvo neste dispositivo, com suas fotos anexadas.");}
 async function exportCard(i,extension){var cn=document.createElement("canvas");cn.width=1080;cn.height=1350;await brandAvatarReady;await draw(cn,current.slides[i],i,current.slides.length,false);var type=extension==="png"?"image/png":"image/jpeg";return await new Promise(function(resolve){cn.toBlob(resolve,type,.94)})}
 async function download(i){if(!current)return;var ext=$("#format").value;var blob=await exportCard(i,ext);if(!blob){msg("Não foi possível gerar imagem.");return}var url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download="crediti-card-"+String(i+1).padStart(2,"0")+"."+ext;document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(url)},25000);msg("Card "+(i+1)+" exportado em "+ext.toUpperCase()+".")}
