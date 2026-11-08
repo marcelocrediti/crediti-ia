@@ -22,6 +22,8 @@
 .cloud-text-btn{background:transparent;border:0;color:#182f54;text-decoration:underline;margin:12px 0;padding:8px 0;font-size:12px}
 #cloudRecoveryBox[hidden],#cloudResetPasswordBox[hidden],#cloudSignIn[hidden],#cloudSignUp[hidden],#cloudForgotPassword[hidden],#cloudPasswordRow[hidden],#cloudConfirmRow[hidden]{display:none!important}
 #cloudRecoveryBox button{margin:6px 7px 6px 0;padding:11px;font-size:12px}
+.cloud-link-recovery{margin-top:12px;border-top:1px solid #dce3e8;padding-top:10px}
+.cloud-link-recovery textarea{width:100%;resize:vertical;overflow-wrap:anywhere;font-size:12px;min-height:85px}
 #cloudResetPasswordBox h3{font-family:Sora;font-size:15px}
 
 .cloud-backup-panel input[type=email],.cloud-backup-panel input[type=password]{border:1px solid #dce2e9;background:white;border-radius:10px;width:100%;padding:12px;font-size:14px;min-height:46px}
@@ -105,8 +107,13 @@
  </div>
  <button type="button" id="cloudForgotPassword" class="cloud-text-btn" hidden>Esqueci minha senha</button>
  <div id="cloudRecoveryBox" hidden>
-  <p class="fine">Enviaremos um link ao e-mail informado. Abra o link para definir uma nova senha.</p>
-  <button type="button" id="cloudSendRecovery" class="secondary">Enviar link de recuperação</button>
+  <p class="fine">Solicite um novo link. Enquanto o Supabase estiver redirecionando para localhost, <strong>não abra o link do e-mail</strong>. Toque e segure no botão ou link do e-mail, escolha <strong>Copiar link</strong> e cole abaixo. O código será conferido diretamente com o Supabase, sem enviá-lo ao servidor da Crediti.</p>
+  <button type="button" id="cloudSendRecovery" class="secondary">Enviar novo link de recuperação</button>
+  <div class="cloud-link-recovery">
+   <label for="cloudRecoveryLink">Cole o link do e-mail aqui</label>
+   <textarea id="cloudRecoveryLink" rows="3" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Cole o link de recuperação copiado do e-mail, sem abrir"></textarea>
+   <button type="button" id="cloudVerifyRecoveryLink" class="secondary wide">Confirmar link e criar nova senha</button>
+  </div>
   <button type="button" id="cloudCancelRecovery" class="ghost">Voltar ao login</button>
  </div>
 </div>
@@ -754,9 +761,65 @@ async function cloudSendPasswordRecovery(){
   });
   var result=await response.json().catch(()=>({}));
   if(!response.ok){cloudTell(cloudFriendlyError(result,"recovery"));return}
-  cloudTell("Se este e-mail tem conta, um link de recuperação foi solicitado. Confira sua caixa de entrada e spam. Abra o link para criar uma nova senha. O servidor de e-mail pode ter limite de envios.");
+  cloudTell("Link solicitado. Enquanto a configuração de redirecionamento não for corrigida no Supabase, NÃO clique no link. No e-mail, toque e segure nele, escolha Copiar link e cole no campo acima. O link anterior que já foi aberto não serve mais.");
  }catch(err){cloudTell("Falha ao pedir recuperação. Confira sua conexão e tente novamente.")}
  finally{cloudAuthBusy=false;$("#cloudSendRecovery").disabled=false}
+}
+
+function cloudParseRecoveryEmailLink(raw) {
+ var value=String(raw||"").trim().replace(/&amp;/gi,"&");
+ if(value.length<40||value.length>7000)throw new Error("Cole o link completo do e-mail de recuperação.");
+ var u;
+ try { u=new URL(value); }
+ catch(e){throw new Error("O texto não parece um link válido. Copie o link diretamente do e-mail.");}
+ if(u.origin!==CLOUD_URL||u.pathname.replace(/\/$/,"")!=="/auth/v1/verify"){
+  throw new Error("Esse endereço não é o link de recuperação oficial do Supabase da Crediti.");
+ }
+ if(u.searchParams.get("type")!=="recovery"){
+  throw new Error("O link copiado não é de recuperação de senha.");
+ }
+ var token=u.searchParams.get("token_hash")||u.searchParams.get("token");
+ if(!token||!/^[A-Za-z0-9_-]{8,512}$/.test(token)){
+  throw new Error("O link está incompleto. Copie o endereço inteiro, sem abrir.");
+ }
+ return {type:"recovery",token_hash:token};
+}
+async function cloudVerifyRecoveryLink() {
+ if(cloudAuthBusy)return;
+ var request;
+ try{request=cloudParseRecoveryEmailLink($("#cloudRecoveryLink").value)}
+ catch(err){cloudTell(err.message);return}
+ cloudAuthBusy=true;$("#cloudVerifyRecoveryLink").disabled=true;
+ cloudTell("Conferindo link com o Supabase. Não feche o aplicativo.");
+ try {
+  // POST evita o redirecionamento configurado incorretamente para localhost.
+  var response=await fetch(CLOUD_URL+"/auth/v1/verify",{
+   method:"POST",cache:"no-store",
+   headers:cloudHeaders(null,{"Content-Type":"application/json"}),
+   body:JSON.stringify(request)
+  });
+  var data=await response.json().catch(()=>({}));
+  if(!response.ok){
+   cloudTell(response.status===403||response.status===422?
+    "Este link já foi usado ou expirou. Solicite um novo e COPIE antes de clicar. Não abra o endereço localhost.":
+    "O Supabase não aceitou este link. Peça um novo e copie o endereço completo do e-mail.");
+   return;
+  }
+  // Valida o resultado antes de aceitar o acesso à troca de senha.
+  if(!data.access_token||!data.refresh_token)throw new Error("O Supabase não devolveu uma sessão válida.");
+  var who=await fetch(CLOUD_URL+"/auth/v1/user",{headers:cloudHeaders(data.access_token)});
+  var user=await who.json().catch(()=>({}));
+  if(!who.ok||!user.id)throw new Error("Não consegui confirmar a identidade da conta.");
+  cloudStoreSession({access_token:data.access_token,refresh_token:data.refresh_token,user:user,
+   expires_at:Date.now()+Number(data.expires_in||3600)*1000});
+  $("#cloudRecoveryLink").value="";
+  $("#cloudLoginBox").hidden=true;
+  $("#cloudConnectedBox").hidden=true;
+  $("#cloudResetPasswordBox").hidden=false;
+  cloudTell("Link confirmado com segurança. Agora informe e confirme sua nova senha abaixo.");
+  $("#cloudNewPassword").focus();
+ }catch(err){cloudTell(err.message||"Não foi possível conferir o link. Tente com um link novo.")}
+ finally{cloudAuthBusy=false;$("#cloudVerifyRecoveryLink").disabled=false}
 }
 async function cloudProcessRecoveryCallback(){
  var params=new URLSearchParams(location.hash.replace(/^#/,""));
@@ -983,6 +1046,7 @@ $("#cloudSignUp").onclick=()=>cloudAuth("signup");
 $("#cloudForgotPassword").onclick=cloudStartRecovery;
 $("#cloudCancelRecovery").onclick=()=>cloudSetAuthMode("login","Volte ao login e informe sua senha.");
 $("#cloudSendRecovery").onclick=cloudSendPasswordRecovery;
+$("#cloudVerifyRecoveryLink").onclick=cloudVerifyRecoveryLink;
 $("#cloudSetNewPassword").onclick=cloudUpdatePassword;
 $("#cloudShowPassword").onclick=function(){var field=$("#cloudPassword");field.type=field.type==="password"?"text":"password";this.textContent=field.type==="password"?"Ver":"Ocultar"};
 $("#cloudShowConfirm").onclick=function(){var field=$("#cloudConfirmPassword");field.type=field.type==="password"?"text":"password";this.textContent=field.type==="password"?"Ver":"Ocultar"};
