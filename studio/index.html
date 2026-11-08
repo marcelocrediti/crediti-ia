@@ -29,7 +29,7 @@
 .cloud-backup-panel input[type=email],.cloud-backup-panel input[type=password]{border:1px solid #dce2e9;background:white;border-radius:10px;width:100%;padding:12px;font-size:14px;min-height:46px}
 .cloud-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
 .cloud-actions button{flex:1;min-width:135px}
-#cloudLoginBox[hidden],#cloudConnectedBox[hidden],#cloudBackupList[hidden]{display:none!important}
+#cloudLoginBox[hidden],#cloudConnectedBox[hidden],#cloudBackupList[hidden],#localOriginalsList[hidden]{display:none!important}
 #cloudBackupList{margin-top:14px;max-height:310px;overflow-y:auto}
 .cloud-file{display:flex;gap:8px;align-items:center;justify-content:space-between;padding:10px;border:1px solid #e4e7eb;border-radius:9px;margin:7px 0;background:#fff}
 .cloud-file-info{min-width:0;flex:1}
@@ -37,6 +37,9 @@
 .cloud-file-info small{color:#64748b;font-size:10px}
 .cloud-file-actions{display:flex;gap:6px}
 .cloud-file-actions button{padding:7px;font-size:10px;border-radius:7px}
+.local-original{display:flex;gap:8px;align-items:center;justify-content:space-between;padding:9px;margin:7px 0;border:1px solid #dce3eb;background:#fff;border-radius:9px}
+.local-original small{font-size:11px;color:#58677e;overflow-wrap:anywhere;flex:1}
+.local-original button{padding:8px 10px;font-size:11px;flex-shrink:0}
 .folder-picker{margin-top:16px;border:1px solid #e3d292;background:#fffdf5;border-radius:14px;padding:18px}
 .folder-picker[hidden],.folder-create-panel[hidden],#folderContents[hidden],#foldersGrid[hidden]{display:none!important}
 .folder-picker h3{font-family:Sora;font-size:16px;margin:0 0 6px}
@@ -93,6 +96,8 @@
 <p class="fine" id="photoHelp">Selecione até 10 fotos juntas, na ordem desejada. A primeira vai para a capa, a segunda para o card 2. As fotos são guardadas no armazenamento do aparelho antes de criar o carrossel. Ao gerar com IA, cópias reduzidas são analisadas para relacionar fotos e assunto. Evite documentos e fotos sensíveis.</p>
 <p class="photo-status" id="uploadStatus" role="status" aria-live="polite">Nenhuma foto anexada (0 de 10).</p>
 <div id="uploadList" aria-label="Fotos anexadas por card" class="upload-grid"></div>
+<button id="localOriginalsButton" class="ghost wide" type="button">Ver fotos originais guardadas neste aparelho</button>
+<div id="localOriginalsList" hidden aria-label="Fotografias originais disponíveis para recuperar"></div>
 </div>
 <p id="photoStatus" class="photo-status" role="status" aria-live="polite">Escolha como quer usar imagens.</p>
 <button class="primary wide" id="generate">✦ Pesquisar e gerar carrossel com IA</button>
@@ -401,6 +406,56 @@ async function localMediaDeleteForPost(postId){
   });
  }catch(err){console.warn("Originais ainda no armazenamento local",err)}
 }
+
+async function localMediaDisplayOriginals(){
+ var area=$("#localOriginalsList");area.innerHTML="";area.hidden=false;
+ var found=localMediaFiles.slice(),id=current?.id||null;
+ if(id){
+  try{
+   const old=await localMediaGet("originals:"+id);
+   if(Array.isArray(old))for(let i=0;i<10;i++)if(!found[i])found[i]=old[i]||null;
+  }catch(err){}
+ }
+ var count=0;
+ found.forEach(function(file,slot){
+  if(!file)return;count++;
+  var div=document.createElement("div");div.className="local-original";
+  var label=document.createElement("small");label.textContent=(slot===0?"Capa":"Card "+(slot+1))+" • "+file.name+" • "+Math.round(file.size/1024)+" KB";
+  var button=document.createElement("button");button.type="button";button.className="secondary";button.textContent="Baixar";
+  button.onclick=function(){localMediaDownloadOriginal(slot,id)};
+  div.appendChild(label);div.appendChild(button);area.appendChild(div);
+ });
+ if(!count){
+  var info=document.createElement("p");info.className="fine";
+  info.textContent="Não há arquivos originais guardados para este trabalho. As fotos convertidas continuam nos cards salvos.";
+  area.appendChild(info);
+ }
+}
+async function localMediaOriginalsForPost(id){
+ if(!id)return;
+ try{
+  const old=await localMediaGet("originals:"+id);
+  if(current?.id!==id)return;
+  const list=Array.isArray(old)?old:[];
+  // Não sobrescreve arquivos que foram enviados depois da abertura do carrossel.
+  for(let i=0;i<10;i++)if(!localMediaFiles[i]&&list[i])localMediaFiles[i]=list[i];
+  if(!$("#localOriginalsList").hidden)localMediaDisplayOriginals();
+ }catch(err){console.warn("Originais indisponíveis neste dispositivo",err)}
+}
+async function localMediaRemoveOriginalSlot(postId,slot){
+ if(!postId)return;
+ try{
+  const saved=await localMediaGet("originals:"+postId);
+  if(!Array.isArray(saved)||!saved[slot])return;
+  const db=await openLibraryDB();
+  await new Promise(function(resolve,reject){
+   const tx=db.transaction("posts","readwrite");
+   saved[slot]=null;tx.objectStore("posts").put(saved,"originals:"+postId);
+   tx.oncomplete=resolve;tx.onerror=function(){reject(tx.error)}
+  });
+ }catch(err){console.warn("Não consegui excluir o original desta foto",err)}
+}
+
 async function localMediaDownloadOriginal(slot,postId){
  var file=localMediaFiles[slot];
  if((!file||postId&&localMediaStateId!==postId)&&postId){
@@ -490,8 +545,11 @@ async function removeDraftAfterSaving(id){
  showDrafts();
 }
 function fillEditorFromPost(post){
+ const sameMedia=localMediaStateId===post.id;
  current=post;index=0;
  coverImage=post.photo||null;
+ if(!sameMedia)localMediaFiles=Array(10).fill(null);
+ localMediaStateId=post.id;
  stagedUploads=Array(10).fill(null);
  for(var si=0;si<Math.min(10,post.slides.length);si++){
   if(post.uploadedNames?.[si]&&post.images?.[si]){
@@ -506,6 +564,8 @@ function fillEditorFromPost(post){
  if(m)m.checked=true;
  updatePhotoControls();resetGallery(post.topic||"");
  changeTab("create");render();
+ localMediaOriginalsForPost(post.id);
+ localPhotoStatus("Fotos deste carrossel disponíveis neste aparelho. As alterações são guardadas automaticamente.",false);
 }
 function openDraft(id){
  var p=drafts.find(function(item){return item.id===id});
@@ -727,6 +787,7 @@ async function removeUploadedSlot(slot){
  if(slot<0||slot>9||!stagedUploads[slot])return;
  stagedUploads[slot]=null;
  localMediaFiles[slot]=null;
+ if(current?.id)await localMediaRemoveOriginalSlot(current.id,slot);
  if(current&&current.uploadedNames?.[slot]){
   delete current.uploadedNames[slot];delete current.images[slot];delete current.forceImages?.[slot];
   if(slot===0){current.photo=null;coverImage=null}
@@ -2055,6 +2116,7 @@ $("#galleryShareReady").onclick=gallerySharePreparedFiles;
 $("#galleryDownloadFiles").onclick=galleryDownloadPreparedFiles;
 $("#copy").onclick=async function(){try{await navigator.clipboard.writeText($("#caption").value);msg("Legenda copiada.")}catch(e){$("#caption").select();msg("Selecione e copie a legenda.")}};
 $("#photo").onchange=function(){var files=Array.from(this.files||[]);this.value="";handleUploadedPhotos(files)};
+$("#localOriginalsButton").onclick=localMediaDisplayOriginals;
 $("#replaceCardPhoto").onclick=function(){if(!current){msg("Gere seu carrossel primeiro.");return}$("#cardPhoto").click()};
 $("#cardPhoto").onchange=function(){var files=Array.from(this.files||[]);this.value="";handleUploadedPhotos(files,index)};
 $("#count").onchange=renderUploadList;
