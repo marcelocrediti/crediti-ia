@@ -703,7 +703,7 @@ function studioClean(str, max=220) {
 // Proteção editorial: endereços, URLs, marcadores de citações e notas de fonte não entram nas artes.
 function studioCardCopy(str,max=220){
  return String(str||"")
-  .replace(/\[[^\]]{0,110}\]\((?:https?:\/\/|www\.)[^)]+\)/gi," ")
+  .replace(/\[([^\]]{0,110})\]\((?:https?:\/\/|www\.)[^)]+\)/gi,function(full,label){return /^(?:fonte|referência|leia mais|link|saiba mais)$/i.test(label.trim())?"":label})
   .replace(/\b(?:https?:\/\/|www\.)[^\s<>"'()\[\]{}]+/gi," ")
   .replace(/【[^】]{1,140}】/g," ")
   .replace(/\[\s*\d{1,3}\s*\]/g," ")
