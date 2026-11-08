@@ -22,7 +22,7 @@
 <div id="photoOptions">
 <label for="photo">Anexar até 10 fotos (capa + demais cards)</label>
 <input type="file" id="photo" accept="image/*,.heic,.heif,.dng" multiple>
-<p class="fine" id="photoHelp">Selecione até 10 fotos juntas, na ordem desejada. A primeira vai para a capa, a segunda para o card 2 e assim por diante. Você pode trocar a foto de qualquer card depois. Fotos originais têm prioridade sobre a busca automática.</p>
+<p class="fine" id="photoHelp">Selecione até 10 fotos juntas, na ordem desejada. A primeira vai para a capa, a segunda para o card 2 e assim por diante. Ao gerar o carrossel com IA, cópias reduzidas dessas fotos serão analisadas pela OpenAI junto do seu título para criar conteúdo coerente. Evite anexar documentos e fotos sensíveis. As fotos originais não serão modificadas.</p>
 <p class="photo-status" id="uploadStatus" role="status" aria-live="polite">Nenhuma foto anexada (0 de 10).</p>
 <div id="uploadList" aria-label="Fotos anexadas por card" class="upload-grid"></div>
 </div>
@@ -495,6 +495,40 @@ async function populatePhotos(post,customQuery){
 function cleanTopic(s){return String(s||"").trim().replace(/[.!?]+$/,"")}
 var contentBusy=false;
 var carouselApiUrl="https://crediti-ia-api.onrender.com/api/studio/carousel";
+function smallImageForResearch(source){
+ return new Promise(function(resolve,reject){
+  var image=new Image();
+  var timer=setTimeout(function(){image.src="";reject(new Error("Uma foto demorou para abrir. Tente reenviá-la."))},14000);
+  image.onload=function(){
+   clearTimeout(timer);
+   try{
+    var canvas=document.createElement("canvas"),w=image.naturalWidth,h=image.naturalHeight;
+    if(!w||!h)throw new Error("Imagem inválida");
+    var factor=Math.min(1,540/Math.max(w,h));
+    canvas.width=Math.max(1,Math.round(w*factor));canvas.height=Math.max(1,Math.round(h*factor));
+    canvas.getContext("2d").drawImage(image,0,0,canvas.width,canvas.height);
+    var output=canvas.toDataURL("image/jpeg",.55);
+    if(output.length>230000)throw new Error("Foto grande demais para análise");
+    resolve(output);
+   }catch(error){reject(new Error("Não consegui preparar uma foto para a IA. Exporte em JPG e tente novamente."))}
+  };
+  image.onerror=function(){clearTimeout(timer);reject(new Error("Um dos anexos não pode ser lido. Exporte em JPG."))};
+  image.src=source;
+ });
+}
+async function imagesForCarrouselAnalysis(topic,qty){
+ var chosen=[],sum=0;
+ for(var i=0;i<qty;i++){
+  var uploaded=stagedUploads[i]||(current?.topic===topic&&current?.uploadedNames?.[i]&&current?.images?.[i]?
+   {name:current.uploadedNames[i],data:current.images[i]}:null);
+  if(!uploaded?.data)continue;
+  var image=await smallImageForResearch(uploaded.data);
+  sum+=image.length;
+  if(sum>1350000)throw new Error("As fotos são grandes para analisar juntas. Use imagens JPG menores.");
+  chosen.push({slot:i,image:image});
+ }
+ return chosen;
+}
 function cleanCardCopy(value){
  return String(value||"")
   .replace(/\[([^\]]{0,110})\]\((?:https?:\/\/|www\.)[^)]+\)/gi,function(full,label){return /^(?:fonte|referência|leia mais|link|saiba mais)$/i.test(label.trim())?"":label})
@@ -533,18 +567,23 @@ async function generate(){
  if(topic.length<5){$("#contentStatus").textContent="Escreva um tema com pelo menos cinco caracteres.";msg("Informe o assunto que a IA deve pesquisar.");return}
  var qty=Math.max(5,Math.min(10,Number($("#count").value)||6));
  var prev=current,btn=$("#generate"),controller=new AbortController();
- var timer=setTimeout(function(){controller.abort()},100000);
+ var timer=setTimeout(function(){controller.abort()},145000);
  var related=(posts||[]).filter(function(p){
   var q=cleanTopic(p.topic).toLowerCase(),t=topic.toLowerCase();
   return q&&t&&(q.includes(t)||t.includes(q));
  }).slice(0,4).flatMap(function(p){return (p.slides||[]).slice(1,-1).map(function(sl){return sl.title})}).slice(0,16);
- contentBusy=true;btn.disabled=true;btn.textContent="Pesquisando fontes brasileiras…";
- $("#contentStatus").textContent="Pesquisando informações do Brasil sobre: "+topic+". Cada card terá um assunto diferente.";
+ contentBusy=true;btn.disabled=true;btn.textContent="Analisando título e fotos…";
+ $("#contentStatus").textContent="Conferindo o assunto e as fotos anexadas antes de criar os cards.";
  try{
+  var photoPreviews=await imagesForCarrouselAnalysis(topic,qty);
+  btn.textContent=photoPreviews.length?"Lendo fotos e pesquisando…":"Pesquisando conteúdo brasileiro…";
+  $("#contentStatus").textContent=photoPreviews.length?
+   "Analisando "+photoPreviews.length+" fotografia(s), cruzando com o título e pesquisando fontes brasileiras…":
+   "Pesquisando informações brasileiras diretamente relacionadas a: "+topic;
   var res=await fetch(carouselApiUrl,{
    method:"POST",cache:"no-store",signal:controller.signal,
    headers:{"Content-Type":"application/json"},
-   body:JSON.stringify({topic:topic,count:qty,avoid:related})
+   body:JSON.stringify({topic:topic,count:qty,avoid:related,photos:photoPreviews})
   });
   var result=await res.json().catch(function(){return {}});
   if(!res.ok||!result.success){
@@ -579,7 +618,7 @@ async function generate(){
   current=post;index=0;
   $("#photoQuery").value=topic;resetGallery(topic);
   render();renderResearchSources(post);
-  $("#contentStatus").textContent="Carrossel com "+qty+" cards únicos, pesquisado em "+sources.length+" fonte(s) brasileira(s). Revise os dados antes de publicar.";
+  $("#contentStatus").textContent="Carrossel com "+qty+" cards diferentes e "+(Number(result.photosAnalyzed)||0)+" foto(s) analisada(s). Conteúdo pesquisado em fontes brasileiras. Revise os dados antes de publicar.";
   msg("Carrossel educativo criado pela IA. Você pode editar os cards.");
   if(post.photoMode!=="none"){await populatePhotos(post);moreGalleryPhotos()}
  }catch(error){
