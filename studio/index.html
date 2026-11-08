@@ -649,36 +649,157 @@ async function cloudActiveSession(){
  if(Number(cloudSession.expires_at||0)>Date.now()+60000)return cloudSession;
  return await cloudRefreshSession();
 }
+
+var cloudAuthMode="signup",cloudAuthBusy=false,cloudRecoveryActive=false;
+function cloudSetAuthMode(mode,notice){
+ cloudAuthMode=mode==="login"?"login":"signup";
+ cloudRecoveryActive=false;
+ $("#cloudTabSignup").classList.toggle("active",cloudAuthMode==="signup");
+ $("#cloudTabLogin").classList.toggle("active",cloudAuthMode==="login");
+ $("#cloudTabSignup").setAttribute("aria-pressed",String(cloudAuthMode==="signup"));
+ $("#cloudTabLogin").setAttribute("aria-pressed",String(cloudAuthMode==="login"));
+ $("#cloudConfirmRow").hidden=cloudAuthMode!=="signup";
+ $("#cloudSignUp").hidden=cloudAuthMode!=="signup";
+ $("#cloudSignIn").hidden=cloudAuthMode!=="login";
+ $("#cloudForgotPassword").hidden=cloudAuthMode!=="login";
+ $("#cloudPasswordRow").hidden=false;
+ $("#cloudRecoveryBox").hidden=true;
+ $("#cloudPasswordLabel").textContent=cloudAuthMode==="signup"?"Crie sua senha (mínimo 8 caracteres)":"Senha da sua conta";
+ $("#cloudPassword").placeholder=cloudAuthMode==="signup"?"Crie uma senha segura":"Digite sua senha";
+ $("#cloudPassword").autocomplete=cloudAuthMode==="signup"?"new-password":"current-password";
+ $("#cloudInstructions").textContent=cloudAuthMode==="signup"?
+  "Primeiro crie seu acesso com e-mail, senha e confirmação. Se já usou este e-mail em outro aplicativo da Crediti, toque em Entrar na conta. Nessa situação, não é possível cadastrar outra senha por cima.":"Entre com sua conta existente para proteger e recuperar fotografias. Se não lembra a senha, use Esqueci minha senha.";
+ if(notice)cloudTell(notice);
+}
+function cloudFriendlyError(error,mode){
+ const code=String(error?.error_code||error?.code||"").toLowerCase();
+ const detail=String(error?.msg||error?.error_description||error?.message||error?.error||"");
+ const str=detail.toLowerCase();
+ if(code.includes("invalid_credentials")||str.includes("invalid login credentials"))
+  return "Senha incorreta ou e-mail diferente do cadastro. Se já possui conta, toque em Esqueci minha senha.";
+ if(code.includes("email_not_confirmed")||str.includes("email not confirmed"))
+  return "Você precisa confirmar o cadastro pelo e-mail antes de entrar.";
+ if(code.includes("user_already_exists")||str.includes("already registered")||str.includes("already exists"))
+  return "Este e-mail já tem cadastro. Selecione Entrar na conta ou Esqueci minha senha.";
+ if(code.includes("weak_password")||str.includes("password should")||str.includes("password is too weak"))
+  return "A senha não atende aos requisitos de segurança. Use pelo menos 8 caracteres e misture letras e números.";
+ if(code.includes("over_email_send_rate_limit")||str.includes("email rate limit")||str.includes("rate limit"))
+  return "Limite temporário de e-mails atingido. Tente novamente mais tarde.";
+ if(code.includes("signup_disabled"))return "A criação de contas está desativada neste servidor.";
+ if(code.includes("email_address_invalid"))return "Confira o formato do e-mail informado.";
+ return (mode==="signup"?"Não foi possível criar acesso: ":"Não foi possível entrar: ")+detail.slice(0,150);
+}
 async function cloudAuth(mode){
+ if(cloudAuthBusy)return;
  var email=$("#cloudEmail").value.trim().toLowerCase(),password=$("#cloudPassword").value;
- if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)){cloudTell("Informe seu e-mail corretamente.");return}
- if(password.length<8){cloudTell("Use uma senha forte, com pelo menos 8 caracteres.");return}
+ if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)){cloudTell("Digite um e-mail válido antes de continuar.");$("#cloudEmail").focus();return}
+ if(password.length<8){cloudTell("O campo senha está vazio ou incompleto. Digite uma senha de pelo menos 8 caracteres antes de tocar no botão.");$("#cloudPassword").focus();return}
+ if(mode==="signup"){
+  var confirm=$("#cloudConfirmPassword").value;
+  if(!confirm){cloudTell("Confirme a senha no segundo campo antes de criar o acesso.");$("#cloudConfirmPassword").focus();return}
+  if(password!==confirm){cloudTell("As duas senhas não são iguais. Confira a digitação.");$("#cloudConfirmPassword").focus();return}
+ }
+ cloudAuthBusy=true;
  $("#cloudSignIn").disabled=$("#cloudSignUp").disabled=true;
- cloudTell(mode==="signup"?"Criando seu acesso privado…":"Entrando na sua conta de backup…");
+ cloudTell(mode==="signup"?"Solicitando criação do acesso com segurança…":"Conferindo e-mail e senha…");
  try{
-  const endpoint=mode==="signup"?"/auth/v1/signup":"/auth/v1/token?grant_type=password";
+  var endpoint=mode==="signup"?"/auth/v1/signup":"/auth/v1/token?grant_type=password";
   var response=await fetch(CLOUD_URL+endpoint,{
-   method:"POST",headers:cloudHeaders(null,{"Content-Type":"application/json"}),
+   method:"POST",headers:cloudHeaders(null,{"Content-Type":"application/json"}),cache:"no-store",
    body:JSON.stringify({email,password})
   });
   var data=await response.json().catch(()=>({}));
-  if(!response.ok){
-   cloudTell("Não foi possível entrar: "+String(data.msg||data.error_description||data.message||data.error||"Confira o e-mail e a senha.").slice(0,170));
+  if(!response.ok){cloudTell(cloudFriendlyError(data,mode));return}
+  var session=data.session?.access_token?Object.assign({},data.session,{user:data.user||data.session.user}):data;
+  if(!session.access_token||!session.user?.id){
+   if(mode==="signup"){
+    cloudSetAuthMode("login");
+    cloudTell("Pedido de cadastro recebido. Se este e-mail é novo, confira a caixa de entrada e o spam para confirmar. Se a conta já existia, escolha Esqueci minha senha para recuperar o acesso. Nenhum backup na nuvem está ativo até você entrar.");
+   }else cloudTell("O servidor não confirmou seu acesso. Confira o e-mail e a senha.");
    return;
   }
-  var resultSession=data.session?.access_token?
-   Object.assign({},data.session,{user:data.user||data.session.user}):data;
-  if(!resultSession.access_token||!resultSession.user?.id){
-   cloudTell("Acesse seu e-mail para confirmar o cadastro e depois volte aqui para tocar em Entrar. Até lá, as fotos ficam somente na cópia local.");
-   return;
-  }
-  cloudStoreSession(Object.assign({},resultSession,{expires_at:Date.now()+Number(resultSession.expires_in||3600)*1000}));
-  $("#cloudPassword").value="";
-  cloudTell("Nuvem conectada. As fotos originais serão guardadas automaticamente e poderão ser recuperadas por esta conta.");
+  cloudStoreSession(Object.assign({},session,{expires_at:Date.now()+Number(session.expires_in||3600)*1000}));
+  cloudTell("Acesso confirmado. Sua conta está conectada para guardar e recuperar as imagens originais.");
   await cloudFlushPendingOriginals();
   await cloudListOriginals(false);
- }catch(err){cloudTell("Não consegui conectar ao backup agora. Confira a conexão e tente novamente.");}
- finally{$("#cloudPassword").value="";$("#cloudSignIn").disabled=$("#cloudSignUp").disabled=false}
+ }catch(err){cloudTell("Não foi possível falar com o servidor de cadastro. Confira a conexão e tente novamente.")}
+ finally{
+  $("#cloudPassword").value="";$("#cloudConfirmPassword").value="";
+  cloudAuthBusy=false;$("#cloudSignIn").disabled=$("#cloudSignUp").disabled=false;
+ }
+}
+function cloudStartRecovery(){
+ cloudRecoveryActive=true;
+ cloudSetAuthMode("login");
+ cloudRecoveryActive=true;
+ $("#cloudPasswordRow").hidden=true;
+ $("#cloudForgotPassword").hidden=true;
+ $("#cloudSignIn").hidden=true;
+ $("#cloudRecoveryBox").hidden=false;
+ $("#cloudInstructions").textContent="Digite o e-mail que já tem cadastro. Você receberá instruções para definir uma nova senha.";
+ cloudTell("Recuperar senha: confirme o seu e-mail e toque em Enviar link de recuperação.");
+}
+async function cloudSendPasswordRecovery(){
+ if(cloudAuthBusy)return;
+ var email=$("#cloudEmail").value.trim().toLowerCase();
+ if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)){cloudTell("Digite seu e-mail corretamente para recuperar a senha.");$("#cloudEmail").focus();return}
+ cloudAuthBusy=true;$("#cloudSendRecovery").disabled=true;
+ cloudTell("Solicitando link de recuperação…");
+ try{
+  var redirect="https://crediti-studio.onrender.com/?recover=password";
+  var response=await fetch(CLOUD_URL+"/auth/v1/recover?redirect_to="+encodeURIComponent(redirect),{
+   method:"POST",headers:cloudHeaders(null,{"Content-Type":"application/json"}),
+   body:JSON.stringify({email})
+  });
+  var result=await response.json().catch(()=>({}));
+  if(!response.ok){cloudTell(cloudFriendlyError(result,"recovery"));return}
+  cloudTell("Se este e-mail tem conta, um link de recuperação foi solicitado. Confira sua caixa de entrada e spam. Abra o link para criar uma nova senha. O servidor de e-mail pode ter limite de envios.");
+ }catch(err){cloudTell("Falha ao pedir recuperação. Confira sua conexão e tente novamente.")}
+ finally{cloudAuthBusy=false;$("#cloudSendRecovery").disabled=false}
+}
+async function cloudProcessRecoveryCallback(){
+ var params=new URLSearchParams(location.hash.replace(/^#/,""));
+ if(params.get("type")!=="recovery"||!params.get("access_token"))return;
+ var token=params.get("access_token"),refresh=params.get("refresh_token");
+ cloudTell("Validando seu link de recuperação…");
+ try{
+  var response=await fetch(CLOUD_URL+"/auth/v1/user",{
+   headers:cloudHeaders(token)
+  });
+  var user=await response.json().catch(()=>({}));
+  if(!response.ok||!user.id)throw new Error("O link expirou ou não pôde ser confirmado.");
+  cloudStoreSession({access_token:token,refresh_token:refresh||"",user,
+   expires_at:Date.now()+Math.max(60,Number(params.get("expires_in"))||3600)*1000});
+  $("#cloudLoginBox").hidden=true;
+  $("#cloudConnectedBox").hidden=true;
+  $("#cloudResetPasswordBox").hidden=false;
+  history.replaceState(null,"",location.pathname+location.search);
+  cloudTell("Link confirmado. Escolha sua nova senha abaixo e confirme.");
+ }catch(err){cloudTell(err.message||"Link inválido ou expirado. Peça outra recuperação.")}
+}
+async function cloudUpdatePassword(){
+ var password=$("#cloudNewPassword").value,confirm=$("#cloudNewPasswordConfirm").value;
+ if(password.length<8){cloudTell("Sua nova senha precisa ter pelo menos 8 caracteres.");$("#cloudNewPassword").focus();return}
+ if(password!==confirm){cloudTell("As duas novas senhas precisam ser iguais.");$("#cloudNewPasswordConfirm").focus();return}
+ $("#cloudSetNewPassword").disabled=true;
+ cloudTell("Atualizando sua senha…");
+ try{
+  var session=await cloudActiveSession();
+  if(!session)throw new Error("Sessão de recuperação expirada. Solicite outro link.");
+  var response=await fetch(CLOUD_URL+"/auth/v1/user",{
+   method:"PUT",headers:cloudHeaders(session.access_token,{"Content-Type":"application/json"}),
+   body:JSON.stringify({password})
+  });
+  var data=await response.json().catch(()=>({}));
+  if(!response.ok)throw new Error(cloudFriendlyError(data,"recovery"));
+  $("#cloudNewPassword").value=$("#cloudNewPasswordConfirm").value="";
+  $("#cloudResetPasswordBox").hidden=true;
+  cloudRenderAuth();
+  cloudTell("Senha atualizada. Você já está conectado ao backup privado das fotos.");
+  await cloudFlushPendingOriginals();
+  await cloudListOriginals(false);
+ }catch(error){cloudTell(error.message||"Não foi possível atualizar a senha.")}
+ finally{$("#cloudSetNewPassword").disabled=false}
 }
 async function cloudSavePendingLocally(){
  var snapshot=cloudPendingOriginals.slice();
@@ -853,8 +974,18 @@ async function cloudInitialize(){
 }
 var cloudStartupPromise=cloudInitialize();
 window.addEventListener("online",()=>cloudFlushPendingOriginals());
+cloudSetAuthMode("signup");
+$("#cloudTabSignup").onclick=()=>cloudSetAuthMode("signup","Crie uma senha com no mínimo 8 caracteres e confirme no campo abaixo.");
+$("#cloudTabLogin").onclick=()=>cloudSetAuthMode("login","Se este e-mail já foi usado antes, informe a senha existente ou toque em Esqueci minha senha.");
 $("#cloudSignIn").onclick=()=>cloudAuth("login");
 $("#cloudSignUp").onclick=()=>cloudAuth("signup");
+$("#cloudForgotPassword").onclick=cloudStartRecovery;
+$("#cloudCancelRecovery").onclick=()=>cloudSetAuthMode("login","Volte ao login e informe sua senha.");
+$("#cloudSendRecovery").onclick=cloudSendPasswordRecovery;
+$("#cloudSetNewPassword").onclick=cloudUpdatePassword;
+$("#cloudShowPassword").onclick=function(){var field=$("#cloudPassword");field.type=field.type==="password"?"text":"password";this.textContent=field.type==="password"?"Ver":"Ocultar"};
+$("#cloudShowConfirm").onclick=function(){var field=$("#cloudConfirmPassword");field.type=field.type==="password"?"text":"password";this.textContent=field.type==="password"?"Ver":"Ocultar"};
+cloudStartupPromise.then(cloudProcessRecoveryCallback).catch(function(){});
 $("#cloudListPhotos").onclick=()=>cloudListOriginals(true);
 $("#cloudSignOut").onclick=function(){
  cloudStoreSession(null);
