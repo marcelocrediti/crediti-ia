@@ -7,7 +7,7 @@ import {
 } from "./meta-conversions.js";
 
 const s = O();
-s.use(h({ origin: "*", methods: ["GET", "POST", "OPTIONS"], allowedHeaders: ["Content-Type", "X-Studio-Code"] })), s.use(O.json({ limit: "1mb" }));
+s.use(h({ origin: "*", methods: ["GET", "POST", "OPTIONS"], allowedHeaders: ["Content-Type", "X-Studio-Code"] })), s.use(O.json({ limit: "3mb" }));
 
 s.post("/api/meta/events", async (o, a) => {
   try {
@@ -720,10 +720,35 @@ function studioValidateCarousel(obj,topic,total) {
  if(!obj||typeof obj!=="object"||!Array.isArray(obj.cards)||obj.cards.length!==total-2)return null;
  const cover={title:studioCardCopy(obj.cover?.title,110),body:studioCardCopy(obj.cover?.body,195)};
  const end={title:studioCardCopy(obj.closing?.title,110),body:studioCardCopy(obj.closing?.body,195)};
- const cards=obj.cards.map(c=>({title:studioCardCopy(c?.title,110),body:studioCardCopy(c?.body,205)}));
+ const cards=obj.cards.map(c=>({title:studioCardCopy(c?.title,110),body:studioCardCopy(c?.body,205),angle:studioCardCopy(c?.angle,75)}));
  const caption=studioCardCopy(obj.caption,850);
  const all=[cover,...cards,end];
  if(all.some(c=>c.title.length<8||c.body.length<30))return null;
+ // Verifica a aderência ao título e rejeita a troca por um assunto diferente.
+ const focus=studioNorm(obj.focus||"");
+ const topicTerms=studioNorm(topic).split(" ").filter(w=>w.length>3&&
+  !["voce","sobre","quando","porque","chegou","esse","esses","essa","aqui","como","qual","quais","seus","suas","pode","muito","cada","sera","mais","menos","todo","todos","seja"].includes(w));
+ const focusTerms=new Set(focus.split(" "));
+ const bridges={"mercantil":["supermercado","mercado","compras","alimentos","feira"],
+  "supermercado":["mercantil","mercado","compras","alimentos"],
+  "moto":["motocicleta","motocicletas","motos"],
+  "motos":["moto","motocicleta","motocicletas"],
+  "inss":["aposentadoria","beneficio","previdencia"],
+  "fgts":["saque","trabalhador","antecipacao"]};
+ const onTopic=topicTerms.some(term=>[term,term.slice(0,Math.max(4,term.length-1)),...(bridges[term]||[])].some(x=>focusTerms.has(x)||focus.includes(x)));
+ if(topicTerms.length&&!onTopic)return null;
+ const distinctAngles=new Set();
+ const bodySets=[];
+ for(const c of cards){
+  const key=studioNorm(c.angle),terms=studioNorm(c.title+" "+c.body).split(" ").filter(w=>w.length>4);
+  if(key.length<5||distinctAngles.has(key))return null;
+  const cur=new Set(terms);
+  if(bodySets.some(prev=>{
+   const intersection=[...cur].filter(x=>prev.has(x)).length;
+   return intersection/Math.max(1,Math.min(cur.size,prev.size))>.78;
+  }))return null;
+  distinctAngles.add(key);bodySets.push(cur);
+ }
  const topics=new Set();
  for (const c of all) {
   const title=studioNorm(c.title), key=title.split(" ").filter(Boolean).join(" ");
@@ -734,21 +759,89 @@ function studioValidateCarousel(obj,topic,total) {
  if(!studioNorm(topic))return null;
  return {slides:[
   {title:cover.title,body:cover.body,kind:"cover",layout:"auto"},
-  ...cards.map(c=>({...c,kind:"content",layout:"auto"})),
+  ...cards.map(c=>({title:c.title,body:c.body,kind:"content",layout:"auto"})),
   {title:end.title,body:end.body,kind:"cta",layout:"auto"}
  ],caption};
 }
 const studioSlideSchema={type:"object",additionalProperties:false,
  properties:{title:{type:"string"},body:{type:"string"}},
  required:["title","body"]};
+const studioContentCardSchema={type:"object",additionalProperties:false,
+ properties:{title:{type:"string"},body:{type:"string"},angle:{type:"string"}},
+ required:["title","body","angle"]};
+const studioVisionSchema={type:"object",additionalProperties:false,
+ properties:{
+  theme:{type:"string"},
+  photos:{type:"array",items:{type:"object",additionalProperties:false,
+   properties:{slot:{type:"integer"},description:{type:"string"},
+    relation:{type:"string",enum:["related","unrelated","uncertain"]}},
+   required:["slot","description","relation"]}}
+ },required:["theme","photos"]};
+function studioValidPhotos(list){
+ if(list==null)return [];
+ if(!Array.isArray(list)||list.length>10)throw Object.assign(new Error("Selecione no máximo 10 fotografias."),{status:400});
+ let size=0;const slots=new Set();
+ return list.map(function(item){
+  const slot=Number(item?.slot),url=String(item?.image||"");
+  size+=url.length;
+  if(!Number.isInteger(slot)||slot<0||slot>9||slots.has(slot)||!/^data:image\/jpeg;base64,[A-Za-z0-9+/=]{300,}$/.test(url)||url.length>240000)
+   throw Object.assign(new Error("Uma das fotos anexadas é inválida. Use uma imagem JPEG."),{status:400});
+  slots.add(slot);return {slot,image:url};
+ }).filter(Boolean).map(x=>{if(size>1400000)throw Object.assign(new Error("Fotografias muito grandes. Tente com imagens menores."),{status:413});return x});
+}
+async function studioReadImages(topic,photos){
+ if(!photos.length)return {theme:topic,photos:[]};
+ const content=[{type:"input_text",text:[
+   "Analise estas fotografias apenas como apoio ao tema proposto.",
+   "TEMA OBRIGATÓRIO: "+topic,
+   "Para cada foto, descreva objetos e ações observáveis, sem inventar pessoas, cidades, produtos, preços ou situação econômica.",
+   "Julgue se a fotografia é realmente pertinente AO TEMA. Marque unrelated só se for claramente incompatível.",
+   "Não assuma que o tema é aquele que você vê na foto se o título do usuário indica outra coisa.",
+   "Responda em português do Brasil e JSON do esquema."
+  ].join("\n")}];
+ for(const p of photos){
+  content.push({type:"input_text",text:"FOTO DO CARD "+(p.slot+1)+":"});
+  content.push({type:"input_image",image_url:p.image,detail:"low"});
+ }
+ const abort=new AbortController(),timer=setTimeout(()=>abort.abort(),40000);
+ try{
+  const response=await fetch("https://api.openai.com/v1/responses",{
+   method:"POST",signal:abort.signal,
+   headers:{"Authorization":"Bearer "+process.env.OPENAI_API_KEY,"Content-Type":"application/json"},
+   body:JSON.stringify({
+    model:process.env.STUDIO_VISION_MODEL||"gpt-4.1-mini",
+    instructions:"Você observa fotos de produtos e cenas brasileiras sem especular sobre identidade ou fatos. Classifique a relação com o tema escrito de forma rigorosa.",
+    input:[{role:"user",content}],text:{format:{type:"json_schema",name:"studio_photo_read",strict:true,schema:studioVisionSchema}},
+    max_output_tokens:1200,store:false
+   })
+  });
+  const json=await response.json().catch(()=>({}));
+  if(!response.ok){console.error("Crediti Studio photo reading status",response.status);
+   throw Object.assign(new Error("Não consegui analisar as fotos com IA. Confira o acesso à API."),{status:502})}
+  const raw=(json.output||[]).filter(o=>o.type==="message")
+   .flatMap(o=>o.content||[]).filter(c=>c.type==="output_text").map(c=>c.text).join("").trim();
+  let parsed;try{parsed=JSON.parse(raw)}catch{parsed=null}
+  if(!parsed||!Array.isArray(parsed.photos)||parsed.photos.length!==photos.length)
+   throw Object.assign(new Error("A análise das fotos não ficou completa. Tente novamente."),{status:502});
+  const bySlot=new Map(parsed.photos.map(p=>[Number(p.slot),p]));
+  const checked=photos.map(p=>{
+   const item=bySlot.get(p.slot);
+   if(!item||!["related","unrelated","uncertain"].includes(item.relation))throw Object.assign(new Error("Não consegui relacionar todos os anexos ao tema."),{status:502});
+   return {slot:p.slot,description:studioCardCopy(item.description,160),relation:item.relation};
+  });
+  return {theme:studioCardCopy(parsed.theme,160)||topic,photos:checked};
+ }finally{clearTimeout(timer)}
+}
+
 const studioCarouselSchema={
  type:"object",additionalProperties:false,
  properties:{
+  focus:{type:"string"},
   cover:studioSlideSchema,
-  cards:{type:"array",items:studioSlideSchema},
+  cards:{type:"array",items:studioContentCardSchema},
   closing:studioSlideSchema,
   caption:{type:"string"}
- },required:["cover","cards","closing","caption"]
+ },required:["focus","cover","cards","closing","caption"]
 };
 s.post("/api/studio/carousel",async(req,res)=>{
  res.set("Cache-Control","no-store");
@@ -760,6 +853,8 @@ s.post("/api/studio/carousel",async(req,res)=>{
  });
  const topic=studioClean(req.body?.topic,180);
  const total=Number(req.body?.count);
+ let photoPreviews;
+ try{photoPreviews=studioValidPhotos(req.body?.photos)}catch(err){return res.status(err.status||400).json({error:err.message})}
  const avoid=Array.isArray(req.body?.avoid) ? req.body.avoid.slice(0,16).map(v=>studioClean(v,95)) : [];
  if(topic.length<5||!Number.isInteger(total)||total<5||total>10){
   return res.status(400).json({error:"Informe um tema de pelo menos 5 caracteres e de 5 a 10 cards."});
@@ -772,12 +867,32 @@ s.post("/api/studio/carousel",async(req,res)=>{
  });
  studioTextUsage.busy=true;studioTextUsage.count++;studioTextUsage.lastAt=Date.now();
  const points=total-2;
+ let photoReview;
+ try{
+  photoReview=await studioReadImages(topic,photoPreviews);
+ }catch(err){
+  console.warn("Crediti Studio photo analysis unavailable",err?.name||"error");
+  return res.status(err.status||502).json({error:err.message||"A leitura das fotografias não foi concluída."});
+ }finally{ /* A trava de geração será liberada no bloco finally principal. */ }
+ const unrelated=photoReview.photos.filter(p=>p.relation==="unrelated");
+ if(unrelated.length){
+  studioTextUsage.busy=false;
+  return res.status(422).json({error:"A foto do card "+unrelated.map(p=>p.slot+1).join(", ")+" não combina com o tema informado. Troque esse anexo ou ajuste o título antes de gerar."});
+ }
+ const visualGuide=photoReview.photos.length?photoReview.photos.map(p=>
+  "Card "+(p.slot+1)+": "+p.description+" ("+p.relation+")").join("\n"):"Nenhuma foto anexada: o tema escrito define todo o conteúdo.";
  const prompt=[
   "Você é redator e pesquisador de carrosséis brasileiros extremamente interessantes.",
   "Pesquise NA WEB fontes oficiais ou jornalismo público brasileiro, realmente relacionadas ao tema fornecido. Baseie o conteúdo nos dados localizados; NÃO invente dados, números, regras, programas, preços, datas ou CIDs.",
   "Tema ÚNICO e OBRIGATÓRIO fornecido pelo usuário: "+JSON.stringify(topic),
+  "Descrição das fotografias analisadas pelo modelo de visão (se houver):\n"+visualGuide,
+  "As fotos servem para criar conexões VISUAIS com o tema, não para mudar o assunto. Se uma foto for genérica, mantenha o assunto prioritário do título. Não use uma imagem como prova documental.",
+  "Identifique uma frase curta focus que represente o TEMA EXATO do usuário (não um tema vizinho); cada card deve estar dentro desse foco.",
   "Use SOMENTE esse tema. Nunca reutilize roteiros de Black Friday, investimentos, financiamento, INSS ou outro tema sem conexão explícita com a pergunta.",
   "Antes de escrever, pense em "+points+" ângulos diferentes, específicos e úteis para esse tema. Cada card ensina algo novo; não repita conceitos, conselhos, alertas ou títulos. Use a pesquisa para embasar as orientações.",
+  "Cada objeto de cards deve incluir um angle curto, um rótulo semântico EXCLUSIVO (por exemplo, lista de compras, preço por quilo, validade ou armazenamento para tema supermercado). O texto e o título de cada card devem desenvolver seu angle sem repetir conteúdo dos outros.",
+  "Com fotos: quando possível, alinhe o assunto do card N com o que a foto N mostra, sem perder o tema central e sem inventar detalhes.",
+  "Verificação final obrigatória: título, foco, fotos e todos os cards devem falar do MESMO assunto central. Se dois cards ensinam a mesma coisa com palavras diferentes, mude um deles para outro ângulo útil.",
   "Gere exatamente "+total+" slides: 1 capa forte que reflita o tema, "+points+" cards educativos distintos e 1 encerramento com CTA gentil.",
   "Formato: português brasileiro natural, curioso, prático, claro e compartilhável, sem jargões e sem frases vazias.",
   "JAMAIS inclua links, domínios, URL, www, http, fonte, citação, referência, nota de rodapé ou marcador bibliográfico nos títulos ou textos dos cards. Faça a pesquisa por trás, sem poluir a arte. O sistema guarda as fontes separadamente para conferência.",
@@ -787,11 +902,11 @@ s.post("/api/studio/carousel",async(req,res)=>{
   "Exemplo de distinção: tema 'compras do mercantil' deve falar de lista de compras, preço por quilo, validade, impulso, sazonalidade, comparação de embalagens, e não Black Friday.",
   "Dê uma legenda atrativa em português brasileiro, até 650 caracteres, com até 4 hashtags relacionadas ao tema.",
   avoid.length?"Evite ângulos semelhantes a estes títulos anteriores: "+JSON.stringify(avoid):"",
-  "Devolva apenas o JSON estruturado do esquema. Cada cartão precisa ser editorialmente distinto, sem links ou indicações de fontes no texto visual."
+  "Devolva apenas o JSON estruturado do esquema. Preencha focus, cover, cards com angle, closing e caption. Cada cartão precisa ser editorialmente distinto, sem links ou indicações de fontes no texto visual."
  ].filter(Boolean).join("\n");
  try{
   const controller=new AbortController();
-  const timeout=setTimeout(()=>controller.abort(),85000);
+  const timeout=setTimeout(()=>controller.abort(),90000);
   let api;
   try{
    api=await fetch("https://api.openai.com/v1/responses",{
