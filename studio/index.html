@@ -639,7 +639,7 @@ async function cloudAuth(mode){
   await cloudFlushPendingOriginals();
   await cloudListOriginals(false);
  }catch(err){cloudTell("Não consegui conectar ao backup agora. Confira a conexão e tente novamente.");}
- finally{$("#cloudSignIn").disabled=$("#cloudSignUp").disabled=false}
+ finally{$("#cloudPassword").value="";$("#cloudSignIn").disabled=$("#cloudSignUp").disabled=false}
 }
 async function cloudSavePendingLocally(){
  var snapshot=cloudPendingOriginals.slice();
@@ -700,6 +700,9 @@ async function cloudUploadOriginal(item){
   body:item.file
  });
  var result=await response.json().catch(()=>({}));
+ // Se a conexão cair depois de o arquivo ser enviado, um retry pode encontrar o mesmo
+ // nome. Ele é único e imutável: nesse caso a cópia já foi armazenada.
+ if(response.status===409)return path;
  if(!response.ok)throw new Error(String(result.message||result.error||"Falha no envio").slice(0,150));
  return path;
 }
