@@ -570,6 +570,253 @@ function removeUploadedSlot(slot){
  renderUploadList();
  msg("Foto do card "+(slot+1)+" retirada. Os demais anexos foram mantidos.");
 }
+
+const CLOUD_URL="https://jfguumxlxmveuszddyky.supabase.co";
+const CLOUD_PUBLIC_KEY="sb_publishable_F84YmaFbhJGUmNXYrye1Rw_h6xKvW3B";
+const CLOUD_BUCKET="crediti-studio-originais";
+const CLOUD_SESSION_KEY="crediti-studio-private-photo-session-v1";
+var cloudSession=null,cloudPendingOriginals=[],cloudPendingWrite=Promise.resolve(),cloudPendingBusy=false,cloudRestoreInProgress=false;
+function cloudTell(message){var el=$("#cloudBackupStatus");if(el)el.textContent=message}
+function cloudHeaders(token,extras){
+ return Object.assign({"apikey":CLOUD_PUBLIC_KEY},token?{"Authorization":"Bearer "+token}:{},extras||{});
+}
+function cloudReadStoredSession(){
+ try{return JSON.parse(localStorage.getItem(CLOUD_SESSION_KEY)||"null")}catch(e){return null}
+}
+function cloudStoreSession(session){
+ cloudSession=session;
+ try{if(session)localStorage.setItem(CLOUD_SESSION_KEY,JSON.stringify(session));
+ else localStorage.removeItem(CLOUD_SESSION_KEY)}catch(e){}
+ cloudRenderAuth();
+}
+function cloudRenderAuth(){
+ var signed=!!cloudSession?.access_token&&!!cloudSession?.user?.id;
+ $("#cloudLoginBox").hidden=signed;
+ $("#cloudConnectedBox").hidden=!signed;
+ if(signed)$("#cloudAccountName").textContent="Conta protegida: "+(cloudSession.user.email||"Usuário autenticado");
+}
+async function cloudRefreshSession(){
+ if(!cloudSession?.refresh_token)return null;
+ var response=await fetch(CLOUD_URL+"/auth/v1/token?grant_type=refresh_token",{
+  method:"POST",headers:cloudHeaders(null,{"Content-Type":"application/json"}),
+  body:JSON.stringify({refresh_token:cloudSession.refresh_token})
+ });
+ var payload=await response.json().catch(()=>({}));
+ if(!response.ok||!payload.access_token){cloudStoreSession(null);return null}
+ cloudStoreSession(Object.assign({},payload,{user:payload.user||cloudSession?.user,
+  expires_at:Date.now()+Number(payload.expires_in||3600)*1000}));
+ return cloudSession;
+}
+async function cloudActiveSession(){
+ if(!cloudSession?.access_token)return null;
+ if(Number(cloudSession.expires_at||0)>Date.now()+60000)return cloudSession;
+ return await cloudRefreshSession();
+}
+async function cloudAuth(mode){
+ var email=$("#cloudEmail").value.trim().toLowerCase(),password=$("#cloudPassword").value;
+ if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)){cloudTell("Informe seu e-mail corretamente.");return}
+ if(password.length<8){cloudTell("Use uma senha forte, com pelo menos 8 caracteres.");return}
+ $("#cloudSignIn").disabled=$("#cloudSignUp").disabled=true;
+ cloudTell(mode==="signup"?"Criando seu acesso privado…":"Entrando na sua conta de backup…");
+ try{
+  const endpoint=mode==="signup"?"/auth/v1/signup":"/auth/v1/token?grant_type=password";
+  var response=await fetch(CLOUD_URL+endpoint,{
+   method:"POST",headers:cloudHeaders(null,{"Content-Type":"application/json"}),
+   body:JSON.stringify({email,password})
+  });
+  var data=await response.json().catch(()=>({}));
+  if(!response.ok){
+   cloudTell("Não foi possível entrar: "+String(data.msg||data.error_description||data.message||data.error||"Confira o e-mail e a senha.").slice(0,170));
+   return;
+  }
+  if(!data.access_token||!data.user?.id){
+   cloudTell("Acesse seu e-mail para confirmar o cadastro e depois volte aqui para tocar em Entrar. Até lá, as fotos ficam somente na cópia local.");
+   return;
+  }
+  cloudStoreSession(Object.assign({},data,{expires_at:Date.now()+Number(data.expires_in||3600)*1000}));
+  $("#cloudPassword").value="";
+  cloudTell("Nuvem conectada. As fotos originais serão guardadas automaticamente e poderão ser recuperadas por esta conta.");
+  await cloudFlushPendingOriginals();
+  await cloudListOriginals(false);
+ }catch(err){cloudTell("Não consegui conectar ao backup agora. Confira a conexão e tente novamente.");}
+ finally{$("#cloudSignIn").disabled=$("#cloudSignUp").disabled=false}
+}
+async function cloudSavePendingLocally(){
+ var snapshot=cloudPendingOriginals.slice();
+ cloudPendingWrite=cloudPendingWrite.catch(()=>{}).then(async function(){
+  var db=await openLibraryDB();
+  await new Promise(function(resolve,reject){
+   var tx=db.transaction("posts","readwrite");
+   tx.objectStore("posts").put(snapshot,"pending-originals");
+   tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error);
+   tx.onabort=()=>reject(tx.error);
+  });
+ });
+ return cloudPendingWrite;
+}
+async function cloudLoadPendingLocally(){
+ await libraryLoadPromise;
+ try{
+  var db=await openLibraryDB();
+  var result=await new Promise(function(resolve,reject){
+   var request=db.transaction("posts","readonly").objectStore("posts").get("pending-originals");
+   request.onsuccess=()=>resolve(request.result||[]);
+   request.onerror=()=>reject(request.error);
+  });
+  if(Array.isArray(result))cloudPendingOriginals=result.filter(x=>x&&x.file&&x.id);
+ }catch(err){console.warn("Fila de fotos não carregada localmente",err)}
+}
+function cloudStorageFilePath(item,userId){
+ var original=String(item.file.name||"imagem.jpg").replace(/[^a-zA-Z0-9_.-]/g,"-").slice(-75);
+ var id=String(item.id).replace(/[^a-z0-9_-]/gi,"").slice(0,40);
+ return userId+"/original_card"+(item.slot+1)+"_"+id+"_"+original;
+}
+async function cloudQueueOriginal(file,slot){
+ if(cloudRestoreInProgress)return true;
+ if(!file||!file.size)return false;
+ if(file.size>52428800){
+  cloudTell("A foto "+file.name+" ultrapassa 50 MB e ainda não pode ser protegida na nuvem. Exporte uma cópia menor.");
+  return false;
+ }
+ var random=Array.from(crypto.getRandomValues(new Uint8Array(8))).map(x=>x.toString(16).padStart(2,"0")).join("");
+ var item={id:Date.now().toString(36)+"-"+random,slot:slot,file:file,capturedAt:new Date().toISOString()};
+ cloudPendingOriginals.push(item);
+ try{
+  await cloudSavePendingLocally();
+ }catch(err){
+  cloudTell("A cópia local não pôde ser gravada. Não apague sua foto original. Entre no backup em nuvem.");
+ }
+ cloudTell("Foto "+file.name+" recebida. "+(cloudSession?"Enviando cópia original para a nuvem…":"Aguardando login para enviar à nuvem. A foto AINDA não está protegida fora deste aparelho."));
+ if(cloudSession)cloudFlushPendingOriginals();
+ return true;
+}
+async function cloudUploadOriginal(item){
+ var session=await cloudActiveSession();
+ if(!session)throw new Error("Faça login para proteger suas fotografias.");
+ var path=cloudStorageFilePath(item,session.user.id);
+ var endpoint=CLOUD_URL+"/storage/v1/object/"+CLOUD_BUCKET+"/"+path.split("/").map(encodeURIComponent).join("/");
+ var response=await fetch(endpoint,{method:"POST",
+  headers:cloudHeaders(session.access_token,{"Content-Type":item.file.type||"application/octet-stream","x-upsert":"false"}),
+  body:item.file
+ });
+ var result=await response.json().catch(()=>({}));
+ if(!response.ok)throw new Error(String(result.message||result.error||"Falha no envio").slice(0,150));
+ return path;
+}
+async function cloudFlushPendingOriginals(){
+ if(cloudPendingBusy||!cloudSession||!cloudPendingOriginals.length)return;
+ cloudPendingBusy=true;var successes=0;
+ try{
+  while(cloudPendingOriginals.length){
+   var item=cloudPendingOriginals[0];
+   cloudTell("Enviando foto original para a nuvem: "+item.file.name+" ("+(cloudPendingOriginals.length)+" pendente(s))…");
+   try{
+    await cloudUploadOriginal(item);
+   }catch(err){
+    cloudTell("Backup ainda NÃO confirmado: "+err.message+". Mantenha a foto no aparelho e tente novamente.");
+    break;
+   }
+   successes++;
+   cloudPendingOriginals.shift();
+   try{await cloudSavePendingLocally()}catch(err){console.warn("Falha ao atualizar fila local",err)}
+  }
+  if(!cloudPendingOriginals.length&&successes){
+   cloudTell(successes+" imagem(ns) original(is) guardada(s) na nuvem. Você poderá recuperá-las mesmo após remover do carrossel.");
+  }
+ }finally{cloudPendingBusy=false}
+}
+async function cloudListOriginals(show=true){
+ var session=await cloudActiveSession();
+ if(!session){cloudTell("Entre na conta do backup para recuperar suas fotos.");return}
+ if(show)cloudTell("Buscando suas imagens originais guardadas na nuvem…");
+ try{
+  var result=[],offset=0;
+  while(offset<500){
+   var response=await fetch(CLOUD_URL+"/storage/v1/object/list/"+CLOUD_BUCKET,{
+    method:"POST",headers:cloudHeaders(session.access_token,{"Content-Type":"application/json"}),
+    body:JSON.stringify({prefix:session.user.id+"/",limit:100,offset,
+     sortBy:{column:"created_at",order:"desc"}})
+   });
+   if(!response.ok)throw new Error("Não foi possível listar as fotos desta conta.");
+   var page=await response.json();
+   if(!Array.isArray(page))throw new Error("A listagem não retornou os arquivos esperados.");
+   result.push(...page.filter(x=>x&&x.name&&!x.name.endsWith("/")));
+   if(page.length<100)break;offset+=100;
+  }
+  var target=$("#cloudBackupList");target.hidden=false;target.innerHTML="";
+  if(!result.length){target.textContent="Nenhuma fotografia enviada para esta conta ainda.";if(show)cloudTell("Nenhum backup encontrado nesta conta.");return}
+  result.forEach(function(entry){
+   var div=document.createElement("article");div.className="cloud-file";
+   var info=document.createElement("div");info.className="cloud-file-info";
+   var label=document.createElement("b");
+   var pretty=entry.name.replace(/^original_card\d+_[^_]+_/,"");
+   label.textContent=pretty;info.appendChild(label);
+   var small=document.createElement("small");small.textContent="Guardada em "+(entry.created_at?new Date(entry.created_at).toLocaleString("pt-BR"):"data não informada");
+   info.appendChild(small);div.appendChild(info);
+   var actions=document.createElement("div");actions.className="cloud-file-actions";
+   var recover=document.createElement("button");recover.type="button";recover.className="secondary";recover.textContent="Usar no card";
+   recover.onclick=()=>cloudRecoverOriginal(entry.name,true);
+   var original=document.createElement("button");original.type="button";original.className="ghost";original.textContent="Baixar original";
+   original.onclick=()=>cloudRecoverOriginal(entry.name,false);
+   actions.appendChild(recover);actions.appendChild(original);
+   div.appendChild(actions);target.appendChild(div);
+  });
+  if(show)cloudTell(result.length+" fotografia(s) original(is) disponível(is) para recuperar nesta conta.");
+ }catch(err){cloudTell("Erro ao consultar backup: "+err.message)}
+}
+async function cloudRecoverOriginal(filename,apply){
+ var session=await cloudActiveSession();
+ if(!session){cloudTell("Faça login antes de recuperar.");return}
+ cloudTell("Recuperando imagem original do armazenamento privado…");
+ try{
+  var path=(session.user.id+"/"+filename).split("/").map(encodeURIComponent).join("/");
+  var resp=await fetch(CLOUD_URL+"/storage/v1/object/authenticated/"+CLOUD_BUCKET+"/"+path,{
+   headers:cloudHeaders(session.access_token)
+  });
+  if(!resp.ok)throw new Error("Não foi possível recuperar esta imagem.");
+  var blob=await resp.blob();
+  var name=filename.replace(/^original_card\d+_[^_]+_/,"")||"imagem-recuperada.jpg";
+  var file=new File([blob],name,{type:blob.type||"application/octet-stream"});
+  if(!apply){
+   var url=URL.createObjectURL(blob),link=document.createElement("a");
+   link.href=url;link.download=name;document.body.appendChild(link);link.click();link.remove();
+   setTimeout(()=>URL.revokeObjectURL(url),30000);
+   cloudTell("Download do arquivo original iniciado. Se for DNG, abra no app Arquivos ou Fotos compatível.");
+   return;
+  }
+  cloudRestoreInProgress=true;
+  try{await handleUploadedPhotos([file],current?index:0)}
+  finally{cloudRestoreInProgress=false}
+  cloudTell("Imagem original recuperada para o card selecionado. A cópia na nuvem continua guardada.");
+ }catch(err){cloudTell("Não foi possível recuperar: "+err.message)}
+}
+async function cloudInitialize(){
+ cloudSession=cloudReadStoredSession();
+ cloudRenderAuth();
+ await cloudLoadPendingLocally();
+ if(cloudSession){
+  var session=await cloudActiveSession();
+  if(session){
+   cloudTell("Backup em nuvem conectado. "+cloudPendingOriginals.length+" envio(s) pendente(s).");
+   await cloudFlushPendingOriginals();
+  }else cloudTell("Sua sessão expirou. Entre novamente para continuar o backup automático.");
+ }else{
+  cloudTell(cloudPendingOriginals.length?
+   cloudPendingOriginals.length+" original(is) aguardando login para backup em nuvem. Os arquivos ainda dependem deste aparelho.":
+   "Backup em nuvem desativado. Entre para proteger cada foto enviada e poder recuperá-la depois.");
+ }
+}
+var cloudStartupPromise=cloudInitialize();
+window.addEventListener("online",()=>cloudFlushPendingOriginals());
+$("#cloudSignIn").onclick=()=>cloudAuth("login");
+$("#cloudSignUp").onclick=()=>cloudAuth("signup");
+$("#cloudListPhotos").onclick=()=>cloudListOriginals(true);
+$("#cloudSignOut").onclick=function(){
+ cloudStoreSession(null);
+ $("#cloudBackupList").hidden=true;
+ cloudTell("Saiu da conta. As fotos guardadas continuam na nuvem, mas será necessário entrar novamente para recuperá-las.");
+};
+
 function decodeOriginalFile(file){
  return new Promise(function(resolve,reject){
   if(!file||!file.size)return reject(new Error("Arquivo de foto vazio ou inválido."));
