@@ -557,6 +557,7 @@ async function restoreMercantilOnRequest(){
 }
 async function loadDraftsOnStartup(){
  await libraryLoadPromise;
+ await localMediaRestore();
  var saved=[];
  try{
   var db=await openLibraryDB();
@@ -583,8 +584,12 @@ async function loadDraftsOnStartup(){
   await restoreMercantilOnRequest();
  }else if(!current&&drafts.length){
   var latest=drafts.slice().sort(function(a,b){return String(b.lastEdited||b.createdAt||"").localeCompare(String(a.lastEdited||a.createdAt||""))})[0];
-  fillEditorFromPost(latest);
-  $("#draftStatus").textContent="Rascunho restaurado automaticamente. Continue de onde parou ou salve numa pasta.";
+  if(stagedUploads.some(Boolean)&&localMediaStateId==="pre-generation"){
+   $("#draftStatus").textContent="Encontrei fotos anexadas antes de gerar um carrossel. Elas aparecem abaixo e os rascunhos anteriores continuam disponíveis.";
+  }else{
+   fillEditorFromPost(latest);
+   $("#draftStatus").textContent="Rascunho restaurado automaticamente. Continue de onde parou ou salve numa pasta.";
+  }
  }
 }
 var draftsLoadPromise=loadDraftsOnStartup();
@@ -686,6 +691,9 @@ function renderUploadList(){
    if(obj){
     var pic=document.createElement("img");pic.src=obj.data;pic.alt="Foto do "+(pos===0?"card da capa":"card "+(pos+1));cell.appendChild(pic);
     var small=document.createElement("small");small.title=obj.name;small.textContent=obj.name;cell.appendChild(small);
+    var original=document.createElement("button");original.type="button";original.textContent="Baixar original";
+    original.onclick=function(){localMediaDownloadOriginal(pos,current?.id||null)};
+    cell.appendChild(original);
     var remove=document.createElement("button");remove.type="button";remove.textContent="Remover";remove.setAttribute("aria-label","Remover imagem do card "+(pos+1));remove.onclick=function(){removeUploadedSlot(pos)};cell.appendChild(remove);
    }else{
     var hint=document.createElement("small");hint.textContent="Sem foto anexada";cell.appendChild(hint);
@@ -714,10 +722,11 @@ function syncStagedToCurrent(){
  // Evita que uma capa antiga substitua a fotografia recém-enviada.
  if(stagedUploads[0]){current.photo=null;coverImage=null}
 }
-function removeUploadedSlot(slot){
+async function removeUploadedSlot(slot){
  if(uploadBusy)return;
  if(slot<0||slot>9||!stagedUploads[slot])return;
  stagedUploads[slot]=null;
+ localMediaFiles[slot]=null;
  if(current&&current.uploadedNames?.[slot]){
   delete current.uploadedNames[slot];delete current.images[slot];delete current.forceImages?.[slot];
   if(slot===0){current.photo=null;coverImage=null}
@@ -726,6 +735,7 @@ function removeUploadedSlot(slot){
   drawAll();
  }
  renderUploadList();
+ await localMediaPersist();
  msg("Foto do card "+(slot+1)+" retirada. Os demais anexos foram mantidos.");
 }
 
@@ -1243,12 +1253,13 @@ async function handleUploadedPhotos(fileList,targetSlot){
    var pos=slots[i];
    $("#uploadStatus").textContent="Preparando foto "+(i+1)+" de "+files.length+"…";
    try{
-    // Arquivo ORIGINAL entra na fila de proteção antes de virar imagem 4:5.
-    // Remover foto do card ou apagar o carrossel não remove o backup privado.
-    await cloudQueueOriginal(files[i],pos);
+    // Guarda o arquivo original no próprio aparelho ANTES de converter para 4:5.
+    localMediaFiles[pos]=files[i];
+    if(!await localMediaPersist())errors.push("A foto "+files[i].name+" ainda não foi guardada com segurança no aparelho.");
     var processed=await decodeOriginalFile(files[i]);
     stagedUploads[pos]=processed;added++;
     syncStagedToCurrent();
+    await localMediaPersist();
     renderUploadList();
    }catch(err){errors.push((files[i].name||"Arquivo "+(i+1))+": "+err.message)}
   }
@@ -1268,8 +1279,8 @@ async function handleUploadedPhotos(fileList,targetSlot){
   }
   renderUploadList();
   $("#uploadStatus").textContent=errors.length?
-   "Anexadas "+stagedUploads.filter(Boolean).length+" de 10 fotos. Não foi possível abrir: "+errors.slice(0,2).join(" | "):
-   stagedUploads.filter(Boolean).length+" de 10 fotos prontas, uma por card, sem alterar rostos.";
+   "Anexadas "+stagedUploads.filter(Boolean).length+" de 10 fotos. Atenção: "+errors.slice(0,2).join(" | "):
+   stagedUploads.filter(Boolean).length+" de 10 fotos prontas, guardadas neste aparelho e editáveis por card.";
  }finally{
   uploadBusy=false;$("#photo").disabled=false;$("#replaceCardPhoto").disabled=false;
  }
@@ -1568,6 +1579,8 @@ async function generate(){
    }
   }
   current=post;index=0;
+  localMediaStateId=post.id;
+  await localMediaPersist();
   $("#photoQuery").value=topic;resetGallery(topic);
   render();renderResearchSources(post);
   $("#contentStatus").textContent="Carrossel com "+qty+" cards diferentes e "+(Number(result.photosAnalyzed)||0)+" foto(s) analisada(s). Conteúdo pesquisado em fontes brasileiras. Revise os dados antes de publicar.";
