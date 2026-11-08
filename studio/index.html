@@ -741,7 +741,7 @@ async function generateAiImage(){
  }finally{clearTimeout(timer);aiBusy=false;button.disabled=false;button.textContent="✦ Gerar imagem realista com IA";}
 }
 $("#aiGenerateBtn").onclick=generateAiImage;
-$("#replacePhoto").onclick=function(){if(!current){msg("Crie um carrossel primeiro.");return}if(current.photoMode==="none"){msg("Escolha uma opção com imagens primeiro.");return}current.images=[];current.credits=[];current.imageCredits={};current.caption=current.captionBase||current.caption;populatePhotos(current);searchGallery()};
+$("#replacePhoto").onclick=function(){if(!current){msg("Crie um carrossel primeiro.");return}if(current.photoMode==="none"){msg("Escolha uma opção com imagens primeiro.");return}current.images=(current.images||[]).map(function(img,i){return current.uploadedNames?.[i]?img:null});current.credits=[];current.imageCredits={};current.caption=current.captionBase||current.caption;populatePhotos(current);searchGallery()};
 updatePhotoControls();
 $("#prev").onclick=function(){if(current){index=Math.max(0,index-1);render()}};
 $("#next").onclick=function(){if(current){index=Math.min(current.slides.length-1,index+1);render()}};
