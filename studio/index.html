@@ -23,7 +23,7 @@
 #cloudRecoveryBox[hidden],#cloudResetPasswordBox[hidden],#cloudSignIn[hidden],#cloudSignUp[hidden],#cloudForgotPassword[hidden],#cloudPasswordRow[hidden],#cloudConfirmRow[hidden]{display:none!important}
 #cloudRecoveryBox button{margin:6px 7px 6px 0;padding:11px;font-size:12px}
 .cloud-link-recovery{margin-top:12px;border-top:1px solid #dce3e8;padding-top:10px}
-.cloud-link-recovery textarea{width:100%;resize:vertical;overflow-wrap:anywhere;font-size:12px;min-height:85px}
+.cloud-link-recovery input{width:100%;font-size:13px;min-height:46px;border:1px solid #dce2e9;background:#fff;border-radius:10px;padding:12px;box-sizing:border-box}
 #cloudResetPasswordBox h3{font-family:Sora;font-size:15px}
 
 .cloud-backup-panel input[type=email],.cloud-backup-panel input[type=password]{border:1px solid #dce2e9;background:white;border-radius:10px;width:100%;padding:12px;font-size:14px;min-height:46px}
@@ -107,11 +107,11 @@
  </div>
  <button type="button" id="cloudForgotPassword" class="cloud-text-btn" hidden>Esqueci minha senha</button>
  <div id="cloudRecoveryBox" hidden>
-  <p class="fine">Solicite um novo link. Enquanto o Supabase estiver redirecionando para localhost, <strong>não abra o link do e-mail</strong>. Toque e segure no botão ou link do e-mail, escolha <strong>Copiar link</strong> e cole abaixo. O código será conferido diretamente com o Supabase, sem enviá-lo ao servidor da Crediti.</p>
+  <p class="fine">Solicite um novo link. Enquanto o Supabase estiver redirecionando para localhost, <strong>não abra o link do e-mail</strong>. Toque e segure no botão ou link, escolha <strong>Copiar link</strong> e cole abaixo. O endereço fica oculto porque funciona como uma senha temporária. Não o compartilhe com ninguém. A verificação é feita diretamente com o Supabase.</p>
   <button type="button" id="cloudSendRecovery" class="secondary">Enviar novo link de recuperação</button>
   <div class="cloud-link-recovery">
    <label for="cloudRecoveryLink">Cole o link do e-mail aqui</label>
-   <textarea id="cloudRecoveryLink" rows="3" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Cole o link de recuperação copiado do e-mail, sem abrir"></textarea>
+   <input id="cloudRecoveryLink" type="password" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Cole o link de recuperação copiado do e-mail, sem abrir">
    <button type="button" id="cloudVerifyRecoveryLink" class="secondary wide">Confirmar link e criar nova senha</button>
   </div>
   <button type="button" id="cloudCancelRecovery" class="ghost">Voltar ao login</button>
