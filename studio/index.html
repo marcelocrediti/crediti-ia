@@ -670,7 +670,8 @@ async function restoreMercantilOnRequest(){
  var found=drafts.find(function(p){return query.test(p.topic||"")||query.test(p.name||"")})||
    posts.find(function(p){return query.test(p.topic||"")||query.test(p.name||"")});
  if(found){
-  fillEditorFromPost(found);
+  if(found.photosOnly)openDraft(found.id);
+  else fillEditorFromPost(found);
   $("#draftStatus").textContent="Encontrei um trabalho do mercantil salvo neste aparelho e abri para continuar.";
   msg("Carrossel do mercantil encontrado no aparelho.");
   return;
@@ -715,8 +716,13 @@ async function loadDraftsOnStartup(){
   if(stagedUploads.some(Boolean)&&localMediaStateId==="pre-generation"){
    $("#draftStatus").textContent="Encontrei fotos anexadas antes de gerar um carrossel. Elas aparecem abaixo e os rascunhos anteriores continuam disponíveis.";
   }else{
-   fillEditorFromPost(latest);
-   $("#draftStatus").textContent="Rascunho restaurado automaticamente. Continue de onde parou ou salve numa pasta.";
+   if(latest.photosOnly){
+    openDraft(latest.id);
+    $("#draftStatus").textContent="Fotos de um rascunho antigo recuperadas. Gere os cards deste tema quando quiser.";
+   }else{
+    fillEditorFromPost(latest);
+    $("#draftStatus").textContent="Rascunho restaurado automaticamente. Continue de onde parou ou salve numa pasta.";
+   }
   }
  }
 }
