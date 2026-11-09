@@ -228,7 +228,7 @@
 (function(){
 "use strict";
 var $=function(s){return document.querySelector(s)};
-var STORE="crediti-studio-live-v1",posts=[],folders=[],drafts=[],activeFolderId=null,current=null,index=0,coverImage=null,stagedUploads=Array(10).fill(null),uploadBusy=false;var galleryBatchFiles=null,galleryBatchPost=null,galleryBatchBusy=false;var selectedImageMode=function(){return document.querySelector('input[name="photoMode"]:checked')?.value||"none"};
+var STORE="crediti-studio-live-v1",posts=[],folders=[],drafts=[],activeFolderId=null,current=null,index=0,coverImage=null,stagedUploads=Array(10).fill(null),uploadBusy=false,workspaceTopic="",topicChangeTask=Promise.resolve();var galleryBatchFiles=null,galleryBatchPost=null,galleryBatchBusy=false;var selectedImageMode=function(){return document.querySelector('input[name="photoMode"]:checked')?.value||"none"};
 var brandAvatar=new Image();
 brandAvatar.onload=function(){if(current)drawAll()};
 var brandAvatarReady=Promise.all(["./brand-avatar-a.txt","./brand-avatar-b.txt"].map(async function(path){
@@ -386,6 +386,7 @@ async function localMediaRestore(){
   localMediaFiles=Array.isArray(record.originals)?record.originals.slice(0,10):Array(10).fill(null);
   while(localMediaFiles.length<10)localMediaFiles.push(null);
   localMediaStateId=record.projectId||"pre-generation";
+  workspaceTopic=String(record.topic||"").trim();
   if(!$("#topic").value.trim()&&record.topic)$("#topic").value=record.topic;
   if(record.cardCount>=5&&record.cardCount<=10)$("#count").value=String(record.cardCount);
   const count=stagedUploads.filter(Boolean).length;
@@ -596,6 +597,7 @@ async function removeDraftAfterSaving(id){
 function fillEditorFromPost(post){
  const sameMedia=localMediaStateId===post.id;
  current=post;index=0;
+ workspaceTopic=String(post.topic||"").trim();
  coverImage=post.photo||null;
  if(!sameMedia)localMediaFiles=Array(10).fill(null);
  localMediaStateId=post.id;
@@ -1634,9 +1636,86 @@ function renderResearchSources(post){
   }catch(e){}
  });
 }
+function comparableTopic(value){
+ return String(value||"").trim().toLocaleLowerCase("pt-BR")
+  .normalize("NFD").replace(/[\u0300-\u036f]/g,"")
+  .replace(/\s+/g," ").replace(/[.!?]+$/g,"");
+}
+function workspaceHasOldContent(){
+ return !!(current?.slides?.length||stagedUploads.some(Boolean)||localMediaFiles.some(Boolean));
+}
+function resetCreationWorkspace(nextTopic,mode){
+ // Nunca toca nos carrosséis guardados em "Minhas pastas".
+ var topic=String(nextTopic||"").trim();
+ current=null;index=0;coverImage=null;
+ stagedUploads=Array(10).fill(null);
+ localMediaFiles=Array(10).fill(null);
+ localMediaStateId="pre-generation";
+ workspaceTopic=topic;
+ galleryBatchFiles=null;galleryBatchPost=null;
+ $("#topic").value=topic;
+ $("#cardTitle").value="";$("#cardText").value="";$("#caption").value="";
+ $("#cardLayout").value="auto";$("#photoQuery").value="";
+ $("#thumbs").replaceChildren();
+ $("#photoGrid").replaceChildren();
+ $("#countBadge").textContent="0 cards";
+ $("#pagePos").textContent="Digite o assunto e gere o próximo carrossel.";
+ $("#batchStatus").textContent="Crie um carrossel para baixar suas imagens.";
+ $("#folderPicker").hidden=true;
+ $("#localOriginalsList").hidden=true;$("#localOriginalsList").replaceChildren();
+ $("#contentSources").replaceChildren();$("#contentSourcesPanel").hidden=true;
+ $("#galleryStatus").textContent="As fotografias do novo assunto aparecerão aqui.";
+ $("#galleryPanel").hidden=true;
+ $("#photoStatus").textContent="O novo carrossel ainda não tem imagens.";
+ if(mode==="default"){
+  var first=document.querySelector('input[name="photoMode"][value="cover"]');
+  if(first)first.checked=true;
+ }
+ renderUploadList();updatePhotoControls();
+ var canvas=$("#preview"),ctx=canvas.getContext("2d");
+ ctx.clearRect(0,0,canvas.width,canvas.height);
+ ctx.fillStyle="#ffffff";ctx.fillRect(0,0,canvas.width,canvas.height);
+ ctx.textAlign="center";ctx.font="600 42px Montserrat,Arial";ctx.fillStyle="#69748a";
+ ctx.fillText("Seu próximo carrossel",canvas.width/2,canvas.height/2-30);
+ ctx.font="400 29px Montserrat,Arial";
+ ctx.fillText("aparece aqui",canvas.width/2,canvas.height/2+38);
+}
+async function clearWorkingMediaAfterSwitch(){
+ // Primeiro conclui escritas anteriores, sem apagar os originais de trabalhos salvos.
+ await localMediaWrite.catch(function(){});
+ return await localMediaPersist();
+}
+async function prepareWorkspaceForTopic(nextTopic){
+ var proposed=String(nextTopic||"").trim();
+ var previous=String(current?.topic||workspaceTopic||"").trim();
+ if(!proposed||!previous||comparableTopic(previous)===comparableTopic(proposed)){
+  if(!previous)workspaceTopic=proposed;
+  return true;
+ }
+ // Trabalho anterior continua disponível em Rascunhos caso ainda não tenha sido salvo.
+ if(current&&current.slides?.length){
+  rememberDraft(true);
+  const protectedDraft=await persistDrafts();
+  if(!protectedDraft){
+   $("#contentStatus").textContent="Não consegui guardar o rascunho anterior. Ele continua aberto; libere espaço antes de iniciar outro.";
+   return false;
+  }
+ }
+ // Só limpa depois de garantir que a versão anterior esteja registrada.
+ await localMediaWrite.catch(function(){});
+ resetCreationWorkspace(proposed,"keep");
+ const protectedWorkspace=await clearWorkingMediaAfterSwitch();
+ if(!protectedWorkspace){
+  $("#contentStatus").textContent="A criação foi limpa, mas o armazenamento está cheio. Não apague dados do Safari até exportar suas imagens.";
+ }
+ msg("Novo assunto: o trabalho anterior continua nos rascunhos e não será misturado.");
+ return true;
+}
 async function generate(){
  if(contentBusy)return;
+ await topicChangeTask.catch(function(){});
  var topic=cleanTopic($("#topic").value);
+ if(!await prepareWorkspaceForTopic(topic))return;
  if(topic.length<5){$("#contentStatus").textContent="Escreva um tema com pelo menos cinco caracteres.";msg("Informe o assunto que a IA deve pesquisar.");return}
  var qty=Math.max(5,Math.min(10,Number($("#count").value)||6));
  var prev=current,btn=$("#generate"),controller=new AbortController();
@@ -1689,6 +1768,7 @@ async function generate(){
    }
   }
   current=post;index=0;
+  workspaceTopic=topic;
   localMediaStateId=post.id;
   await localMediaPersist();
   $("#photoQuery").value=topic;resetGallery(topic);
