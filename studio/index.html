@@ -559,7 +559,7 @@ function showDrafts(){
   var card=document.createElement("article");card.className="draft-item";
   var title=document.createElement("strong");title.textContent=post.name||post.slides?.[0]?.title||post.topic||"Carrossel em andamento";
   card.appendChild(title);
-  var info=document.createElement("small");info.textContent=(post.slides?.length||0)+" cards • "+(post.restoredFromScreenshots?"Recriado a partir de capturas • ":"")+(post.lastEdited?new Date(post.lastEdited).toLocaleString("pt-BR"):"Não salvo em pasta");
+  var info=document.createElement("small");info.textContent=(post.photosOnly?(post.images||[]).filter(Boolean).length+" fotos antes da geração":(post.slides?.length||0)+" cards")+" • "+(post.restoredFromScreenshots?"Recriado a partir de capturas • ":"")+(post.lastEdited?new Date(post.lastEdited).toLocaleString("pt-BR"):"Não salvo em pasta");
   card.appendChild(info);
   var actions=document.createElement("div");actions.className="draft-actions";
   var open=document.createElement("button");open.className="secondary";open.textContent="Continuar editando";
@@ -622,6 +622,22 @@ function fillEditorFromPost(post){
 function openDraft(id){
  var p=drafts.find(function(item){return item.id===id});
  if(!p)return;
+ if(p.photosOnly){
+  current=null;coverImage=null;index=0;
+  stagedUploads=(p.images||[]).slice(0,10);
+  while(stagedUploads.length<10)stagedUploads.push(null);
+  localMediaFiles=(p.originalFiles||[]).slice(0,10);
+  while(localMediaFiles.length<10)localMediaFiles.push(null);
+  localMediaStateId="pre-generation";workspaceTopic=String(p.topic||"");
+  $("#topic").value=p.topic||"";$("#count").value=String(p.cardCount||6);
+  var mode=document.querySelector('input[name="photoMode"][value="all"]');
+  if(mode)mode.checked=true;
+  changeTab("create");updatePhotoControls();renderUploadList();
+  localMediaPersist();
+  $("#draftStatus").textContent="Fotografias recuperadas do rascunho. Você já pode gerar os cards deste assunto.";
+  msg("Fotos recuperadas. Agora gere o carrossel ou anexe outras.");
+  return;
+ }
  fillEditorFromPost(p);
  $("#draftStatus").textContent="Rascunho restaurado. Você pode continuar editando e salvar na pasta que escolher.";
  msg("Rascunho aberto sem perder o conteúdo.");
@@ -682,7 +698,7 @@ async function loadDraftsOnStartup(){
   try{saved=JSON.parse(localStorage.getItem(DRAFT_STORE)||"[]")||[]}catch(e){saved=[]}
  }
  if(Array.isArray(saved)){
-  var validSaved=saved.filter(function(p){return p&&p.id&&Array.isArray(p.slides)&&p.slides.length});
+  var validSaved=saved.filter(function(p){return p&&p.id&&(p.photosOnly||Array.isArray(p.slides)&&p.slides.length)});
   if(!draftsTouched)drafts=validSaved;
   else{
    // Se o usuário começou um trabalho antes de terminar a leitura, mescla sem perder os anteriores.
@@ -1668,6 +1684,9 @@ function resetCreationWorkspace(nextTopic,mode){
  $("#galleryStatus").textContent="As fotografias do novo assunto aparecerão aqui.";
  $("#galleryPanel").hidden=true;
  $("#photoStatus").textContent="O novo carrossel ainda não tem imagens.";
+ $("#contentStatus").textContent=topic?"Preparando um novo carrossel sobre: "+topic:"Digite um assunto novo e toque em Pesquisar e gerar carrossel com IA.";
+ $("#aiStatus").textContent="Selecione um card para gerar uma imagem realista com IA.";
+ $("#selectedCardPhotoInfo").textContent="Você poderá anexar ou substituir a foto de cada novo card.";
  if(mode==="default"){
   var first=document.querySelector('input[name="photoMode"][value="cover"]');
   if(first)first.checked=true;
@@ -1699,6 +1718,25 @@ async function prepareWorkspaceForTopic(nextTopic){
   const protectedDraft=await persistDrafts();
   if(!protectedDraft){
    $("#contentStatus").textContent="Não consegui guardar o rascunho anterior. Ele continua aberto; libere espaço antes de iniciar outro.";
+   return false;
+  }
+ }else if(stagedUploads.some(Boolean)||localMediaFiles.some(Boolean)){
+  // Há fotografias enviadas antes de gerar cards. Não podem ser apagadas
+  // simplesmente porque o usuário trocou o tema.
+  var images=stagedUploads.map(function(obj){return obj?Object.assign({},obj):null});
+  var raw=localMediaFiles.slice();
+  var photoDraft={
+   id:"draft-fotos-"+Date.now()+"-"+Math.random().toString(36).slice(2,7),
+   name:"Fotos do tema: "+previous,topic:previous,photosOnly:true,
+   slides:[],images:images,originalFiles:raw,cardCount:Number($("#count").value)||6,
+   createdAt:new Date().toISOString(),lastEdited:new Date().toISOString()
+  };
+  drafts.push(photoDraft);draftsTouched=true;
+  showDrafts();
+  if(!await persistDrafts()){
+   drafts=drafts.filter(function(d){return d.id!==photoDraft.id});
+   showDrafts();
+   $("#contentStatus").textContent="As fotos anteriores ainda não foram protegidas. Não vou apagá-las; libere espaço antes de trocar de tema.";
    return false;
   }
  }
