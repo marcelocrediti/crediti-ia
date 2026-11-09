@@ -79,6 +79,7 @@
 <div class="cols">
 <div class="panel"><h2>Qual é o assunto?</h2><p class="hint">Escreva um tema. A IA pesquisa fontes brasileiras e cria um carrossel educativo exclusivo, com assuntos diferentes em cada card.</p>
 <label for="topic">Assunto do carrossel</label><textarea id="topic" rows="3" maxlength="180" placeholder="Ex.: 5 cuidados antes de contratar um financiamento de moto"></textarea>
+<p class="fine">Mudou o assunto? O novo carrossel começa limpo. O anterior continua em Rascunhos até você salvá-lo em uma pasta.</p>
 <div class="inline"><div><label for="count">Quantidade de cards</label><select id="count"><option value="5">5 cards</option><option value="6" selected>6 cards</option><option value="7">7 cards</option><option value="8">8 cards</option><option value="9">9 cards</option><option value="10">10 cards</option></select></div><div><label for="style">Estilo</label><select id="style"><option value="clean">Editorial claro</option><option value="dark">Escuro elegante</option></select></div></div>
 <fieldset class="photo-choice" aria-describedby="photoHelp"><legend>Quer imagens no carrossel?</legend>
 <label class="photo-option"><input type="radio" name="photoMode" value="none"><span><b>Sem imagens</b><small>Todos os cards apenas com textos</small></span></label>
@@ -1987,17 +1988,36 @@ async function finishSaveInFolder(){
  if(!current)return;
  var folder=folderById($("#folderSelect").value);
  if(!folder){$("#folderSaveStatus").textContent="Selecione uma pasta ou crie uma nova antes de salvar.";return}
- var originalFolderId=current.folderId,existing=posts.findIndex(function(p){return p.id===current.id});
+ var active=current,existing=posts.findIndex(function(p){return p.id===active.id});
  var previous=posts.slice();
- current.folderId=folder.id;
- current.name=String(current.slides?.[0]?.title||current.topic||current.name||"Carrossel Crediti").trim();
- if(existing>=0)posts[existing]=current;else posts.unshift(current);
+ // Cópia independente: uma busca de foto ou alteração ainda pendente não pode
+ // modificar silenciosamente o carrossel já guardado na pasta.
+ var stored=Object.assign({},active,{
+  folderId:folder.id,
+  name:String(active.slides?.[0]?.title||active.topic||active.name||"Carrossel Crediti").trim(),
+  slides:(active.slides||[]).map(function(sl){return Object.assign({},sl)}),
+  images:(active.images||[]).slice(),
+  uploadedNames:Object.assign({},active.uploadedNames||{}),
+  forceImages:Object.assign({},active.forceImages||{}),
+  imageCredits:Object.assign({},active.imageCredits||{})
+ });
+ if(existing>=0)posts[existing]=stored;else posts.unshift(stored);
  libraryChanged=true;
  var saved=await persist();
- if(!saved){posts=previous;current.folderId=originalFolderId;$("#folderSaveStatus").textContent="Não foi possível salvar. Libere espaço e tente novamente.";return}
+ if(!saved){posts=previous;$("#folderSaveStatus").textContent="Não foi possível salvar. Nada foi removido da criação. Libere espaço e tente novamente.";return}
  $("#folderPicker").hidden=true;
- await removeDraftAfterSaving(current.id);
- msg("Carrossel salvo na pasta “"+folder.name+"”.");
+ try{await removeDraftAfterSaving(active.id)}
+ catch(err){console.warn("Falha ao retirar rascunho após salvar na pasta",err)}
+ // Preserva os originais por ID e limpa SOMENTE a área de criação.
+ await localMediaWrite.catch(function(){});
+ resetCreationWorkspace("","default");
+ $("#count").value="6";$("#style").value="clean";
+ var workspaceClean=await clearWorkingMediaAfterSwitch();
+ activeFolderId=folder.id;
+ changeTab("library");
+ if(!workspaceClean){
+  msg("Carrossel guardado na pasta, mas não foi possível limpar o cache local. Não apague dados do Safari.");
+ }else msg("Carrossel salvo em “"+folder.name+"”. A criação está pronta para um novo assunto.");
 }
 async function renameFolder(folderId){
  await libraryLoadPromise;
@@ -2180,6 +2200,17 @@ function drawLibrary(){
 }
 document.querySelectorAll(".tab").forEach(function(b){b.addEventListener("click",function(){changeTab(b.dataset.tab)})});
 $("#generate").addEventListener("click",generate);
+$("#topic").addEventListener("change",function(){
+ var nextTopic=cleanTopic(this.value),prior=String(current?.topic||workspaceTopic||"");
+ if(!nextTopic||!prior||comparableTopic(nextTopic)===comparableTopic(prior)){
+  if(!prior&&nextTopic)workspaceTopic=nextTopic;
+  return;
+ }
+ // O evento change acontece ao sair do campo. A geração aguarda a limpeza terminar.
+ topicChangeTask=topicChangeTask.catch(function(){}).then(function(){
+  return prepareWorkspaceForTopic(nextTopic);
+ });
+});
 document.querySelectorAll('input[name="photoMode"]').forEach(function(r){r.addEventListener("change",function(){updatePhotoControls()})});
 $("#searchPhotos").onclick=searchGallery;
 $("#morePhotos").onclick=moreGalleryPhotos;
