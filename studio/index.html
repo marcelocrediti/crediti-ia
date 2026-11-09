@@ -850,6 +850,8 @@ function syncStagedToCurrent(){
    current.images[slot]=stagedUploads[slot].data;
    current.uploadedNames[slot]=stagedUploads[slot].name;
    current.forceImages[slot]=true;
+   if(current.aiGeneratedSlots)delete current.aiGeneratedSlots[slot];
+   if(current.aiVisualNotes)delete current.aiVisualNotes[slot];
    if(current.imageCredits)delete current.imageCredits[slot];
   }
  }
@@ -1528,6 +1530,8 @@ async function applyGalleryPhoto(item){
   if(current!==post)return;
   post.images=post.images||[];post.images[slot]=bitmap;
   post.imageCredits=post.imageCredits||{};post.imageCredits[slot]=item;
+  if(post.aiGeneratedSlots)delete post.aiGeneratedSlots[slot];
+  if(post.aiVisualNotes)delete post.aiVisualNotes[slot];
   updatePhotoCaption(post);rememberDraft(false);
   render();galleryNotice("Foto aplicada ao card "+(slot+1)+". Você pode escolher outra a qualquer momento.");
   msg("Fotografia incluída no card "+(slot+1)+".");
@@ -2044,7 +2048,8 @@ async function finishSaveInFolder(){
   uploadedNames:Object.assign({},active.uploadedNames||{}),
   forceImages:Object.assign({},active.forceImages||{}),
   imageCredits:Object.assign({},active.imageCredits||{}),
-  aiVisualNotes:Object.assign({},active.aiVisualNotes||{})
+  aiVisualNotes:Object.assign({},active.aiVisualNotes||{}),
+  aiGeneratedSlots:Object.assign({},active.aiGeneratedSlots||{})
  });
  if(existing>=0)posts[existing]=stored;else posts.unshift(stored);
  libraryChanged=true;
@@ -2285,8 +2290,8 @@ async function generateAiImage(){
   var visualReference=null;
   // Só usa foto enviada pelo usuário a ESTE card, e apenas para interpretar
   // o contexto visual. Não copia nem recria o rosto de quem estiver nela.
-  if(post.uploadedNames?.[slot]&&post.images?.[slot]){
-   try{visualReference=await smallImageForResearch(post.images[slot]);}
+  if(post.uploadedNames?.[slot]&&!post.aiGeneratedSlots?.[slot]&&stagedUploads[slot]?.data){
+   try{visualReference=await smallImageForResearch(stagedUploads[slot].data);}
    catch(e){console.warn("Referência fotográfica indisponível; texto será usado",e);}
   }
   $("#aiStatus").textContent="A IA está interpretando a mensagem do card "+(slot+1)+" e preparando uma fotografia realista brasileira…";
@@ -2322,6 +2327,7 @@ async function generateAiImage(){
   post.images[slot]=formatted;
   post.forceImages=post.forceImages||{};post.forceImages[slot]=true;
   post.imageCredits=post.imageCredits||{};delete post.imageCredits[slot];
+  post.aiGeneratedSlots=post.aiGeneratedSlots||{};post.aiGeneratedSlots[slot]=true;
   post.aiVisualNotes=post.aiVisualNotes||{};
   post.aiVisualNotes[slot]=String(result.sceneSummary||result.visualMessage||"").slice(0,320);
   post.captionBase=post.captionBase||post.caption;
