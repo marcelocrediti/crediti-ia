@@ -577,6 +577,97 @@ AVISO DE HOR\xC1RIO: nosso atendimento humano funciona de segunda a sexta, das 7
 }
 
 // Estúdio de imagens da Crediti. A chave da OpenAI nunca é enviada ao navegador.
+
+const studioImageSceneSchema = {
+  type:"object",additionalProperties:false,
+  properties:{
+    message:{type:"string"},
+    visibleSubject:{type:"string"},
+    visibleAction:{type:"string"},
+    concreteSetting:{type:"string"},
+    visualDetails:{type:"array",items:{type:"string"}},
+    avoid:{type:"string"}
+  },
+  required:["message","visibleSubject","visibleAction","concreteSetting","visualDetails","avoid"]
+};
+function studioImageText(value,max=400){
+ return String(value||"").replace(/[\u0000-\u001f]+/g," ").replace(/\s+/g," ").trim().slice(0,max);
+}
+function studioImageReference(value){
+ if(!value)return null;
+ if(typeof value!=="string"||value.length>235000||
+    !/^data:image\/jpeg;base64,[A-Za-z0-9+/=]{600,}$/.test(value)){
+  throw new Error("A foto enviada como referência está fora do formato permitido.");
+ }
+ return value;
+}
+async function studioPlanCardPhoto({topic,title,body,position,cardIndex,totalCards,style,otherTitles,visualReference,otherVisualScenes}){
+ const instructions=[
+  "Você é diretor de fotografia editorial para um carrossel do Brasil.",
+  "Sua missão: LEIA O TÍTULO E TODO O TEXTO EXPLICATIVO DE UM ÚNICO CARD e descreva UMA CENA VISUAL específica que ensine e ilustre exatamente a mensagem deste card.",
+  "O TEXTO DESTE CARD tem prioridade absoluta. O tema geral é apenas o contexto. Nunca use o tema dos cards anteriores para substituir o assunto do card atual.",
+  "Exemplo: se o card fala 'sair do mercado sem lista', mostre uma pessoa diante das prateleiras olhando compras não planejadas; não crie uma foto genérica de dinheiro, banco, crédito ou Black Friday.",
+  "Exemplo: se fala 'comparar o preço por quilo', represente duas embalagens com quantidades distintas e uma pessoa comparando etiquetas sem números legíveis.",
+  "Exemplo: se fala 'comprar sem conferir validade', mostre pessoa checando o prazo de validade de um alimento, e não uma cena genérica no caixa.",
+  "O cenário deve ser cotidiano brasileiro, humano e fotográfico. Não estereotipe pessoas, não suponha benefícios ou aprovações, não invente dados factuais.",
+  "Use objetos, ambiente e ações específicos que comuniquem a ideia. Não escreva título, legenda, números ou letras DENTRO DA IMAGEM, pois o aplicativo coloca o texto por cima.",
+  "Os títulos dos OUTROS CARDS só existem para você EVITAR repetir cenas. Jamais ilustre esses outros tópicos em vez deste.",
+  "Se houver fotografia de referência, observe somente cenário, objetos e contexto visual. Não reproduza rostos, identidades, documentos, logotipos ou informações particulares da foto.",
+  "Produza o JSON estruturado, com message (interpretação do card), visibleSubject (quem/que aparece), visibleAction (o que acontece), concreteSetting (local brasileiro), visualDetails (3 a 5 detalhes específicos), avoid (o que NÃO mostrar).",
+  "Cada campo deve ser específico e relacionado ao TÍTULO e ao TEXTO DESTE CARD."
+ ].join("\n");
+ const content=[{type:"input_text",text:[
+  "TEMA GERAL DO CARROSSEL: "+topic,
+  "CARD ATUAL: "+cardIndex+" de "+totalCards,
+  "TIPO DO CARD: "+position,
+  "TÍTULO DO CARD QUE DEVE SER ILUSTRADO: "+title,
+  "TEXTO EXPLICATIVO DO CARD QUE DEVE SER ILUSTRADO: "+body,
+  "ESTILO DO CARD: "+style,
+  "OUTROS CARDS, apenas para evitar ideias repetidas: "+JSON.stringify(otherTitles),
+  "DESCRIÇÕES DE CENAS JÁ USADAS NOS OUTROS CARDS, NÃO REUTILIZAR: "+JSON.stringify(otherVisualScenes),
+  "Lembre: a imagem tem que mostrar a MENSAGEM DESTE CARD, não apenas o tema geral."
+ ].join("\n")}];
+ if(visualReference)content.push({type:"input_image",image_url:visualReference,detail:"low"});
+ const abort=new AbortController(),timer=setTimeout(()=>abort.abort(),45000);
+ let response;
+ try{
+  response=await fetch("https://api.openai.com/v1/responses",{
+   method:"POST",signal:abort.signal,
+   headers:{"Authorization":"Bearer "+process.env.OPENAI_API_KEY,"Content-Type":"application/json"},
+   body:JSON.stringify({
+    model:process.env.STUDIO_SCENE_MODEL||"gpt-4.1-mini",
+    instructions,input:[{role:"user",content}],
+    text:{format:{type:"json_schema",name:"crediti_card_photo_scene",strict:true,schema:studioImageSceneSchema}},
+    max_output_tokens:1000,store:false
+   })
+  });
+ }finally{clearTimeout(timer)}
+ const data=await response.json().catch(()=>({}));
+ if(!response.ok){
+  console.warn("Crediti Studio scene planner status:",response.status);
+  throw new Error(response.status===429?"A IA atingiu o limite temporário de análises. Tente novamente.":"A IA não conseguiu interpretar o card para gerar a imagem.");
+ }
+ const raw=(data.output||[]).filter(item=>item.type==="message")
+  .flatMap(item=>item.content||[]).filter(item=>item.type==="output_text")
+  .map(item=>item.text||"").join("").trim();
+ let scene;
+ try{scene=JSON.parse(raw)}catch{scene=null}
+ if(!scene||typeof scene!=="object"||!Array.isArray(scene.visualDetails))
+  throw new Error("A IA não conseguiu interpretar a mensagem do card. Nenhuma imagem foi substituída.");
+ const plan={
+  message:studioImageText(scene.message,250),
+  visibleSubject:studioImageText(scene.visibleSubject,220),
+  visibleAction:studioImageText(scene.visibleAction,320),
+  concreteSetting:studioImageText(scene.concreteSetting,210),
+  visualDetails:scene.visualDetails.slice(0,6).map(x=>studioImageText(x,130)).filter(Boolean),
+  avoid:studioImageText(scene.avoid,280)
+ };
+ if(plan.message.length<12||plan.visibleSubject.length<6||plan.visibleAction.length<12||
+    plan.concreteSetting.length<6||plan.visualDetails.length<2)
+  throw new Error("A descrição da cena ficou genérica. Não substituí a imagem do card.");
+ return plan;
+}
+
 const studioLimit = new Map();
 const studioOwnerOrigin = "https://crediti-studio.onrender.com";
 let studioGenerating = false;
@@ -601,13 +692,25 @@ s.post("/api/studio/image", async (req, res) => {
   if (!process.env.OPENAI_API_KEY) {
     return res.status(503).json({ error: "A API de imagens ainda não está habilitada no servidor da Crediti." });
   }
-  const title = typeof req.body?.title === "string" ? req.body.title.trim().slice(0, 180) : "";
-  const body = typeof req.body?.body === "string" ? req.body.body.trim().slice(0, 400) : "";
-  const topic = typeof req.body?.topic === "string" ? req.body.topic.trim().slice(0, 180) : "";
-  const cardPosition = req.body?.cardPosition === "cover" ? "cover" : "interior";
-  if (!title || !topic || title.length < 3) {
-    return res.status(400).json({ error: "Informe o assunto e o título do card." });
-  }
+  const title=studioImageText(req.body?.title,180);
+  const body=studioImageText(req.body?.body,450);
+  const topic=studioImageText(req.body?.topic,180);
+  const cardPosition=["cover","interior","closing"].includes(req.body?.cardPosition)?req.body.cardPosition:"interior";
+  const cardIndex=Number(req.body?.cardIndex);
+  const totalCards=Number(req.body?.totalCards);
+  const style=studioImageText(req.body?.style||"editorial claro",70);
+  const otherTitles=Array.isArray(req.body?.otherCardTitles)?
+    req.body.otherCardTitles.slice(0,10).map(s=>studioImageText(s,125)):[];
+  const otherVisualScenes=Array.isArray(req.body?.otherVisualScenes)?
+    req.body.otherVisualScenes.slice(0,10).map(s=>studioImageText(s,270)):[];
+  let visualReference;
+  try{visualReference=studioImageReference(req.body?.visualReference)}
+  catch(err){return res.status(400).json({error:err.message})}
+  if(title.length<5||body.length<12||topic.length<4)
+    return res.status(400).json({error:"Para gerar a imagem, escreva o título e a explicação do card."});
+  if(!Number.isInteger(cardIndex)||cardIndex<1||cardIndex>10||
+     !Number.isInteger(totalCards)||totalCards<1||totalCards>10||cardIndex>totalCards)
+    return res.status(400).json({error:"O card selecionado não é válido."});
   // Limite de custo global da Crediti, além do código de acesso.
   const day = new Date().toISOString().slice(0, 10);
   const today = studioLimit.get(day) || { count: 0, lastAt: 0 };
@@ -622,60 +725,68 @@ s.post("/api/studio/image", async (req, res) => {
   studioLimit.clear();
   studioLimit.set(day, today);
   studioGenerating = true;
-  const prompt = [
-    "Generate ONE authentic-looking, professional PHOTOGRAPHIC editorial image for a Brazilian financial education Instagram carousel.",
-    "The scene must unmistakably take place in contemporary Brazil, with contextually accurate Brazilian everyday environments, objects and realistic people when applicable.",
-    "Depict a plausible real-world situation related to the EXACT card topic. The people are fictional, not identifiable real customers or actual benefit recipients.",
-    "No drawings, cartoons, illustrations, 3D graphics, fake logos, government seals, documents with readable personal information, watermarks or any written words.",
-    "Natural skin texture, believable expressions, documentary photographic lighting, restrained colors. Neutral framing suitable for a serious financial institution.",
-    "Compose as vertical portrait with generous safe area for title text overlay, subject slightly away from the center; no text in image.",
-    "Main campaign topic: " + topic,
-    "Card heading: " + title,
-    "Card explanation: " + body,
-    "This is a " + (cardPosition === "cover" ? "strong cover photograph" : "supporting photograph for the card") + ".",
-    "Do not infer that someone receives or has been approved for any government benefit or loan."
-  ].join("\n");
   try {
-    const abort = new AbortController();
-    const timer = setTimeout(() => abort.abort(), 115000);
+    // Leitura semântica ANTES de gastar créditos na imagem. A IA recebe os
+    // textos completos do card selecionado e, opcionalmente, a foto original.
+    const visualPlan=await studioPlanCardPhoto({
+      topic,title,body,position:cardPosition,cardIndex,totalCards,style,
+      otherTitles,visualReference,otherVisualScenes
+    });
+    const prompt=[
+      "Create exactly ONE visually coherent, ultra-photorealistic editorial photograph. It will be the full background of an Instagram carousel card in Brazil.",
+      "ABSOLUTE PRIORITY: Illustrate the MESSAGE OF THIS SPECIFIC CARD, not the generic topic of the carousel. Follow the visual plan faithfully.",
+      "Specific message of this card: "+visualPlan.message,
+      "WHO OR WHAT must appear: "+visualPlan.visibleSubject,
+      "WHAT HAPPENS in the photograph: "+visualPlan.visibleAction,
+      "EXACT REAL-WORLD SETTING: "+visualPlan.concreteSetting,
+      "CONCRETE VISUAL DETAILS: "+visualPlan.visualDetails.join("; "),
+      "AVOID THESE IRRELEVANT SCENES OR DETAILS: "+visualPlan.avoid,
+      "Main carousel topic (secondary context only): "+topic,
+      "Card title (meaning only, DO NOT WRITE IT IN THE IMAGE): "+title,
+      "Card explanation (meaning only, DO NOT WRITE IT IN THE IMAGE): "+body,
+      "Other cards' topics must NOT appear in this scene: "+otherTitles.join(" / "),
+      "Previously used scenes not to repeat: "+otherVisualScenes.join(" / "),
+      "Composition: vertical portrait 4:5 friendly, realistic modern Brazilian people and objects when appropriate, natural light and skin texture, documentary realism. Leave visually quiet space in the top 18% for the Crediti header and center for title/explanation overlays.",
+      "Do not write any typography, fake prices, text labels, letters, watermarks or logos into the image. The app adds the brand and copy separately.",
+      "This is a fictional editorial scene, not a photo of real customers or documented loan approvals. Do not reproduce faces from any reference photo.",
+      "Never produce drawings, cartoons, illustration, 3D renderings, irrelevant banks, stock money piles, random credit cards or general advertising graphics.",
+      "Render the concrete action and props defined above so a Brazilian reader can tell which CARD MESSAGE the picture illustrates."
+    ].join("\n");
+    const abort=new AbortController();
+    const timer=setTimeout(()=>abort.abort(),115000);
     let response;
-    try {
-      response = await fetch("https://api.openai.com/v1/images/generations", {
-        method: "POST",
-        signal: abort.signal,
-        headers: {
-          "Authorization": "Bearer " + process.env.OPENAI_API_KEY,
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          model: "gpt-image-2.5-flare",
-          prompt,
-          size: "1024x1536",
-          quality: "medium",
-          output_format: "jpeg"
+    try{
+      response=await fetch("https://api.openai.com/v1/images/generations",{
+        method:"POST",signal:abort.signal,
+        headers:{"Authorization":"Bearer "+process.env.OPENAI_API_KEY,"Content-Type":"application/json"},
+        body:JSON.stringify({
+          model:process.env.STUDIO_IMAGE_MODEL||"gpt-image-2.5-flare",
+          prompt,size:"1024x1536",quality:"medium",output_format:"jpeg"
         })
       });
-    } finally { clearTimeout(timer); }
-    const data = await response.json().catch(() => ({}));
-    if (!response.ok) {
-      console.error("Crediti Studio Image API error status:", response.status);
-      return res.status(response.status === 429 ? 429 : 502).json({
-        error: response.status === 429 ?
-          "Limite da API OpenAI atingido. Confira os créditos e tente novamente." :
-          "A API de imagens não conseguiu concluir a geração. Confira acesso ao modelo e faturamento da API."
+    }finally{clearTimeout(timer)}
+    const data=await response.json().catch(()=>({}));
+    if(!response.ok){
+      console.error("Crediti Studio image generation failed with status:",response.status);
+      return res.status(response.status===429?429:502).json({
+        error:response.status===429?
+         "Limite da API OpenAI atingido. Confira os créditos e tente novamente.":
+         "A IA interpretou o card, mas não conseguiu criar a foto. Confira os créditos e o acesso ao modelo de imagens."
       });
     }
-    const generated = data.data?.[0]?.b64_json;
-    if (typeof generated !== "string" || generated.length < 1000) {
-      return res.status(502).json({ error: "A IA não retornou uma imagem válida." });
-    }
-    return res.json({ success: true, image: "data:image/jpeg;base64," + generated,
-      model: "gpt-image-2.5-flare", fictional: true });
-  } catch (err) {
-    console.error("Crediti Studio image request failed:", err?.name || "error");
-    return res.status(502).json({ error: "A geração de imagem não foi concluída. Tente novamente." });
+    const generated=data.data?.[0]?.b64_json;
+    if(typeof generated!=="string"||generated.length<1000)
+      return res.status(502).json({error:"A IA não retornou uma fotografia válida."});
+    return res.json({success:true,image:"data:image/jpeg;base64,"+generated,
+      model:process.env.STUDIO_IMAGE_MODEL||"gpt-image-2.5-flare",
+      cardIndex,sceneSummary:visualPlan.visibleAction,visualMessage:visualPlan.message,fictional:true});
+  } catch(err){
+    console.error("Crediti Studio image request failed:",err?.name||"error");
+    return res.status(502).json({error:err?.name==="AbortError"?
+      "A geração demorou além do permitido. Tente novamente.":
+      (err?.message||"A geração de imagem não foi concluída. Tente novamente.")});
   } finally {
-    studioGenerating = false;
+    studioGenerating=false;
   }
 });
 
