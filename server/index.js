@@ -835,14 +835,14 @@ function studioCreditiCTA(topic,focus=""){
  const text=raw||alt;
  let item;
  const insured=/\b(seguro|seguros|apolice|apolices|sinistro|cobertura|coberturas|cotacao de seguro)\b/;
- const excludedInsurance=/\b(seguro de vida|seguro residencial|seguro saude|seguro viagem|seguro desemprego)\b/;
+ const excludedInsurance=/\b(seguro vida|seguro residencial|seguro saude|seguro viagem|seguro desemprego)\b/;
  if(insured.test(text)&&!excludedInsurance.test(text)){
   item={product:"Seguro Auto",title:"Quer uma cotação grátis em Itapajé?",
    body:"Fale com a Crediti e conheça as opções de Seguro Auto e as coberturas disponíveis para seu veículo."};
  }else if(/\b(consorcio|consorcios|carta de credito|contemplacao|lance em consorcio)\b/.test(text)){
   item={product:"Consórcio",title:"Quer planejar sua próxima conquista?",
    body:"Fale com a Crediti e conheça opções de consórcio para carros, motos e outros objetivos, conforme as condições do grupo."};
- }else if(/\b(refinanciamento|refinanciar|veiculo em garantia|carro em garantia|moto em garantia)\b/.test(text)){
+ }else if(/\b(refinanciamento|refinanciar|veiculo garantia|carro garantia|moto garantia|veiculo como garantia|renegociacao carro garantia)\b/.test(text)){
   item={product:"Refinanciamento de veículo",title:"Já tem um carro ou uma moto?",
    body:"Peça uma simulação de refinanciamento com garantia de veículo na Crediti e confira as condições disponíveis."};
  }else if(/\b(financiamento|financiar|comprar carro|comprar moto|comprar veiculo|carro novo|moto nova|concessionaria|trocar de carro|trocar de moto)\b/.test(text)){
@@ -863,10 +863,10 @@ function studioCreditiCTA(topic,focus=""){
  }else if(/\b(inss|aposentadoria|aposentado|aposentados|pensionista|pensionistas|consignado)\b/.test(text)){
   item={product:"Consignado INSS",title:"Recebe aposentadoria ou pensão?",
    body:"Peça uma simulação de consignado INSS na Crediti e compare parcelas, custos e condições antes de decidir."};
- }else if(/\b(conta de luz|fatura de energia|conta de energia|energia eletrica|emprestimo na luz|emprestimo na conta)\b/.test(text)){
+ }else if(/\b(conta luz|fatura energia|conta energia|energia eletrica|emprestimo luz|emprestimo conta)\b/.test(text)){
   item={product:"Crédito na Conta de Luz",title:"Quer simular crédito na conta de luz?",
    body:"Fale com a Crediti e confira as condições do empréstimo na conta de luz, conforme sua elegibilidade."};
- }else if(/\b(cartao de credito|limite do cartao|cartao para pix|cartao em pix|cartao pix)\b/.test(text)){
+ }else if(/\b(cartao credito|limite cartao|cartao pix|cartao transformar pix|limite pix)\b/.test(text)){
   item={product:"Crédito no Cartão",title:"Quer transformar limite em Pix?",
    body:"Peça uma simulação de empréstimo no cartão com a Crediti e confira parcelas e custos antes de contratar."};
  }else if(/\b(bolsa familia|caixa tem)\b/.test(text)){
