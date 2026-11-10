@@ -827,10 +827,70 @@ function studioNorm(str) {
    .replace(/\b(o|a|de|do|da|dos|das|um|uma|e|em|para|por|com|no|na)\b/g," ")
    .replace(/\s+/g," ").trim();
 }
+// O último card é definido exclusivamente pelos serviços da Crediti, nunca por CTAs
+// genéricos ou promessas de aprovação escritas livremente pelo modelo.
+function studioCreditiCTA(topic,focus=""){
+ const raw=studioNorm(topic||"");
+ const alt=studioNorm(focus||"");
+ const text=raw||alt;
+ let item;
+ const insured=/\b(seguro|seguros|apolice|apolices|sinistro|cobertura|coberturas|cotacao de seguro)\b/;
+ const excludedInsurance=/\b(seguro de vida|seguro residencial|seguro saude|seguro viagem|seguro desemprego)\b/;
+ if(insured.test(text)&&!excludedInsurance.test(text)){
+  item={product:"Seguro Auto",title:"Quer uma cotação grátis em Itapajé?",
+   body:"Fale com a Crediti e conheça as opções de Seguro Auto e as coberturas disponíveis para seu veículo."};
+ }else if(/\b(consorcio|consorcios|carta de credito|contemplacao|lance em consorcio)\b/.test(text)){
+  item={product:"Consórcio",title:"Quer planejar sua próxima conquista?",
+   body:"Fale com a Crediti e conheça opções de consórcio para carros, motos e outros objetivos, conforme as condições do grupo."};
+ }else if(/\b(refinanciamento|refinanciar|veiculo em garantia|carro em garantia|moto em garantia)\b/.test(text)){
+  item={product:"Refinanciamento de veículo",title:"Já tem um carro ou uma moto?",
+   body:"Peça uma simulação de refinanciamento com garantia de veículo na Crediti e confira as condições disponíveis."};
+ }else if(/\b(financiamento|financiar|comprar carro|comprar moto|comprar veiculo|carro novo|moto nova|concessionaria|trocar de carro|trocar de moto)\b/.test(text)){
+  item={product:"Financiamento de veículos",title:"Pensando em comprar um carro ou moto?",
+   body:"Faça uma simulação de financiamento na Crediti e conheça as opções para realizar sua compra, sujeitas à análise."};
+ }else if(/\b(bpc|loas)\b/.test(text)){
+  item={product:"Crédito para BPC/LOAS",title:"Recebe BPC ou LOAS e quer consultar crédito?",
+   body:"Converse com a Crediti para verificar as condições de crédito disponíveis ao seu perfil, com cuidado e sem compromisso."};
+ }else if(/\b(fgts|saque aniversario|saque-aniversario|antecipacao do saque)\b/.test(text) && /\b(clt|carteira assinada|trabalhador registrado)\b/.test(text)){
+  item={product:"FGTS e Crédito CLT",title:"Quer conhecer suas opções de crédito?",
+   body:"Fale com a Crediti para consultar a antecipação do FGTS ou o crédito CLT e comparar as condições disponíveis."};
+ }else if(/\b(fgts|saque aniversario|saque-aniversario|antecipacao do saque)\b/.test(text)){
+  item={product:"Antecipação do FGTS",title:"Quer consultar seu FGTS?",
+   body:"Peça uma simulação de antecipação do saque-aniversário na Crediti e veja as condições para o seu saldo."};
+ }else if(/\b(clt|carteira assinada|trabalhador registrado|credito do trabalhador)\b/.test(text)){
+  item={product:"Crédito CLT",title:"Trabalha com carteira assinada?",
+   body:"Fale com a Crediti para consultar as opções de crédito CLT disponíveis e comparar as condições da contratação."};
+ }else if(/\b(inss|aposentadoria|aposentado|aposentados|pensionista|pensionistas|consignado)\b/.test(text)){
+  item={product:"Consignado INSS",title:"Recebe aposentadoria ou pensão?",
+   body:"Peça uma simulação de consignado INSS na Crediti e compare parcelas, custos e condições antes de decidir."};
+ }else if(/\b(conta de luz|fatura de energia|conta de energia|energia eletrica|emprestimo na luz|emprestimo na conta)\b/.test(text)){
+  item={product:"Crédito na Conta de Luz",title:"Quer simular crédito na conta de luz?",
+   body:"Fale com a Crediti e confira as condições do empréstimo na conta de luz, conforme sua elegibilidade."};
+ }else if(/\b(cartao de credito|limite do cartao|cartao para pix|cartao em pix|cartao pix)\b/.test(text)){
+  item={product:"Crédito no Cartão",title:"Quer transformar limite em Pix?",
+   body:"Peça uma simulação de empréstimo no cartão com a Crediti e confira parcelas e custos antes de contratar."};
+ }else if(/\b(bolsa familia|caixa tem)\b/.test(text)){
+  item={product:"Crédito Pessoal",title:"Precisa avaliar opções de crédito?",
+   body:"Fale com a Crediti para conhecer opções de crédito pessoal e consultar as condições disponíveis ao seu perfil."};
+ }else if(/\b(cnpj|empresa|empresas|empreendedor|negocio|negocios|capital de giro|credito pj|emprestimo pj)\b/.test(text)){
+  item={product:"Empréstimo PJ",title:"Seu negócio precisa de crédito?",
+   body:"Peça uma simulação de empréstimo PJ na Crediti e confira as opções de acordo com o perfil da sua empresa."};
+ }else if(/\b(microcredito|micro credito|autonomo|renda extra|pequeno negocio)\b/.test(text)){
+  item={product:"Microcrédito",title:"Quer conhecer opções de microcrédito?",
+   body:"Fale com a Crediti e consulte as ofertas de microcrédito disponíveis após a análise do seu perfil."};
+ }else{
+  item={product:"Crédito Pessoal",title:"As contas apertaram e você precisa de crédito?",
+   body:"Conheça as opções de crédito pessoal da Crediti, compare as condições e solicite uma simulação sem compromisso."};
+ }
+ return item;
+}
+
 function studioValidateCarousel(obj,topic,total) {
  if(!obj||typeof obj!=="object"||!Array.isArray(obj.cards)||obj.cards.length!==total-2)return null;
  const cover={title:studioCardCopy(obj.cover?.title,110),body:studioCardCopy(obj.cover?.body,195)};
- const end={title:studioCardCopy(obj.closing?.title,110),body:studioCardCopy(obj.closing?.body,195)};
+ // Todo carrossel termina com uma oferta real da Crediti, ligada ao tema.
+ const creditiCTA=studioCreditiCTA(topic,obj.focus);
+ const end={title:studioCardCopy(creditiCTA.title,110),body:studioCardCopy(creditiCTA.body,195)};
  const cards=obj.cards.map(c=>({title:studioCardCopy(c?.title,110),body:studioCardCopy(c?.body,205),angle:studioCardCopy(c?.angle,75)}));
  const caption=studioCardCopy(obj.caption,850);
  const all=[cover,...cards,end];
@@ -872,7 +932,7 @@ function studioValidateCarousel(obj,topic,total) {
   {title:cover.title,body:cover.body,kind:"cover",layout:"auto"},
   ...cards.map(c=>({title:c.title,body:c.body,kind:"content",layout:"auto"})),
   {title:end.title,body:end.body,kind:"cta",layout:"auto"}
- ],caption};
+ ],caption,ctaProduct:creditiCTA.product};
 }
 const studioSlideSchema={type:"object",additionalProperties:false,
  properties:{title:{type:"string"},body:{type:"string"}},
@@ -955,6 +1015,14 @@ const studioCarouselSchema={
   caption:{type:"string"}
  },required:["focus","cover","cards","closing","caption"]
 };
+s.post("/api/studio/cta",(req,res)=>{
+ res.set("Cache-Control","no-store");
+ if(req.get("Origin")!=="https://crediti-studio.onrender.com")
+  return res.status(403).json({error:"Abra o Crediti Studio para ajustar seu CTA."});
+ const topic=studioClean(req.body?.topic,180);
+ if(topic.length<3)return res.status(400).json({error:"Informe o assunto do carrossel."});
+ return res.json({success:true,...studioCreditiCTA(topic)});
+});
 s.post("/api/studio/carousel",async(req,res)=>{
  res.set("Cache-Control","no-store");
  if(req.get("Origin")!=="https://crediti-studio.onrender.com") {
@@ -1006,7 +1074,14 @@ s.post("/api/studio/carousel",async(req,res)=>{
   "Cada objeto de cards deve incluir um angle curto, um rótulo semântico EXCLUSIVO (por exemplo, lista de compras, preço por quilo, validade ou armazenamento para tema supermercado). O texto e o título de cada card devem desenvolver seu angle sem repetir conteúdo dos outros.",
   "Com fotos: quando possível, alinhe o assunto do card N com o que a foto N mostra, sem perder o tema central e sem inventar detalhes.",
   "Verificação final obrigatória: título, foco, fotos e todos os cards devem falar do MESMO assunto central. Se dois cards ensinam a mesma coisa com palavras diferentes, mude um deles para outro ângulo útil.",
-  "Gere exatamente "+total+" slides: 1 capa forte que reflita o tema, "+points+" cards educativos distintos e 1 encerramento com CTA gentil.",
+  "Gere exatamente "+total+" slides: 1 capa forte que reflita o tema, "+points+" cards educativos distintos e 1 encerramento com CTA ESPECÍFICO DA CREDITI.",
+  "SERVIÇO REAL DA CREDITI A OFERECER NO ÚLTIMO CARD: "+studioCreditiCTA(topic).product+". Use-o para um convite à simulação de crédito, cotação de seguro auto ou consulta de consórcio, conforme o assunto.",
+  "CTA OBRIGATÓRIO: deve citar Crediti pelo nome, direcionar a um produto ou serviço que ela realmente oferece e convidar para FALAR COM A CREDITI. Nunca termine apenas com 'salve', 'compartilhe', 'curta' ou 'confira as dicas'.",
+  "Exemplo seguro: título 'Quer uma cotação grátis em Itapajé?'; texto 'Fale com a Crediti e conheça as opções de Seguro Auto.'",
+  "Exemplo FGTS: título 'Quer antecipar seu FGTS?'; texto 'Peça uma simulação na Crediti e confira as condições disponíveis.'",
+  "Exemplo financiamento: 'Pensando em comprar sua moto? Faça uma simulação de financiamento na Crediti.'",
+  "Os outros cards devem continuar educativos e fiéis ao tema. Não desvie o assunto nem use crédito como solução automática para despesas essenciais.",
+  "Não prometa aprovação, valor liberado, taxa fixa ou proteção contratada. Uma cotação ou simulação não garante contratação.",
   "Formato: português brasileiro natural, curioso, prático, claro e compartilhável, sem jargões e sem frases vazias.",
   "JAMAIS inclua links, domínios, URL, www, http, fonte, citação, referência, nota de rodapé ou marcador bibliográfico nos títulos ou textos dos cards. Faça a pesquisa por trás, sem poluir a arte. O sistema guarda as fontes separadamente para conferência.",
   "Títulos curtos e fortes, idealmente 20-60 caracteres, sem listas numeradas. Textos explicativos entre 70 e 165 caracteres, em no máximo duas frases claras. Capa e chamada final também curtas, para ótima leitura em celular.",
@@ -1067,7 +1142,7 @@ s.post("/api/studio/carousel",async(req,res)=>{
   try{parsed=JSON.parse(output)}catch{parsed=null}
   const verified=studioValidateCarousel(parsed,topic,total);
   if(!verified)return res.status(502).json({error:"A IA não entregou cards diferentes e completos. Tente gerar novamente."});
-  return res.json({success:true,topic,slides:verified.slides,caption:verified.caption,sources,research:"Pesquisa em fontes brasileiras",photosAnalyzed:photoReview.photos.length,visualFocus:photoReview.theme,model:process.env.STUDIO_TEXT_MODEL||"gpt-6-sol"});
+  return res.json({success:true,topic,slides:verified.slides,caption:verified.caption,ctaProduct:verified.ctaProduct,sources,research:"Pesquisa em fontes brasileiras",photosAnalyzed:photoReview.photos.length,visualFocus:photoReview.theme,model:process.env.STUDIO_TEXT_MODEL||"gpt-6-sol"});
  }catch(error){
   console.error("Crediti Studio carousel error:",error?.name||"Erro");
   return res.status(502).json({error:"Não consegui completar a pesquisa agora. Tente novamente sem perder seu carrossel anterior."});
