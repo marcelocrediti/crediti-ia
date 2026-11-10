@@ -1698,6 +1698,7 @@ function resetCreationWorkspace(nextTopic,mode){
  $("#photoStatus").textContent="O novo carrossel ainda não tem imagens.";
  $("#contentStatus").textContent=topic?"Preparando um novo carrossel sobre: "+topic:"Digite um assunto novo e toque em Pesquisar e gerar carrossel com IA.";
  $("#aiStatus").textContent="Selecione um card para gerar uma imagem realista com IA.";
+ $("#ctaStatus").textContent="No novo carrossel, o último card vai oferecer um serviço da Crediti relacionado ao tema.";
  $("#selectedCardPhotoInfo").textContent="Você poderá anexar ou substituir a foto de cada novo card.";
  if(mode==="default"){
   var first=document.querySelector('input[name="photoMode"][value="cover"]');
@@ -2003,7 +2004,7 @@ function render(){if(!current)return;
  current.slides.forEach(function(sl){sl.title=cleanCardCopy(sl.title);sl.body=cleanCardCopy(sl.body)});
  current.captionBase=cleanResearchNotes(current.captionBase||current.caption);
  current.caption=cleanResearchNotes(current.caption);
- renderUploadList();renderResearchSources(current);$("#cardTitle").value=current.slides[index].title;$("#cardText").value=current.slides[index].body;$("#cardLayout").value=current.slides[index].layout||"auto";$("#caption").value=current.caption;document.querySelector('input[name="photoMode"][value="'+(current.photoMode||"none")+'"]').checked=true;updatePhotoControls();drawAll()}
+ renderUploadList();renderResearchSources(current);$("#ctaStatus").textContent=current.ctaProduct?"CTA da Crediti: "+current.ctaProduct+". Você pode alterar a mensagem do último card.":"Se o último card estiver genérico, toque em Atualizar CTA final para a Crediti.";$("#cardTitle").value=current.slides[index].title;$("#cardText").value=current.slides[index].body;$("#cardLayout").value=current.slides[index].layout||"auto";$("#caption").value=current.caption;document.querySelector('input[name="photoMode"][value="'+(current.photoMode||"none")+'"]').checked=true;updatePhotoControls();drawAll()}
 function folderNameText(value){return String(value||"").replace(/\s+/g," ").trim().slice(0,55)}
 function folderById(id){return folders.find(function(folder){return folder.id===id})}
 async function createFolderByName(rawName){
