@@ -208,7 +208,7 @@ const FAIXAS = [
   { max: 2000,  label: 'R$ 1.001 a R$ 2.000',  prazoTexto: 'Até 9 meses',   prazoMax: 9,  taxa: 10 },
   { max: 3000,  label: 'R$ 2.001 a R$ 3.000',  prazoTexto: 'Até 12 meses',  prazoMax: 12, taxa: 11 },
   { max: 5000,  label: 'R$ 3.001 a R$ 5.000',  prazoTexto: '13 a 18 meses', prazoMax: 18, taxa: 12 },
-  { max: 15000, label: 'R$ 5.000,01 a R$ 15.000,00', prazoTexto: '19 a 60 meses', prazoMax: 60, taxa: 13 },
+  { max: 15000, label: 'R$ 5.001,00 a R$ 15.000,00', prazoTexto: '19 a 60 meses', prazoMax: 60, taxa: 13 },
 ];
 function getFaixa(valor){
   return FAIXAS.find(f => valor <= f.max) || FAIXAS[FAIXAS.length-1];
