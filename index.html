@@ -472,7 +472,7 @@ function calcularCdcPorDatas(valor, taxa, prazo, dataBase, dataPrimeira, modoCal
   const inicio = diaUtc(dataBase);
   const primeira = diaUtc(dataPrimeira);
   if(primeira <= inicio) throw new Error('O primeiro vencimento deve ser posterior à data de liberação.');
-  if(!Number.isFinite(taxa) || taxa < 9) throw new Error('A taxa mínima do crédito pessoal é 9% ao mês. Você pode informar uma taxa maior.');
+  if(!Number.isFinite(taxa) || taxa < 1.5) throw new Error('A taxa mínima do crédito pessoal é 1,50% ao mês. Você pode informar uma taxa maior.');
   if(!Number.isFinite(valor) || valor <= 0 ||
      !Number.isInteger(prazo) || prazo < CONFIG.prazoMin || prazo > CONFIG.prazoMax){
     throw new Error('Confira o valor, a taxa e a quantidade de parcelas.');
@@ -711,8 +711,8 @@ function viewNovo(){
       <div><label>Prazo (meses)</label><select id="f-prazo">${opcoesPrazo}</select></div>
     </div>
     <label>Taxa de juros (% a.m.)</label>
-    <input type="number" min="9" step="0.01" id="f-taxa" placeholder="Preenchido pela faixa">
-    <p class="hint">Mínimo de 9% ao mês. A taxa sugerida pode ser editada.</p>
+    <input type="number" min="1.5" step="0.01" id="f-taxa" placeholder="Preenchido pela faixa">
+    <p class="hint">Mínimo de 1,50% ao mês. A taxa sugerida pode ser editada.</p>
     <div id="faixa-hint" class="hint" style="margin-top:6px;color:#8a5a00;font-weight:700;"></div>
     <label>Data da 1ª parcela</label>
     <input type="date" id="f-data1">
@@ -1271,7 +1271,7 @@ window.editarSimulacaoInline = async function(id){
     <label>Prazo (meses)</label>
     <select id="ei-prazo">${opcoesPrazo}</select>
     <label>Taxa de juros (% a.m.)</label>
-    <input type="number" min="9" step="0.01" id="ei-taxa" value="${s.taxa}">
+    <input type="number" min="1.5" step="0.01" id="ei-taxa" value="${s.taxa}">
     <label>Data da 1ª parcela</label>
     <input type="date" id="ei-data1" value="${s.dataPrimeira}">
     <button class="btn btn-gold" id="btn-recalcular-inline" style="margin-top:14px;">Recalcular simulação</button>
@@ -2521,5 +2521,6 @@ render();
 </script>
 </body>
 </html>
+
 
 
