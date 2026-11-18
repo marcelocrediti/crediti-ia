@@ -60,7 +60,7 @@
   #app .cdc-login-panel input{height:54px;min-height:54px;}
   #app .cdc-login-password input{padding-right:86px;}
   @media(max-width:799px){
-    #app .cdc-login-screen{align-items:flex-start;padding:100px 18px 28px;}
+    #app .cdc-login-screen{min-height:100svh;min-height:100dvh;align-items:center;padding:24px 18px;}
     #app .cdc-login-panel{padding:24px;max-width:420px;}
     #app .cdc-login-panel h1{font-size:29px;}
     #app .cdc-login-panel .cdc-login-intro{margin-bottom:18px;}
