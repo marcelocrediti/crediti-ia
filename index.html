@@ -8,6 +8,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
 <style>
   :root{
@@ -632,6 +633,8 @@ async function render(){
 async function renderInner(){
   const route = getRoute();
   const app = document.getElementById('app');
+  if(!cdcAuthReady){ app.innerHTML = '<div class="wrap"><div class="card">Verificando acesso…</div></div>'; return; }
+  if(!isCdcAdmin()) { renderCdcLogin(app); return; }
   if(route.view === 'cliente'){
     app.innerHTML = await viewCliente(route.id);
     return;
@@ -646,6 +649,7 @@ async function renderInner(){
     return;
   }
   const tabs = `
+    <button class="btn btn-outline" style="margin-bottom:12px" onclick="cdcLogout()">Sair do painel</button>
     <div class="tabbar">
       <button class="${route.view==='painel'||route.view==='detalhe'?'active':''}" onclick="location.hash=''">Painel</button>
       <button class="${route.view==='novo'?'active':''}" onclick="location.hash='novo'">Nova simulação</button>
@@ -2517,10 +2521,80 @@ window.addEventListener('unhandledrejection', (ev)=>{
   console.error('Erro não tratado:', ev.reason);
 });
 
-render();
+// Authentication is enforced by Firestore rules as well as this UI gate.
+const CDC_ADMIN_UID = 'LuvNA4bYAmQRkFTAHUTDMpsD1ZF2';
+const CDC_ADMIN_EMAIL = 'marcelinoteixeira.santos@gmail.com';
+let cdcAuthReady = false;
+function isCdcAdmin(){
+  const u = firebaseOk && firebase.auth().currentUser;
+  return !!u && u.uid === CDC_ADMIN_UID && u.email === CDC_ADMIN_EMAIL;
+}
+function renderCdcLogin(app){
+  app.innerHTML = `<div class="wrap" style="max-width:520px;padding:20px;box-sizing:border-box;width:100%">
+    <div class="card"><h1>CDC Crediti</h1><p>Acesso exclusivo do administrador.</p>
+    <form id="cdc-login-form">
+    <label for="cdc-email">E-mail</label><input id="cdc-email" type="email" autocomplete="username" required>
+    <label for="cdc-password">Senha de 6 dígitos</label>
+    <input id="cdc-password" type="password" inputmode="numeric" pattern="[0-9]{6}" minlength="6" maxlength="6" autocomplete="current-password" required>
+    <button type="button" class="btn btn-outline" id="cdc-eye" aria-controls="cdc-password" aria-pressed="false">Mostrar senha</button>
+    <button type="submit" class="btn btn-primary" id="cdc-enter">Entrar</button>
+    <button type="button" class="btn btn-outline" id="cdc-reset">Esqueci minha senha</button>
+    <p id="cdc-login-message" role="status" aria-live="polite"></p></form></div></div>`;
+  const email = document.getElementById('cdc-email');
+  const pass = document.getElementById('cdc-password');
+  const message = document.getElementById('cdc-login-message');
+  document.getElementById('cdc-eye').onclick = function(){
+    const show = pass.type === 'password'; pass.type = show ? 'text' : 'password';
+    this.textContent = show ? 'Ocultar senha' : 'Mostrar senha';
+    this.setAttribute('aria-pressed', String(show));
+  };
+  document.getElementById('cdc-login-form').onsubmit = async function(event){
+    event.preventDefault();
+    if(email.value.trim().toLowerCase() !== CDC_ADMIN_EMAIL){message.textContent='Acesso permitido somente ao administrador.'; return;}
+    const button = document.getElementById('cdc-enter'); button.disabled = true;
+    message.textContent = 'Entrando…';
+    try{
+      await firebase.auth().setPersistence(firebase.auth.Auth.Persistence.SESSION);
+      await firebase.auth().signInWithEmailAndPassword(CDC_ADMIN_EMAIL, pass.value);
+      if(!isCdcAdmin()){ await firebase.auth().signOut(); throw new Error('access'); }
+    }catch(error){
+      message.textContent = error.code === 'auth/too-many-requests'
+        ? 'Muitas tentativas. Aguarde antes de tentar novamente.'
+        : error.code === 'auth/network-request-failed' ? 'Sem conexão. Tente novamente.'
+        : 'Não foi possível entrar. Confira o e-mail e a senha.';
+      button.disabled = false;
+    }
+  };
+  document.getElementById('cdc-reset').onclick = async function(){
+    this.disabled = true;
+    try{
+      await firebase.auth().sendPasswordResetEmail(CDC_ADMIN_EMAIL);
+      message.textContent = 'Link de redefinição enviado ao e-mail do administrador. Confira também o spam. Use uma senha numérica de 6 dígitos.';
+    }catch(error){ message.textContent = 'Não foi possível enviar o link agora. Aguarde e tente novamente.'; }
+    finally{ this.disabled = false; }
+  };
+}
+async function cdcLogout(){
+  window.__simsCache = null;
+  await firebase.auth().signOut();
+  location.hash = '';
+}
+if(firebaseOk){
+  firebase.auth().onAuthStateChanged(async user => {
+    if(user && (user.uid !== CDC_ADMIN_UID || user.email !== CDC_ADMIN_EMAIL)){
+      await firebase.auth().signOut(); return;
+    }
+    cdcAuthReady = true;
+    window.__simsCache = null;
+    await render();
+  });
+}else{
+  document.getElementById('app').innerHTML = '<div class="wrap"><div class="card">Não foi possível iniciar o acesso seguro. Atualize a página.</div></div>';
+}
 </script>
 </body>
 </html>
+
 
 
 
