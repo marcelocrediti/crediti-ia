@@ -4,7 +4,7 @@ const DOCS=[['rgFrente','Identidade completa (RG, CIN ou CNH)'],['cpfFrente','CP
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const money=v=>Number(v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
 const hash=async value=>Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(value)))).map(x=>x.toString(16).padStart(2,'0')).join('');
-const number=v=>Number(String(v).replace(/\./g,'').replace(',','.'));
+const number=v=>{let text=String(v).trim();if(text.includes(','))text=text.replace(/\./g,'').replace(',','.');else if(/^\d{1,3}(\.\d{3})+$/.test(text))text=text.replace(/\./g,'');return Number(text);};
 export async function creditSnapshot(current,{listSims,loadDocumentos}){
   const cpf=String(current.dadosCliente?.cpf||'').replace(/\D/g,'');
   const relatives=(await listSims()).filter(x=>String(x.dadosCliente?.cpf||'').replace(/\D/g,'')===cpf);
@@ -50,6 +50,8 @@ export async function mountCdcReview(id,root,ctx){
   <button type="button" class="btn btn-outline" id="rev-refuse">Recusar manualmente</button>
   <p class="hint">A decisão fica registrada com data e responsável. O retorno bruto da Crediti continua fora do PDF do cliente.</p>`;
   const el=k=>root.querySelector('#rev-'+k);
+  root.querySelectorAll('input:not([type])').forEach(input=>{input.type='text';input.style.fontSize='16px';});
+  root.querySelectorAll('textarea').forEach(input=>{Object.assign(input.style,{width:'100%',minHeight:'90px',boxSizing:'border-box',fontSize:'16px',padding:'11px',border:'1.5px solid var(--line)',borderRadius:'10px'});});
   for(const k of ['restricao','conta','titular']) el(k).value=q[k]||'';
   const message=text=>{el('output').textContent=text;};
   if(record) message('Última avaliação: '+record.status+'\n'+record.motivos.join('\n')+'\n'+(s.analiseCdc.decisao?'Decisão confirmada: '+s.analiseCdc.decisao.status:'Aguardando conferência do administrador.'));
