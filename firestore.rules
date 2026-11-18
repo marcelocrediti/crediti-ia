@@ -1,0 +1,49 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function admin() {
+      return request.auth != null
+        && request.auth.uid == 'LuvNA4bYAmQRkFTAHUTDMpsD1ZF2'
+        && request.auth.token.email == 'marcelinoteixeira.santos@gmail.com';
+    }
+    match /simulacoes/{id} {
+      allow read, write: if admin();
+      match /documentos/{documento} {
+        allow read, write: if admin();
+      }
+    }
+    match /contadoresCCB/{id} {
+      allow read, write: if admin();
+    }
+    match /assinaturasCDC/{token} {
+      allow read, write: if admin();
+      allow get: if token.matches('^[a-f0-9]{64}$')
+        && resource.data.expiraEm > request.time;
+      allow update: if token.matches('^[a-f0-9]{64}$')
+        && resource.data.expiraEm > request.time
+        && resource.data.aceite == null
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['aceite','assinadoEm'])
+        && request.resource.data.assinadoEm == request.time
+        && request.resource.data.aceite is map
+        && request.resource.data.aceite.keys().hasOnly(['timestamp','foto','geo','endereco'])
+        && request.resource.data.aceite.timestamp is int
+        && request.resource.data.aceite.timestamp > request.time.toMillis() - 300000
+        && request.resource.data.aceite.timestamp < request.time.toMillis() + 300000
+        && request.resource.data.aceite.foto is string
+        && request.resource.data.aceite.foto.size() < 750000
+        && request.resource.data.aceite.foto.matches('^data:image/jpeg;base64,[A-Za-z0-9+/=]+$')
+        && (request.resource.data.aceite.endereco == null ||
+          (request.resource.data.aceite.endereco is string && request.resource.data.aceite.endereco.size() < 2000))
+        && (request.resource.data.aceite.geo == null ||
+          (request.resource.data.aceite.geo is map
+          && request.resource.data.aceite.geo.keys().hasOnly(['lat','lng'])
+          && request.resource.data.aceite.geo.lat is number
+          && request.resource.data.aceite.geo.lng is number
+          && request.resource.data.aceite.geo.lat >= -90 && request.resource.data.aceite.geo.lat <= 90
+          && request.resource.data.aceite.geo.lng >= -180 && request.resource.data.aceite.geo.lng <= 180));
+    }
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
