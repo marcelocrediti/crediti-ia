@@ -100,7 +100,7 @@ export async function mountCdcReview(id,root,ctx){
   const bind=(id,task)=>{const b=el(id);b.task=task;b.onclick=()=>run(b);};
   el('auto').onchange=async()=>{const enabled=el('auto').checked;el('auto').disabled=true;try{await db.collection('contadoresCCB').doc('analise_config').set({automatica:enabled,atualizadoEm:Date.now(),por:auth.currentUser.uid});config.automatica=enabled;message(enabled?'Análise automática ativada. Preencha a ficha e clique em Analisar ficha.':'Modo manual ativado.');}catch{el('auto').checked=!enabled;message('Não foi possível salvar a configuração.');}finally{el('auto').disabled=false;}};
   const cpf=String(s.dadosCliente?.cpf||'').replace(/\D/g,'');
-  const related=async()=>{if(cpf.length!==11)throw Error('Preencha o CPF na ficha de contratação para vincular o histórico.');const all=await listSims();return all.filter(x=>String(x.dadosCliente?.cpf||'').replace(/\D/g,'')===cpf);};
+  const related=async()=>{if(cpf.length!==11)throw Error('Preencha o CPF na ficha de contratação para vincular o histórico.');const all=await listSims();if(!all.some(x=>x.id===id))throw Error('Não foi possível confirmar a consulta ao histórico. Tente novamente.');return all.filter(x=>String(x.dadosCliente?.cpf||'').replace(/\D/g,'')===cpf);};
   const snapshot=current=>creditSnapshot(current,{listSims,loadDocumentos});
   await mountCdcHistory(id,el('history'),ctx);
   let busy=false;
