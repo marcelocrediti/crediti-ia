@@ -5,6 +5,12 @@ const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&
 const money=v=>Number(v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
 const hash=async value=>Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(value)))).map(x=>x.toString(16).padStart(2,'0')).join('');
 const number=v=>Number(String(v).replace(/\./g,'').replace(',','.'));
+export async function creditSnapshot(current,{listSims,loadDocumentos}){
+  const cpf=String(current.dadosCliente?.cpf||'').replace(/\D/g,'');
+  const relatives=(await listSims()).filter(x=>String(x.dadosCliente?.cpf||'').replace(/\D/g,'')===cpf);
+  const docs=await loadDocumentos(current.id);
+  return hash(JSON.stringify({questionario:current.analiseCdc?.questionario,valor:current.valor,parcela:current.parcela,prazo:current.prazo,taxa:current.taxa,dataPrimeira:current.dataPrimeira,cpf:current.dadosCliente?.cpf,history:relatives.sort((a,b)=>a.id.localeCompare(b.id)).map(x=>({id:x.id,assinado:!!x.aceite,hist:x.historicoCrediti||[]})),docs:await Promise.all(Object.keys(docs).sort().map(async key=>[key,await hash(docs[key].dataUrl||'')])),leitura:current.analiseDocumentos||{}}));
+}
 export async function mountCdcReview(id,root,ctx){
   const {db,loadSim,saveSim,listSims,loadDocumentos,saveDocumento,auth}=ctx;
   const s=await loadSim(id); if(!s || !root.isConnected) return;
@@ -16,6 +22,7 @@ export async function mountCdcReview(id,root,ctx){
   root.innerHTML=`<h2>Análise de crédito</h2>
   <label style="display:flex;gap:12px;align-items:center"><input id="rev-auto" type="checkbox" style="width:auto" ${config.automatica?'checked':''}>Ativar análise automática para novas avaliações</label>
   <p class="hint">Não altera contratos existentes. O resultado usa apenas a ficha e o histórico registrado. Confira as evidências antes de confirmar a decisão.</p>
+  <button type="button" class="btn btn-outline" id="rev-test">Testar leitor com documento fictício</button>
   <label>Renda líquida mensal comprovada (R$)</label><input id="rev-renda" inputmode="decimal" value="${esc(q.renda?.toFixed(2).replace('.',',')||'')}">
   <label>Despesas essenciais mensais (R$)</label><input id="rev-despesas" inputmode="decimal" value="${esc(q.despesas?.toFixed(2).replace('.',',')||'')}">
   <label>Outras parcelas mensais em andamento (R$)</label><input id="rev-outrasParcelas" inputmode="decimal" value="${esc(q.outrasParcelas?.toFixed(2).replace('.',',')||'')}">
@@ -53,7 +60,12 @@ export async function mountCdcReview(id,root,ctx){
   el('auto').onchange=async()=>{const enabled=el('auto').checked;el('auto').disabled=true;try{await db.collection('contadoresCCB').doc('analise_config').set({automatica:enabled,atualizadoEm:Date.now(),por:auth.currentUser.uid});config.automatica=enabled;message(enabled?'Análise automática ativada. Preencha a ficha e clique em Analisar ficha.':'Modo manual ativado.');}catch{el('auto').checked=!enabled;message('Não foi possível salvar a configuração.');}finally{el('auto').disabled=false;}};
   const cpf=String(s.dadosCliente?.cpf||'').replace(/\D/g,'');
   const related=async()=>{if(cpf.length!==11)throw Error('Preencha o CPF na ficha de contratação para vincular o histórico.');const all=await listSims();return all.filter(x=>String(x.dadosCliente?.cpf||'').replace(/\D/g,'')===cpf);};
-  const snapshot=async(current)=>{const relatives=await related();const docs=await loadDocumentos(id);return hash(JSON.stringify({questionario:current.analiseCdc?.questionario,valor:current.valor,parcela:current.parcela,prazo:current.prazo,taxa:current.taxa,dataPrimeira:current.dataPrimeira,cpf:current.dadosCliente?.cpf,history:relatives.sort((a,b)=>a.id.localeCompare(b.id)).map(x=>({id:x.id,assinado:!!x.aceite,hist:x.historicoCrediti||[]})),docs:await Promise.all(Object.keys(docs).sort().map(async key=>[key,await hash(docs[key].dataUrl||'')])),leitura:current.analiseDocumentos||{}}));};
+  const snapshot=current=>creditSnapshot(current,{listSims,loadDocumentos});
+  bind('test',async()=>{
+    message('Testando leitura com dados fictícios, sem salvar no cliente…');
+    const canvas=document.createElement('canvas');canvas.width=1000;canvas.height=400;const g=canvas.getContext('2d');g.fillStyle='white';g.fillRect(0,0,1000,400);g.fillStyle='black';g.font='30px sans-serif';g.fillText('DOCUMENTO FICTICIO DE TESTE - SEM VALIDADE',30,70);g.fillText('Renda liquida mensal: R$ 2.000,00',30,150);g.fillText('Competencia: novembro de 2026',30,220);
+    const response=await fetch(API,{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+await auth.currentUser.getIdToken()},body:JSON.stringify({dataUrl:canvas.toDataURL('image/jpeg',0.8)}),signal:AbortSignal.timeout(90000)});const data=await response.json();if(!response.ok||!data.document)throw Error(data.error||'Falha no teste.');message('Leitor conectado e respondendo. Teste fictício concluído, sem alterar o cliente. Renda lida: '+money(data.document.rendaLiquida));
+  });
   const showHistory=async()=>{try{const sims=await related();const hist=sims.flatMap(x=>(x.historicoCrediti||[]).map(h=>({...h,contrato:x.id})));el('history').textContent=hist.length?hist.map(h=>`${h.data} | ${h.tipo}${h.dias?' | '+h.dias+' dias de atraso':''} | ${h.nota||''}`).join('\n'):'Nenhuma ocorrência registrada. Ausência de registro não comprova ausência de atraso.';el('history').style.whiteSpace='pre-wrap';}catch(e){el('history').textContent=e.message;}};
   await showHistory();
   bind('add',async()=>{
