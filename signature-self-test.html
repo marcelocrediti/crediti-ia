@@ -1,0 +1,43 @@
+<!doctype html><html lang="pt-BR"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Verificação de uso único | Crediti</title>
+<style>body{font:17px system-ui;max-width:850px;margin:35px auto;padding:20px;background:#fffdf5;color:#171717}button{padding:16px;background:#fdca01;border:0;border-radius:10px;font-weight:700}pre{white-space:pre-wrap;padding:20px;background:white;border:1px solid #ddd;border-radius:12px}</style>
+<h1>Teste de proteção dos links</h1><p>Usa somente um registro fictício, sem contrato, foto de cliente ou numeração de CCB.</p><button id="test" disabled>Executar teste de uso único</button><pre id="result">Verificando acesso do administrador…</pre><a href="/">Voltar ao painel</a>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
+<script>
+const cfg={
+  apiKey: "AIzaSyCGcy60hIEFpw3_LUN9SEqXL8fbNg4a-Bk",
+  authDomain: "aplicativo-cdc.firebaseapp.com",
+  projectId: "aplicativo-cdc",
+  storageBucket: "aplicativo-cdc.firebasestorage.app",
+  messagingSenderId: "1005590459955",
+  appId: "1:1005590459955:web:3d5ce9767faddf2499d546"
+};
+const app=firebase.initializeApp(cfg), db=app.firestore();
+const probe=firebase.initializeApp(cfg,'single-use-probe').firestore();
+const out=document.getElementById('result'),btn=document.getElementById('test');
+const log=s=>{out.textContent+=s+'\n';};
+firebase.auth().onAuthStateChanged(u=>{if(u&&u.uid==='LuvNA4bYAmQRkFTAHUTDMpsD1ZF2'){btn.disabled=false;out.textContent='Pronto. Nenhum contrato real será modificado.\n';}else{btn.disabled=true;out.textContent='Entre como administrador no painel antes de executar o teste.';}});
+btn.onclick=async()=>{
+btn.disabled=true;out.textContent='';let adminRef;
+const assert=(ok,msg)=>{if(!ok)throw Error(msg);log('OK: '+msg);};
+const denied=async fn=>{try{await fn();return false;}catch(e){if(e.code!=='permission-denied')throw e;return true;}};
+try{
+const token=Array.from(crypto.getRandomValues(new Uint8Array(32))).map(x=>x.toString(16).padStart(2,'0')).join('');
+adminRef=db.collection('assinaturasCDC').doc(token);
+const publicRef=probe.collection('assinaturasCDC').doc(token);
+await adminRef.set({proposta:{cliente:'TESTE FICTÍCIO SEM VALIDADE'},simId:'TESTE-SEM-CONTRATO',teste:true,aceite:null,expiraEm:firebase.firestore.Timestamp.fromMillis(Date.now()+600000)});
+assert((await publicRef.get({source:'server'})).exists,'Link novo permite abrir somente sua proposta');
+assert(await denied(()=>probe.collection('simulacoes').limit(1).get({source:'server'})),'Sem acesso ao painel ou aos contratos');
+assert(await denied(()=>publicRef.update({proposta:{cliente:'ALTERACAO INDEVIDA'}})),'Cliente não consegue alterar a proposta');
+assert(await denied(()=>publicRef.update({aceite:{timestamp:Date.now(),foto:'invalida',geo:null,endereco:null},assinadoEm:firebase.firestore.FieldValue.serverTimestamp()})),'Envio inválido recusado');
+assert((await publicRef.get({source:'server'})).exists,'Envio inválido não inutiliza o link');
+const canvas=document.createElement('canvas');canvas.width=80;canvas.height=40;const g=canvas.getContext('2d');g.fillStyle='white';g.fillRect(0,0,80,40);g.fillStyle='black';g.fillText('TESTE',5,20);
+const payload=()=>({aceite:{timestamp:Date.now(),foto:canvas.toDataURL('image/jpeg'),geo:null,endereco:null},assinadoEm:firebase.firestore.FieldValue.serverTimestamp()});
+const results=await Promise.allSettled([publicRef.update(payload()),publicRef.update(payload())]);
+assert(results.filter(x=>x.status==='fulfilled').length===1,'Somente um envio aceito, mesmo com duas tentativas simultâneas');
+assert(results.filter(x=>x.status==='rejected'&&x.reason.code==='permission-denied').length===1,'Segundo envio bloqueado pelo banco');
+assert(await denied(()=>publicRef.get({source:'server'})),'Link usado não permite mais leitura');
+assert((await adminRef.get({source:'server'})).data().aceite!==null,'Administrador continua com o envio salvo');
+log('\nTODOS OS TESTES PASSARAM. Nenhum contrato real foi alterado.');
+}catch(e){log('FALHA: '+e.message);}finally{if(adminRef){try{await adminRef.update({expiraEm:firebase.firestore.Timestamp.fromMillis(0)});log('Registro fictício encerrado, sem acesso público.');}catch(e){log('Falha ao encerrar registro fictício: '+e.message);}}btn.disabled=false;}
+};
+</script></html>
