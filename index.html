@@ -514,6 +514,8 @@ async function criarLinkCDC(s){
   if(!isDecimoTerceiro(s)){
     const cfg=await db.collection('contadoresCCB').doc('analise_config').get();
     if(s.analiseCdc?.decisao?.status==='Recusada')throw new Error('Ficha recusada. Revise a decisão no painel antes de continuar.');
+    if(s.analiseCdc?.decisao?.status!=='Aprovada')throw new Error('Confirme a aprovação da ficha antes de informar o Pix e gerar o link.');
+    if(!s.dadosCliente?.pix?.trim())throw new Error('Ficha aprovada. Informe a chave Pix do cliente em Continuar contratação.');
     if(cfg.data()?.automatica){
       if(s.analiseCdc?.decisao?.status!=='Aprovada')throw new Error('Abra a proposta, conclua a análise e confirme a aprovação antes de gerar o link.');
       const {creditSnapshot}=await import('./cdc-review.mjs?v=20261118-modal');
@@ -754,7 +756,7 @@ function viewNovo(){
     <label style="display:flex;align-items:flex-start;gap:10px;font-weight:600;"><input type="checkbox" style="width:22px;height:22px;flex:0 0 22px;margin:2px 0 0;" aria-label="Comprovante de residência separado"><span>Comprovante de residência recente.</span></label>
     <label style="display:flex;align-items:flex-start;gap:10px;font-weight:600;"><input type="checkbox" style="width:22px;height:22px;flex:0 0 22px;margin:2px 0 0;" aria-label="Comprovantes de renda separados"><span>Comprovantes de renda: 3 contracheques, comprovante atual do benefício ou extratos dos últimos 3 meses.</span></label>
     <p class="hint" style="margin-top:16px;"><strong>Anexos:</strong> PDF, JPG ou JPEG, até 5 arquivos por categoria e 700 KB por arquivo. O envio será feito na etapa de análise.</p>
-    <p class="hint">Tenha também a chave Pix do cliente e os valores da renda líquida, das despesas essenciais e das outras parcelas mensais.</p>
+    <p class="hint">Tenha também os valores da renda líquida, das despesas essenciais e das outras parcelas mensais. A chave Pix será solicitada somente após a aprovação.</p>
     <p class="hint">Este checklist é só para organização. Marcar as opções não envia documentos, não aprova crédito e não impede a simulação. As marcações são temporárias.</p>
   </section>
   <div class="card" style="background:#fffaeb;border:1.5px dashed var(--gold-deep);">
@@ -1747,7 +1749,7 @@ async function viewContratar(id){
       <div><label>UF</label><input type="text" id="dc-uf" value="${(d.enderecoEstruturado&&d.enderecoEstruturado.uf)||''}" maxlength="2" style="text-transform:uppercase;"></div>
     </div>
 
-    <label style="margin-top:18px;">Chave Pix para recebimento do valor</label><input type="text" id="dc-pix" value="${d.pix||''}">
+    ${isDecimoTerceiro(s)||s.aceite?`<label style="margin-top:18px;">Chave Pix para recebimento do valor</label><input type="text" id="dc-pix" value="${d.pix||''}">`:''}
     <div class="result-box">
       <div class="step-title">Dados da simulação</div>
       <div class="kv"><span>Produto</span><b>${nomeProduto(s)}</b></div>
@@ -1768,6 +1770,12 @@ async function viewContratar(id){
     ${!isDecimoTerceiro(s) && !s.aceite ? `
     <p class="hint">Preencha as perguntas, anexe e leia os documentos, depois clique em Analisar ficha. Confirme a decisão antes de gerar o link.</p>
     <div id="cdc-review-contratacao">Carregando a ficha de análise...</div>
+    <div id="pix-pos-aprovacao" ${s.analiseCdc?.decisao?.status==='Aprovada'?'':'hidden'} style="margin-top:20px;">
+      <h3>Ficha aprovada: recebimento por Pix</h3>
+      <label for="dc-pix-aprovado">Chave Pix do cliente</label>
+      <input type="text" id="dc-pix-aprovado" value="${String(d.pix||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;')}" ${s.analiseCdc?.decisao?.status==='Aprovada'?'':'disabled'} placeholder="Informe a chave Pix para receber o crédito">
+      <p class="hint">Confira o titular antes de fazer o pagamento. A chave será salva ao gerar o link da contratação.</p>
+    </div>
     ` : `
     <h2>Documentos do cliente</h2>
     <p class="hint">Envie os documentos abaixo. Aceita JPEG, PNG ou PDF.</p>
@@ -1791,7 +1799,13 @@ async function mountContratacaoReview(id){
   if(!s?.dadosCliente?.cpf) return;
   try{
     const module=await import('./cdc-review.mjs?v=20261118-modal');
-    await module.mountCdcReview(id,root,{db,loadSim,saveSim,listSims,loadDocumentos,saveDocumento,auth:firebase.auth()});
+    const saveReview=async current=>{
+      await saveSim(current);
+      const box=document.getElementById('pix-pos-aprovacao'),input=document.getElementById('dc-pix-aprovado');
+      const approved=current.analiseCdc?.decisao?.status==='Aprovada';
+      if(box)box.hidden=!approved;if(input)input.disabled=!approved;
+    };
+    await module.mountCdcReview(id,root,{db,loadSim,saveSim:saveReview,listSims,loadDocumentos,saveDocumento,auth:firebase.auth()});
   }catch(e){
     root.textContent='Não foi possível carregar a análise. Atualize a página para tentar novamente. O link não será liberado sem a decisão exigida.';
   }
@@ -1881,7 +1895,7 @@ function wireContratarEvents(id){
           email: document.getElementById('dc-email').value.trim(),
           endereco: enderecoTexto,
           enderecoEstruturado,
-          pix: document.getElementById('dc-pix').value.trim(),
+          pix: document.getElementById('dc-pix')?.value.trim() || s.dadosCliente?.pix || '',
         };
         await saveSim(s);
         document.getElementById('step2').style.display = 'block';
@@ -1943,6 +1957,13 @@ function wireContratarEvents(id){
           return;
         }
         const base = getBaseUrl();
+        if(!isDecimoTerceiro(s)){
+          if(s.analiseCdc?.decisao?.status!=='Aprovada')throw new Error('Conclua a pré-análise e confirme a aprovação antes de continuar.');
+          const pix=document.getElementById('dc-pix-aprovado')?.value.trim();
+          if(!pix)throw new Error('Informe a chave Pix no campo liberado após a aprovação.');
+          s.dadosCliente={...(s.dadosCliente||{}),pix};
+          await saveSim(s);
+        }
         const token=await criarLinkCDC(s);
         await db.collection('simulacoes').doc(id).update({status:'aguardando_cliente'});
         const url = base ? (base + '#cliente/' + token) : null;
@@ -2700,6 +2721,7 @@ if(firebaseOk){
 </script>
 </body>
 </html>
+
 
 
 
