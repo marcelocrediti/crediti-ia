@@ -698,6 +698,7 @@ async function renderInner(){
   if(route.view === 'contratar'){
     app.innerHTML = await viewContratar(route.id);
     wireContratarEvents(route.id);
+    await mountContratacaoReview(route.id);
     return;
   }
   const tabs = `
@@ -1750,6 +1751,10 @@ async function viewContratar(id){
     <button class="btn btn-gold" id="btn-avancar">Avançar</button>
   </div>
   <div class="card" id="step2" style="${d.cpf ? '' : 'display:none;'}">
+    ${!isDecimoTerceiro(s) && !s.aceite ? `
+    <p class="hint">Preencha as perguntas, anexe e leia os documentos, depois clique em Analisar ficha. Confirme a decisão antes de gerar o link.</p>
+    <div id="cdc-review-contratacao">Carregando a ficha de análise...</div>
+    ` : `
     <h2>Documentos do cliente</h2>
     <p class="hint">Envie os documentos abaixo. Aceita JPEG, PNG ou PDF.</p>
     <label>RG - Frente</label><input type="file" id="doc-rg-frente" accept="image/*,.pdf,.jpg,.jpeg,.png,.gif,.webp,.heic,.heif,.bmp,.tiff">
@@ -1757,11 +1762,25 @@ async function viewContratar(id){
     <label>CPF - Frente</label><input type="file" id="doc-cpf-frente" accept="image/*,.pdf,.jpg,.jpeg,.png,.gif,.webp,.heic,.heif,.bmp,.tiff">
     <label>Comprovante de Residência</label><input type="file" id="doc-residencia" accept="image/*,.pdf,.jpg,.jpeg,.png,.gif,.webp,.heic,.heif,.bmp,.tiff">
     <label>Comprovante de Renda <span style="font-weight:400;color:var(--ink-soft);">(opcional)</span></label><input type="file" id="doc-comprovante-renda" accept="image/*,.pdf,.jpg,.jpeg,.png,.gif,.webp,.heic,.heif,.bmp,.tiff">
-    <button class="btn btn-primary" id="btn-concluir">Concluir e gerar link para o cliente</button>
+    `}
+    <button class="btn btn-primary" id="btn-concluir">${s.aceite?'Salvar documentos':!isDecimoTerceiro(s)?'Gerar link após aprovação':'Concluir e gerar link para o cliente'}</button>
   </div>
   <div id="link-final"></div>
   <button class="btn btn-outline" onclick="location.hash=''">Voltar ao painel</button>
   </div>`;
+}
+
+async function mountContratacaoReview(id){
+  const root=document.getElementById('cdc-review-contratacao');
+  if(!root) return;
+  const s=await loadSim(id);
+  if(!s?.dadosCliente?.cpf) return;
+  try{
+    const module=await import('./cdc-review.mjs');
+    await module.mountCdcReview(id,root,{db,loadSim,saveSim,listSims,loadDocumentos,saveDocumento,auth:firebase.auth()});
+  }catch(e){
+    root.textContent='Não foi possível carregar a análise. Atualize a página para tentar novamente. O link não será liberado sem a decisão exigida.';
+  }
 }
 
 function fileToDataUrl(file){
@@ -1852,8 +1871,9 @@ function wireContratarEvents(id){
         };
         await saveSim(s);
         document.getElementById('step2').style.display = 'block';
+        await mountContratacaoReview(id);
         document.getElementById('step2').scrollIntoView({behavior:'smooth'});
-        toast('Dados salvos. Agora anexe os documentos.');
+        toast('Dados salvos. Preencha a ficha abaixo e anexe os documentos.');
       }catch(e){
         toast('Não deu pra salvar os dados. Tente novamente.');
       }
@@ -1864,6 +1884,7 @@ function wireContratarEvents(id){
   const btnConcluir = document.getElementById('btn-concluir');
   if(btnConcluir){
     btnConcluir.onclick = async ()=>{
+      const originalLabel=btnConcluir.textContent;
       btnConcluir.disabled = true;
       btnConcluir.textContent = 'Enviando...';
       try{
@@ -1878,7 +1899,7 @@ function wireContratarEvents(id){
         const falhas = [];
         for(const [elId,key] of campos){
           const el = document.getElementById(elId);
-          if(el.files && el.files[0]){
+          if(el && el.files && el.files[0]){
             try{
               const file = el.files[0];
               const dataUrl = await fileToDataUrl(file);
@@ -1896,14 +1917,20 @@ function wireContratarEvents(id){
             }
           }
         }
-        s.status = 'aguardando_cliente';
         s.documentosEnviados = [...new Set([...(s.documentosEnviados||[]),...enviados])];
         await saveSim(s);
         if(falhas.length){
-          toast('Atenção: não deu pra salvar (' + falhas.join(', ') + '). Os demais foram salvos.');
+          throw new Error('Não deu pra salvar (' + falhas.join(', ') + '). Os demais foram salvos; tente os arquivos pendentes novamente.');
+        }
+        if(s.aceite){
+          toast('Documentos salvos. A CCB e a assinatura existentes foram preservadas.');
+          btnConcluir.disabled=false;
+          btnConcluir.textContent=originalLabel;
+          return;
         }
         const base = getBaseUrl();
         const token=await criarLinkCDC(s);
+        await db.collection('simulacoes').doc(id).update({status:'aguardando_cliente'});
         const url = base ? (base + '#cliente/' + token) : null;
         const linkBlock = url
           ? `<div class="link-box"><input readonly value="${url}" id="link-cliente-final"><button class="btn btn-outline btn-sm" onclick="navigator.clipboard.writeText('${url}').then(()=>toast('Link copiado!'))">Copiar</button></div>`
@@ -1930,7 +1957,7 @@ function wireContratarEvents(id){
         console.error('Erro ao concluir contratação:', e);
         toast('Não deu pra concluir: ' + (e.message||e));
         btnConcluir.disabled = false;
-        btnConcluir.textContent = 'Concluir e gerar link para o cliente';
+        btnConcluir.textContent = originalLabel;
       }
     };
   }
