@@ -5,6 +5,30 @@
 <meta name="hosting-provider" content="Render">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CDC Crediti — Simulador</title>
+<link rel="stylesheet" href="login-facade.css?v=20261118">
+<style>
+  .cdc-login-screen{min-height:100svh;width:100%;display:flex;align-items:center;justify-content:center;padding:200px 20px 48px;background-color:#083c36;background-size:cover;background-position:center 28%;position:relative;}
+  .cdc-login-panel{width:100%;max-width:420px;background:#fff;border-radius:24px;padding:32px;box-shadow:0 24px 80px #001c3860;border:1px solid #ffffff80;border-top:5px solid #f5c800;color:#14364b;}
+  .cdc-login-kicker{display:block;font-size:11px;letter-spacing:2px;font-weight:800;color:#16805b;margin-bottom:12px;}
+  .cdc-login-panel h1{font-size:32px;line-height:1.15;letter-spacing:-1px;margin:0 0 10px;color:#073b33;}
+  .cdc-login-panel .cdc-login-intro{font-size:14px;line-height:1.6;color:#60717a;margin:0 0 26px;}
+  .cdc-login-panel label{display:block;font-size:14px;font-weight:700;margin:18px 0 8px;color:#183d50;}
+  .cdc-login-panel input{display:block;width:100%;min-width:0;height:54px;margin:0;padding:0 15px;font:inherit;font-size:16px;color:#14364b;border:1px solid #ccd9df;border-radius:12px;background:#f7fafb;box-sizing:border-box;}
+  .cdc-login-panel input:focus{outline:3px solid #1b97612b;outline-offset:1px;border-color:#16805b;}
+  .cdc-login-password{position:relative;}
+  .cdc-login-password input{padding-right:86px;}
+  .cdc-login-panel #cdc-eye{position:absolute;right:5px;top:5px;width:76px;height:44px;padding:0;border:0;border-radius:8px;background:transparent;color:#12664c;font-size:12px;font-weight:700;cursor:pointer;}
+  .cdc-login-panel #cdc-enter{width:100%;height:54px;margin:24px 0 0;border:0;border-radius:12px;background:#087549;color:#fff;font-size:16px;font-weight:800;cursor:pointer;box-shadow:0 6px 16px #08754926;}
+  .cdc-login-panel #cdc-enter:hover{background:#055b39;}
+  .cdc-login-panel #cdc-reset{display:block;width:100%;min-height:44px;margin:10px 0 0;padding:10px;border:0;background:transparent;color:#194b77;font-size:14px;font-weight:600;cursor:pointer;}
+  .cdc-login-panel button:focus-visible{outline:3px solid #e5b900;outline-offset:3px;}
+  .cdc-login-panel button:disabled{opacity:.6;cursor:wait;}
+  .cdc-login-panel #cdc-login-message{font-size:14px;line-height:1.5;color:#983b22;margin:12px 0 0;overflow-wrap:anywhere;}
+  .cdc-login-panel #cdc-login-message:empty{display:none;}
+  .cdc-login-footer{font-size:11px;line-height:1.5;color:#78868e;text-align:center;border-top:1px solid #e7edf0;padding-top:18px;margin:18px 0 0;}
+  @media(min-width:800px){.cdc-login-screen{justify-content:flex-end;padding:64px max(7vw,40px);background-position:center 38%;}.cdc-login-panel{padding:36px;}}
+  @media(max-width:380px){.cdc-login-screen{padding:150px 16px 32px;}.cdc-login-panel{padding:24px;}.cdc-login-panel h1{font-size:28px;}}
+</style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
@@ -2660,22 +2684,23 @@ function isCdcAdmin(){
   return !!u && u.uid === CDC_ADMIN_UID && u.email === CDC_ADMIN_EMAIL;
 }
 function renderCdcLogin(app){
-  app.innerHTML = `<div class="wrap" style="max-width:520px;padding:20px;box-sizing:border-box;width:100%">
-    <div class="card"><h1>CDC Crediti</h1><p>Acesso exclusivo do administrador.</p>
+  app.innerHTML = `<section class="cdc-login-screen" aria-label="Acesso ao CDC Crediti">
+    <div class="cdc-login-panel"><span class="cdc-login-kicker">CREDITI SOLUÇÕES FINANCEIRAS</span><h1>Bem-vindo ao<br>CDC Crediti</h1><p class="cdc-login-intro">Seu painel de crédito, em um só lugar.<br>Acesso exclusivo do administrador.</p>
     <form id="cdc-login-form">
-    <label for="cdc-email">E-mail</label><input id="cdc-email" type="email" autocomplete="username" required>
+    <label for="cdc-email">E-mail</label><input id="cdc-email" type="email" autocomplete="username" placeholder="Seu e-mail de acesso" required>
     <label for="cdc-password">Senha de 6 dígitos</label>
-    <input id="cdc-password" type="password" inputmode="numeric" pattern="[0-9]{6}" minlength="6" maxlength="6" autocomplete="current-password" required>
-    <button type="button" class="btn btn-outline" id="cdc-eye" aria-controls="cdc-password" aria-pressed="false">Mostrar senha</button>
-    <button type="submit" class="btn btn-primary" id="cdc-enter">Entrar</button>
-    <button type="button" class="btn btn-outline" id="cdc-reset">Esqueci minha senha</button>
-    <p id="cdc-login-message" role="status" aria-live="polite"></p></form></div></div>`;
+    <div class="cdc-login-password"><input id="cdc-password" type="password" inputmode="numeric" pattern="[0-9]{6}" minlength="6" maxlength="6" autocomplete="current-password" placeholder="Digite sua senha" required>
+    <button type="button" id="cdc-eye" aria-label="Mostrar senha" aria-controls="cdc-password" aria-pressed="false">Mostrar</button></div>
+    <button type="submit" id="cdc-enter">Entrar no painel</button>
+    <button type="button" id="cdc-reset">Esqueci minha senha</button>
+    <p id="cdc-login-message" role="status" aria-live="polite"></p></form><p class="cdc-login-footer">Crediti · Itapajé, Ceará<br>Área restrita ao administrador</p></div></section>`;
   const email = document.getElementById('cdc-email');
   const pass = document.getElementById('cdc-password');
   const message = document.getElementById('cdc-login-message');
   document.getElementById('cdc-eye').onclick = function(){
     const show = pass.type === 'password'; pass.type = show ? 'text' : 'password';
-    this.textContent = show ? 'Ocultar senha' : 'Mostrar senha';
+    this.textContent = show ? 'Ocultar' : 'Mostrar';
+    this.setAttribute('aria-label', show ? 'Ocultar senha' : 'Mostrar senha');
     this.setAttribute('aria-pressed', String(show));
   };
   document.getElementById('cdc-login-form').onsubmit = async function(event){
@@ -2724,6 +2749,7 @@ if(firebaseOk){
 </script>
 </body>
 </html>
+
 
 
 
