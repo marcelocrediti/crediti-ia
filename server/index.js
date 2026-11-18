@@ -1,13 +1,15 @@
 import O from "express";
 import h from "cors";
 import E from "openai";
+import { registerCdcAnalysis } from './cdc-analysis.mjs';
 import {
   isMetaConversionsConfigured,
   sendMetaConversion
 } from "./meta-conversions.js";
 
 const s = O();
-s.use(h({ origin: "*", methods: ["GET", "POST", "OPTIONS"], allowedHeaders: ["Content-Type", "X-Studio-Code"] })), s.use(O.json({ limit: "3mb" }));
+s.use(h({ origin: "*", methods: ["GET", "POST", "OPTIONS"], allowedHeaders: ["Content-Type", "X-Studio-Code", "Authorization"] })), s.use(O.json({ limit: "3mb" }));
+registerCdcAnalysis(s, new E({ apiKey: process.env.OPENAI_API_KEY }));
 
 s.post("/api/meta/events", async (o, a) => {
   try {
@@ -1177,3 +1179,4 @@ s.get("/", (o, a) => {
 }), s.listen(N, "0.0.0.0", () => {
   console.log(`Crediti IA online na porta ${N}`), console.log("OpenAI configurada:", !!process.env.OPENAI_API_KEY), console.log("Modelo:", m);
 });
+
