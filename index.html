@@ -516,7 +516,7 @@ async function criarLinkCDC(s){
     if(s.analiseCdc?.decisao?.status==='Recusada')throw new Error('Ficha recusada. Revise a decisão no painel antes de continuar.');
     if(cfg.data()?.automatica){
       if(s.analiseCdc?.decisao?.status!=='Aprovada')throw new Error('Abra a proposta, conclua a análise e confirme a aprovação antes de gerar o link.');
-      const {creditSnapshot}=await import('./cdc-review.mjs?v=20261118-drawer');
+      const {creditSnapshot}=await import('./cdc-review.mjs?v=20261118-modal');
       if(s.analiseCdc.snapshot!==await creditSnapshot(s,{listSims,loadDocumentos}))throw new Error('A ficha mudou. Faça uma nova análise antes de contratar.');
     }
   }
@@ -1241,8 +1241,8 @@ window.abrirDetalhe = async function(id){
   if(documentosBlock) carregarDocumentosDetalhe(s.id);
   const reviewRoot=document.getElementById('cdc-review-card');
   const historyRoot=document.getElementById('cdc-history-card');
-  if(historyRoot) import('./cdc-review.mjs?v=20261118-drawer').then(module=>module.mountCdcHistory(s.id,historyRoot,{db,loadSim,listSims,auth:firebase.auth()})).catch(()=>{historyRoot.textContent='Não foi possível carregar o histórico. Atualize a página.';});
-  if(reviewRoot) import('./cdc-review.mjs?v=20261118-drawer').then(module=>module.mountCdcReview(s.id,reviewRoot,{db,loadSim,saveSim,listSims,loadDocumentos,saveDocumento,auth:firebase.auth()})).catch(()=>{reviewRoot.textContent='Não foi possível carregar a análise. Suas propostas continuam disponíveis. Atualize a página para tentar novamente.';});
+  if(historyRoot) import('./cdc-review.mjs?v=20261118-modal').then(module=>module.mountCdcHistory(s.id,historyRoot,{db,loadSim,listSims,auth:firebase.auth()})).catch(()=>{historyRoot.textContent='Não foi possível carregar o histórico. Atualize a página.';});
+  if(reviewRoot) import('./cdc-review.mjs?v=20261118-modal').then(module=>module.mountCdcReview(s.id,reviewRoot,{db,loadSim,saveSim,listSims,loadDocumentos,saveDocumento,auth:firebase.auth()})).catch(()=>{reviewRoot.textContent='Não foi possível carregar a análise. Suas propostas continuam disponíveis. Atualize a página para tentar novamente.';});
 };
 
 function htmlDocumentosCliente(simId, docs){
@@ -1779,7 +1779,7 @@ async function mountContratacaoReview(id){
   const s=await loadSim(id);
   if(!s?.dadosCliente?.cpf) return;
   try{
-    const module=await import('./cdc-review.mjs?v=20261118-drawer');
+    const module=await import('./cdc-review.mjs?v=20261118-modal');
     await module.mountCdcReview(id,root,{db,loadSim,saveSim,listSims,loadDocumentos,saveDocumento,auth:firebase.auth()});
   }catch(e){
     root.textContent='Não foi possível carregar a análise. Atualize a página para tentar novamente. O link não será liberado sem a decisão exigida.';
@@ -2689,6 +2689,7 @@ if(firebaseOk){
 </script>
 </body>
 </html>
+
 
 
 
