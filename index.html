@@ -1178,6 +1178,7 @@ window.abrirDetalhe = async function(id){
     ${signBlock}
   </div>
   ${documentosBlock}
+  ${isDecimoTerceiro(s)?'':'<div class="card" id="cdc-review-card">Carregando análise de crédito…</div>'}
   <div class="card">
     <button class="btn btn-outline" style="border-color:var(--danger);color:var(--danger);" onclick="excluirSimulacao('${s.id}')">🗑️ Excluir esta simulação</button>
   </div>`;
@@ -1185,6 +1186,8 @@ window.abrirDetalhe = async function(id){
     document.getElementById('btn-pdf-salva').onclick = ()=> gerarPDFSimulacao(s.id, false, s);
   }
   if(documentosBlock) carregarDocumentosDetalhe(s.id);
+  const reviewRoot=document.getElementById('cdc-review-card');
+  if(reviewRoot) import('./cdc-review.mjs').then(module=>module.mountCdcReview(s.id,reviewRoot,{db,loadSim,saveSim,listSims,loadDocumentos,saveDocumento,auth:firebase.auth()})).catch(()=>{reviewRoot.textContent='Não foi possível carregar a análise. Suas propostas continuam disponíveis. Atualize a página para tentar novamente.';});
 };
 
 function htmlDocumentosCliente(simId, docs){
@@ -1842,7 +1845,7 @@ function wireContratarEvents(id){
           }
         }
         s.status = 'aguardando_cliente';
-        s.documentosEnviados = enviados;
+        s.documentosEnviados = [...new Set([...(s.documentosEnviados||[]),...enviados])];
         await saveSim(s);
         if(falhas.length){
           toast('Atenção: não deu pra salvar (' + falhas.join(', ') + '). Os demais foram salvos.');
