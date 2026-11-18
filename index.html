@@ -508,12 +508,47 @@ async function compressImage(dataUrl, maxW){
 }
 
 // ---------- Storage wrappers (shared = visible to owner AND client link) ----------
+async function criarLinkCDC(s){
+  if(!isCdcAdmin())throw new Error('Entre como administrador.');
+  if(s.aceite)throw new Error('Esta proposta já está assinada.');
+  if(!isDecimoTerceiro(s)){
+    const cfg=await db.collection('contadoresCCB').doc('analise_config').get();
+    if(s.analiseCdc?.decisao?.status==='Recusada')throw new Error('Ficha recusada. Revise a decisão no painel antes de continuar.');
+    if(cfg.data()?.automatica){
+      if(s.analiseCdc?.decisao?.status!=='Aprovada')throw new Error('Abra a proposta, conclua a análise e confirme a aprovação antes de gerar o link.');
+      const {creditSnapshot}=await import('./cdc-review.mjs');
+      if(s.analiseCdc.snapshot!==await creditSnapshot(s,{listSims,loadDocumentos}))throw new Error('A ficha mudou. Faça uma nova análise antes de contratar.');
+    }
+  }
+  const token=Array.from(crypto.getRandomValues(new Uint8Array(32))).map(x=>x.toString(16).padStart(2,'0')).join('');
+  const proposta={};
+  for(const key of ['cliente','valor','prazo','parcela','taxa','cet','dataPrimeira','dataUltima','produto','tipo','salarioBruto','parcela13','inssAplicado'])if(s[key]!==undefined)proposta[key]=s[key];
+  const batch=db.batch();
+  batch.set(db.collection('assinaturasCDC').doc(token),{proposta,simId:s.id,aceite:null,expiraEm:firebase.firestore.Timestamp.fromMillis(Date.now()+7*86400000)});
+  if(s.linkAssinatura)batch.update(db.collection('assinaturasCDC').doc(s.linkAssinatura),{expiraEm:firebase.firestore.Timestamp.fromMillis(0)});
+  batch.update(db.collection('simulacoes').doc(s.id),{linkAssinatura:token});
+  await batch.commit();return token;
+}
+window.renovarLinkCDC=async function(id){try{const s=await loadSim(id);await criarLinkCDC(s);await abrirDetalhe(id);}catch(e){toast('Não foi possível gerar o link protegido: '+e.message);}};
 async function saveSim(sim){
+  if(getRoute().view==='cliente' && /^[a-f0-9]{64}$/.test(sim.id)){
+    await db.collection('assinaturasCDC').doc(sim.id).update({aceite:sim.aceite,assinadoEm:firebase.firestore.FieldValue.serverTimestamp()});
+    return true;
+  }
   if(!firebaseOk){
     memStore[sim.id] = JSON.parse(JSON.stringify(sim));
     return true;
   }
   try{
+    const previous=await db.collection('simulacoes').doc(sim.id).get();
+    if(previous.exists && previous.data().linkAssinatura){
+      const before=previous.data();
+      const keys=['cliente','valor','parcela','prazo','taxa','dataPrimeira','dataUltima','dadosCliente'];
+      if(keys.some(key=>JSON.stringify(before[key])!==JSON.stringify(sim[key])) || (before.aceite && !sim.aceite)){
+        await db.collection('assinaturasCDC').doc(before.linkAssinatura).update({expiraEm:firebase.firestore.Timestamp.fromMillis(0)});
+        sim.linkAssinatura=null;
+      }
+    }
     await db.collection('simulacoes').doc(sim.id).set(sim);
     return true;
   }catch(e){
@@ -524,12 +559,28 @@ async function saveSim(sim){
   }
 }
 async function loadSim(id){
+  if(getRoute().view==='cliente' && /^[a-f0-9]{64}$/.test(id)){
+    try{const link=await db.collection('assinaturasCDC').doc(id).get({source:'server'});if(!link.exists)return null;const d=link.data();if(d.aceite || d.expiraEm.toMillis()<=Date.now())return null;return {...d.proposta,id,aceite:null};}catch{return null;}
+  }
   if(!firebaseOk){
     return memStore[id] ? JSON.parse(JSON.stringify(memStore[id])) : null;
   }
   try{
     const doc = await db.collection('simulacoes').doc(id).get();
-    return doc.exists ? doc.data() : null;
+    if(!doc.exists)return null;
+    let data=doc.data();
+    if(data.linkAssinatura && !data.aceite && isCdcAdmin()){
+      const link=await db.collection('assinaturasCDC').doc(data.linkAssinatura).get();
+      if(link.exists && link.data().aceite){
+        const aceite=link.data().aceite;
+        const when=link.data().assinadoEm?.toDate()||new Date(aceite.timestamp);
+        const parts=new Intl.DateTimeFormat('pt-BR',{timeZone:'America/Fortaleza',day:'2-digit',month:'2-digit',year:'2-digit'}).format(when).replaceAll('/','.');
+        const ref=db.collection('simulacoes').doc(id),counter=db.collection('contadoresCCB').doc(parts);
+        await db.runTransaction(async tx=>{const current=await tx.get(ref);if(current.data().aceite)return;const count=await tx.get(counter);const next=(count.data()?.contador||0)+1;if(!current.data().numeroCCB)tx.set(counter,{contador:next},{merge:true});tx.update(ref,{aceite,numeroCCB:current.data().numeroCCB||String(next).padStart(2,'0')+'.'+parts});});
+        data=(await ref.get()).data();
+      }
+    }
+    return data;
   }catch(e){
     console.error('Erro loadSim:', e);
     return null;
@@ -543,7 +594,7 @@ async function listSims(){
   }
   try{
     const snap = await db.collection('simulacoes').orderBy('criadoEm','desc').get();
-    return snap.docs.map(d=>d.data());
+    return await Promise.all(snap.docs.map(d=>{const s=d.data();return s.linkAssinatura&&!s.aceite?loadSim(d.id):s;})).then(rows=>rows.filter(Boolean));
   }catch(e){
     console.error('Erro listSims:', e);
     return [];
@@ -634,6 +685,7 @@ async function renderInner(){
   const route = getRoute();
   const app = document.getElementById('app');
   if(!cdcAuthReady){ app.innerHTML = '<div class="wrap"><div class="card">Verificando acesso…</div></div>'; return; }
+  if(route.view==='cliente' && /^[a-f0-9]{64}$/.test(route.id)){app.innerHTML=await viewCliente(route.id);return;}
   if(!isCdcAdmin()) { renderCdcLogin(app); return; }
   if(route.view === 'cliente'){
     app.innerHTML = await viewCliente(route.id);
@@ -1097,7 +1149,7 @@ window.abrirPaginaDetalhe = function(id){
 };
 
 window.abrirDetalhe = async function(id){
-  const s = (window.__simsCache && window.__simsCache[id]) || await loadSim(id);
+  const s = await loadSim(id);
   const detalheEl = document.getElementById('detalhe');
   if(!detalheEl){
     abrirPaginaDetalhe(id);
@@ -1108,7 +1160,7 @@ window.abrirDetalhe = async function(id){
     return;
   }
   const base = getBaseUrl();
-  const url = base ? (base + '#cliente/' + s.id) : null;
+  const url = base && s.linkAssinatura ? (base + '#cliente/' + s.linkAssinatura) : null;
   let signBlock = '';
   if(s.aceite){
     signBlock = `
@@ -1128,7 +1180,7 @@ window.abrirDetalhe = async function(id){
       ? `<div class="link-box"><input readonly value="${url}"><button class="btn btn-outline btn-sm" onclick="navigator.clipboard.writeText('${url}').then(()=>toast('Link copiado!'))">Copiar</button></div>
          <a class="wa-btn" target="_blank" href="https://wa.me/?text=${encodeURIComponent('Olá '+s.cliente+'! Finalize sua contratação de '+nomeProduto(s)+' da Crediti neste link: '+url)}">Enviar via WhatsApp</a>`
       : linkIndisponivelHtml() + `<button class="btn btn-outline" onclick="location.hash='cliente/${s.id}'">Pré-visualizar como o cliente</button>`;
-    signBlock = `${linkBlock}<p class="hint" style="margin-top:8px;">O cliente ainda não abriu/aceitou o link.${(s.documentosEnviados&&s.documentosEnviados.length)?' Os documentos já estão guardados e serão liberados aqui assim que ele assinar.':''}</p>`;
+    signBlock = `${s.linkAssinatura?linkBlock:'<p>Gere um novo link protegido para o cliente.</p>'}<button class="btn btn-outline" onclick="renovarLinkCDC('${s.id}')">Gerar novo link de assinatura</button><p class="hint" style="margin-top:8px;">Link individual de uso único. Após salvar a foto e o aceite, ele fica inacessível. Se não for utilizado, expira em 7 dias.</p>`;
   } else {
     signBlock = `
     ${isDecimoTerceiro(s) ? '' : `<button class="btn btn-outline" onclick="editarSimulacaoInline('${s.id}')">✏️ Editar simulação</button>`}
@@ -1144,7 +1196,7 @@ window.abrirDetalhe = async function(id){
 
   // Documentos do cliente (RG/CPF) — só liberados depois que o cliente assina a CCB
   let documentosBlock = '';
-  if(s.aceite && s.documentosEnviados && s.documentosEnviados.length){
+  if(s.documentosEnviados && s.documentosEnviados.length){
     documentosBlock = `<div class="card" id="documentos-cliente" data-sim-id="${s.id}">
       <h2>Documentos do cliente</h2>
       <p class="hint">Os dados da proposta já estão disponíveis. Carregando os arquivos em segundo plano...</p>
@@ -1427,7 +1479,7 @@ window.copiarLink = function(id, url){
 async function viewSimulacaoPublica(id){
   const s = await loadSim(id);
   if(!s){
-    return `<div class="wrap"><div class="card"><h2>Link inválido</h2><p>Esta simulação não foi encontrada.</p></div></div>`;
+    return `<div class="wrap"><div class="card"><h2>Link indisponível</h2><p>Este link pode já ter sido utilizado, expirado ou substituído. Se ainda não concluiu o envio, verifique sua conexão e tente novamente ou fale com a Crediti.</p></div></div>`;
   }
   return `
   <div class="wrap">
@@ -1851,7 +1903,8 @@ function wireContratarEvents(id){
           toast('Atenção: não deu pra salvar (' + falhas.join(', ') + '). Os demais foram salvos.');
         }
         const base = getBaseUrl();
-        const url = base ? (base + '#cliente/' + s.id) : null;
+        const token=await criarLinkCDC(s);
+        const url = base ? (base + '#cliente/' + token) : null;
         const linkBlock = url
           ? `<div class="link-box"><input readonly value="${url}" id="link-cliente-final"><button class="btn btn-outline btn-sm" onclick="navigator.clipboard.writeText('${url}').then(()=>toast('Link copiado!'))">Copiar</button></div>`
           : linkIndisponivelHtml() + `<button class="btn btn-outline" onclick="location.hash='cliente/${s.id}'">Pré-visualizar como o cliente</button>`;
@@ -2276,10 +2329,13 @@ async function capturarGeo(id){
 }
 
 async function finalizarAssinatura(id){
+  if(window.__signatureSending)return;
+  window.__signatureSending=true;
+  try{
   const s = await loadSim(id);
-  if(!s) return;
+  if(!s){document.getElementById('app').innerHTML='<div class="wrap"><div class="card"><h2>Link indisponível</h2><p>O link já foi utilizado, expirou ou não pôde ser carregado. Confira sua conexão ou fale com a Crediti.</p></div></div>';return;}
   const geoData = window.__geoTemp;
-  if(!s.numeroCCB) s.numeroCCB = await gerarNumeroCCB();
+  if(!s.numeroCCB && !/^[a-f0-9]{64}$/.test(id)) s.numeroCCB = await gerarNumeroCCB();
   s.aceite = {
     timestamp: Date.now(),
     foto: window.__fotoTemp,
@@ -2287,13 +2343,18 @@ async function finalizarAssinatura(id){
     endereco: geoData ? geoData.endereco : null
   };
   await saveSim(s);
-  const box = document.getElementById('fluxo-assinatura');
+  const box = document.getElementById('app');
   box.innerHTML = `
-    <div class="card final-ok">
+    <div class="wrap"><div class="card final-ok">
       ✅ Proposta aceita e assinada com sucesso!<br>
-      Número da proposta: <b>${s.numeroCCB}</b><br>
-      A Crediti entrará em contato para dar continuidade.
-    </div>`;
+      ${s.numeroCCB?'Número da proposta: <b>'+s.numeroCCB+'</b><br>':'A Crediti disponibilizará a CCB com sua numeração.<br>'}
+      Este link foi encerrado e não pode ser utilizado novamente.
+    </div></div>`;
+  window.__fotoTemp=null;window.__geoTemp=null;
+  }catch(error){
+    const box=document.getElementById('fluxo-assinatura');
+    if(box){box.innerHTML='<div class="card"><p>Não foi possível confirmar o envio. Confira sua conexão e tente novamente. Se o envio já tiver sido recebido, o link ficará encerrado.</p><button class="btn btn-primary" id="retry-signature">Tentar enviar novamente</button></div>';document.getElementById('retry-signature').onclick=()=>finalizarAssinatura(id);}
+  }finally{window.__signatureSending=false;}
 }
 
 function dataUrlParaBytes(dataUrl){
