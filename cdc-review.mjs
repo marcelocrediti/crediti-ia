@@ -68,6 +68,7 @@ export async function mountCdcReview(id,root,ctx){
   <button type="button" class="btn btn-gold" id="rev-save">Salvar ficha da análise</button>
   <button type="button" class="btn btn-primary" id="rev-analyze">Analisar ficha</button>
   <div id="rev-output" style="white-space:pre-wrap;overflow-wrap:anywhere" role="status"></div>
+  <label>Observações da análise</label><textarea id="rev-observacoes" readonly style="min-height:130px" placeholder="O resultado e os motivos aparecerão aqui após a análise."></textarea>
   <label>Motivo da decisão manual ou confirmação</label><textarea id="rev-reason" maxlength="500"></textarea>
   <button type="button" class="btn btn-outline" id="rev-approve">Confirmar aprovação</button>
   <button type="button" class="btn btn-outline" id="rev-refuse">Recusar manualmente</button>
@@ -80,6 +81,18 @@ export async function mountCdcReview(id,root,ctx){
   for(const k of ['renda','despesas','outrasParcelas']){const input=el(k);input.oninput=()=>{input.value=input.value.replace(/[^\d.,]/g,'');};input.onblur=()=>{if(input.value.trim()&&Number.isFinite(number(input.value)))input.value=formatAmount(number(input.value));};}
   el('restricao').value=q.restricao||'';
   const message=text=>{el('output').textContent=text;};
+  el('observacoes').value=s.analiseCdc?.observacoes|| (record?record.status+'\n'+record.motivos.join('\n'):'');
+  const showResult=(title,text)=>{
+    el('observacoes').value=text;message(title);
+    const dialog=document.createElement('dialog');
+    dialog.setAttribute('aria-label','Resultado da análise');
+    Object.assign(dialog.style,{width:'min(520px, calc(100vw - 32px))',maxHeight:'80dvh',boxSizing:'border-box',border:'2px solid #FDCA01',borderRadius:'18px',padding:'24px',overflow:'auto',background:'#fffdf5',color:'#171717'});
+    const heading=document.createElement('h2');heading.textContent=title;
+    const body=document.createElement('p');body.textContent=text;Object.assign(body.style,{whiteSpace:'pre-wrap',overflowWrap:'anywhere',lineHeight:'1.5'});
+    const ok=document.createElement('button');ok.textContent='OK';ok.className='btn btn-gold';ok.type='button';
+    ok.onclick=()=>dialog.close();dialog.addEventListener('close',()=>{dialog.remove();el('observacoes').scrollIntoView({behavior:'smooth',block:'center'});});
+    dialog.append(heading,body,ok);document.body.append(dialog);dialog.showModal();ok.focus();
+  };
   if(record) message('Última avaliação: '+record.status+'\n'+record.motivos.join('\n')+'\n'+(s.analiseCdc.decisao?'Decisão confirmada: '+s.analiseCdc.decisao.status:'Aguardando conferência do administrador.'));
   const questionnaire=()=>Object.fromEntries(['renda','despesas','outrasParcelas','restricao','cpfNaIdentidade','documentosConferidos'].map(k=>[k,['renda','despesas','outrasParcelas'].includes(k)?(el(k).value.trim()?number(el(k).value):null):el(k).type==='checkbox'?el(k).checked:el(k).value]));
   const persist=async()=>{const current=await loadSim(id);current.analiseCdc={...(current.analiseCdc||{}),questionario:questionnaire(),atualizadoEm:Date.now()};delete current.analiseCdc.decisao;delete current.analiseCdc.resultado;await saveSim(current);return current;};
@@ -100,7 +113,7 @@ export async function mountCdcReview(id,root,ctx){
       groupEl('result',key).textContent=keys.map(k=>{const r=current.analiseDocumentos?.[k];if(!r)return (docs[k].nome||k)+': aguardando leitura';const d=r.document;return (docs[k].nome||k)+'\nLeitura: '+d.legibilidade+' | Tipo: '+d.tipo+'\nRenda líquida: '+(d.rendaLiquida==null?'Não identificada':money(d.rendaLiquida))+'\nCompetências: '+(d.competencias||[]).join(', ')+'\n'+(d.observacoes||'');}).join('\n\n');
     }
   };
-  const lock=value=>{busy=value;root.querySelectorAll('button,input[type="file"]').forEach(e=>{e.disabled=value;});};
+  const lock=value=>{busy=value;root.querySelectorAll('button,input,select,textarea').forEach(e=>{e.disabled=value;});};
   for(const [key] of DOCS){
     const input=groupEl('doc',key),button=groupEl('read',key);
     input.onchange=async()=>{
@@ -124,8 +137,8 @@ export async function mountCdcReview(id,root,ctx){
         el('documentosConferidos').checked=false;message('Anexos salvos. Clique em Ler anexos e confira os dados.');
       }catch(e){message(e.message);}finally{input.value='';try{await refreshFiles();}finally{lock(false);}}
     };
-    button.task=async()=>{
-      if(busy)return;lock(true);
+    button.task=async(auto=false)=>{
+      if(busy&&!auto)return;if(!auto)lock(true);
       try{
         const docs=await loadDocumentos(id),keys=documentKeys(docs,key);if(!keys.length)throw Error('Anexe os documentos desta categoria primeiro.');
         for(const slot of keys){
@@ -138,33 +151,51 @@ export async function mountCdcReview(id,root,ctx){
           const review={hash:fingerprint,hashes:[...new Set([...(previous?.hashes||[]),fingerprint])],document:data.document,consecutivos:data.document.legibilidade==='ilegivel'?(previous?.consecutivos||0)+1:0,lidoEm:Date.now()};
           current=await loadSim(id);current.analiseDocumentos={...(current.analiseDocumentos||{}),[slot]:review};if(current.analiseCdc)delete current.analiseCdc.decisao;await saveSim(current);
         }
-        el('documentosConferidos').checked=false;message('Leitura concluída. Confira os anexos antes de analisar.');
-      }finally{try{await refreshFiles();}finally{lock(false);}}
+        if(!auto)el('documentosConferidos').checked=false;
+        message('Leitura concluída. Conferindo os dados da ficha…');
+      }finally{try{await refreshFiles();}finally{if(!auto)lock(false);}}
     };button.onclick=()=>run(button);
   }
   await refreshFiles();
   bind('save',async()=>{await persist();message('Ficha da análise salva.');});
   bind('analyze',async()=>{
-    if(busy)throw Error('Aguarde o envio ou a leitura dos anexos.');
-    if(!config.automatica)throw Error('O modo automático está desligado. Ative-o para analisar ou registre uma decisão manual.');
-    const current=await persist();const sims=await related();const docs=await loadDocumentos(id);const checks=[];
+    if(busy)return;
+    if(!config.automatica){showResult('Análise automática desligada','Ative a análise automática ou registre uma decisão manual.');return;}
+    lock(true);const originalLabel=el('analyze').textContent;el('analyze').textContent='Analisando ficha…';
+    try{
+    await persist();
+    const issues=[];const initialDocs=await loadDocumentos(id);
+    for(const [key,label] of DOCS){
+      if(key==='cpfFrente'&&questionnaire().cpfNaIdentidade&&!documentKeys(initialDocs,key).length)continue;
+      if(!documentKeys(initialDocs,key).length){issues.push('Documento obrigatório não enviado: '+label+'.');continue;}
+      try{await groupEl('read',key).task(true);}catch(e){issues.push('Não foi possível concluir a leitura de '+label+': '+e.message);}
+    }
+    message('Conferindo renda, parcelas, valores e histórico do cliente…');
+    const current=await loadSim(id);const sims=await related();const docs=await loadDocumentos(id);const checks=[];
     const readDocs=[];
     for(const [key,label]of DOCS){
-      if(key==='cpfFrente'&&questionnaire().cpfNaIdentidade)continue;
-      const keys=documentKeys(docs,key);if(!keys.length)throw Error('Anexe os documentos de '+label);
-      for(const slot of keys){const r=current.analiseDocumentos?.[slot];if(!r||r.hash!==await hash(docs[slot].dataUrl))throw Error('Leia o anexo atualizado: '+(docs[slot].nome||label));checks.push({label:docs[slot].nome||label,legibilidade:r.document.legibilidade,consecutivos:r.consecutivos,confirmado:questionnaire().documentosConferidos});readDocs.push({key,label,d:r.document});}
+      if(key==='cpfFrente'&&questionnaire().cpfNaIdentidade&&!documentKeys(docs,key).length)continue;
+      const keys=documentKeys(docs,key);
+      for(const slot of keys){const r=current.analiseDocumentos?.[slot];if(!r||r.hash!==await hash(docs[slot].dataUrl)){issues.push('Leitura não concluída: '+(docs[slot].nome||label));continue;}checks.push({label:docs[slot].nome||label,legibilidade:r.document.legibilidade,consecutivos:r.consecutivos,confirmado:questionnaire().documentosConferidos});readDocs.push({key,label,d:r.document});}
     }
     const history=sims.flatMap(x=>(x.historicoCrediti||[]).map(h=>({...h,contrato:x.id})));
     const result=evaluateCredit({q:questionnaire(),parcela:current.parcela,history,contracts:sims.filter(x=>x.aceite&&x.id!==id).map(x=>x.id),documents:checks,today:new Date().toLocaleDateString('en-CA',{timeZone:'America/Fortaleza'})});
-    const conflicts=[];const expected={rgFrente:'identidade',cpfFrente:'cpf',comprovanteResidencia:'residencia',comprovanteRenda:'renda',contaCorrente:'conta'};
+    const conflicts=[...issues];const expected={rgFrente:'identidade',cpfFrente:'cpf',comprovanteResidencia:'residencia',comprovanteRenda:'renda',contaCorrente:'conta'};
     for(const {key,label,d}of readDocs){if(d.tipo!==expected[key])conflicts.push('Tipo do documento não confirmado: '+label);if(d.cpf && d.cpf.replace(/\D/g,'')!==cpf)conflicts.push('CPF do documento diverge da ficha: '+label);}
     const incomes=readDocs.filter(x=>x.key==='comprovanteRenda'&&Number.isFinite(x.d.rendaLiquida)&&x.d.rendaLiquida>0).map(x=>x.d.rendaLiquida);
     if(!incomes.length)conflicts.push('Confirme a renda líquida: não foi identificada nos anexos.');
     else if(questionnaire().renda>Math.min(...incomes)+0.01)conflicts.push('A renda informada supera um dos comprovantes. Confira variações mensais e competências.');
     result.historicoConsiderado=history.map(h=>({contrato:h.contrato,tipo:h.tipo,data:h.data,nota:h.nota||'',dias:h.dias||0}));
-    if(conflicts.length && result.status!=='Recusada'){result.status='Pendente';result.motivos=conflicts;result.pendencias=[...(result.pendencias||[]),...conflicts];}
-    current.analiseCdc={...current.analiseCdc,resultado:result,avaliadoEm:Date.now(),por:auth.currentUser.uid};current.analiseCdc.snapshot=await snapshot(current);await saveSim(current);
-    message(result.status+'\n'+result.motivos.join('\n')+'\nLimite da parcela: '+money(result.limiteParcela)+'\nHistórico consultado: '+history.length+' registro(s).'+(history.length?'\n'+history.map(h=>h.data+' • '+h.tipo+': '+(h.nota||'')).join('\n'):'')+'\nConfira as evidências e confirme a decisão abaixo.');
+    result.pendencias=[...new Set([...(result.pendencias||[]),...conflicts])];
+    if(result.pendencias.length&&result.status!=='Recusada'){result.status='Pendente';result.motivos=result.pendencias;}
+    const observation=result.status+'\n'+result.motivos.join('\n')+(result.status==='Recusada'&&result.pendencias.length?'\nTambém falta conferir:\n'+result.pendencias.join('\n'):'')+'\nValor do crédito: '+money(current.valor)+'\nParcela: '+money(current.parcela)+' | Prazo: '+current.prazo+'x\nLimite da parcela: '+money(result.limiteParcela)+'\nAnexos lidos e conferidos pelo sistema: '+readDocs.length+'\nHistórico consultado: '+history.length+' registro(s).'+(history.length?'\n'+history.map(h=>h.data+' • '+h.tipo+': '+(h.nota||'')).join('\n'):'')+'\nConfira as evidências antes de confirmar a decisão.';
+    current.analiseCdc={...current.analiseCdc,resultado:result,observacoes:observation,avaliadoEm:Date.now(),por:auth.currentUser.uid};current.analiseCdc.snapshot=await snapshot(current);await saveSim(current);
+    showResult(result.status==='Pendente'?'Análise pendente':result.status,observation);
+    }catch(e){
+      const text='Não foi possível concluir a análise: '+(e.message||'falha inesperada')+'. Nenhuma aprovação ou recusa foi confirmada.';
+      let saved=false;try{const current=await loadSim(id);if(current){current.analiseCdc={...(current.analiseCdc||{}),observacoes:text,resultado:{status:'Pendente',motivos:[text]},avaliadoEm:Date.now()};delete current.analiseCdc.decisao;delete current.analiseCdc.snapshot;await saveSim(current);saved=true;}}catch{}
+      showResult('Análise não concluída',text+(saved?'':' Não foi possível salvar estas observações. Tente novamente.'));
+    }finally{lock(false);el('analyze').textContent=originalLabel;}
   });
   async function decide(status){
     const reason=el('reason').value.trim();if(!reason)throw Error('Informe o motivo da decisão.');
@@ -179,3 +210,4 @@ export async function mountCdcReview(id,root,ctx){
   }
   bind('approve',()=>decide('Aprovada'));bind('refuse',()=>decide('Recusada'));
 }
+
