@@ -746,6 +746,17 @@ function viewNovo(){
       <td style="padding:6px 4px;border-bottom:1px dotted #e6d6a8;font-weight:800;">${f.taxa}% a.m.</td>
     </tr>`).join('');
   return `
+  <section class="card" aria-labelledby="checklist-documentos-titulo" style="background:#fffaeb;overflow-wrap:anywhere;">
+    <h2 id="checklist-documentos-titulo">📋 Antes de simular: separe os documentos</h2>
+    <p class="hint">Confira o que você vai precisar para iniciar a análise do crédito pessoal:</p>
+    <label style="display:flex;align-items:flex-start;gap:10px;font-weight:600;"><input type="checkbox" style="width:22px;height:22px;flex:0 0 22px;margin:2px 0 0;" aria-label="Documento de identidade separado"><span>RG, CIN ou CNH legível, com frente e verso quando houver.</span></label>
+    <label style="display:flex;align-items:flex-start;gap:10px;font-weight:600;"><input type="checkbox" style="width:22px;height:22px;flex:0 0 22px;margin:2px 0 0;" aria-label="CPF separado ou presente na identidade"><span>CPF, se o número não constar na identidade.</span></label>
+    <label style="display:flex;align-items:flex-start;gap:10px;font-weight:600;"><input type="checkbox" style="width:22px;height:22px;flex:0 0 22px;margin:2px 0 0;" aria-label="Comprovante de residência separado"><span>Comprovante de residência recente.</span></label>
+    <label style="display:flex;align-items:flex-start;gap:10px;font-weight:600;"><input type="checkbox" style="width:22px;height:22px;flex:0 0 22px;margin:2px 0 0;" aria-label="Comprovantes de renda separados"><span>Comprovantes de renda: 3 contracheques, comprovante atual do benefício ou extratos dos últimos 3 meses.</span></label>
+    <p class="hint" style="margin-top:16px;"><strong>Anexos:</strong> PDF, JPG ou JPEG, até 5 arquivos por categoria e 700 KB por arquivo. O envio será feito na etapa de análise.</p>
+    <p class="hint">Tenha também a chave Pix do cliente e os valores da renda líquida, das despesas essenciais e das outras parcelas mensais.</p>
+    <p class="hint">Este checklist é só para organização. Marcar as opções não envia documentos, não aprova crédito e não impede a simulação. As marcações são temporárias.</p>
+  </section>
   <div class="card" style="background:#fffaeb;border:1.5px dashed var(--gold-deep);">
     <h2 style="font-size:15px;">📋 Tabela de referência</h2>
     <table style="width:100%;font-size:12.5px;border-collapse:collapse;">
@@ -2689,6 +2700,7 @@ if(firebaseOk){
 </script>
 </body>
 </html>
+
 
 
 
