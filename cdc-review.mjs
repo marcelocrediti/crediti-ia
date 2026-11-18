@@ -87,9 +87,10 @@ export async function mountCdcReview(id,root,ctx){
       message('Lendo documento. Aguarde…');const docs=await loadDocumentos(id);const doc=docs[key];if(!doc?.dataUrl)throw Error('Anexe este documento primeiro.');
       const fingerprint=await hash(doc.dataUrl);let current=await loadSim(id);const previous=current.analiseDocumentos?.[key];
       if(previous?.hash===fingerprint){showDoc(key,previous);message('Este arquivo já foi lido. A leitura foi reutilizada, sem nova chamada à API.');return;}
+      if(previous?.hashes?.includes(fingerprint))throw Error('Este arquivo já foi analisado antes. Envie uma nova digitalização; repetir o mesmo arquivo não conta como novo envio.');
       const response=await fetch(API,{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+await auth.currentUser.getIdToken()},body:JSON.stringify({dataUrl:doc.dataUrl}),signal:AbortSignal.timeout(90000)});
       const data=await response.json();if(!response.ok||!data.document)throw Error(data.error||'Falha na leitura. Nenhuma recusa aplicada.');
-      const review={hash:fingerprint,document:data.document,consecutivos:data.document.legibilidade==='ilegivel'?(previous?.consecutivos||0)+1:data.document.legibilidade==='legivel'?0:(previous?.consecutivos||0),lidoEm:Date.now()};
+      const review={hash:fingerprint,hashes:[...new Set([...(previous?.hashes||[]),...(previous?.hash?[previous.hash]:[]),fingerprint])],document:data.document,consecutivos:data.document.legibilidade==='ilegivel'?(previous?.consecutivos||0)+1:data.document.legibilidade==='legivel'?0:(previous?.consecutivos||0),lidoEm:Date.now()};
       current=await loadSim(id);current.analiseDocumentos={...(current.analiseDocumentos||{}),[key]:review};await saveSim(current);showDoc(key,review);el('documentosConferidos').checked=false;message('Leitura concluída. Confira os dados extraídos antes de analisar.');
     };button.onclick=()=>run(button);
   }
@@ -100,6 +101,14 @@ export async function mountCdcReview(id,root,ctx){
     for(const [key,label]of DOCS){if(key==='cpfFrente'&&questionnaire().cpfNaIdentidade)continue;const d=docs[key],r=current.analiseDocumentos?.[key];if(!d?.dataUrl||!r||r.hash!==await hash(d.dataUrl))throw Error('Anexe e leia o documento atualizado: '+label);checks.push({label,legibilidade:r.document.legibilidade,consecutivos:r.consecutivos,confirmado:questionnaire().documentosConferidos});}
     const history=sims.flatMap(x=>(x.historicoCrediti||[]).map(h=>({...h,contrato:x.id})));
     const result=evaluateCredit({q:questionnaire(),parcela:current.parcela,history,contracts:sims.filter(x=>x.aceite&&x.id!==id).map(x=>x.id),documents:checks,today:new Date().toLocaleDateString('en-CA',{timeZone:'America/Fortaleza'})});
+    const conflicts=[];const expected={rgFrente:'identidade',cpfFrente:'cpf',comprovanteResidencia:'residencia',comprovanteRenda:'renda',contaCorrente:'conta'};
+    for(const [key,label]of DOCS){if(key==='cpfFrente'&&questionnaire().cpfNaIdentidade)continue;const d=current.analiseDocumentos[key].document;if(d.tipo!==expected[key])conflicts.push('Tipo do documento não confirmado: '+label);if(d.cpf && d.cpf.replace(/\D/g,'')!==cpf)conflicts.push('CPF do documento diverge da ficha: '+label);}
+    const account=current.analiseDocumentos.contaCorrente.document;
+    if(account.contaTipo==='poupanca'){result.status='Recusada';result.motivos=['O comprovante de conta identifica conta poupança. Confira o documento antes de confirmar a recusa.'];}
+    else if(account.contaTipo!=='corrente')conflicts.push('O comprovante não permitiu identificar conta corrente.');
+    const income=current.analiseDocumentos.comprovanteRenda.document.rendaLiquida;
+    if(income!==null && questionnaire().renda>income+0.01)conflicts.push('A renda informada é maior que a renda líquida lida no comprovante.');
+    if(conflicts.length && result.status!=='Recusada'){result.status='Pendente';result.motivos=conflicts;result.pendencias=[...(result.pendencias||[]),...conflicts];}
     current.analiseCdc={...current.analiseCdc,resultado:result,avaliadoEm:Date.now(),por:auth.currentUser.uid};current.analiseCdc.snapshot=await snapshot(current);await saveSim(current);
     message(result.status+'\n'+result.motivos.join('\n')+'\nLimite da parcela: '+money(result.limiteParcela)+'\nConfira as evidências e confirme a decisão abaixo.');
   });
