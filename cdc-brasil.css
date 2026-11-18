@@ -1,0 +1,85 @@
+/* Visual only. Print layouts and business rules remain unchanged. */
+@media screen {
+  body{background:#f1f6f5;}
+  #app:not(:has(.cdc-login-screen)){
+    --ink:#15394c;--ink-soft:#546d79;--gold:#fdca01;--gold-deep:#bd9000;
+    --paper:#f1f6f5;--card:#fff;--line:#dce8e5;
+    --ok:#087549;--ok-bg:#e5f5ed;--warn:#795600;--warn-bg:#fff5cd;--danger:#b3261e;
+    max-width:960px;padding:24px 20px 48px;
+  }
+  #app header.top{padding:20px;gap:14px;background:#073f36;border:1px solid #105347;border-bottom:3px solid #fdca01;border-radius:20px;margin-bottom:18px;box-shadow:0 8px 24px #073f3612;}
+  #app header.top .brand-name{color:#fff;font-size:24px;letter-spacing:-.5px;}
+  #app header.top .brand-sub{color:#d7eae5;font-size:13px;line-height:1.5;}
+  #app header.top img{width:52px;height:52px;flex-basis:52px;border:2px solid #fff;}
+  #app .tabbar{padding:6px;gap:6px;border-color:#dce8e5;border-radius:16px;box-shadow:0 4px 16px #12394a06;}
+  #app .tabbar button{min-height:46px;font-size:14px;border-radius:11px;color:#3f626e;}
+  #app .tabbar button.active{background:#087549;color:#fff;box-shadow:0 3px 8px #08754922;}
+  #app .card{padding:24px;border-color:#dce8e5;border-radius:20px;box-shadow:0 5px 22px #163f4d08;margin-bottom:20px;}
+  #app .card h2{font-size:21px;color:#123f51;letter-spacing:-.4px;margin-bottom:12px;}
+  #app .card h3,#app .step-title{color:#123f51;}
+  #app .card .hint,#app .muted{font-size:14px;line-height:1.55;color:#546d79;}
+  #app label{font-size:14px;line-height:1.45;margin:16px 0 7px;color:#355665;}
+  #app input[type=text],#app input[type=number],#app input[type=date],#app input[type=email],#app input[type=tel],#app select,#app textarea{
+    box-sizing:border-box;width:100%;min-width:0;max-width:100%;min-height:50px;border:1px solid #cbdcd9;border-radius:12px;
+    padding:12px 14px;font-family:inherit;font-size:16px;color:#15394c;background:#f8fbfa;
+  }
+  #app textarea{min-height:112px;line-height:1.5;resize:vertical;}
+  #app input:focus-visible,#app select:focus-visible,#app textarea:focus-visible{outline:3px solid #0b8b5d22;outline-offset:1px;border-color:#0b8b5d;}
+  #app input[type=checkbox]{accent-color:#087549;width:20px;height:20px;flex-shrink:0;}
+  #app input[type=file]{font-size:14px;color:#546d79;line-height:2.4;}
+  #app input[type=file]::file-selector-button{border:1px solid #cbdcd9;border-radius:9px;padding:10px 12px;margin-right:10px;color:#164f61;background:#f1f7f5;font-weight:600;cursor:pointer;}
+  #app .btn{min-height:48px;border-radius:12px;font-size:15px;line-height:1.35;padding:13px 18px;font-weight:700;}
+  #app .btn-primary,#app .btn-ok{background:#087549;color:#fff;box-shadow:0 4px 12px #08754919;}
+  #app .btn-gold{background:#fdca01;color:#173b3b;box-shadow:0 4px 12px #c9a00014;}
+  #app .btn-outline{background:#fff;border:1px solid #b8d0d2;color:#194b68;}
+  #app .btn-sm{min-height:42px;white-space:nowrap;flex-shrink:0;padding:10px 16px;}
+  #app .btn:focus-visible,#app .tabbar button:focus-visible{outline:3px solid #194b77;outline-offset:3px;}
+  #app .btn:disabled{opacity:.6;cursor:wait;}
+  #app .sim-item{gap:16px;padding:20px 0;border-bottom-color:#e3ece9;}
+  #app .sim-item .nm{font-size:16px;line-height:1.4;color:#15394c;margin-bottom:4px;}
+  #app .sim-item .sub{font-size:14px;line-height:1.65;}
+  #app .badge{font-size:12px;line-height:1.5;padding:4px 10px;vertical-align:middle;}
+  #app .badge-ok{background:#e5f5ed;color:#087549;}
+  #app .badge-pending{background:#fce7e5;color:#a52d25;}
+  #app .result-box{background:#f2faf6;border:1px solid #beddd0;border-top:3px solid #087549;border-radius:16px;padding:20px;}
+  #app .result-section{background:#fff;border-color:#d6e6df;border-radius:14px;}
+  #app .result-section-title{color:#087549;}
+  #app .kv{font-size:15px;line-height:1.55;padding:10px 0;gap:16px;border-bottom:1px solid #e0ebe6;}
+  #app .kv b{font-variant-numeric:tabular-nums;}
+  #app .result-highlight{color:#087549;}
+  #app .check-row{background:#f0f7fa;border-color:#d5e4eb;}
+  #app .disclaimer,#app .geo-box{background:#edf3f6;color:#526d7b;font-size:13px;line-height:1.6;padding:14px;border-radius:12px;}
+  #app .footer-note{color:#617d84;font-size:12px;line-height:1.6;padding:8px 12px;}
+  #app details{border:1px solid #dce8e5;border-radius:14px;padding:16px;margin:16px 0;background:#f8fbfa;}
+  #app summary{color:#194b68;font-size:17px;font-weight:700;cursor:pointer;line-height:1.4;}
+  #app table{border-color:#dce8e5;}
+  #app th{background:#e9f4ef;color:#124d3c;}
+  #app .client-hero{background:#073f36;color:white;border-bottom:4px solid #fdca01;}
+  #app .accept-box{border-color:#bed6cf;background:#fff;}
+  /* Login: keep the card higher and comfortable on a phone. */
+  #app .cdc-login-panel input{height:54px;min-height:54px;}
+  #app .cdc-login-password input{padding-right:86px;}
+  @media(max-width:799px){
+    #app .cdc-login-screen{align-items:flex-start;padding:100px 18px 28px;}
+    #app .cdc-login-panel{padding:24px;max-width:420px;}
+    #app .cdc-login-panel h1{font-size:29px;}
+    #app .cdc-login-panel .cdc-login-intro{margin-bottom:18px;}
+    #app .cdc-login-panel label{margin-top:14px;}
+    #app .cdc-login-footer{padding-top:14px;margin-top:14px;}
+    #app .cdc-login-logo{width:56px;height:56px;top:18px;left:18px;}
+  }
+  @media(max-width:600px){
+    #app:not(:has(.cdc-login-screen)){padding:16px 14px 32px;}
+    #app header.top{padding:16px;gap:12px;border-radius:16px;}
+    #app header.top .brand-name{font-size:22px;}
+    #app header.top .brand-sub{font-size:12px;}
+    #app .card{padding:18px;border-radius:16px;}
+    #app .tabbar button{font-size:12px;padding:10px 5px;}
+    #app .sim-item{gap:10px;padding:18px 0;}
+    #app .sim-item .nm{font-size:15px;}
+    #app .sim-item .sub{font-size:13px;}
+    #app .sim-item .btn-sm{padding:10px 13px;min-width:60px;}
+    #app .kv{font-size:14px;gap:10px;}
+    #app .result-box{padding:15px;}
+  }
+}
