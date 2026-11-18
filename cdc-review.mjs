@@ -59,7 +59,7 @@ export async function mountCdcReview(id,root,ctx){
   <label>Despesas essenciais mensais (R$)</label><input type="text" id="rev-despesas" inputmode="decimal" placeholder="0,00" value="${esc(formatAmount(q.despesas))}">
   <label>Outras parcelas mensais em andamento (R$)</label><input type="text" id="rev-outrasParcelas" inputmode="decimal" placeholder="0,00" value="${esc(formatAmount(q.outrasParcelas))}">
   <label>Há restrição informada ou verificada?</label><select id="rev-restricao"><option value="">Selecione</option><option value="nao">Não</option><option value="sim">Sim</option></select>
-  <p class="hint">A análise considera sua resposta. Não faz consulta externa ao Serasa ou SPC. O pagamento é por Pix, usando a chave informada nos dados do cliente.</p>
+  <p class="hint">A pré-análise considera sua resposta, os documentos e o histórico. Não faz consulta externa ao Serasa ou SPC. O Pix será solicitado somente após a aprovação.</p>
   <h3>Documentos para análise</h3><p class="hint">Até 5 anexos por categoria, em PDF, JPG ou JPEG, até 700 KB cada. Você pode enviar frente e verso ou os comprovantes mensais separados.</p>
   ${DOCS.map(([key,label])=>`<div style="margin-bottom:18px;min-width:0"><label>${esc(label)}</label><input type="file" multiple data-doc="${key}" style="display:block;width:100%;max-width:100%;min-width:0;box-sizing:border-box;font-size:14px" accept="application/pdf,image/jpeg,.jpg,.jpeg"><div data-files="${key}" class="hint" style="overflow-wrap:anywhere"></div><button type="button" class="btn btn-outline" data-read="${key}">Ler anexos</button><div data-result="${key}" style="white-space:pre-wrap;overflow-wrap:anywhere"></div></div>`).join('')}
   <label style="display:flex;gap:10px"><input id="rev-cpfNaIdentidade" type="checkbox" style="width:auto" ${q.cpfNaIdentidade?'checked':''}>CPF consta no documento de identidade</label>
@@ -210,4 +210,5 @@ export async function mountCdcReview(id,root,ctx){
   }
   bind('approve',()=>decide('Aprovada'));bind('refuse',()=>decide('Recusada'));
 }
+
 
