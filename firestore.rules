@@ -18,7 +18,8 @@ service cloud.firestore {
     match /assinaturasCDC/{token} {
       allow read, write: if admin();
       allow get: if token.matches('^[a-f0-9]{64}$')
-        && resource.data.expiraEm > request.time;
+        && resource.data.expiraEm > request.time
+        && resource.data.aceite == null;
       allow update: if token.matches('^[a-f0-9]{64}$')
         && resource.data.expiraEm > request.time
         && resource.data.aceite == null
