@@ -534,6 +534,9 @@ async function compressImage(dataUrl, maxW){
   });
 }
 
+window.renovarPreanaliseCDC=async function(id){
+  try{const s=await loadSim(id);const module=await import('./cdc-preanalise.mjs?v=1');const result=await module.createLink(s,{db,fb:firebase});const box=document.getElementById('link-preanalise-salva');box.innerHTML='';const input=document.createElement('input');input.readOnly=true;input.value=location.origin+location.pathname+'#preanalise/'+result.token;const p=document.createElement('p');p.className='hint';p.textContent='Novo link válido por 30 minutos. O anterior foi cancelado.';const b=document.createElement('button');b.className='btn btn-ok';b.textContent='Copiar link';b.onclick=async()=>{try{await navigator.clipboard.writeText(input.value);toast('Link copiado!');}catch{input.focus();input.select();}};box.append(p,input,b);}catch(e){toast(e.message);}
+};
 // ---------- Storage wrappers (shared = visible to owner AND client link) ----------
 async function criarLinkCDC(s){
   if(!isCdcAdmin())throw new Error('Entre como administrador.');
@@ -570,6 +573,13 @@ async function saveSim(sim){
   }
   try{
     const previous=await db.collection('simulacoes').doc(sim.id).get();
+    if(previous.exists && previous.data().linkPreanalise){
+      const before=previous.data();
+      if(['cliente','valor','parcela','prazo','taxa','dataPrimeira','dataUltima','dadosCliente'].some(k=>JSON.stringify(before[k])!==JSON.stringify(sim[k]))){
+        await db.collection('preanalisesCDC').doc(before.linkPreanalise).update({estado:'revogado'});
+        sim.linkPreanalise=null;
+      }else if(!sim.linkPreanalise){sim.linkPreanalise=before.linkPreanalise;}
+    }
     if(previous.exists && previous.data().linkAssinatura){
       const before=previous.data();
       const keys=['cliente','valor','parcela','prazo','taxa','dataPrimeira','dataUltima','dadosCliente'];
@@ -598,6 +608,8 @@ async function loadSim(id){
     const doc = await db.collection('simulacoes').doc(id).get();
     if(!doc.exists)return null;
     let data=doc.data();
+    if(data.linkPreanalise && isCdcAdmin()){try{const module=await import('./cdc-preanalise.mjs?v=1');data=await module.receiveSubmission(data,{db});}catch(e){toast('Não foi possível receber a pré-análise: '+e.message);}}
+
     if(data.linkAssinatura && !data.aceite && isCdcAdmin()){
       const link=await db.collection('assinaturasCDC').doc(data.linkAssinatura).get();
       if(link.exists && link.data().aceite){
@@ -623,7 +635,7 @@ async function listSims(){
   }
   try{
     const snap = await db.collection('simulacoes').orderBy('criadoEm','desc').get();
-    return await Promise.all(snap.docs.map(d=>{const s=d.data();return s.linkAssinatura&&!s.aceite?loadSim(d.id):s;})).then(rows=>rows.filter(Boolean));
+    return await Promise.all(snap.docs.map(d=>{const s=d.data();return (s.linkAssinatura||s.linkPreanalise)&&!s.aceite?loadSim(d.id):s;})).then(rows=>rows.filter(Boolean));
   }catch(e){
     console.error('Erro listSims:', e);
     return [];
@@ -684,6 +696,7 @@ async function deleteDocumento(simId, key){
 // ---------- Router ----------
 function getRoute(){
   const h = location.hash.replace('#','');
+  if(h.startsWith('preanalise/')) return {view:'preanalise', id:h.split('/')[1]};
   if(h.startsWith('cliente/')) return {view:'cliente', id:h.split('/')[1]};
   if(h.startsWith('simulacao/')) return {view:'simulacao', id:h.split('/')[1]};
   if(h.startsWith('contratar/')) return {view:'contratar', id:h.split('/')[1]};
@@ -714,6 +727,7 @@ async function renderInner(){
   const route = getRoute();
   const app = document.getElementById('app');
   if(!cdcAuthReady){ app.innerHTML = '<div class="wrap"><div class="card">Verificando acesso…</div></div>'; return; }
+  if(route.view==='preanalise'){const module=await import('./cdc-preanalise.mjs?v=1');await module.mountCustomer(app,route.id,{db,fb:firebase,logo:LOGO_DATAURL});return;}
   if(route.view==='cliente' && /^[a-f0-9]{64}$/.test(route.id)){app.innerHTML=await viewCliente(route.id);return;}
   if(!isCdcAdmin()) { renderCdcLogin(app); return; }
   if(route.view === 'cliente'){
@@ -783,6 +797,7 @@ function viewNovo(){
     <label style="display:flex;align-items:flex-start;gap:10px;font-weight:600;"><input type="checkbox" style="width:22px;height:22px;flex:0 0 22px;margin:2px 0 0;" aria-label="Comprovante de residência separado"><span>Comprovante de residência recente.</span></label>
     <label style="display:flex;align-items:flex-start;gap:10px;font-weight:600;"><input type="checkbox" style="width:22px;height:22px;flex:0 0 22px;margin:2px 0 0;" aria-label="Comprovantes de renda separados"><span>Comprovantes de renda: 3 contracheques, comprovante atual do benefício ou extratos dos últimos 3 meses.</span></label>
     <p class="hint" style="margin-top:16px;"><strong>Anexos:</strong> PDF, JPG ou JPEG, até 5 arquivos por categoria e 700 KB por arquivo. O envio será feito na etapa de análise.</p>
+    <p class="hint"><strong>Limite da parcela:</strong> a nova parcela, somada às outras parcelas mensais, poderá comprometer até 15% da renda líquida comprovada. O limite poderá ser menor conforme despesas e análise. Não garante aprovação.</p>
     <p class="hint">Tenha também os valores da renda líquida, das despesas essenciais e das outras parcelas mensais. A chave Pix será solicitada somente após a aprovação.</p>
     <p class="hint">Este checklist é só para organização. Marcar as opções não envia documentos, não aprova crédito e não impede a simulação. As marcações são temporárias.</p>
   </section>
@@ -800,6 +815,8 @@ function viewNovo(){
     <p class="hint">Calcule pelo valor do crédito ou pela parcela que o cliente deseja pagar. Confira o prazo, a taxa e o vencimento antes de calcular.</p>
     <label>Nome completo do cliente</label>
     <input type="text" id="f-cliente" placeholder="Ex: João da Silva">
+    <label for="f-cpf">CPF do cliente (necessário para o link de pré-análise)</label>
+    <input type="text" id="f-cpf" inputmode="numeric" maxlength="14" placeholder="000.000.000-00">
     <label for="f-modo">Como deseja calcular?</label>
     <select id="f-modo"><option value="valor">Pelo valor do crédito</option><option value="parcela">Pelo valor da parcela</option></select>
     <div class="row2">
@@ -1159,6 +1176,8 @@ async function viewPainel(){
     // A decisão manual prevalece; sem decisão, exiba o resultado da análise.
     const analiseStatus = s.analiseCdc?.decisao?.status || s.analiseCdc?.resultado?.status;
     if(analiseStatus==='Recusada') return `<span class="badge badge-pending">Recusado</span>`;
+    if(s.status==='preanalise_recebida')return `<span class="badge badge-wait">Documentos recebidos</span>`;
+    if(s.status==='preanalise_aguardando')return `<span class="badge badge-pending">Aguardando documentos</span>`;
     if(s.status==='aguardando_cliente'){
       const completos = s.documentosEnviados && s.documentosEnviados.length>=4;
       return completos
@@ -1270,6 +1289,7 @@ window.abrirDetalhe = async function(id){
     <p class="hint">Retorno antes de despesas, impostos e inadimplência. Não aparece no PDF do cliente.</p>
     <button class="btn btn-outline" id="btn-pdf-salva">Gerar PDF da simulação</button>
     `}
+    ${s.linkPreanalise && !s.preanaliseRecebida && !s.aceite ? `<button class="btn btn-outline" onclick="renovarPreanaliseCDC('${s.id}')">Gerar novo link de pré-análise (30 minutos)</button><div id="link-preanalise-salva" role="status"></div>` : ''}
     ${dadosClienteBlock}
     ${signBlock}
   </div>
@@ -2091,7 +2111,7 @@ function wireEvents(view){
       document.getElementById('f-valor').disabled = porParcela;
       document.getElementById('f-parcela').disabled = !porParcela;
     });
-    for(const id of ['f-cliente','f-modo','f-parcela','f-valor','f-prazo','f-taxa','f-data1']){
+    for(const id of ['f-cliente','f-cpf','f-modo','f-parcela','f-valor','f-prazo','f-taxa','f-data1']){
       for(const evento of ['input','change']) document.getElementById(id).addEventListener(evento, ()=>{
         marcarCdcPendente();
       });
@@ -2198,10 +2218,11 @@ function marcarCdcPendente(){
   // Mantém o último resumo visível, mas impede envio/contratação de dados desatualizados.
   window.__simTemp = null;
   aviso.hidden = false;
-  for(const id of ['btn-enviar','btn-salvar','btn-contratar']){
+  for(const id of ['btn-enviar','btn-salvar','btn-contratar','btn-preanalise']){
     const btn = document.getElementById(id);
     if(btn) btn.disabled = true;
   }
+  const pre = document.getElementById('painel-preanalise');if(pre)pre.innerHTML='';
   const envio = document.getElementById('painel-envio');
   if(envio) envio.innerHTML = '';
 }
@@ -2242,6 +2263,7 @@ async function onCalcular(){
   const id = uid();
   window.__simTemp = {
     id, cliente, valor, prazo, taxa, cet, cetAnual,
+    dadosCliente:{cpf:document.getElementById('f-cpf').value.replace(/\D/g,'')},
     dataPrimeira: data1, dataUltima, parcela,
     ...calculo,
     criadoEm: Date.now(),
@@ -2262,10 +2284,31 @@ async function onCalcular(){
     <p class="hint">Total a receber menos o valor liberado, antes de despesas, impostos e inadimplência. Esta informação não aparece no PDF do cliente.</p>
   </div>
   <button class="btn btn-outline" id="btn-enviar">Enviar simulação ao cliente</button>
+  <button class="btn btn-outline" id="btn-preanalise">Gerar link de pré-análise (30 minutos)</button>
+  <div id="painel-preanalise" role="status"></div>
   <button class="btn btn-primary" id="btn-salvar">Salvar simulação</button>
   <button class="btn btn-gold" id="btn-contratar">Contratar</button>
   <div id="painel-envio"></div>`;
 
+  const preButton=document.getElementById('btn-preanalise');
+  preButton.onclick=async()=>{
+    if(!cdcProntoParaEnviar())return;
+    preButton.disabled=true;preButton.textContent='Gerando link protegido…';
+    try{
+      const module=await import('./cdc-preanalise.mjs?v=1');
+      if(!module.validCpf(window.__simTemp.dadosCliente?.cpf))throw Error('Preencha um CPF válido e clique em Calcular simulação novamente.');
+      await saveSim(window.__simTemp);
+      const link=await module.createLink(window.__simTemp,{db,fb:firebase});
+      const url=location.origin+location.pathname+'#preanalise/'+link.token;
+      const box=document.getElementById('painel-preanalise');box.innerHTML='';
+      const p=document.createElement('p');p.className='hint';p.textContent='Simulação salva. Link exclusivo válido até '+new Date(link.expires).toLocaleTimeString('pt-BR',{timeZone:'America/Fortaleza',hour:'2-digit',minute:'2-digit'})+'. Não encaminhe a terceiros.';
+      const input=document.createElement('input');input.type='text';input.readOnly=true;input.value=url;input.setAttribute('aria-label','Link exclusivo de pré-análise');
+      const copy=document.createElement('button');copy.className='btn btn-ok';copy.textContent='Copiar link para enviar ao cliente';copy.onclick=async()=>{try{await navigator.clipboard.writeText(url);toast('Link copiado!');}catch{input.focus();input.select();toast('Selecione e copie o link acima.');}};
+      const panel=document.createElement('button');panel.className='btn btn-outline';panel.textContent='Voltar ao painel';panel.onclick=()=>{location.hash='';};box.append(p,input,copy,panel);
+      for(const id of ['btn-enviar','btn-salvar','btn-contratar'])document.getElementById(id).disabled=true;
+      window.__simTemp=null;preButton.textContent='Link gerado';
+    }catch(e){toast(e.message);preButton.disabled=false;preButton.textContent='Gerar link de pré-análise (30 minutos)';}
+  };
   const btnSalvar = document.getElementById('btn-salvar');
   const btnEnviar = document.getElementById('btn-enviar');
   const btnContratar = document.getElementById('btn-contratar');
