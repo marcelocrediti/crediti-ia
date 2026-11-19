@@ -2,6 +2,11 @@ name: Android Release Bundle
 
 on:
   workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - android/app/build.gradle
+      - .github/workflows/android-release.yml
 
 permissions:
   contents: read
