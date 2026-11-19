@@ -595,8 +595,8 @@ async function criarLinkCDC(s){
     if(!s.dadosCliente?.pix?.trim())throw new Error('Ficha aprovada. Informe a chave Pix do cliente em Continuar contratação.');
     if(cfg.data()?.automatica){
       if(s.analiseCdc?.decisao?.status!=='Aprovada')throw new Error('Abra a proposta, conclua a análise e confirme a aprovação antes de gerar o link.');
-      const {creditSnapshot}=await import('./cdc-review.mjs?v=20261118-modal');
-      if(s.analiseCdc.snapshot!==await creditSnapshot(s,{listSims,loadDocumentos}))throw new Error('A ficha mudou. Faça uma nova análise antes de contratar.');
+      const {creditSnapshot,createReviewContext}=await import('./cdc-review.mjs?v=20261119-controls');
+      if(s.analiseCdc.snapshot!==await creditSnapshot(s,createReviewContext({db})))throw new Error('A ficha mudou. Faça uma nova análise antes de contratar.');
     }
   }
   const token=Array.from(crypto.getRandomValues(new Uint8Array(32))).map(x=>x.toString(16).padStart(2,'0')).join('');
@@ -1365,8 +1365,8 @@ window.abrirDetalhe = async function(id){
   if(documentosBlock) carregarDocumentosDetalhe(s.id);
   const reviewRoot=document.getElementById('cdc-review-card');
   const historyRoot=document.getElementById('cdc-history-card');
-  if(historyRoot) import('./cdc-review.mjs?v=20261118-modal').then(module=>module.mountCdcHistory(s.id,historyRoot,{db,loadSim,listSims,auth:firebase.auth()})).catch(()=>{historyRoot.textContent='Não foi possível carregar o histórico. Atualize a página.';});
-  if(reviewRoot) import('./cdc-review.mjs?v=20261118-modal').then(module=>module.mountCdcReview(s.id,reviewRoot,{db,loadSim,saveSim,listSims,loadDocumentos,saveDocumento,auth:firebase.auth()})).catch(()=>{reviewRoot.textContent='Não foi possível carregar a análise. Suas propostas continuam disponíveis. Atualize a página para tentar novamente.';});
+  if(historyRoot) import('./cdc-review.mjs?v=20261119-controls').then(module=>module.mountCdcHistory(s.id,historyRoot,module.createReviewContext({db,loadSim,listSims,auth:firebase.auth()}))).catch(()=>{historyRoot.textContent='Não foi possível carregar o histórico. Atualize a página.';});
+  if(reviewRoot) import('./cdc-review.mjs?v=20261119-controls').then(module=>module.mountCdcReview(s.id,reviewRoot,module.createReviewContext({db,loadSim,saveSim,listSims,loadDocumentos,saveDocumento,auth:firebase.auth()}))).catch(()=>{reviewRoot.textContent='Não foi possível carregar a análise. Suas propostas continuam disponíveis. Atualize a página para tentar novamente.';});
 };
 
 function htmlDocumentosCliente(simId, docs){
@@ -1909,14 +1909,14 @@ async function mountContratacaoReview(id){
   const s=await loadSim(id);
   if(!s?.dadosCliente?.cpf) return;
   try{
-    const module=await import('./cdc-review.mjs?v=20261118-modal');
+    const module=await import('./cdc-review.mjs?v=20261119-controls');
     const saveReview=async current=>{
       await saveSim(current);
       const box=document.getElementById('pix-pos-aprovacao'),input=document.getElementById('dc-pix-aprovado');
       const approved=current.analiseCdc?.decisao?.status==='Aprovada';
       if(box)box.hidden=!approved;if(input)input.disabled=!approved;
     };
-    await module.mountCdcReview(id,root,{db,loadSim,saveSim:saveReview,listSims,loadDocumentos,saveDocumento,auth:firebase.auth()});
+    await module.mountCdcReview(id,root,module.createReviewContext({db,loadSim,saveSim:saveReview,listSims,loadDocumentos,saveDocumento,auth:firebase.auth()}));
   }catch(e){
     root.textContent='Não foi possível carregar a análise. Atualize a página para tentar novamente. O link não será liberado sem a decisão exigida.';
   }
@@ -2859,6 +2859,7 @@ if(firebaseOk){
 </script>
 </body>
 </html>
+
 
 
 
