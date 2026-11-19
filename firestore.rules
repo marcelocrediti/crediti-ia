@@ -89,8 +89,17 @@ service cloud.firestore {
             || (request.resource.data.tipo == 'image/jpeg' && request.resource.data.dataUrl.matches('^data:image/jpeg;base64,/9j/[A-Za-z0-9+/=]+$')));
       }
     }
+    // SHA-256(CPF + random 128-bit code). No lists or public writes.
+    match /consultasCDC/{key} {
+      allow read, write: if admin();
+      allow get: if key.matches('^[a-f0-9]{64}$')
+        && resource.data.keys().hasOnly(['status','atualizadoEm','expiraEm'])
+        && resource.data.status in ['Em análise','Pré-aprovada','Recusada','Contratada']
+        && resource.data.expiraEm > request.time;
+    }
     match /{document=**} {
       allow read, write: if false;
     }
   }
 }
+
