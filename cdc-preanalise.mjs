@@ -1,5 +1,5 @@
 // Remote intake is separate from contracts. Public input never approves credit.
-import {newCode,statusKey,statusRecord,showReceipt} from './cdc-status.mjs?v=1';
+import {newCode,statusKey,statusRecord,showReceipt} from './cdc-status.mjs?v=20261119-pendente';
 export const TTL_MS=30*60*1000;
 export const GROUPS=[['rgFrente','Identidade: RG, CIN ou CNH, frente e verso'],['cpfFrente','CPF, se não constar na identidade'],['comprovanteResidencia','Comprovante de residência recente'],['comprovanteRenda','Renda: 3 contracheques, benefício atual ou extratos de 3 meses']];
 export const WARNING='A nova parcela pode usar até 15% do que sobra da renda após os gastos e as parcelas atuais. Depois da nova parcela, devem restar pelo menos R$ 600,00 por mês. Empréstimo mínimo: R$ 300,00. Sujeito à análise.';
@@ -125,5 +125,6 @@ export async function mountCustomer(root,token,{db,fb,logo}){
     }catch(error){msg.textContent=error.code==='permission-denied'?'Link expirado ou já utilizado. Peça um novo link à Crediti.':error.message;}finally{busy=false;submit.disabled=false;}
   };
 }
+
 
 

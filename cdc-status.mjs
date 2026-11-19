@@ -14,7 +14,23 @@ export function publicStatus(sim){
   if(sim.aceite)return 'Contratada';
   if(decision==='Aprovada')return 'Pré-aprovada';
   if(decision==='Recusada')return 'Recusada';
+  if(sim.analiseCdc?.resultado?.status==='Pendente')return 'Pendente';
   return 'Em análise';
+}
+// Repair only this proposal's existing projection. Never renew or recreate expired codes.
+export async function syncStatus(id,{db,fb}){
+  return db.runTransaction(async tx=>{
+    const snap=await tx.get(db.collection('simulacoes').doc(id));
+    if(!snap.exists)return false;
+    const sim=snap.data(),key=sim.consultaStatusId;
+    if(!key)return false;
+    const ref=db.collection('consultasCDC').doc(key),projection=await tx.get(ref);
+    if(!projection.exists||projection.data().expiraEm?.toMillis()<=Date.now())return false;
+    const status=publicStatus(sim);
+    if(projection.data().status===status)return false;
+    tx.update(ref,{status,atualizadoEm:fb.firestore.FieldValue.serverTimestamp()});
+    return true;
+  });
 }
 export function statusRecord(sim,fb){
   return {status:publicStatus(sim),atualizadoEm:fb.firestore.FieldValue.serverTimestamp(),expiraEm:fb.firestore.Timestamp.fromMillis(Date.now()+STATUS_DAYS*86400000)};
@@ -69,9 +85,10 @@ export function mountStatus(root,{db}){
     const c=digits(cpf.value),k=normalizeCode(code.value);
     if(c.length!==11||k.length!==32){result.textContent='Confira o CPF e o código completo recebido.';return;}
     busy=true;last=Date.now();const button=form.querySelector('button');button.disabled=true;result.textContent='Consultando…';
-    try{const snap=await db.collection('consultasCDC').doc(await statusKey(c,k)).get({source:'server'});if(!snap.exists)throw Error('invalid');const data=snap.data();if(!['Em análise','Pré-aprovada','Recusada','Contratada'].includes(data.status)||data.expiraEm.toMillis()<=Date.now())throw Error('invalid');
-      result.innerHTML='';const heading=document.createElement('h3');heading.textContent=data.status;const p=document.createElement('p');p.textContent=({'Em análise':'Sua ficha está em conferência. Consulte novamente para acompanhar.','Pré-aprovada':'Sua proposta foi pré-aprovada pela Crediti. Entre em contato para continuar a contratação.','Recusada':'Sua proposta não foi aprovada. Entre em contato com a Crediti para esclarecimentos.','Contratada':'Sua contratação foi registrada pela Crediti.'})[data.status];result.append(heading,p);
+    try{const snap=await db.collection('consultasCDC').doc(await statusKey(c,k)).get({source:'server'});if(!snap.exists)throw Error('invalid');const data=snap.data();if(!['Em análise','Pendente','Pré-aprovada','Recusada','Contratada'].includes(data.status)||data.expiraEm.toMillis()<=Date.now())throw Error('invalid');
+      result.innerHTML='';const heading=document.createElement('h3');heading.textContent=data.status;const p=document.createElement('p');p.textContent=({'Em análise':'Sua ficha está em conferência. Consulte novamente para acompanhar.','Pendente':'Sua ficha foi analisada e há pendências que precisam ser esclarecidas. Entre em contato com a Crediti para saber o que falta. A proposta ainda não foi aprovada nem recusada.','Pré-aprovada':'Sua proposta foi pré-aprovada pela Crediti. Entre em contato para continuar a contratação.','Recusada':'Sua proposta não foi aprovada. Entre em contato com a Crediti para esclarecimentos.','Contratada':'Sua contratação foi registrada pela Crediti.'})[data.status];result.append(heading,p);
     }catch(error){result.textContent=error.code==='unavailable'?'Não foi possível consultar agora. Verifique sua conexão e tente novamente.':'Consulta não disponível. Confira CPF e código ou peça um novo código à Crediti.';}
     finally{busy=false;button.disabled=false;}
   };
 }
+

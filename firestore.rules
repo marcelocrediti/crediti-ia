@@ -99,7 +99,7 @@ service cloud.firestore {
       allow read, write: if admin();
       allow get: if key.matches('^[a-f0-9]{64}$')
         && resource.data.keys().hasOnly(['status','atualizadoEm','expiraEm'])
-        && resource.data.status in ['Em análise','Pré-aprovada','Recusada','Contratada']
+        && resource.data.status in ['Em análise','Pendente','Pré-aprovada','Recusada','Contratada']
         && resource.data.expiraEm > request.time;
     }
     match /{document=**} {
@@ -107,3 +107,4 @@ service cloud.firestore {
     }
   }
 }
+

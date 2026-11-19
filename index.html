@@ -545,7 +545,7 @@ window.gerarCodigoConsultaCDC=async function(id){
   if(button)button.disabled=true;
   try{
     if(!isCdcAdmin())throw Error('Entre como administrador.');
-    const module=await import('./cdc-status.mjs?v=1');
+    const module=await import('./cdc-status.mjs?v=20261119-pendente');
     const code=await module.issueCode(id,{db,fb:firebase});
     const box=document.getElementById('codigo-consulta-salva');box.innerHTML='';
     const p=document.createElement('p');p.className='hint';p.textContent='Novo código gerado. O anterior foi cancelado. Envie este código ao cliente junto do endereço abaixo. Válido por 90 dias.';
@@ -561,7 +561,7 @@ window.renovarPreanaliseCDC=async function(id){
   if(button)button.disabled=true;
   try{
     const s=await loadSim(id);
-    const module=await import('./cdc-preanalise.mjs?v=20261119-sobra600');
+    const module=await import('./cdc-preanalise.mjs?v=20261119-pendente');
     if(!module.validCpf(s.dadosCliente?.cpf)){
       toast('Informe um CPF válido nos dados do cliente antes de gerar o link da ficha.');
       return;
@@ -635,7 +635,7 @@ async function saveSim(sim){
         sim.linkAssinatura=null;
       }
     }
-    const statusModule=await import('./cdc-status.mjs?v=1');
+    const statusModule=await import('./cdc-status.mjs?v=20261119-pendente');
     await db.runTransaction(async tx=>{
       const ref=db.collection('simulacoes').doc(sim.id),latest=await tx.get(ref);
       const oldConsulta=latest.exists?latest.data().consultaStatusId:null;
@@ -666,7 +666,7 @@ async function loadSim(id){
     const doc = await db.collection('simulacoes').doc(id).get();
     if(!doc.exists)return null;
     let data=doc.data();
-    if(data.linkPreanalise && isCdcAdmin()){try{const module=await import('./cdc-preanalise.mjs?v=20261119-sobra600');data=await module.receiveSubmission(data,{db});}catch(e){toast('Não foi possível receber a pré-análise: '+e.message);}}
+    if(data.linkPreanalise && isCdcAdmin()){try{const module=await import('./cdc-preanalise.mjs?v=20261119-pendente');data=await module.receiveSubmission(data,{db});}catch(e){toast('Não foi possível receber a pré-análise: '+e.message);}}
 
     if(data.linkAssinatura && !data.aceite && isCdcAdmin()){
       const link=await db.collection('assinaturasCDC').doc(data.linkAssinatura).get();
@@ -786,8 +786,8 @@ async function renderInner(){
   const route = getRoute();
   const app = document.getElementById('app');
   if(!cdcAuthReady){ app.innerHTML = '<div class="wrap"><div class="card">Verificando acesso…</div></div>'; return; }
-  if(route.view==='consulta'){const module=await import('./cdc-status.mjs?v=1');module.mountStatus(app,{db});return;}
-  if(route.view==='preanalise'){const module=await import('./cdc-preanalise.mjs?v=20261119-sobra600');await module.mountCustomer(app,route.id,{db,fb:firebase,logo:LOGO_DATAURL});return;}
+  if(route.view==='consulta'){const module=await import('./cdc-status.mjs?v=20261119-pendente');module.mountStatus(app,{db});return;}
+  if(route.view==='preanalise'){const module=await import('./cdc-preanalise.mjs?v=20261119-pendente');await module.mountCustomer(app,route.id,{db,fb:firebase,logo:LOGO_DATAURL});return;}
   if(route.view==='cliente' && /^[a-f0-9]{64}$/.test(route.id)){app.innerHTML=await viewCliente(route.id);return;}
   if(!isCdcAdmin()) { renderCdcLogin(app); return; }
   if(route.view === 'cliente'){
@@ -1273,6 +1273,10 @@ window.abrirPaginaDetalhe = function(id){
 
 window.abrirDetalhe = async function(id){
   const s = await loadSim(id);
+  if(s?.consultaStatusId && isCdcAdmin()){
+    try{const statusModule=await import('./cdc-status.mjs?v=20261119-pendente');await statusModule.syncStatus(id,{db,fb:firebase});}
+    catch(e){toast('Não foi possível atualizar a consulta do cliente. Tente salvar a ficha novamente.');}
+  }
   const detalheEl = document.getElementById('detalhe');
   if(!detalheEl){
     abrirPaginaDetalhe(id);
@@ -2357,7 +2361,7 @@ async function onCalcular(){
     if(!cdcProntoParaEnviar())return;
     preButton.disabled=true;preButton.textContent='Gerando link protegido…';
     try{
-      const module=await import('./cdc-preanalise.mjs?v=20261119-sobra600');
+      const module=await import('./cdc-preanalise.mjs?v=20261119-pendente');
       if(!module.validCpf(window.__simTemp.dadosCliente?.cpf))throw Error('Preencha um CPF válido e clique em Calcular simulação novamente.');
       await saveSim(window.__simTemp);
       const link=await module.createLink(window.__simTemp,{db,fb:firebase});
@@ -2859,6 +2863,7 @@ if(firebaseOk){
 </script>
 </body>
 </html>
+
 
 
 
