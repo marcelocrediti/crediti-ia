@@ -43,6 +43,52 @@ service cloud.firestore {
           && request.resource.data.aceite.geo.lat >= -90 && request.resource.data.aceite.geo.lat <= 90
           && request.resource.data.aceite.geo.lng >= -180 && request.resource.data.aceite.geo.lng <= 180));
     }
+    // Only a random, unguessable link can access its own intake for 30 minutes.
+    match /preanalisesCDC/{token} {
+      function active(d) {
+        return token.matches('^[a-f0-9]{64}$') && d.estado == 'aberto'
+          && d.criadoEm <= request.time
+          && request.time < d.criadoEm + duration.value(30, 'm');
+      }
+      function validResponse(r) {
+        return r is map
+          && r.keys().hasAll(['cpf','telefone','email','endereco','profissao','renda','despesas','outrasParcelas','restricao','cpfNaIdentidade','consentimento','arquivos'])
+          && r.keys().hasOnly(['cpf','telefone','email','endereco','profissao','renda','despesas','outrasParcelas','restricao','cpfNaIdentidade','consentimento','arquivos'])
+          && r.cpf is string && r.cpf.matches('^[0-9]{11}$')
+          && r.telefone is string && r.telefone.matches('^[0-9]{10,13}$')
+          && r.email is string && r.email.size() <= 160
+          && r.endereco is string && r.endereco.size() > 0 && r.endereco.size() <= 300
+          && r.profissao is string && r.profissao.size() > 0 && r.profissao.size() <= 160
+          && r.renda is number && r.renda > 0 && r.renda <= 10000000
+          && r.despesas is number && r.despesas >= 0 && r.despesas <= 10000000
+          && r.outrasParcelas is number && r.outrasParcelas >= 0 && r.outrasParcelas <= 10000000
+          && r.restricao in ['sim','nao','nao_sei']
+          && r.cpfNaIdentidade is bool && r.consentimento == true
+          && r.arquivos is list && r.arquivos.size() >= 3 && r.arquivos.size() <= 20
+          && r.arquivos.hasOnly(['rgFrente','rgFrente__2','rgFrente__3','rgFrente__4','rgFrente__5','cpfFrente','cpfFrente__2','cpfFrente__3','cpfFrente__4','cpfFrente__5','comprovanteResidencia','comprovanteResidencia__2','comprovanteResidencia__3','comprovanteResidencia__4','comprovanteResidencia__5','comprovanteRenda','comprovanteRenda__2','comprovanteRenda__3','comprovanteRenda__4','comprovanteRenda__5'])
+          && r.arquivos.hasAll(['rgFrente','comprovanteResidencia','comprovanteRenda'])
+          && (r.cpfNaIdentidade || r.arquivos.hasAll(['cpfFrente']));
+      }
+      allow read, write: if admin();
+      allow get: if active(resource.data);
+      allow update: if active(resource.data)
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['estado','resposta','enviadoEm'])
+        && request.resource.data.estado == 'enviado'
+        && request.resource.data.enviadoEm == request.time
+        && validResponse(request.resource.data.resposta);
+      match /documentos/{slot} {
+        allow read, write: if admin();
+        // Documents are write-only for the link holder. No public listing/downloads.
+        allow create, update: if active(get(/databases/$(database)/documents/preanalisesCDC/$(token)).data)
+          && slot.matches('^(rgFrente|cpfFrente|comprovanteResidencia|comprovanteRenda)(__[2-5])?$')
+          && request.resource.data.keys().hasOnly(['nome','tipo','dataUrl'])
+          && request.resource.data.nome is string && request.resource.data.nome.size() <= 160
+          && request.resource.data.tipo in ['application/pdf','image/jpeg']
+          && request.resource.data.dataUrl is string && request.resource.data.dataUrl.size() <= 950000
+          && ((request.resource.data.tipo == 'application/pdf' && request.resource.data.dataUrl.matches('^data:application/pdf;base64,JVBER[A-Za-z0-9+/=]+$'))
+            || (request.resource.data.tipo == 'image/jpeg' && request.resource.data.dataUrl.matches('^data:image/jpeg;base64,/9j/[A-Za-z0-9+/=]+$')));
+      }
+    }
     match /{document=**} {
       allow read, write: if false;
     }
