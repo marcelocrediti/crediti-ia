@@ -534,6 +534,22 @@ async function compressImage(dataUrl, maxW){
   });
 }
 
+window.gerarCodigoConsultaCDC=async function(id){
+  const button=document.getElementById('btn-codigo-consulta');
+  if(button?.disabled)return;
+  if(button)button.disabled=true;
+  try{
+    if(!isCdcAdmin())throw Error('Entre como administrador.');
+    const module=await import('./cdc-status.mjs?v=1');
+    const code=await module.issueCode(id,{db,fb:firebase});
+    const box=document.getElementById('codigo-consulta-salva');box.innerHTML='';
+    const p=document.createElement('p');p.className='hint';p.textContent='Novo código gerado. O anterior foi cancelado. Envie este código ao cliente junto do endereço abaixo. Válido por 90 dias.';
+    box.append(p);module.appendCopy(box,code);
+    const link=document.createElement('a');link.href=location.origin+location.pathname+'#consulta';link.textContent='Página de consulta do cliente';box.append(link);
+    const copy=document.createElement('button');copy.className='btn btn-outline';copy.textContent='Copiar mensagem para o cliente';
+    copy.onclick=async()=>{try{await navigator.clipboard.writeText('Consulte sua proposta na Crediti: '+link.href+'\nInforme seu CPF e o código: '+code);toast('Mensagem copiada. Cole na conversa com o cliente.');}catch{toast('Copie o código e o endereço da consulta acima.');}};box.append(copy);
+  }catch(e){toast(e.message);}finally{if(button)button.disabled=false;}
+};
 window.renovarPreanaliseCDC=async function(id){
   const button=document.getElementById('btn-link-ficha-salva');
   if(button?.disabled)return;
@@ -614,7 +630,18 @@ async function saveSim(sim){
         sim.linkAssinatura=null;
       }
     }
-    await db.collection('simulacoes').doc(sim.id).set(sim);
+    const statusModule=await import('./cdc-status.mjs?v=1');
+    await db.runTransaction(async tx=>{
+      const ref=db.collection('simulacoes').doc(sim.id),latest=await tx.get(ref);
+      const oldConsulta=latest.exists?latest.data().consultaStatusId:null;
+      if(oldConsulta){
+        const beforeCpf=String(latest.data().dadosCliente?.cpf||'').replace(/\D/g,'');
+        const afterCpf=String(sim.dadosCliente?.cpf||'').replace(/\D/g,'');
+        if(beforeCpf!==afterCpf){tx.delete(db.collection('consultasCDC').doc(oldConsulta));delete sim.consultaStatusId;}
+        else{sim.consultaStatusId=oldConsulta;tx.set(db.collection('consultasCDC').doc(oldConsulta),statusModule.statusRecord(sim,firebase));}
+      }else{delete sim.consultaStatusId;}
+      tx.set(ref,sim);
+    });
     return true;
   }catch(e){
     console.error('Erro saveSim:', e);
@@ -722,6 +749,7 @@ async function deleteDocumento(simId, key){
 // ---------- Router ----------
 function getRoute(){
   const h = location.hash.replace('#','');
+  if(h === 'consulta') return {view:'consulta'};
   if(h.startsWith('preanalise/')) return {view:'preanalise', id:h.split('/')[1]};
   if(h.startsWith('cliente/')) return {view:'cliente', id:h.split('/')[1]};
   if(h.startsWith('simulacao/')) return {view:'simulacao', id:h.split('/')[1]};
@@ -753,6 +781,7 @@ async function renderInner(){
   const route = getRoute();
   const app = document.getElementById('app');
   if(!cdcAuthReady){ app.innerHTML = '<div class="wrap"><div class="card">Verificando acesso…</div></div>'; return; }
+  if(route.view==='consulta'){const module=await import('./cdc-status.mjs?v=1');module.mountStatus(app,{db});return;}
   if(route.view==='preanalise'){const module=await import('./cdc-preanalise.mjs?v=1');await module.mountCustomer(app,route.id,{db,fb:firebase,logo:LOGO_DATAURL});return;}
   if(route.view==='cliente' && /^[a-f0-9]{64}$/.test(route.id)){app.innerHTML=await viewCliente(route.id);return;}
   if(!isCdcAdmin()) { renderCdcLogin(app); return; }
@@ -1316,6 +1345,7 @@ window.abrirDetalhe = async function(id){
     <button class="btn btn-outline" id="btn-pdf-salva">Gerar PDF da simulação</button>
     `}
     ${!isDecimoTerceiro(s) && !s.preanaliseRecebida && !s.aceite && !s.analiseCdc?.decisao ? `<section class="result-box"><h3>Ficha para o cliente preencher</h3><p class="hint">Envie a simulação e o checklist para o cliente preencher os dados e anexar os documentos. O link vale por 30 minutos.</p><button class="btn btn-primary" id="btn-link-ficha-salva" onclick="renovarPreanaliseCDC('${s.id}')">${s.linkPreanalise ? 'Gerar novo link da ficha' : 'Gerar link da ficha para o cliente'}</button><div id="link-preanalise-salva" role="status"></div></section>` : ''}
+    ${!isDecimoTerceiro(s) ? `<section class="result-box"><h3>Acompanhamento pelo cliente</h3><p class="hint">Gere um código de consulta para esta proposta. Ao gerar outro, o anterior deixa de funcionar. Não altera a análise nem o contrato.</p><button class="btn btn-outline" id="btn-codigo-consulta" onclick="gerarCodigoConsultaCDC('${s.id}')">Gerar novo código de consulta</button><div id="codigo-consulta-salva" role="status"></div></section>` : ''}
     ${dadosClienteBlock}
     ${signBlock}
   </div>
@@ -2766,6 +2796,7 @@ function renderCdcLogin(app){
     <button type="button" id="cdc-eye" aria-label="Mostrar senha" aria-controls="cdc-password" aria-pressed="false">Mostrar</button></div>
     <button type="submit" id="cdc-enter">Entrar no painel</button>
     <button type="button" id="cdc-reset">Esqueci minha senha</button>
+    <button type="button" class="btn btn-outline" onclick="location.hash='consulta'">Consultar status da proposta</button>
     <p id="cdc-login-message" role="status" aria-live="polite"></p></form><p class="cdc-login-footer">Crediti · Itapajé, Ceará<br>Área restrita ao administrador</p></div></section>`;
   const email = document.getElementById('cdc-email');
   const pass = document.getElementById('cdc-password');
@@ -2822,6 +2853,7 @@ if(firebaseOk){
 </script>
 </body>
 </html>
+
 
 
 
