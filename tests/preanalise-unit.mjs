@@ -1,0 +1,13 @@
+import assert from 'node:assert/strict';
+import {TTL_MS,validCpf,amount,publicProposal,validateQuestionnaire,receiveSubmission,createLink} from '../cdc-preanalise.mjs';
+assert.equal(TTL_MS,1800000);
+assert.equal(validCpf('529.982.247-25'),true);assert.equal(validCpf('11111111111'),false);assert.equal(validCpf('52998224726'),false);
+assert.equal(amount('1.500,50'),1500.5);assert.equal(amount('1.500'),1500);assert.equal(amount('1500,00'),1500);assert.ok(Number.isNaN(amount('')));
+const s={cliente:'TESTE FICTICIO',valor:700,prazo:6,parcela:167.4,taxa:9,retorno:304.4,dadosCliente:{cpf:'52998224725',pix:'PRIVATE'},historicoCrediti:[{nota:'PRIVATE'}],numeroCCB:'PRIVATE'};
+const p=publicProposal(s);assert.deepEqual(Object.keys(p),['cliente','valor','prazo','parcela','taxa']);assert.ok(!JSON.stringify(p).includes('PRIVATE'));
+validateQuestionnaire({renda:1500,despesas:750,outrasParcelas:0,restricao:'nao'});
+for(const r of [-1,Infinity,NaN,null])assert.throws(()=>validateQuestionnaire({renda:r,despesas:0,outrasParcelas:0,restricao:'nao'}));
+assert.equal(await receiveSubmission({id:'1'},{}).then(x=>x.id),'1');
+assert.equal(await receiveSubmission({id:'1',aceite:{},linkPreanalise:'x'},{}).then(x=>x.id),'1');
+await assert.rejects(createLink({dadosCliente:{cpf:'123'}},{}));
+console.log('PASS: TTL, CPF, BRL, privacy allowlist, validation, signed-contract preservation');
