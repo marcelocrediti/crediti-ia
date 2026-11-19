@@ -1,4 +1,5 @@
 // Remote intake is separate from contracts. Public input never approves credit.
+import {newCode,statusKey,statusRecord,showReceipt} from './cdc-status.mjs?v=1';
 export const TTL_MS=30*60*1000;
 export const GROUPS=[['rgFrente','Identidade: RG, CIN ou CNH, frente e verso'],['cpfFrente','CPF, se não constar na identidade'],['comprovanteResidencia','Comprovante de residência recente'],['comprovanteRenda','Renda: 3 contracheques, benefício atual ou extratos de 3 meses']];
 export const WARNING='A parcela do novo empréstimo, somada às outras parcelas mensais, poderá comprometer até 15% da renda líquida comprovada. O limite poderá ser menor conforme as despesas e a análise. Isso não garante aprovação.';
@@ -47,14 +48,17 @@ export async function createLink(s,ctx){
   if(!existing.empty)throw Error('Esta ficha já recebeu documentos. Continue a análise pelo painel.');
   const token=Array.from(crypto.getRandomValues(new Uint8Array(32))).map(n=>n.toString(16).padStart(2,'0')).join('');
   const cpfHash=await digest(token+cpf),ref=db.collection('preanalisesCDC').doc(token);
+  const codigoConsulta=newCode(),consultaStatusId=await statusKey(cpf,codigoConsulta);
   await db.runTransaction(async tx=>{
     const current=await tx.get(db.collection('simulacoes').doc(s.id));if(!current.exists)throw Error('Salve a simulação antes de gerar o link.');
     const d=current.data();if(d.aceite||d.analiseCdc?.decisao||d.preanaliseRecebida)throw Error('Esta ficha já foi concluída ou recebida.');
     if(JSON.stringify(publicProposal(d))!==JSON.stringify(publicProposal(s)))throw Error('A simulação mudou. Calcule novamente.');
     if(d.linkPreanalise){const old=await tx.get(db.collection('preanalisesCDC').doc(d.linkPreanalise));if(old.data()?.estado==='enviado')throw Error('O cliente já enviou a ficha. Abra o painel para receber os documentos.');}
-    tx.set(ref,{simId:s.id,proposta:publicProposal(s),cpfHash,criadoEm:fb.firestore.FieldValue.serverTimestamp(),estado:'aberto'});
+    tx.set(ref,{simId:s.id,proposta:publicProposal(s),cpfHash,codigoConsulta,criadoEm:fb.firestore.FieldValue.serverTimestamp(),estado:'aberto'});
+    if(d.consultaStatusId)tx.delete(db.collection('consultasCDC').doc(d.consultaStatusId));
+    tx.set(db.collection('consultasCDC').doc(consultaStatusId),statusRecord(s,fb));
     if(d.linkPreanalise)tx.update(db.collection('preanalisesCDC').doc(d.linkPreanalise),{estado:'revogado'});
-    tx.update(db.collection('simulacoes').doc(s.id),{linkPreanalise:token,status:'preanalise_aguardando'});
+    tx.update(db.collection('simulacoes').doc(s.id),{linkPreanalise:token,status:'preanalise_aguardando',consultaStatusId});
   });
   const record=(await ref.get({source:'server'})).data();
   return {token,expires:record.criadoEm.toMillis()+TTL_MS};
@@ -112,8 +116,11 @@ export async function mountCustomer(root,token,{db,fb,logo}){
       for(const [key,label] of GROUPS){const files=Array.from(root.querySelector('[data-files="'+key+'"]').files||[]);if(!files.length&&(key!=='cpfFrente'||!q.cpfNaIdentidade))throw Error('Anexe: '+label);if(files.length>5)throw Error('O máximo é 5 arquivos por categoria.');for(let i=0;i<files.length;i++){const file=files[i];if(file.size>700000||!['application/pdf','image/jpeg'].includes(file.type))throw Error('Use somente PDF ou JPEG de até 700 KB por arquivo.');const bytes=new Uint8Array(await file.slice(0,5).arrayBuffer());if(file.type==='application/pdf'?String.fromCharCode(...bytes)!=='%PDF-':bytes[0]!==255||bytes[1]!==216)throw Error('Arquivo inválido: '+file.name);const dataUrl=await new Promise((resolve,reject)=>{const fr=new FileReader();fr.onload=()=>resolve(fr.result);fr.onerror=()=>reject(Error('Falha ao ler arquivo.'));fr.readAsDataURL(file);});const slot=key+(i?'__'+(i+1):'');q.arquivos.push(slot);uploads.push([slot,{nome:clean(file.name),tipo:file.type,dataUrl}]);}}
       // Each upload is bounded. Final state transition is atomic and closes access.
       for(const [slot,file] of uploads){if(Date.now()>=expires)throw Error('O link expirou durante o envio. Peça um novo link.');await ref.collection('documentos').doc(slot).set(file);}
+      const currentIntake=await ref.get({source:'server'});
+      const currentCode=currentIntake.exists?currentIntake.data().codigoConsulta:record.codigoConsulta;
       await ref.update({estado:'enviado',resposta:q,enviadoEm:fb.firestore.FieldValue.serverTimestamp()});done=true;
-      root.innerHTML='<section class="card"><h2>Ficha recebida pela Crediti</h2><p>Seus dados e documentos foram enviados para pré-análise. A Crediti vai conferir os anexos e o histórico antes de confirmar a decisão.</p><p>O envio não significa aprovação. Não é necessário informar Pix nesta etapa.</p><p>Este link foi encerrado para proteger seus dados.</p></section>';
+      showReceipt(root,currentCode);
     }catch(error){msg.textContent=error.code==='permission-denied'?'Link expirado ou já utilizado. Peça um novo link à Crediti.':error.message;}finally{busy=false;submit.disabled=false;}
   };
 }
+
