@@ -2,7 +2,7 @@
 import {newCode,statusKey,statusRecord,showReceipt} from './cdc-status.mjs?v=1';
 export const TTL_MS=30*60*1000;
 export const GROUPS=[['rgFrente','Identidade: RG, CIN ou CNH, frente e verso'],['cpfFrente','CPF, se não constar na identidade'],['comprovanteResidencia','Comprovante de residência recente'],['comprovanteRenda','Renda: 3 contracheques, benefício atual ou extratos de 3 meses']];
-export const WARNING='A parcela do novo empréstimo, somada às outras parcelas mensais, poderá comprometer até 15% da renda líquida comprovada. O limite poderá ser menor conforme as despesas e a análise. Isso não garante aprovação.';
+export const WARNING='A nova parcela pode usar até 15% do que sobra da renda após os gastos e as parcelas atuais. Depois da nova parcela, devem restar pelo menos R$ 600,00 por mês. Empréstimo mínimo: R$ 300,00. Sujeito à análise.';
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const clean=(v,max=160)=>String(v??'').replace(/[<>"'`&]/g,'').trim().slice(0,max);
 const money=v=>Number(v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
@@ -105,7 +105,7 @@ export async function mountCustomer(root,token,{db,fb,logo}){
   bindNumberMask(fields('telefone'),formatPhone);
   const clock=root.querySelector('[data-clock]');
   const tick=()=>{if(!clock.isConnected||done)return;const left=Math.max(0,Math.ceil((expires-Date.now())/1000));clock.textContent='Tempo restante: '+String(Math.floor(left/60)).padStart(2,'0')+':'+String(left%60).padStart(2,'0');if(!left){done=true;closed();return;}setTimeout(tick,1000);};tick();
-  const income=()=>{const r=amount(fields('renda').value),d=amount(fields('outrasParcelas').value);root.querySelector('[data-income]').textContent=r>0&&Number.isFinite(d)?'Esta parcela representa '+(s.parcela/r*100).toLocaleString('pt-BR',{maximumFractionDigits:2})+'% da renda informada. Com outras parcelas: '+((s.parcela+d)/r*100).toLocaleString('pt-BR',{maximumFractionDigits:2})+'%. Limite de referência: 15%, sujeito à análise.':'';};
+  const income=()=>{const r=amount(fields('renda').value),d=amount(fields('outrasParcelas').value),g=amount(fields('despesas').value),sobra=r-g-d;root.querySelector('[data-income]').textContent=r>0&&Number.isFinite(d)&&Number.isFinite(g)?'Após gastos e parcelas atuais, sobram '+money(sobra)+'. Limite para a nova parcela: '+money(Math.max(0,Math.min(Math.floor(sobra*100*0.15)/100,sobra-600)))+'. Após a parcela solicitada, restariam '+money(sobra-s.parcela)+'. É necessário manter R$ 600,00 por mês. Empréstimo mínimo: R$ 300,00.':'';};
   for(const k of ['renda','despesas','outrasParcelas']){fields(k).oninput=income;fields(k).onblur=()=>{const n=amount(fields(k).value);if(Number.isFinite(n))fields(k).value=n.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});income();};}
   for(const [k] of GROUPS)root.querySelector('[data-files="'+k+'"]').onchange=e=>{const files=Array.from(e.target.files);root.querySelector('[data-file-label="'+k+'"]').textContent=files.length+'/5: '+files.map(f=>f.name).join('; ');};
   form.onsubmit=async e=>{e.preventDefault();if(busy||done)return;busy=true;const submit=form.querySelector('button');submit.disabled=true;msg.textContent='Conferindo e enviando seus documentos…';

@@ -1,7 +1,7 @@
-export const POLICY_VERSION = '2026-11-19-v3-explicacoes';
+export const POLICY_VERSION = '2026-11-19-v4-renda-disponivel';
 const cents = n => Math.round(Number(n)*100);
 const money = n => Number(n).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
-export function evaluateCredit({q, parcela, history=[], contracts=[], documents=[], today}) {
+export function evaluateCredit({q, parcela, valor, history=[], contracts=[], documents=[], today}) {
   const reasons=[], pending=[];
   const income=cents(q.renda), expenses=cents(q.despesas), debts=cents(q.outrasParcelas), payment=cents(parcela);
   const validMoney=![q.renda,q.despesas,q.outrasParcelas].some(x=>x===null||x===''||x===undefined) && [income,expenses,debts,payment].every(Number.isFinite) && income>0 && expenses>=0 && debts>=0 && payment>0;
@@ -9,10 +9,13 @@ export function evaluateCredit({q, parcela, history=[], contracts=[], documents=
   if(q.restricao==='sim') reasons.push('Restrição informada.');
   if(q.restricao!=='nao' && q.restricao!=='sim') pending.push('Confirme a situação de restrições.');
   if(history.some(x=>x.tipo==='atencao'||(x.tipo==='nota'&&x.nota?.trim())))pending.push('Há observações ou pontos de atenção no histórico. Leia a gaveta e faça a avaliação manual; o texto livre não gera uma recusa automática.');
-  const maximum = validMoney?Math.max(0,Math.min(Math.floor(income*15/100)-debts,income-expenses-debts)):null;
-  const requiredIncome=validMoney?Math.max(Math.ceil((debts+payment)*100/15),expenses+debts+payment):null;
-  if(validMoney && debts+payment>Math.floor(income*15/100)) reasons.push('Comprometimento da renda: renda líquida informada de '+money(income/100)+'. O limite de 15% corresponde a '+money(Math.floor(income*15/100)/100)+'. As parcelas existentes de '+money(debts/100)+' mais a nova parcela de '+money(payment/100)+' somam '+money((debts+payment)/100)+' ('+((debts+payment)/income*100).toLocaleString('pt-BR',{maximumFractionDigits:2})+'% da renda). Para atender somente a este limite, seria necessária renda líquida de pelo menos '+money(Math.ceil((debts+payment)*100/15)/100)+'.');
-  if(validMoney && payment>income-expenses-debts) reasons.push('Saldo após os gastos: '+money(income/100)+' de renda − '+money(expenses/100)+' de gastos com mercado, energia, água, internet, remédios e aluguéis − '+money(debts/100)+' de parcelas existentes = '+money((income-expenses-debts)/100)+'. Esse saldo não cobre a nova parcela de '+money(payment/100)+'. Mantidos os gastos, seria necessária renda de pelo menos '+money((expenses+debts+payment)/100)+' para cobrir todos esses pagamentos.');
+  const available=validMoney?income-expenses-debts:null;
+  const maximum=validMoney?Math.max(0,Math.min(Math.floor(available*15/100),available-60000)):null;
+  const requiredIncome=validMoney?expenses+debts+Math.max(Math.ceil(payment*100/15),60000+payment):null;
+  if(!Number.isFinite(Number(valor))||Number(valor)<=0) pending.push('Informe o valor do empréstimo para conferir o mínimo de R$ 300,00.');
+  else if(cents(valor)<30000) reasons.push('Valor abaixo do mínimo: empréstimo solicitado de '+money(valor)+'. O mínimo da Crediti é R$ 300,00.');
+  if(validMoney && payment>Math.floor(available*15/100)) reasons.push('Parcela acima de 15% da sobra: renda recebida de '+money(income/100)+' − gastos de '+money(expenses/100)+' − empréstimos e financiamentos atuais de '+money(debts/100)+' = '+money(available/100)+'. Os 15% dessa sobra permitem até '+money(Math.max(0,Math.floor(available*15/100))/100)+', mas a nova parcela é '+money(payment/100)+'.');
+  if(validMoney && available-payment<60000) reasons.push('Sobra insuficiente para o mês: após as despesas e os empréstimos atuais, restam '+money(available/100)+'. Descontando a nova parcela de '+money(payment/100)+', sobrariam '+money((available-payment)/100)+'. É necessário preservar pelo menos R$ 600,00 por mês.');
   if(history.some(x=>x.tipo==='renegociacao')) reasons.push('Histórico de contrato renegociado na Crediti.');
   const late=new Set(history.filter(x=>x.tipo==='atraso' && x.dias>0).map(x=>x.contrato+'|'+x.vencimento));
   if(late.size>=3){
@@ -32,7 +35,7 @@ export function evaluateCredit({q, parcela, history=[], contracts=[], documents=
     else if(!d.confirmado) pending.push('Conferência documental: '+d.label+'. Falta a confirmação do administrador.');
   }
   if(!q.documentosConferidos) pending.push('Confirme os documentos obrigatórios e os valores extraídos.');
-  return {status:reasons.length?'Recusada':pending.length?'Pendente':'Aprovada',motivos:reasons.length?reasons:pending.length?pending:['Parcela dentro do limite, documentos conferidos, restrições respondidas como não e nenhum impedimento registrado.'+(history.some(x=>x.tipo==='positivo')?' Histórico contém registro positivo.':'')],pendencias:pending,limiteParcela:maximum===null?null:maximum/100,rendaMinima:requiredIncome===null?null:requiredIncome/100,calculo:validMoney?{renda:income/100,gastos:expenses/100,parcelasExistentes:debts/100,novaParcela:payment/100,teto15:Math.floor(income*15/100)/100,margem15:Math.max(0,Math.floor(income*15/100)-debts)/100,saldo:(income-expenses-debts)/100}:null,comprometimento:validMoney?(debts+payment)/income*100:null,versao:POLICY_VERSION};
+  return {status:reasons.length?'Recusada':pending.length?'Pendente':'Aprovada',motivos:reasons.length?reasons:pending.length?pending:['Parcela dentro do limite, documentos conferidos, restrições respondidas como não e nenhum impedimento registrado.'+(history.some(x=>x.tipo==='positivo')?' Histórico contém registro positivo.':'')],pendencias:pending,limiteParcela:maximum===null?null:maximum/100,rendaMinima:requiredIncome===null?null:requiredIncome/100,calculo:validMoney?{renda:income/100,gastos:expenses/100,parcelasExistentes:debts/100,novaParcela:payment/100,teto15:Math.max(0,Math.floor(available*15/100))/100,margem15:Math.max(0,Math.floor(available*15/100))/100,saldo:(income-expenses-debts)/100}:null,comprometimento:validMoney&&available>0?payment/available*100:null,versao:POLICY_VERSION};
 }
 
 const normalizedName=v=>String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toUpperCase().replace(/[^A-Z0-9 ]/g,' ').replace(/\s+/g,' ').trim();
@@ -76,9 +79,10 @@ export function analysisSections(result,{valor,parcela,prazo,readCount,historyCo
     'Renda líquida informada: '+money(c.renda)+'.',
     'Gastos mensais informados: '+money(c.gastos)+' (mercado, energia, água, internet, remédios e aluguéis).',
     'Empréstimos e financiamentos existentes: '+money(c.parcelasExistentes)+' por mês.',
-    'Limite de 15%: '+money(c.renda)+' × 15% = '+money(c.teto15)+'. Descontando as parcelas existentes, restam '+money(c.margem15)+'.',
+    'Limite de 15% sobre a sobra: '+money(c.saldo)+' × 15% = '+money(c.teto15)+'.',
     'Saldo após gastos e parcelas existentes: '+money(c.renda)+' − '+money(c.gastos)+' − '+money(c.parcelasExistentes)+' = '+money(c.saldo)+'.',
-    'Limite para a nova parcela: '+money(result.limiteParcela)+'. É o menor valor entre a margem de 15% e o saldo disponível, nunca abaixo de zero.',
+    'Limite para a nova parcela: '+money(result.limiteParcela)+'. É o menor valor entre 15% da sobra e o valor que permite manter R$ 600,00 depois da nova parcela, nunca abaixo de zero.',
+    'Sobra após a nova parcela: '+money(c.saldo-parcela)+'. Mínimo a preservar: R$ 600,00.',
     'Nova parcela solicitada: '+money(parcela)+'. Renda mínima calculada para atender aos dois critérios: '+money(result.rendaMinima)+'. Esse valor é uma referência matemática, não uma renda comprovada nem garantia de aprovação.'
   ]:['Limite não calculado: faltam dados financeiros válidos. Não interpretar como renda ou limite de R$ 0,00.']});
   if(result.notasDocumentos?.length)sections.push({title:'Conferência dos documentos',items:result.notasDocumentos});

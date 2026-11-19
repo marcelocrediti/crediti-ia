@@ -1,4 +1,4 @@
-import {evaluateCredit,POLICY_VERSION,documentFindings,analysisSections,sectionsText} from './cdc-policy.mjs?v=20261119-explicacoes';
+import {evaluateCredit,POLICY_VERSION,documentFindings,analysisSections,sectionsText} from './cdc-policy.mjs?v=20261119-sobra600';
 const API='https://crediti-ia-api.onrender.com/api/cdc/document';
 const DOCS=[['rgFrente','Identidade completa (RG, CIN ou CNH)'],['cpfFrente','CPF (se não constar na identidade)'],['comprovanteResidencia','Comprovante de residência'],['comprovanteRenda','Renda: 3 contracheques, benefício atual ou extratos de 3 meses']];
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -215,7 +215,7 @@ export async function mountCdcReview(id,root,ctx){
       for(const slot of keys){const r=current.analiseDocumentos?.[slot];if(!r?.document||r.hash!==await hash(docs[slot].dataUrl)){issues.push('Leitura não concluída: '+(docs[slot].nome||label));continue;}checks.push({label:docs[slot].nome||label,legibilidade:r.document.legibilidade,consecutivos:r.consecutivos,confirmado:questionnaire().documentosConferidos});readDocs.push({key,label:label+' ('+(docs[slot].nome||slot)+')',d:r.document});}
     }
     const history=sims.flatMap(x=>(x.historicoCrediti||[]).map(h=>({...h,contrato:x.id})));
-    const result=evaluateCredit({q:questionnaire(),parcela:current.parcela,history,contracts:sims.filter(x=>x.aceite&&x.id!==id).map(x=>x.id),documents:checks,today:new Date().toLocaleDateString('en-CA',{timeZone:'America/Fortaleza'})});
+    const result=evaluateCredit({q:questionnaire(),parcela:current.parcela,valor:current.valor,history,contracts:sims.filter(x=>x.aceite&&x.id!==id).map(x=>x.id),documents:checks,today:new Date().toLocaleDateString('en-CA',{timeZone:'America/Fortaleza'})});
     const findings=documentFindings({q:questionnaire(),cliente:current.cliente,cpf,readDocs});
     const conflicts=[...issues,...findings.pending];result.notasDocumentos=findings.notes;
     result.historicoConsiderado=history.map(h=>({contrato:h.contrato,tipo:h.tipo,data:h.data,nota:h.nota||'',dias:h.dias||0}));
