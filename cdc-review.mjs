@@ -1,4 +1,4 @@
-import {evaluateCredit,POLICY_VERSION} from './cdc-policy.mjs?v=20261118-pix';
+import {evaluateCredit,POLICY_VERSION,documentFindings,analysisSections,sectionsText} from './cdc-policy.mjs?v=20261119-explicacoes';
 const API='https://crediti-ia-api.onrender.com/api/cdc/document';
 const DOCS=[['rgFrente','Identidade completa (RG, CIN ou CNH)'],['cpfFrente','CPF (se não constar na identidade)'],['comprovanteResidencia','Comprovante de residência'],['comprovanteRenda','Renda: 3 contracheques, benefício atual ou extratos de 3 meses']];
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -74,6 +74,8 @@ export async function mountCdcReview(id,root,ctx){
   <label>Soma dos gastos com mercado, energia, água, internet, remédios, aluguéis (R$)</label><input type="text" id="rev-despesas" inputmode="decimal" placeholder="0,00" value="${esc(formatAmount(q.despesas))}">
   <label>Soma dos empréstimos e financiamentos em andamento (R$)</label><input type="text" id="rev-outrasParcelas" inputmode="decimal" placeholder="0,00" value="${esc(formatAmount(q.outrasParcelas))}">
   <label>Tem restrições no nome?</label><select id="rev-restricao"><option value="">Selecione</option><option value="nao">Não</option><option value="sim">Sim</option></select>
+  <label for="rev-residenciaTitular">O comprovante de endereço está em nome de quem?</label><select id="rev-residenciaTitular"><option value="">Selecione</option><option value="proprio">Do próprio cliente</option><option value="terceiro">De terceiro</option></select>
+  <div id="rev-residenciaBox" hidden><label for="rev-residenciaJustificativa">Justifique aqui</label><textarea id="rev-residenciaJustificativa" maxlength="600" placeholder="Informe o nome do titular, a relação com o cliente e por que o comprovante está em nome dessa pessoa.">${esc(q.residenciaJustificativa||'')}</textarea></div>
   <h3>Documentos para análise</h3><p class="hint">Até 5 anexos por categoria, em PDF, JPG ou JPEG, até 700 KB cada. Você pode enviar frente e verso ou os comprovantes mensais separados.</p>
   ${DOCS.map(([key,label])=>`<div style="margin-bottom:18px;min-width:0"><label>${esc(label)}</label><input type="file" multiple data-doc="${key}" style="display:block;width:100%;max-width:100%;min-width:0;box-sizing:border-box;font-size:14px" accept="application/pdf,image/jpeg,.jpg,.jpeg"><div data-files="${key}" class="hint" style="overflow-wrap:anywhere"></div><button type="button" class="btn btn-outline" data-read="${key}">Ler anexos</button><div data-result="${key}" style="white-space:pre-wrap;overflow-wrap:anywhere"></div></div>`).join('')}
   <label style="display:flex;gap:10px"><input id="rev-cpfNaIdentidade" type="checkbox" style="width:auto" ${q.cpfNaIdentidade?'checked':''}>CPF consta no documento de identidade</label>
@@ -94,6 +96,9 @@ export async function mountCdcReview(id,root,ctx){
   root.querySelectorAll('input[type="checkbox"]').forEach(input=>{input.style.flex='0 0 22px';input.style.width='22px';input.style.height='22px';});
   for(const k of ['renda','despesas','outrasParcelas']){const input=el(k);input.oninput=()=>{input.value=input.value.replace(/[^\d.,]/g,'');};input.onblur=()=>{if(input.value.trim()&&Number.isFinite(number(input.value)))input.value=formatAmount(number(input.value));};}
   el('restricao').value=q.restricao||'';
+  el('residenciaTitular').value=q.residenciaTitular||'';
+  const residenceToggle=()=>{el('residenciaBox').hidden=el('residenciaTitular').value!=='terceiro';};
+  el('residenciaTitular').onchange=residenceToggle;residenceToggle();
   const message=text=>{el('output').textContent=text;};
   let busy=false;
   const disabledBefore=new Map();
@@ -104,19 +109,21 @@ export async function mountCdcReview(id,root,ctx){
   };
   const reportError=error=>{message(error?.message||'Não foi possível concluir. Tente novamente.');el('output').scrollIntoView({behavior:'smooth',block:'center'});};
   el('observacoes').value=s.analiseCdc?.observacoes|| (record?record.status+'\n'+record.motivos.join('\n'):'');
-  const showResult=(title,text)=>{
+  const showResult=(title,text,sections)=>{
     el('observacoes').value=text;message(title);
     const dialog=document.createElement('dialog');
     dialog.setAttribute('aria-label','Resultado da análise');
     Object.assign(dialog.style,{width:'min(520px, calc(100vw - 32px))',maxHeight:'80dvh',boxSizing:'border-box',border:'2px solid #FDCA01',borderRadius:'18px',padding:'24px',overflow:'auto',background:'#fffdf5',color:'#171717'});
     const heading=document.createElement('h2');heading.textContent=title;
-    const body=document.createElement('p');body.textContent=text;Object.assign(body.style,{whiteSpace:'pre-wrap',overflowWrap:'anywhere',lineHeight:'1.5'});
+    const body=document.createElement('div');Object.assign(body.style,{whiteSpace:'pre-wrap',overflowWrap:'anywhere',lineHeight:'1.5'});
+    if(sections){for(const section of sections){const block=document.createElement('section'),h=document.createElement('h3'),list=document.createElement('ol');h.textContent=section.title;h.style.fontSize='1rem';list.style.paddingLeft='22px';for(const item of section.items){const li=document.createElement('li');li.textContent=item;li.style.marginBottom='8px';list.append(li);}block.style.marginBottom='20px';block.append(h,list);body.append(block);}}
+    else body.textContent=text;
     const ok=document.createElement('button');ok.textContent='OK';ok.className='btn btn-gold';ok.type='button';
     ok.onclick=()=>dialog.close();dialog.addEventListener('close',()=>{dialog.remove();el('observacoes').scrollIntoView({behavior:'smooth',block:'center'});});
     dialog.append(heading,body,ok);document.body.append(dialog);dialog.showModal();ok.focus();
   };
   if(record) message('Última avaliação: '+record.status+'\n'+record.motivos.join('\n')+'\n'+(s.analiseCdc.decisao?'Decisão confirmada: '+s.analiseCdc.decisao.status:'Aguardando conferência do administrador.'));
-  const questionnaire=()=>Object.fromEntries(['renda','despesas','outrasParcelas','restricao','cpfNaIdentidade','documentosConferidos'].map(k=>[k,['renda','despesas','outrasParcelas'].includes(k)?(el(k).value.trim()?number(el(k).value):null):el(k).type==='checkbox'?el(k).checked:el(k).value]));
+  const questionnaire=()=>Object.fromEntries(['renda','despesas','outrasParcelas','restricao','residenciaTitular','residenciaJustificativa','cpfNaIdentidade','documentosConferidos'].map(k=>[k,['renda','despesas','outrasParcelas'].includes(k)?(el(k).value.trim()?number(el(k).value):null):el(k).type==='checkbox'?el(k).checked:k==='residenciaJustificativa'&&el('residenciaTitular').value!=='terceiro'?'':el(k).value.trim()]));
   const persist=async()=>{const current=await loadSim(id);if(!current)throw Error('Não foi possível carregar a ficha. Tente novamente.');const next=questionnaire();const changed=JSON.stringify(current.analiseCdc?.questionario)!==JSON.stringify(next);current.analiseCdc={...(current.analiseCdc||{}),questionario:next,atualizadoEm:Date.now()};if(changed){delete current.analiseCdc.decisao;delete current.analiseCdc.resultado;delete current.analiseCdc.snapshot;}await saveSim(current);return current;};
   const run=async button=>{
     if(busy)return;
@@ -205,21 +212,19 @@ export async function mountCdcReview(id,root,ctx){
     for(const [key,label]of DOCS){
       if(key==='cpfFrente'&&questionnaire().cpfNaIdentidade&&!documentKeys(docs,key).length)continue;
       const keys=documentKeys(docs,key);
-      for(const slot of keys){const r=current.analiseDocumentos?.[slot];if(!r?.document||r.hash!==await hash(docs[slot].dataUrl)){issues.push('Leitura não concluída: '+(docs[slot].nome||label));continue;}checks.push({label:docs[slot].nome||label,legibilidade:r.document.legibilidade,consecutivos:r.consecutivos,confirmado:questionnaire().documentosConferidos});readDocs.push({key,label,d:r.document});}
+      for(const slot of keys){const r=current.analiseDocumentos?.[slot];if(!r?.document||r.hash!==await hash(docs[slot].dataUrl)){issues.push('Leitura não concluída: '+(docs[slot].nome||label));continue;}checks.push({label:docs[slot].nome||label,legibilidade:r.document.legibilidade,consecutivos:r.consecutivos,confirmado:questionnaire().documentosConferidos});readDocs.push({key,label:label+' ('+(docs[slot].nome||slot)+')',d:r.document});}
     }
     const history=sims.flatMap(x=>(x.historicoCrediti||[]).map(h=>({...h,contrato:x.id})));
     const result=evaluateCredit({q:questionnaire(),parcela:current.parcela,history,contracts:sims.filter(x=>x.aceite&&x.id!==id).map(x=>x.id),documents:checks,today:new Date().toLocaleDateString('en-CA',{timeZone:'America/Fortaleza'})});
-    const conflicts=[...issues];const expected={rgFrente:'identidade',cpfFrente:'cpf',comprovanteResidencia:'residencia',comprovanteRenda:'renda',contaCorrente:'conta'};
-    for(const {key,label,d}of readDocs){if(d.tipo!==expected[key])conflicts.push('Tipo do documento não confirmado: '+label);if(d.cpf && d.cpf.replace(/\D/g,'')!==cpf)conflicts.push('CPF do documento diverge da ficha: '+label);}
-    const incomes=readDocs.filter(x=>x.key==='comprovanteRenda'&&Number.isFinite(x.d.rendaLiquida)&&x.d.rendaLiquida>0).map(x=>x.d.rendaLiquida);
-    if(!incomes.length)conflicts.push('Confirme a renda líquida: não foi identificada nos anexos.');
-    else if(questionnaire().renda>Math.min(...incomes)+0.01)conflicts.push('A renda informada supera um dos comprovantes. Confira variações mensais e competências.');
+    const findings=documentFindings({q:questionnaire(),cliente:current.cliente,cpf,readDocs});
+    const conflicts=[...issues,...findings.pending];result.notasDocumentos=findings.notes;
     result.historicoConsiderado=history.map(h=>({contrato:h.contrato,tipo:h.tipo,data:h.data,nota:h.nota||'',dias:h.dias||0}));
     result.pendencias=[...new Set([...(result.pendencias||[]),...conflicts])];
     if(result.pendencias.length&&result.status!=='Recusada'){result.status='Pendente';result.motivos=result.pendencias;}
-    const observation=result.status+'\n'+result.motivos.join('\n')+(result.status==='Recusada'&&result.pendencias.length?'\nTambém falta conferir:\n'+result.pendencias.join('\n'):'')+'\nValor do crédito: '+money(current.valor)+'\nParcela: '+money(current.parcela)+' | Prazo: '+current.prazo+'x\nLimite da parcela: '+money(result.limiteParcela)+'\nAnexos lidos e conferidos pelo sistema: '+readDocs.length+'\nHistórico consultado: '+history.length+' registro(s).'+(history.length?'\n'+history.map(h=>h.data+' • '+h.tipo+': '+(h.nota||'')).join('\n'):'')+'\nConfira as evidências antes de confirmar a decisão.';
+    const sections=analysisSections(result,{valor:current.valor,parcela:current.parcela,prazo:current.prazo,readCount:readDocs.length,historyCount:history.length});
+    const observation=sectionsText(result.status,sections);
     current.analiseCdc={...current.analiseCdc,resultado:result,observacoes:observation,avaliadoEm:Date.now(),por:auth.currentUser.uid};current.analiseCdc.snapshot=await snapshot(current);await saveSim(current);
-    showResult(result.status==='Pendente'?'Análise pendente':result.status,observation);
+    showResult(result.status==='Pendente'?'Análise pendente':result.status,observation,sections);
     }catch(e){
       const text='Não foi possível concluir a análise: '+(e.message||'falha inesperada')+'. Nenhuma aprovação ou recusa foi confirmada.';
       let saved=false;try{const current=await loadSim(id);if(current){current.analiseCdc={...(current.analiseCdc||{}),observacoes:text,resultado:{status:'Pendente',motivos:[text]},avaliadoEm:Date.now()};delete current.analiseCdc.decisao;delete current.analiseCdc.snapshot;await saveSim(current);saved=true;}}catch{}

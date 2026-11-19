@@ -561,7 +561,7 @@ window.renovarPreanaliseCDC=async function(id){
   if(button)button.disabled=true;
   try{
     const s=await loadSim(id);
-    const module=await import('./cdc-preanalise.mjs?v=1');
+    const module=await import('./cdc-preanalise.mjs?v=20261119-residencia');
     if(!module.validCpf(s.dadosCliente?.cpf)){
       toast('Informe um CPF válido nos dados do cliente antes de gerar o link da ficha.');
       return;
@@ -595,7 +595,7 @@ async function criarLinkCDC(s){
     if(!s.dadosCliente?.pix?.trim())throw new Error('Ficha aprovada. Informe a chave Pix do cliente em Continuar contratação.');
     if(cfg.data()?.automatica){
       if(s.analiseCdc?.decisao?.status!=='Aprovada')throw new Error('Abra a proposta, conclua a análise e confirme a aprovação antes de gerar o link.');
-      const {creditSnapshot,createReviewContext}=await import('./cdc-review.mjs?v=20261119-controls');
+      const {creditSnapshot,createReviewContext}=await import('./cdc-review.mjs?v=20261119-explicacoes');
       if(s.analiseCdc.snapshot!==await creditSnapshot(s,createReviewContext({db})))throw new Error('A ficha mudou. Faça uma nova análise antes de contratar.');
     }
   }
@@ -666,7 +666,7 @@ async function loadSim(id){
     const doc = await db.collection('simulacoes').doc(id).get();
     if(!doc.exists)return null;
     let data=doc.data();
-    if(data.linkPreanalise && isCdcAdmin()){try{const module=await import('./cdc-preanalise.mjs?v=1');data=await module.receiveSubmission(data,{db});}catch(e){toast('Não foi possível receber a pré-análise: '+e.message);}}
+    if(data.linkPreanalise && isCdcAdmin()){try{const module=await import('./cdc-preanalise.mjs?v=20261119-residencia');data=await module.receiveSubmission(data,{db});}catch(e){toast('Não foi possível receber a pré-análise: '+e.message);}}
 
     if(data.linkAssinatura && !data.aceite && isCdcAdmin()){
       const link=await db.collection('assinaturasCDC').doc(data.linkAssinatura).get();
@@ -787,7 +787,7 @@ async function renderInner(){
   const app = document.getElementById('app');
   if(!cdcAuthReady){ app.innerHTML = '<div class="wrap"><div class="card">Verificando acesso…</div></div>'; return; }
   if(route.view==='consulta'){const module=await import('./cdc-status.mjs?v=1');module.mountStatus(app,{db});return;}
-  if(route.view==='preanalise'){const module=await import('./cdc-preanalise.mjs?v=1');await module.mountCustomer(app,route.id,{db,fb:firebase,logo:LOGO_DATAURL});return;}
+  if(route.view==='preanalise'){const module=await import('./cdc-preanalise.mjs?v=20261119-residencia');await module.mountCustomer(app,route.id,{db,fb:firebase,logo:LOGO_DATAURL});return;}
   if(route.view==='cliente' && /^[a-f0-9]{64}$/.test(route.id)){app.innerHTML=await viewCliente(route.id);return;}
   if(!isCdcAdmin()) { renderCdcLogin(app); return; }
   if(route.view === 'cliente'){
@@ -1365,8 +1365,8 @@ window.abrirDetalhe = async function(id){
   if(documentosBlock) carregarDocumentosDetalhe(s.id);
   const reviewRoot=document.getElementById('cdc-review-card');
   const historyRoot=document.getElementById('cdc-history-card');
-  if(historyRoot) import('./cdc-review.mjs?v=20261119-controls').then(module=>module.mountCdcHistory(s.id,historyRoot,module.createReviewContext({db,loadSim,listSims,auth:firebase.auth()}))).catch(()=>{historyRoot.textContent='Não foi possível carregar o histórico. Atualize a página.';});
-  if(reviewRoot) import('./cdc-review.mjs?v=20261119-controls').then(module=>module.mountCdcReview(s.id,reviewRoot,module.createReviewContext({db,loadSim,saveSim,listSims,loadDocumentos,saveDocumento,auth:firebase.auth()}))).catch(()=>{reviewRoot.textContent='Não foi possível carregar a análise. Suas propostas continuam disponíveis. Atualize a página para tentar novamente.';});
+  if(historyRoot) import('./cdc-review.mjs?v=20261119-explicacoes').then(module=>module.mountCdcHistory(s.id,historyRoot,module.createReviewContext({db,loadSim,listSims,auth:firebase.auth()}))).catch(()=>{historyRoot.textContent='Não foi possível carregar o histórico. Atualize a página.';});
+  if(reviewRoot) import('./cdc-review.mjs?v=20261119-explicacoes').then(module=>module.mountCdcReview(s.id,reviewRoot,module.createReviewContext({db,loadSim,saveSim,listSims,loadDocumentos,saveDocumento,auth:firebase.auth()}))).catch(()=>{reviewRoot.textContent='Não foi possível carregar a análise. Suas propostas continuam disponíveis. Atualize a página para tentar novamente.';});
 };
 
 function htmlDocumentosCliente(simId, docs){
@@ -1909,7 +1909,7 @@ async function mountContratacaoReview(id){
   const s=await loadSim(id);
   if(!s?.dadosCliente?.cpf) return;
   try{
-    const module=await import('./cdc-review.mjs?v=20261119-controls');
+    const module=await import('./cdc-review.mjs?v=20261119-explicacoes');
     const saveReview=async current=>{
       await saveSim(current);
       const box=document.getElementById('pix-pos-aprovacao'),input=document.getElementById('dc-pix-aprovado');
@@ -2357,7 +2357,7 @@ async function onCalcular(){
     if(!cdcProntoParaEnviar())return;
     preButton.disabled=true;preButton.textContent='Gerando link protegido…';
     try{
-      const module=await import('./cdc-preanalise.mjs?v=1');
+      const module=await import('./cdc-preanalise.mjs?v=20261119-residencia');
       if(!module.validCpf(window.__simTemp.dadosCliente?.cpf))throw Error('Preencha um CPF válido e clique em Calcular simulação novamente.');
       await saveSim(window.__simTemp);
       const link=await module.createLink(window.__simTemp,{db,fb:firebase});

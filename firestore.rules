@@ -53,7 +53,12 @@ service cloud.firestore {
       function validResponse(r) {
         return r is map
           && r.keys().hasAll(['cpf','telefone','email','endereco','profissao','renda','despesas','outrasParcelas','restricao','cpfNaIdentidade','consentimento','arquivos'])
-          && r.keys().hasOnly(['cpf','telefone','email','endereco','profissao','renda','despesas','outrasParcelas','restricao','cpfNaIdentidade','consentimento','arquivos'])
+          && r.keys().hasOnly(['cpf','telefone','email','endereco','profissao','renda','despesas','outrasParcelas','restricao','cpfNaIdentidade','consentimento','arquivos','residenciaTitular','residenciaJustificativa'])
+          && ((!r.keys().hasAny(['residenciaTitular','residenciaJustificativa'])) ||
+            (r.keys().hasAll(['residenciaTitular','residenciaJustificativa'])
+            && r.residenciaTitular in ['proprio','terceiro']
+            && r.residenciaJustificativa is string && r.residenciaJustificativa.size() <= 600
+            && (r.residenciaTitular == 'proprio' || r.residenciaJustificativa.size() > 0)))
           && r.cpf is string && r.cpf.matches('^[0-9]{11}$')
           && r.telefone is string && r.telefone.matches('^[0-9]{10,13}$')
           && r.email is string && r.email.size() <= 160
@@ -102,4 +107,3 @@ service cloud.firestore {
     }
   }
 }
-
