@@ -387,14 +387,7 @@ function linkIndisponivelHtml(){
 }
 
 function wireWhatsMask(input){
-  if(!input) return;
-  input.addEventListener('input', ()=>{
-    let d = input.value.replace(/\D/g,'').slice(0,11);
-    let out = d;
-    if(d.length > 2) out = `(${d.slice(0,2)}) ${d.slice(2)}`;
-    if(d.length > 7) out = `(${d.slice(0,2)}) ${d.slice(2,7)}-${d.slice(7)}`;
-    input.value = out;
-  });
+  wireTelefoneMask(input);
 }
 function whatsDigits(str){
   const d = String(str||'').replace(/\D/g,'');
@@ -404,14 +397,34 @@ function whatsDigits(str){
 
 // Telefone no padrão (85)99129-4450
 function wireTelefoneMask(input){
-  if(!input) return;
-  input.addEventListener('input', ()=>{
-    let d = input.value.replace(/\D/g,'').slice(0,11);
-    let out = d;
-    if(d.length > 2) out = `(${d.slice(0,2)})${d.slice(2)}`;
-    if(d.length > 6) out = `(${d.slice(0,2)})${d.slice(2,d.length-4)}-${d.slice(-4)}`;
-    input.value = out;
-  });
+  wireIdentificadorMask(input,formatTelefone,'tel',15);
+}
+function formatCpf(value){
+  return String(value||'').replace(/\D/g,'').slice(0,11).replace(/^(\d{3})(\d)/,'$1.$2').replace(/^(\d{3}\.\d{3})(\d)/,'$1.$2').replace(/(\.\d{3})(\d)/,'$1-$2');
+}
+function formatTelefone(value){
+  let d=String(value||'').replace(/\D/g,'');
+  if((d.length===12||d.length===13)&&d.startsWith('55'))d=d.slice(2);
+  d=d.slice(0,11);
+  if(d.length<=2)return d?`(${d}`:'';
+  const local=d.slice(2),split=d.length===11?5:4;
+  return `(${d.slice(0,2)}) `+local.slice(0,split)+(local.length>split?'-'+local.slice(split):'');
+}
+function wireIdentificadorMask(input,format,inputmode,maxLength){
+  if(!input||input.dataset.identificadorMask)return;
+  input.dataset.identificadorMask='1';input.type='text';input.inputMode=inputmode;input.maxLength=maxLength;
+  const apply=()=>{
+    const old=input.value,pos=input.selectionStart??old.length;
+    const digitsBefore=old.slice(0,pos).replace(/\D/g,'').length;
+    input.value=format(old);
+    if(document.activeElement===input){
+      let caret=0,seen=0;
+      while(caret<input.value.length&&seen<digitsBefore){if(/\d/.test(input.value[caret]))seen++;caret++;}
+      if(pos===old.length)caret=input.value.length;
+      input.setSelectionRange(caret,caret);
+    }
+  };
+  input.addEventListener('input',apply);input.addEventListener('change',apply);input.addEventListener('blur',apply);apply();
 }
 
 // Renda no padrão 1.500,00 (moeda com centavos)
@@ -430,15 +443,7 @@ function wireMoedaMask(input){
 // CEP no padrão 00000-000 + busca automática de endereço (ViaCEP)
 // CPF no padrão 000.000.000-00
 function wireCpfMask(input){
-  if(!input) return;
-  input.addEventListener('input', ()=>{
-    let d = input.value.replace(/\D/g,'').slice(0,11);
-    let out = d;
-    if(d.length > 3) out = `${d.slice(0,3)}.${d.slice(3)}`;
-    if(d.length > 6) out = `${d.slice(0,3)}.${d.slice(3,6)}.${d.slice(6)}`;
-    if(d.length > 9) out = `${d.slice(0,3)}.${d.slice(3,6)}.${d.slice(6,9)}-${d.slice(9)}`;
-    input.value = out;
-  });
+  wireIdentificadorMask(input,formatCpf,'numeric',14);
 }
 
 function wireCepMask(input, onFound){
@@ -1307,8 +1312,8 @@ window.abrirDetalhe = async function(id){
   const dadosClienteBlock = s.dadosCliente ? `
     <div class="result-box">
       <div class="step-title">Dados do cliente</div>
-      <div class="kv"><span>CPF</span><b>${s.dadosCliente.cpf||'-'}</b></div>
-      <div class="kv"><span>Telefone</span><b>${s.dadosCliente.telefone||'-'}</b></div>
+      <div class="kv"><span>CPF</span><b>${formatCpf(s.dadosCliente.cpf)||'-'}</b></div>
+      <div class="kv"><span>Telefone</span><b>${formatTelefone(s.dadosCliente.telefone)||'-'}</b></div>
       <div class="kv"><span>Chave Pix</span><b>${s.dadosCliente.pix||'-'}</b></div>
     </div>` : '';
 
@@ -1821,7 +1826,7 @@ async function viewContratar(id){
     <p class="hint">Preencha os dados para dar continuidade à contratação.</p>
     <label>Nome completo</label><input type="text" id="dc-nome" value="${s.cliente}" readonly>
     <div class="row2">
-      <div><label>CPF</label><input type="text" id="dc-cpf" value="${d.cpf||''}" placeholder="000.000.000-00"></div>
+      <div><label>CPF</label><input type="text" id="dc-cpf" value="${formatCpf(d.cpf)}" placeholder="000.000.000-00"></div>
       <div><label>RG</label><input type="text" id="dc-rg" value="${d.rg||''}"></div>
     </div>
     <label>Data de nascimento</label><input type="date" id="dc-nasc" value="${d.nascimento||''}">
@@ -1835,7 +1840,7 @@ async function viewContratar(id){
     </div>
     <label>Escolaridade</label><input type="text" id="dc-escola" value="${d.escolaridade||''}" placeholder="Ex: Ensino médio completo">
     <div class="row2">
-      <div><label>Telefone</label><input type="text" id="dc-tel" value="${d.telefone||''}" placeholder="(85)90000-0000"></div>
+      <div><label>Telefone</label><input type="text" id="dc-tel" value="${formatTelefone(d.telefone)}" placeholder="(85) 90000-0000"></div>
       <div><label>E-mail</label><input type="text" id="dc-email" value="${d.email||''}"></div>
     </div>
 
@@ -2159,6 +2164,7 @@ function wireEvents(view){
     document.getElementById('btn-calcular').onclick = onCalcular;
     wireValorCreditoMask(document.getElementById('f-valor'));
     wireValorCreditoMask(document.getElementById('f-parcela'));
+    wireCpfMask(document.getElementById('f-cpf'));
     wireFaixaSugestao();
     document.getElementById('f-modo').addEventListener('change', ()=>{
       const porParcela = document.getElementById('f-modo').value === 'parcela';
@@ -2714,12 +2720,12 @@ window.gerarPDF = async function(id){
     doc.text('DADOS DO CLIENTE', 40, y); y += 16;
     doc.setFont('helvetica','normal'); doc.setFontSize(9.5);
     const pessoais = [
-      ['CPF', d.cpf||'-'], ['RG', d.rg||'-'],
+      ['CPF', formatCpf(d.cpf)||'-'], ['RG', d.rg||'-'],
       ['Data de nascimento', d.nascimento ? fmtDate(d.nascimento) : '-'],
       ['Nome do pai', d.nomePai||'-'], ['Nome da mãe', d.nomeMae||'-'],
       ['Profissão', d.profissao||'-'], ['Renda mensal', d.renda ? ('R$ '+d.renda) : '-'],
       ['Escolaridade', d.escolaridade||'-'],
-      ['Telefone', d.telefone||'-'], ['E-mail', d.email||'-'],
+      ['Telefone', formatTelefone(d.telefone)||'-'], ['E-mail', d.email||'-'],
       ['Endereço', d.endereco||'-'], ['Chave Pix', d.pix||'-'],
     ];
     pessoais.forEach(([k,v])=>{
