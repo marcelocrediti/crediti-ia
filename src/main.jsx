@@ -569,7 +569,7 @@ const PARTNER_PRODUCTS = {
     name: "Consignado CLT",
     partner: "Grandino Bank",
     logo: "/partners/grandino.png",
-    url: "https://crediti.startcapital.app/credit/cltctps",
+    url: "https://crediti.startcapital.app/credit/crtps",
     button: "SIMULAR SEU CRÉDITO"
   },
 

@@ -8,7 +8,7 @@
   ];
 
   const HOME_CREDITS = [
-    { id: "grandino-clt", name: "Consignado CLT", partner: "Grandino Bank", logo: "/partners/grandino.png", action: "SIMULAR CRÉDITO CLT", url: "https://crediti.startcapital.app/credit/cltctps" },
+    { id: "grandino-clt", name: "Consignado CLT", partner: "Grandino Bank", logo: "/partners/grandino.png", action: "SIMULAR CRÉDITO CLT", url: "https://crediti.startcapital.app/credit/crtps" },
     { id: "inss", name: "Consignado INSS", partner: "Consig Mais", logo: "/partners/consiga-mais.png", action: "SIMULAR CONSIGNADO", url: "https://apretailer.com.br/click/6aa4af912bfa8159945c68c9/184987/360419/app_crediti" },
     { id: "emprestimo-pessoal", name: "Empréstimo pessoal", partner: "SuperSim", logo: "/partners/supersim.webp", action: "SIMULAR MEU EMPRÉSTIMO", url: "https://apretailer.com.br/click/6aa4af912bfa816ab47e8c90/184363/360419/app_crediti" },
     { id: "grandino-fgts", name: "Antecipação do FGTS", partner: "Grandino Bank", logo: "/partners/grandino.png", action: "SIMULAR FGTS", url: "https://crediti.startcapital.app/credit/fgts" },
@@ -212,7 +212,7 @@
       extra = document.createElement("div");
       extra.className = "direct-grid crediti-grandino-direct-grid";
       extra.dataset.creditiInjected = "grandino-direct";
-      extra.appendChild(makeGrandinoDirectCard("clt", "Consignado CLT", "https://crediti.startcapital.app/credit/cltctps", "SIMULAR CRÉDITO CLT"));
+      extra.appendChild(makeGrandinoDirectCard("clt", "Consignado CLT", "https://crediti.startcapital.app/credit/crtps", "SIMULAR CRÉDITO CLT"));
       extra.appendChild(makeGrandinoDirectCard("fgts", "Antecipação do FGTS", "https://crediti.startcapital.app/credit/fgts", "SIMULAR FGTS"));
       grid.insertAdjacentElement("afterend", extra);
     }
