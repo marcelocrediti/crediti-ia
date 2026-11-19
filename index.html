@@ -535,7 +535,33 @@ async function compressImage(dataUrl, maxW){
 }
 
 window.renovarPreanaliseCDC=async function(id){
-  try{const s=await loadSim(id);const module=await import('./cdc-preanalise.mjs?v=1');const result=await module.createLink(s,{db,fb:firebase});const box=document.getElementById('link-preanalise-salva');box.innerHTML='';const input=document.createElement('input');input.readOnly=true;input.value=location.origin+location.pathname+'#preanalise/'+result.token;const p=document.createElement('p');p.className='hint';p.textContent='Novo link válido por 30 minutos. O anterior foi cancelado.';const b=document.createElement('button');b.className='btn btn-ok';b.textContent='Copiar link';b.onclick=async()=>{try{await navigator.clipboard.writeText(input.value);toast('Link copiado!');}catch{input.focus();input.select();}};box.append(p,input,b);}catch(e){toast(e.message);}
+  const button=document.getElementById('btn-link-ficha-salva');
+  if(button?.disabled)return;
+  if(button)button.disabled=true;
+  try{
+    const s=await loadSim(id);
+    const module=await import('./cdc-preanalise.mjs?v=1');
+    if(!module.validCpf(s.dadosCliente?.cpf)){
+      toast('Informe um CPF válido nos dados do cliente antes de gerar o link da ficha.');
+      return;
+    }
+    const hadLink=!!s.linkPreanalise;
+    const result=await module.createLink(s,{db,fb:firebase});
+    const box=document.getElementById('link-preanalise-salva');
+    box.innerHTML='';
+    const input=document.createElement('input');
+    input.type='text';input.readOnly=true;
+    input.value=location.origin+location.pathname+'#preanalise/'+result.token;
+    input.setAttribute('aria-label','Link da ficha do cliente');
+    const p=document.createElement('p');p.className='hint';
+    p.textContent='Link válido por 30 minutos, até '+new Date(result.expires).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})+'.'+(hadLink?' O link anterior foi cancelado.':'');
+    const b=document.createElement('button');b.className='btn btn-ok';
+    b.textContent='Copiar link para enviar ao cliente';
+    b.onclick=async()=>{try{await navigator.clipboard.writeText(input.value);toast('Link copiado! Cole na conversa com o cliente.');}catch{input.focus();input.select();toast('Selecione e copie o link acima.');}};
+    box.append(p,input,b);
+    if(button)button.textContent='Gerar novo link da ficha';
+  }catch(e){toast(e.message);}
+  finally{if(button)button.disabled=false;}
 };
 // ---------- Storage wrappers (shared = visible to owner AND client link) ----------
 async function criarLinkCDC(s){
@@ -1289,7 +1315,7 @@ window.abrirDetalhe = async function(id){
     <p class="hint">Retorno antes de despesas, impostos e inadimplência. Não aparece no PDF do cliente.</p>
     <button class="btn btn-outline" id="btn-pdf-salva">Gerar PDF da simulação</button>
     `}
-    ${s.linkPreanalise && !s.preanaliseRecebida && !s.aceite ? `<button class="btn btn-outline" onclick="renovarPreanaliseCDC('${s.id}')">Gerar novo link de pré-análise (30 minutos)</button><div id="link-preanalise-salva" role="status"></div>` : ''}
+    ${!isDecimoTerceiro(s) && !s.preanaliseRecebida && !s.aceite && !s.analiseCdc?.decisao ? `<section class="result-box"><h3>Ficha para o cliente preencher</h3><p class="hint">Envie a simulação e o checklist para o cliente preencher os dados e anexar os documentos. O link vale por 30 minutos.</p><button class="btn btn-primary" id="btn-link-ficha-salva" onclick="renovarPreanaliseCDC('${s.id}')">${s.linkPreanalise ? 'Gerar novo link da ficha' : 'Gerar link da ficha para o cliente'}</button><div id="link-preanalise-salva" role="status"></div></section>` : ''}
     ${dadosClienteBlock}
     ${signBlock}
   </div>
