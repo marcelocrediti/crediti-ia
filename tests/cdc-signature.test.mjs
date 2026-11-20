@@ -13,3 +13,25 @@ await assert.rejects(()=>readPublicSignature({projectId,token:'broken',fetcher:(
 await assert.rejects(()=>read(async()=>({ok:true,json:async()=>({fields:{...fields,expiraEm:{timestampValue:'2000-01-01T00:00:00Z'}}})})),e=>e.code==='signature-closed');
 assert.deepEqual(signatureAcceptance({timestamp:1,foto:'fixture',geo:{lat:1,lng:2,precisao:3},endereco:null}).geo,{lat:1,lng:2});assert(signatureUrl('https://example.test/',token).endsWith('#cliente/'+token));
 console.log('PASS: reordered fields preserve link; true changes revoke; public load, permission failure, transient failures, expiration, incomplete URL and photo payload');
+
+const {ensureSignatureLink}=await import('../cdc-signature.mjs');
+const stamp=n=>({toMillis:()=>n});
+const fixture={id:'fixture',cliente:'Pessoa fictícia',valor:500,prazo:2,parcela:260,analiseCdc:{snapshot:'review',decisao:{status:'Aprovada',motivo:'Teste'}}};
+const records=new Map([['simulacoes/fixture',structuredClone(fixture)]]);let writes=0,queue=Promise.resolve();
+const db={collection:c=>({doc:id=>({key:c+'/'+id})}),runTransaction:fn=>{
+ const task=queue.then(async()=>{const pending=[];const tx={get:async r=>({exists:records.has(r.key),data:()=>records.get(r.key)}),set:(r,v)=>pending.push(()=>records.set(r.key,v)),update:(r,v)=>pending.push(()=>records.set(r.key,{...records.get(r.key),...v}))};const result=await fn(tx);for(const apply of pending){apply();writes++;}return result;});queue=task.catch(()=>{});return task;
+}};
+let sequence=0;const options={db,fb:{firestore:{Timestamp:{fromMillis:stamp}}},sim:fixture,uid:'fixture-admin',now:()=>1000,newToken:()=>String(++sequence).padStart(64,'0')};
+const first=await ensureSignatureLink(options);assert.equal(records.get('simulacoes/fixture').linkAssinatura,first);
+const writesBefore=writes;
+assert.deepEqual(await Promise.all([ensureSignatureLink(options),ensureSignatureLink(options)]),[first,first]);assert.equal(writes,writesBefore,'Repeated/concurrent clicks do not write or revoke');
+records.get('assinaturasCDC/'+first).expiraEm=stamp(0);
+const renewed=await ensureSignatureLink(options);assert.notEqual(renewed,first);assert.equal(records.get('simulacoes/fixture').linkAssinatura,renewed);
+records.delete('assinaturasCDC/'+renewed);
+const repaired=await ensureSignatureLink(options);assert.notEqual(repaired,renewed,'Missing previous record is repairable');
+records.get('assinaturasCDC/'+repaired).aceite={foto:'synthetic'};
+await assert.rejects(()=>ensureSignatureLink(options),/assinatura já foi recebida/);
+records.get('assinaturasCDC/'+repaired).aceite=null;
+records.get('simulacoes/fixture').valor=501;
+await assert.rejects(()=>ensureSignatureLink(options),/outra tela/);
+console.log('PASS: active link reused, concurrent requests converge, expired/missing links repaired, signature and stale proposal protected');

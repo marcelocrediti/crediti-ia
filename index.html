@@ -600,20 +600,32 @@ async function criarLinkCDC(s){
       if(s.analiseCdc.snapshot!==await creditSnapshot(s,createReviewContext({db,auth:firebase.auth()})))throw new Error('Os dados da avaliação mudaram. Clique em Confirmar aprovação para atualizar antes de finalizar.');
     }
   }
-  const token=Array.from(crypto.getRandomValues(new Uint8Array(32))).map(x=>x.toString(16).padStart(2,'0')).join('');
-  const proposta={};
-  for(const key of ['cliente','valor','prazo','parcela','taxa','cet','dataPrimeira','dataUltima','produto','tipo','salarioBruto','parcela13','inssAplicado'])if(s[key]!==undefined)proposta[key]=s[key];
-  const batch=db.batch();
-  batch.set(db.collection('assinaturasCDC').doc(token),{proposta,simId:s.id,aceite:null,expiraEm:firebase.firestore.Timestamp.fromMillis(Date.now()+7*86400000)});
-  if(s.linkAssinatura)batch.update(db.collection('assinaturasCDC').doc(s.linkAssinatura),{expiraEm:firebase.firestore.Timestamp.fromMillis(0)});
-  batch.update(db.collection('simulacoes').doc(s.id),{linkAssinatura:token,status:'aguardando_cliente',contratacao:{finalizadaEm:Date.now(),por:firebase.auth().currentUser.uid,motivoAprovacao:s.analiseCdc?.decisao?.motivo||''}});
-  await batch.commit();
-  return token;
+  const {ensureSignatureLink}=await import('./cdc-signature.mjs?v=20261120-signature-v13');
+  return ensureSignatureLink({db,fb:firebase,sim:s,uid:firebase.auth().currentUser.uid});
 }
-window.renovarLinkCDC=async function(id){try{const s=await loadSim(id);await criarLinkCDC(s);await abrirDetalhe(id);}catch(e){toast('Não foi possível gerar o link protegido: '+e.message);}};
+const signatureRequests=new Map();
+window.renovarLinkCDC=function(id,button){
+  if(signatureRequests.has(id))return signatureRequests.get(id);
+  if(button){button.disabled=true;button.textContent='Preparando link…';}
+  const task=(async()=>{try{
+    const s=await loadSim(id);
+    if(!s)throw new Error('Não foi possível carregar a ficha. Tente novamente.');
+    await criarLinkCDC(s);
+    await abrirDetalhe(id);
+    document.querySelector('[data-signature-link]')?.scrollIntoView({behavior:'smooth',block:'center'});
+    toast('Link pronto. Copie o endereço exibido abaixo ou use Enviar via WhatsApp.');
+  }catch(e){toast('Não foi possível preparar o link: '+e.message);}
+  finally{signatureRequests.delete(id);if(button?.isConnected){button.disabled=false;button.textContent='Gerar novo link de assinatura';}}})();
+  signatureRequests.set(id,task);return task;
+};
+window.copiarLinkAssinatura=async function(button){
+  const input=button.parentElement.querySelector('input');
+  try{await navigator.clipboard.writeText(input.value);toast('Link atual copiado!');}
+  catch(e){input.focus();input.select();input.setSelectionRange(0,input.value.length);toast('Selecione Copiar no endereço destacado e envie ao cliente.');}
+};
 async function saveSim(sim){
   if(getRoute().view==='cliente' && /^[a-f0-9]{64}$/.test(sim.id)){
-    const {signatureAcceptance}=await import('./cdc-signature.mjs?v=20261120-signature-v11');
+    const {signatureAcceptance}=await import('./cdc-signature.mjs?v=20261120-signature-v13');
     await db.collection('assinaturasCDC').doc(sim.id).update({aceite:signatureAcceptance(sim.aceite),assinadoEm:firebase.firestore.FieldValue.serverTimestamp()});
     return true;
   }
@@ -622,7 +634,7 @@ async function saveSim(sim){
     return true;
   }
   try{
-    const {signatureProposalChanged}=await import('./cdc-signature.mjs?v=20261120-signature-v11');
+    const {signatureProposalChanged}=await import('./cdc-signature.mjs?v=20261120-signature-v13');
     const previous=await db.collection('simulacoes').doc(sim.id).get();
     if(previous.exists && previous.data().linkPreanalise){
       const before=previous.data();
@@ -637,11 +649,12 @@ async function saveSim(sim){
       if(signatureProposalChanged(before,sim) || (before.aceite && !sim.aceite)){
         await db.collection('assinaturasCDC').doc(before.linkAssinatura).update({expiraEm:firebase.firestore.Timestamp.fromMillis(0)});
         sim.linkAssinatura=null;
-      }
+      }else{sim.linkAssinatura=before.linkAssinatura;}
     }
     const statusModule=await import('./cdc-status.mjs?v=20261120-contract-v10');
     await db.runTransaction(async tx=>{
       const ref=db.collection('simulacoes').doc(sim.id),latest=await tx.get(ref);
+      if(latest.exists && latest.data().linkAssinatura && !signatureProposalChanged(latest.data(),sim) && !(latest.data().aceite&&!sim.aceite))sim.linkAssinatura=latest.data().linkAssinatura;
       const oldConsulta=latest.exists?latest.data().consultaStatusId:null;
       if(oldConsulta){
         const beforeCpf=String(latest.data().dadosCliente?.cpf||'').replace(/\D/g,'');
@@ -661,7 +674,7 @@ async function saveSim(sim){
 }
 async function loadSim(id){
   if(getRoute().view==='cliente' && /^[a-f0-9]{64}$/.test(id)){
-    const {readPublicSignature}=await import('./cdc-signature.mjs?v=20261120-signature-v11');
+    const {readPublicSignature}=await import('./cdc-signature.mjs?v=20261120-signature-v13');
     return readPublicSignature({projectId:firebaseConfig.projectId,token:id});
   }
   if(!firebaseOk){
@@ -1305,7 +1318,7 @@ window.abrirDetalhe = async function(id){
     return;
   }
   const base = getBaseUrl();
-  const url = base && s.linkAssinatura ? (base + '?v=20261120-signature-v12#cliente/' + s.linkAssinatura) : null;
+  const url = base && s.linkAssinatura ? (base + '?v=20261120-signature-v13#cliente/' + s.linkAssinatura) : null;
   let signBlock = '';
   if(s.aceite){
     signBlock = `
@@ -1322,10 +1335,10 @@ window.abrirDetalhe = async function(id){
     <button class="btn btn-outline" style="margin-top:10px;border-color:var(--danger);color:var(--danger);" onclick="apagarAssinatura('${s.id}')">🗑️ Apagar assinatura/foto e pedir novo envio</button>`;
   } else if(s.status==='aguardando_cliente'){
     const linkBlock = url
-      ? `<div class="link-box"><input readonly value="${url}"><button class="btn btn-outline btn-sm" onclick="navigator.clipboard.writeText('${url}').then(()=>toast('Link copiado!'))">Copiar</button></div>
+      ? `<div class="link-box" data-signature-link><input readonly value="${url}"><button class="btn btn-outline btn-sm" onclick="copiarLinkAssinatura(this)">Copiar</button></div>
          <a class="wa-btn" target="_blank" href="https://wa.me/?text=${encodeURIComponent('Olá '+s.cliente+'! Finalize sua contratação de '+nomeProduto(s)+' da Crediti neste link: '+url)}">Enviar via WhatsApp</a>`
       : linkIndisponivelHtml() + `<button class="btn btn-outline" onclick="location.hash='cliente/${s.id}'">Pré-visualizar como o cliente</button>`;
-    signBlock = `${s.linkAssinatura?linkBlock:'<p>Gere um novo link protegido para o cliente.</p>'}<button class="btn btn-outline" onclick="renovarLinkCDC('${s.id}')">Gerar novo link de assinatura</button><p class="hint" style="margin-top:8px;">Link individual de uso único. Após salvar a foto e o aceite, ele fica inacessível. Se não for utilizado, expira em 7 dias.</p>`;
+    signBlock = `${s.linkAssinatura?linkBlock:'<p>Gere um novo link protegido para o cliente.</p>'}<button class="btn btn-outline" onclick="renovarLinkCDC('${s.id}',this)">Gerar novo link de assinatura</button><p class="hint" style="margin-top:8px;">Enquanto estiver válido, este botão mantém o mesmo link para não interromper o cliente. Um novo endereço é criado se o anterior expirar ou estiver indisponível. Após a assinatura, o link é encerrado.</p>`;
   } else {
     signBlock = `
     ${isDecimoTerceiro(s) ? '' : `<button class="btn btn-outline" onclick="editarSimulacaoInline('${s.id}')">✏️ Editar simulação</button>`}
@@ -2079,9 +2092,9 @@ function wireContratarEvents(id){
           await saveSim(s);
         }
         const token=await criarLinkCDC(s);
-        const url = base ? (base + '?v=20261120-signature-v12#cliente/' + token) : null;
+        const url = base ? (base + '?v=20261120-signature-v13#cliente/' + token) : null;
         const linkBlock = url
-          ? `<div class="link-box"><input readonly value="${url}" id="link-cliente-final"><button class="btn btn-outline btn-sm" onclick="navigator.clipboard.writeText('${url}').then(()=>toast('Link copiado!'))">Copiar</button></div>`
+          ? `<div class="link-box" data-signature-link><input readonly value="${url}" id="link-cliente-final"><button class="btn btn-outline btn-sm" onclick="copiarLinkAssinatura(this)">Copiar</button></div>`
           : linkIndisponivelHtml() + `<button class="btn btn-outline" onclick="location.hash='cliente/${s.id}'">Pré-visualizar como o cliente</button>`;
         document.getElementById('link-final').innerHTML = `
           <div class="card final-ok">Contratação finalizada. Envie o link para o cliente assinar com a foto e o aceite. O contrato, os dados e os documentos permanecem salvos na ficha.</div>

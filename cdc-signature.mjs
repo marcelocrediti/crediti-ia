@@ -28,3 +28,29 @@ export function signatureAcceptance(aceite){
  const geo=aceite.geo;
  return {...aceite,geo:geo&&Number.isFinite(geo.lat)&&Number.isFinite(geo.lng)?{lat:geo.lat,lng:geo.lng}:null};
 }
+
+// Repeated clicks and concurrent tabs share one active link. Only an expired or
+// unavailable record is replaced; a signed record can never be renewed here.
+export async function ensureSignatureLink({db,fb,sim,uid,now=()=>Date.now(),newToken=()=>Array.from(crypto.getRandomValues(new Uint8Array(32))).map(x=>x.toString(16).padStart(2,'0')).join('')}){
+ const candidate=newToken(),ref=db.collection('simulacoes').doc(sim.id);
+ return db.runTransaction(async tx=>{
+  const snap=await tx.get(ref);
+  if(!snap.exists)throw Error('A ficha não foi encontrada.');
+  const current=snap.data();
+  if(current.aceite)throw Error('Esta proposta já está assinada.');
+  if(signatureProposalChanged(sim,current)||stable(sim.analiseCdc?.decisao)!==stable(current.analiseCdc?.decisao)||sim.analiseCdc?.snapshot!==current.analiseCdc?.snapshot)throw Error('A ficha foi atualizada em outra tela. Abra novamente antes de gerar o link.');
+  const oldRef=current.linkAssinatura?db.collection('assinaturasCDC').doc(current.linkAssinatura):null;
+  const old=oldRef?await tx.get(oldRef):null;
+  if(old?.exists){
+   const data=old.data();
+   if(data.aceite)throw Error('A assinatura já foi recebida. Atualize a ficha para visualizar.');
+   if(data.simId===sim.id&&data.expiraEm?.toMillis()>now())return current.linkAssinatura;
+  }
+  const proposta={};
+  for(const key of ['cliente','valor','prazo','parcela','taxa','cet','dataPrimeira','dataUltima','produto','tipo','salarioBruto','parcela13','inssAplicado'])if(current[key]!==undefined)proposta[key]=current[key];
+  tx.set(db.collection('assinaturasCDC').doc(candidate),{proposta,simId:sim.id,aceite:null,expiraEm:fb.firestore.Timestamp.fromMillis(now()+7*86400000)});
+  if(old?.exists)tx.update(oldRef,{expiraEm:fb.firestore.Timestamp.fromMillis(0)});
+  tx.update(ref,{linkAssinatura:candidate,status:'aguardando_cliente',contratacao:{finalizadaEm:now(),por:uid,motivoAprovacao:current.analiseCdc?.decisao?.motivo||''}});
+  return candidate;
+ });
+}
