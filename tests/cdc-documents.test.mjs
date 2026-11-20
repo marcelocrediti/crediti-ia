@@ -31,3 +31,18 @@ const ctx=createReviewContext({db});const first=ctx.loadDocumentos('test'),secon
 await Promise.resolve();release({docs:[]});await Promise.all([first,second]);assert.equal(reads,1);
 const next=ctx.loadDocumentos('test');await Promise.resolve();release({docs:[]});await next;assert.equal(reads,2);
 console.log('PASS: bank content, two months, CPF automatic, names, income uncertainty, residence and shared reads');
+let historyReads=0,finishHistory;
+const historyContext=createReviewContext({db:{collection:()=>({get:()=>{historyReads++;return new Promise(resolve=>{finishHistory=resolve;});}})}});
+const h1=historyContext.listSims(),h2=historyContext.listSims();
+await Promise.resolve();finishHistory({docs:[{id:'one',data:()=>({historicoCrediti:[]})}]});
+assert.deepEqual(await h1,await h2);assert.equal(historyReads,1);
+const h3=historyContext.listSims();await Promise.resolve();finishHistory({docs:[]});await h3;assert.equal(historyReads,2);
+let transientReads=0;
+const retryContext=createReviewContext({db:{collection:()=>({get:async()=>{if(++transientReads===1)throw Object.assign(Error('offline'),{code:'unavailable'});return {docs:[]};}})}});
+assert.deepEqual(await retryContext.listSims(),[]);assert.equal(transientReads,2);
+let deniedReads=0;
+const deniedContext=createReviewContext({db:{collection:()=>({get:async()=>{deniedReads++;throw Object.assign(Error('denied'),{code:'permission-denied'});}})}});
+await assert.rejects(deniedContext.listSims(),/denied/);assert.equal(deniedReads,1);
+assert(!check([doc('rgFrente','identidade',{nome:'JOSE DA SILVA'}),home,bank]).pending.length);
+assert(!check([doc('rgFrente','identidade',{nome:'Conceição Gonçalves'}),home,bank],{cliente:'Conceicao Goncalves',readDocs:[doc('rgFrente','identidade',{nome:'Conceição Gonçalves'})]}).pending.some(x=>x.startsWith('Nome divergente')));
+console.log('PASS: shared history, fresh subsequent read, transient retry, permission failure preserved, accents and cedilla');

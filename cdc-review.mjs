@@ -16,9 +16,27 @@ export async function readWithDeadline(operation,label,ms=20000){
 export function createReviewContext(ctx){
   const {db}=ctx;
   const documentReads=new Map();
+  let historyRead;
   return {...ctx,
     loadSim:async id=>{const doc=await readWithDeadline(()=>db.collection('simulacoes').doc(id).get({source:'server'}),'a ficha');if(!doc.exists)throw Error('Ficha não encontrada. Volte ao painel e abra a proposta novamente.');return {...doc.data(),id:doc.id||id};},
-    listSims:async()=>{const snap=await readWithDeadline(()=>db.collection('simulacoes').get({source:'server'}),'o histórico');return snap.docs.map(doc=>({...doc.data(),id:doc.id}));},
+    listSims:async()=>{
+      // Share only active reads. Never substitute stale/cache data for a credit check.
+      if(!historyRead){
+        historyRead=readWithDeadline(async()=>{
+          for(let attempt=0;attempt<2;attempt++){
+            try{
+              const snap=await db.collection('simulacoes').get({source:'server'});
+              return snap.docs.map(doc=>({...doc.data(),id:doc.id}));
+            }catch(e){
+              if(attempt||!['unavailable','deadline-exceeded','firestore/unavailable','firestore/deadline-exceeded'].includes(e.code))throw e;
+            }
+          }
+        },'o histórico',60000);
+        const active=historyRead;
+        active.finally(()=>{if(historyRead===active)historyRead=undefined;}).catch(()=>{});
+      }
+      return historyRead;
+    },
     loadDocumentos:async id=>{
       if(!documentReads.has(id)){
         const read=readWithDeadline(()=>db.collection('simulacoes').doc(id).collection('documentos').get({source:'server'}),'os anexos',60000).then(snap=>Object.fromEntries(snap.docs.map(doc=>[doc.id,doc.data()])));
@@ -233,7 +251,10 @@ export async function mountCdcReview(id,root,ctx){
     if(result.pendencias.length&&result.status!=='Recusada'){result.status='Pendente';result.motivos=result.pendencias;}
     const sections=analysisSections(result,{valor:current.valor,parcela:current.parcela,prazo:current.prazo,readCount:readDocs.length,historyCount:history.length});
     const observation=sectionsText(result.status,sections);
-    current.analiseCdc={...current.analiseCdc,resultado:result,observacoes:observation,avaliadoEm:Date.now(),por:auth.currentUser.uid};current.analiseCdc.snapshot=await snapshot(current);await saveSim(current);
+    current.analiseCdc={...current.analiseCdc,resultado:result,observacoes:observation,avaliadoEm:Date.now(),por:auth.currentUser.uid};
+    // Fingerprint exactly the evidence evaluated, without downloading the same history again.
+    // Manual confirmation below still fetches fresh evidence and rejects any change.
+    current.analiseCdc.snapshot=await creditSnapshot(current,{listSims:async()=>sims,loadDocumentos:async()=>docs});await saveSim(current);
     showResult(result.status==='Pendente'?'Análise pendente':result.status,observation,sections);
     }catch(e){
       const text='Não foi possível concluir a análise: '+(e.message||'falha inesperada')+'. Nenhuma aprovação ou recusa foi confirmada.';
