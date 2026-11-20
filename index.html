@@ -225,7 +225,6 @@ const EMPRESA = {
   telefone: "(85) 99203-2258"
 };
 const CONFIG = {
-  multaDia: 1.00,     // R$ por dia de atraso
   prazoMin: 1,
   prazoMax: 60
 };
@@ -602,7 +601,7 @@ async function criarLinkCDC(s){
       if(s.analiseCdc.snapshot!==await creditSnapshot(s,createReviewContext({db,auth:firebase.auth()})))throw new Error('Os dados da avaliação mudaram. Clique em Confirmar aprovação para atualizar antes de finalizar.');
     }
   }
-  const {ensureSignatureLink}=await import('./cdc-signature.mjs?v=20261120-signature-v13');
+  const {ensureSignatureLink}=await import('./cdc-signature.mjs?v=20261120-multa-v15');
   return ensureSignatureLink({db,fb:firebase,sim:s,uid:firebase.auth().currentUser.uid});
 }
 const signatureRequests=new Map();
@@ -627,7 +626,7 @@ window.copiarLinkAssinatura=async function(button){
 };
 async function saveSim(sim){
   if(getRoute().view==='cliente' && /^[a-f0-9]{64}$/.test(sim.id)){
-    const {signatureAcceptance}=await import('./cdc-signature.mjs?v=20261120-signature-v13');
+    const {signatureAcceptance}=await import('./cdc-signature.mjs?v=20261120-multa-v15');
     await db.collection('assinaturasCDC').doc(sim.id).update({aceite:signatureAcceptance(sim.aceite),assinadoEm:firebase.firestore.FieldValue.serverTimestamp()});
     return true;
   }
@@ -636,7 +635,7 @@ async function saveSim(sim){
     return true;
   }
   try{
-    const {signatureProposalChanged}=await import('./cdc-signature.mjs?v=20261120-signature-v13');
+    const {signatureProposalChanged}=await import('./cdc-signature.mjs?v=20261120-multa-v15');
     const previous=await db.collection('simulacoes').doc(sim.id).get();
     if(previous.exists && previous.data().linkPreanalise){
       const before=previous.data();
@@ -651,12 +650,12 @@ async function saveSim(sim){
       if(signatureProposalChanged(before,sim) || (before.aceite && !sim.aceite)){
         await db.collection('assinaturasCDC').doc(before.linkAssinatura).update({expiraEm:firebase.firestore.Timestamp.fromMillis(0)});
         sim.linkAssinatura=null;
-      }else{sim.linkAssinatura=before.linkAssinatura;}
+      }else{sim.linkAssinatura=before.linkAssinatura;if(before.encargosAtraso)sim.encargosAtraso=before.encargosAtraso;}
     }
     const statusModule=await import('./cdc-status.mjs?v=20261120-pdf-v14');
     await db.runTransaction(async tx=>{
       const ref=db.collection('simulacoes').doc(sim.id),latest=await tx.get(ref);
-      if(latest.exists && latest.data().linkAssinatura && !signatureProposalChanged(latest.data(),sim) && !(latest.data().aceite&&!sim.aceite))sim.linkAssinatura=latest.data().linkAssinatura;
+      if(latest.exists && latest.data().linkAssinatura && !signatureProposalChanged(latest.data(),sim) && !(latest.data().aceite&&!sim.aceite)){sim.linkAssinatura=latest.data().linkAssinatura;if(latest.data().encargosAtraso)sim.encargosAtraso=latest.data().encargosAtraso;}
       const oldConsulta=latest.exists?latest.data().consultaStatusId:null;
       if(oldConsulta){
         const beforeCpf=String(latest.data().dadosCliente?.cpf||'').replace(/\D/g,'');
@@ -676,7 +675,7 @@ async function saveSim(sim){
 }
 async function loadSim(id){
   if(getRoute().view==='cliente' && /^[a-f0-9]{64}$/.test(id)){
-    const {readPublicSignature}=await import('./cdc-signature.mjs?v=20261120-signature-v13');
+    const {readPublicSignature}=await import('./cdc-signature.mjs?v=20261120-multa-v15');
     return readPublicSignature({projectId:firebaseConfig.projectId,token:id});
   }
   if(!firebaseOk){
@@ -1320,7 +1319,7 @@ window.abrirDetalhe = async function(id){
     return;
   }
   const base = getBaseUrl();
-  const url = base && s.linkAssinatura ? (base + '?v=20261120-signature-v13#cliente/' + s.linkAssinatura) : null;
+  const url = base && s.linkAssinatura ? (base + '?v=20261120-multa-v15#cliente/' + s.linkAssinatura) : null;
   let signBlock = '';
   if(s.aceite){
     signBlock = `
@@ -2094,7 +2093,7 @@ function wireContratarEvents(id){
           await saveSim(s);
         }
         const token=await criarLinkCDC(s);
-        const url = base ? (base + '?v=20261120-signature-v13#cliente/' + token) : null;
+        const url = base ? (base + '?v=20261120-multa-v15#cliente/' + token) : null;
         const linkBlock = url
           ? `<div class="link-box" data-signature-link><input readonly value="${url}" id="link-cliente-final"><button class="btn btn-outline btn-sm" onclick="copiarLinkAssinatura(this)">Copiar</button></div>`
           : linkIndisponivelHtml() + `<button class="btn btn-outline" onclick="location.hash='cliente/${s.id}'">Pré-visualizar como o cliente</button>`;
@@ -2129,6 +2128,7 @@ function wireContratarEvents(id){
 }
 
 async function viewCliente(id){
+  const {lateChargeClause}=await import('./cdc-charges.mjs?v=20261120-multa-v15');
   let s;
   try{s=await loadSim(id);}catch(e){
     const title=e.code==='signature-service'?'Não foi possível carregar agora':'Link de assinatura indisponível';
@@ -2165,7 +2165,7 @@ async function viewCliente(id){
       <div class="kv"><span>Última parcela</span><b>${fmtDate(s.dataUltima)}</b></div>`}
     <div class="kv"><span>Taxa de juros</span><b>${s.taxa}% a.m.</b></div>
     <div class="kv"><span>CET</span><b>${(s.cet||0).toFixed(2)}% a.m.</b></div>
-    <div class="disclaimer">Estas condições estão sujeitas à análise de crédito e podem ser alteradas após a avaliação cadastral. ${isDecimoTerceiro(s)?'O valor da 2ª parcela pode variar por IRRF e outros ajustes da folha. ':''}Em caso de atraso, incidirá multa moratória de R$ ${CONFIG.multaDia.toFixed(2)} por dia, além dos encargos aplicáveis.</div>
+    <div class="disclaimer">Estas condições estão sujeitas à análise de crédito e podem ser alteradas após a avaliação cadastral. ${isDecimoTerceiro(s)?'O valor da 2ª parcela pode variar por IRRF e outros ajustes da folha. ':''}${lateChargeClause(s)}</div>
     <div class="accept-box">
       <label style="display:flex;gap:8px;align-items:flex-start;font-weight:600;">
         <input type="checkbox" id="chk-aceite" style="margin-top:3px;">
@@ -2659,6 +2659,7 @@ async function salvarCCBComDocumentos(doc, documentos, filename){
 
 // ---------- Geração do PDF (CCB + documentos reais) ----------
 window.gerarPDF = async function(id){
+  const {lateChargeClause}=await import('./cdc-charges.mjs?v=20261120-multa-v15');
   const s = await loadSim(id);
   if(!s) return;
   if(!s.numeroCCB){
@@ -2733,8 +2734,8 @@ window.gerarPDF = async function(id){
   y += 8;
   doc.setFont('helvetica','italic'); doc.setFontSize(9);
   const clausula = isDecimoTerceiro(s)
-    ? `Operação de antecipação da ${s.parcela13==='segunda'?'segunda':'primeira'} parcela do 13º salário, com desconto de ${s.taxa}% ao mês aplicado diretamente sobre o valor da parcela pelo período de ${s.mesesAntecipacao} ${s.mesesAntecipacao===1?'mês':'meses'}. O cálculo da segunda parcela considera o INSS informado nesta CCB e pode variar por IRRF ou ajustes da folha. Em caso de atraso, incidirá multa moratória de R$ ${CONFIG.multaDia.toFixed(2)} por dia, sem prejuízo dos demais encargos contratuais aplicáveis.`
-    : `Taxa de juros remuneratórios: ${s.taxa}% ao mês. Em caso de atraso no pagamento de qualquer parcela, incidirá multa moratória de R$ ${CONFIG.multaDia.toFixed(2)} por dia de atraso, sem prejuízo dos demais encargos contratuais aplicáveis.`;
+    ? `Operação de antecipação da ${s.parcela13==='segunda'?'segunda':'primeira'} parcela do 13º salário, com desconto de ${s.taxa}% ao mês aplicado diretamente sobre o valor da parcela pelo período de ${s.mesesAntecipacao} ${s.mesesAntecipacao===1?'mês':'meses'}. O cálculo da segunda parcela considera o INSS informado nesta CCB e pode variar por IRRF ou ajustes da folha. ${lateChargeClause(s)}`
+    : `Taxa de juros remuneratórios: ${s.taxa}% ao mês. ${lateChargeClause(s)}`;
   const clausulaLines = doc.splitTextToSize(clausula, pageW-80);
   if(y+clausulaLines.length*12>770){doc.addPage();y=40;}
   doc.text(clausulaLines, 40, y);

@@ -23,6 +23,8 @@ const db={collection:c=>({doc:id=>({key:c+'/'+id})}),runTransaction:fn=>{
 }};
 let sequence=0;const options={db,fb:{firestore:{Timestamp:{fromMillis:stamp}}},sim:fixture,uid:'fixture-admin',now:()=>1000,newToken:()=>String(++sequence).padStart(64,'0')};
 const first=await ensureSignatureLink(options);assert.equal(records.get('simulacoes/fixture').linkAssinatura,first);
+assert.deepEqual(records.get('assinaturasCDC/'+first).proposta.encargosAtraso,{version:'multa-unica-2-v1',multaPercentual:2,jurosMoraMensal:0});
+assert.deepEqual(records.get('simulacoes/fixture').encargosAtraso,records.get('assinaturasCDC/'+first).proposta.encargosAtraso);
 const writesBefore=writes;
 assert.deepEqual(await Promise.all([ensureSignatureLink(options),ensureSignatureLink(options)]),[first,first]);assert.equal(writes,writesBefore,'Repeated/concurrent clicks do not write or revoke');
 records.get('assinaturasCDC/'+first).expiraEm=stamp(0);
@@ -35,3 +37,13 @@ records.get('assinaturasCDC/'+repaired).aceite=null;
 records.get('simulacoes/fixture').valor=501;
 await assert.rejects(()=>ensureSignatureLink(options),/outra tela/);
 console.log('PASS: active link reused, concurrent requests converge, expired/missing links repaired, signature and stale proposal protected');
+
+const {lateChargeClause,CURRENT_LATE_CHARGES}=await import('../cdc-charges.mjs');
+assert(lateChargeClause({}).includes('2%'));
+assert(lateChargeClause({}).includes('uma única vez por parcela'));
+assert(lateChargeClause({}).includes('Não serão cobrados juros de mora'));
+assert(lateChargeClause({aceite:{timestamp:1}}).includes('R$ 1.00 por dia'));
+assert(lateChargeClause({linkAssinatura:'legacy'}).includes('R$ 1.00 por dia'));
+assert(lateChargeClause({aceite:{timestamp:1},encargosAtraso:CURRENT_LATE_CHARGES}).includes('2%'));
+assert(lateChargeClause(s).includes('R$ 1.00 por dia'),'Legacy public link preserves its issued terms');
+console.log('PASS: new terms persist with proposal, one-time 2%, no late interest, historical terms preserved');
