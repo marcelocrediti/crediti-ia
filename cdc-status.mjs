@@ -34,6 +34,8 @@ function customerReason(value){
   if(/^Documento obrigatório não enviado:/.test(text))return 'Falta enviar o '+category+'.';
   if(/^Documento inadequado:|^Tipo do documento não confirmado:/.test(text))return 'O arquivo não corresponde ao '+category+' solicitado. Envie o documento correto.';
   if(/^Nome divergente|^CPF divergente/.test(text))return 'Há diferença entre os dados da ficha e o titular do '+category+'. Confira com a Crediti.';
+  if(/^CPF não confirmado/.test(text))return 'Não foi possível conferir o CPF nos documentos. Envie uma cópia legível da identidade com CPF ou um comprovante de CPF separado.';
+  if(/^Movimentação bancária:/.test(text))return 'Falta confirmar a movimentação dos últimos 2 meses. Envie os extratos completos desse período.';
   if(/^Titular não identificado/.test(text))return 'Não foi possível identificar o titular do '+category+'. Envie uma cópia completa e legível.';
   if(/^Documento (ilegível|com leitura inconclusiva)/.test(text))return 'Não foi possível ler o '+category+'. Envie uma cópia completa e legível.';
   if(/^Renda não confirmada|^Confirme a renda líquida/.test(text))return 'A renda não pôde ser confirmada nos anexos. Confira ou envie os comprovantes de renda.';

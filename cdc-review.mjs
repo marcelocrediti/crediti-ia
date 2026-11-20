@@ -1,6 +1,6 @@
-import {evaluateCredit,POLICY_VERSION,documentFindings,analysisSections,sectionsText} from './cdc-policy.mjs?v=20261119-sobra600';
+import {evaluateCredit,POLICY_VERSION,documentFindings,analysisSections,sectionsText} from './cdc-policy.mjs?v=20261120-docs2meses';
 const API='https://crediti-ia-api.onrender.com/api/cdc/document';
-const DOCS=[['rgFrente','Identidade completa (RG, CIN ou CNH)'],['cpfFrente','CPF (se não constar na identidade)'],['comprovanteResidencia','Comprovante de residência'],['comprovanteRenda','Renda: 3 contracheques, benefício atual ou extratos de 3 meses']];
+const DOCS=[['rgFrente','Identidade completa (RG, CIN ou CNH)'],['cpfFrente','CPF (se não constar na identidade)'],['comprovanteResidencia','Comprovante de residência'],['comprovanteRenda','Renda: 3 contracheques, benefício atual ou extratos com movimentação dos últimos 2 meses']];
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const money=v=>Number(v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
 const hash=async value=>Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(value)))).map(x=>x.toString(16).padStart(2,'0')).join('');
@@ -15,10 +15,17 @@ export async function readWithDeadline(operation,label,ms=20000){
 }
 export function createReviewContext(ctx){
   const {db}=ctx;
+  const documentReads=new Map();
   return {...ctx,
     loadSim:async id=>{const doc=await readWithDeadline(()=>db.collection('simulacoes').doc(id).get({source:'server'}),'a ficha');if(!doc.exists)throw Error('Ficha não encontrada. Volte ao painel e abra a proposta novamente.');return {...doc.data(),id:doc.id||id};},
     listSims:async()=>{const snap=await readWithDeadline(()=>db.collection('simulacoes').get({source:'server'}),'o histórico');return snap.docs.map(doc=>({...doc.data(),id:doc.id}));},
-    loadDocumentos:async id=>{const snap=await readWithDeadline(()=>db.collection('simulacoes').doc(id).collection('documentos').get({source:'server'}),'os anexos');return Object.fromEntries(snap.docs.map(doc=>[doc.id,doc.data()]));}
+    loadDocumentos:async id=>{
+      if(!documentReads.has(id)){
+        const read=readWithDeadline(()=>db.collection('simulacoes').doc(id).collection('documentos').get({source:'server'}),'os anexos',60000).then(snap=>Object.fromEntries(snap.docs.map(doc=>[doc.id,doc.data()])));
+        documentReads.set(id,read);read.finally(()=>{if(documentReads.get(id)===read)documentReads.delete(id);}).catch(()=>{});
+      }
+      return documentReads.get(id);
+    }
   };
 }
 const cpfOf=s=>String(s.dadosCliente?.cpf||'').replace(/\D/g,'');
@@ -78,7 +85,7 @@ export async function mountCdcReview(id,root,ctx){
   <div id="rev-residenciaBox" hidden><label for="rev-residenciaJustificativa">Justifique aqui</label><textarea id="rev-residenciaJustificativa" maxlength="600" placeholder="Informe o nome do titular, a relação com o cliente e por que o comprovante está em nome dessa pessoa.">${esc(q.residenciaJustificativa||'')}</textarea></div>
   <h3>Documentos para análise</h3><p class="hint">Até 5 anexos por categoria, em PDF, JPG ou JPEG, até 700 KB cada. Você pode enviar frente e verso ou os comprovantes mensais separados.</p>
   ${DOCS.map(([key,label])=>`<div style="margin-bottom:18px;min-width:0"><label>${esc(label)}</label><input type="file" multiple data-doc="${key}" style="display:block;width:100%;max-width:100%;min-width:0;box-sizing:border-box;font-size:14px" accept="application/pdf,image/jpeg,.jpg,.jpeg"><div data-files="${key}" class="hint" style="overflow-wrap:anywhere"></div><button type="button" class="btn btn-outline" data-read="${key}">Ler anexos</button><div data-result="${key}" style="white-space:pre-wrap;overflow-wrap:anywhere"></div></div>`).join('')}
-  <label style="display:flex;gap:10px"><input id="rev-cpfNaIdentidade" type="checkbox" style="width:auto" ${q.cpfNaIdentidade?'checked':''}>CPF consta no documento de identidade</label>
+  <p class="hint">O CPF será identificado nos documentos, sem necessidade de marcar uma confirmação.</p>
   <label style="display:flex;gap:10px"><input id="rev-documentosConferidos" type="checkbox" style="width:auto">Conferi os documentos, titularidade, datas, renda líquida e competências exigidas. Os dados correspondem à ficha.</label>
   <div id="rev-history"></div>
   <button type="button" class="btn btn-gold" id="rev-save">Salvar ficha da análise</button>
@@ -124,7 +131,7 @@ export async function mountCdcReview(id,root,ctx){
     dialog.append(heading,body,ok);document.body.append(dialog);dialog.showModal();heading.tabIndex=-1;heading.focus({preventScroll:true});dialog.scrollTop=0;
   };
   if(record) message('Última avaliação: '+record.status+'\n'+record.motivos.join('\n')+'\n'+(s.analiseCdc.decisao?'Decisão confirmada: '+s.analiseCdc.decisao.status:'Aguardando conferência do administrador.'));
-  const questionnaire=()=>Object.fromEntries(['renda','despesas','outrasParcelas','restricao','residenciaTitular','residenciaJustificativa','cpfNaIdentidade','documentosConferidos'].map(k=>[k,['renda','despesas','outrasParcelas'].includes(k)?(el(k).value.trim()?number(el(k).value):null):el(k).type==='checkbox'?el(k).checked:k==='residenciaJustificativa'&&el('residenciaTitular').value!=='terceiro'?'':el(k).value.trim()]));
+  const questionnaire=()=>Object.fromEntries(['renda','despesas','outrasParcelas','restricao','residenciaTitular','residenciaJustificativa','documentosConferidos'].map(k=>[k,['renda','despesas','outrasParcelas'].includes(k)?(el(k).value.trim()?number(el(k).value):null):el(k).type==='checkbox'?el(k).checked:k==='residenciaJustificativa'&&el('residenciaTitular').value!=='terceiro'?'':el(k).value.trim()]));
   const persist=async()=>{const current=await loadSim(id);if(!current)throw Error('Não foi possível carregar a ficha. Tente novamente.');const next=questionnaire();const changed=JSON.stringify(current.analiseCdc?.questionario)!==JSON.stringify(next);current.analiseCdc={...(current.analiseCdc||{}),questionario:next,atualizadoEm:Date.now()};if(changed){delete current.analiseCdc.decisao;delete current.analiseCdc.resultado;delete current.analiseCdc.snapshot;}await saveSim(current);return current;};
   const run=async button=>{
     if(busy)return;
@@ -179,15 +186,17 @@ export async function mountCdcReview(id,root,ctx){
         for(const slot of keys){
           message('Lendo '+(docs[slot].nome||slot)+'…');
           const fingerprint=await hash(docs[slot].dataUrl);let current=await loadSim(id);const previous=current.analiseDocumentos?.[slot];
-          if(previous?.hash===fingerprint&&previous.document)continue;
-          if(previous?.document&&previous?.hashes?.includes(fingerprint))throw Error('Este arquivo já foi lido antes. Envie uma nova digitalização.');
+          if(previous?.hash===fingerprint&&previous.document&&previous.versaoLeitor==='cdc-docs-2meses-v2')continue;
+          const reused=Object.values(current.analiseDocumentos||{}).find(r=>r.hash===fingerprint&&r.document&&r.versaoLeitor==='cdc-docs-2meses-v2');
+          if(reused){current.analiseDocumentos={...current.analiseDocumentos,[slot]:{...reused}};await saveSim(current);continue;}
+          // A new reader version may reread the same attachment without counting a new illegible submission.
           const token=await readWithDeadline(()=>auth.currentUser.getIdToken(),'a sessão');
           const controller=new AbortController(),timeout=setTimeout(()=>controller.abort(),90000);let data,response;
           try{response=await fetch(API,{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+token},body:JSON.stringify({dataUrl:docs[slot].dataUrl}),signal:controller.signal});data=await response.json();}
           catch(e){throw Error(controller.signal.aborted?'A leitura demorou além do esperado. Tente novamente. Nenhuma recusa aplicada.':'Não foi possível ler o anexo. Confira a conexão e tente novamente.');}
           finally{clearTimeout(timeout);}
           if(!response.ok||!data.document)throw Error(data.error||'Falha de leitura. Nenhuma recusa aplicada.');
-          const review={hash:fingerprint,hashes:[...new Set([...(previous?.hashes||[]),fingerprint])],document:data.document,consecutivos:data.document.legibilidade==='ilegivel'?(previous?.consecutivos||0)+1:0,lidoEm:Date.now()};
+          const review={versaoLeitor:data.version||'legacy',hash:fingerprint,hashes:[...new Set([...(previous?.hashes||[]),fingerprint])],document:data.document,consecutivos:data.document.legibilidade==='ilegivel'?(previous?.consecutivos||0)+(previous?.hash===fingerprint?0:1):0,lidoEm:Date.now()};
           current=await loadSim(id);current.analiseDocumentos={...(current.analiseDocumentos||{}),[slot]:review};if(current.analiseCdc)delete current.analiseCdc.decisao;await saveSim(current);
         }
         if(!auto)el('documentosConferidos').checked=false;
@@ -203,7 +212,7 @@ export async function mountCdcReview(id,root,ctx){
     await persist();
     const issues=[];const initialDocs=await loadDocumentos(id);
     for(const [key,label] of DOCS){
-      if(key==='cpfFrente'&&questionnaire().cpfNaIdentidade&&!documentKeys(initialDocs,key).length)continue;
+      if(key==='cpfFrente'&&!documentKeys(initialDocs,key).length)continue;
       if(!documentKeys(initialDocs,key).length){issues.push('Documento obrigatório não enviado: '+label+'.');continue;}
       try{await groupEl('read',key).task(true);}catch(e){issues.push('Não foi possível concluir a leitura de '+label+': '+e.message);}
     }
@@ -211,7 +220,7 @@ export async function mountCdcReview(id,root,ctx){
     const current=await loadSim(id);const sims=await related();const docs=await loadDocumentos(id);const checks=[];
     const readDocs=[];
     for(const [key,label]of DOCS){
-      if(key==='cpfFrente'&&questionnaire().cpfNaIdentidade&&!documentKeys(docs,key).length)continue;
+      if(key==='cpfFrente'&&!documentKeys(docs,key).length)continue;
       const keys=documentKeys(docs,key);
       for(const slot of keys){const r=current.analiseDocumentos?.[slot];if(!r?.document||r.hash!==await hash(docs[slot].dataUrl)){issues.push('Leitura não concluída: '+(docs[slot].nome||label));continue;}checks.push({label:docs[slot].nome||label,legibilidade:r.document.legibilidade,consecutivos:r.consecutivos,confirmado:questionnaire().documentosConferidos});readDocs.push({key,label:label+' ('+(docs[slot].nome||slot)+')',d:r.document});}
     }

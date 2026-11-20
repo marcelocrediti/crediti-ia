@@ -1,4 +1,4 @@
-export const POLICY_VERSION = '2026-11-19-v4-renda-disponivel';
+export const POLICY_VERSION = '2026-11-20-v5-documentos-2meses';
 const cents = n => Math.round(Number(n)*100);
 const money = n => Number(n).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
 export function evaluateCredit({q, parcela, valor, history=[], contracts=[], documents=[], today}) {
@@ -38,9 +38,23 @@ export function evaluateCredit({q, parcela, valor, history=[], contracts=[], doc
   return {status:reasons.length?'Recusada':pending.length?'Pendente':'Aprovada',motivos:reasons.length?reasons:pending.length?pending:['Parcela dentro do limite, documentos conferidos, restrições respondidas como não e nenhum impedimento registrado.'+(history.some(x=>x.tipo==='positivo')?' Histórico contém registro positivo.':'')],pendencias:pending,limiteParcela:maximum===null?null:maximum/100,rendaMinima:requiredIncome===null?null:requiredIncome/100,calculo:validMoney?{renda:income/100,gastos:expenses/100,parcelasExistentes:debts/100,novaParcela:payment/100,teto15:Math.max(0,Math.floor(available*15/100))/100,margem15:Math.max(0,Math.floor(available*15/100))/100,saldo:(income-expenses-debts)/100}:null,comprometimento:validMoney&&available>0?payment/available*100:null,versao:POLICY_VERSION};
 }
 
-const normalizedName=v=>String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toUpperCase().replace(/[^A-Z0-9 ]/g,' ').replace(/\s+/g,' ').trim();
+const normalizedName=v=>String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toUpperCase().replace(/[^A-Z0-9 ]/g,' ').split(/\s+/).filter(x=>x&&!['DE','DA','DO','DAS','DOS'].includes(x)).join(' ');
 const digits=v=>String(v||'').replace(/\D/g,'');
-export function documentFindings({q,cliente,cpf,readDocs}){
+export const completeCpf=v=>/^\d{11}$/.test(String(v||'').replace(/[.\-\s]/g,''));
+const oneEdit=(a,b)=>{if(a===b)return true;if(Math.abs(a.length-b.length)>1)return false;let i=0,j=0,errors=0;while(i<a.length&&j<b.length){if(a[i]===b[j]){i++;j++;continue;}if(++errors>1)return false;if(a.length>=b.length)i++;if(b.length>=a.length)j++;}return errors+(a.length-i)+(b.length-j)<=1;};
+const nearName=(a,b)=>{const x=a.split(' '),y=b.split(' ');return x.length>=2&&x.length===y.length&&x.filter((v,i)=>v!==y[i]).length===1&&x.every((v,i)=>oneEdit(v,y[i]));};
+export function statementCoverage(readDocs,today){
+  const date=new Date(today+'T12:00:00Z');
+  const months=[1,2].map(n=>new Date(Date.UTC(date.getUTCFullYear(),date.getUTCMonth()-n,1)).toISOString().slice(0,7));
+  const docs=readDocs.filter(x=>x.key==='comprovanteRenda'&&x.d.legibilidade==='legivel'&&x.d.extratoBancario===true);
+  const found=new Set(docs.flatMap(x=>Array.isArray(x.d.competencias)?x.d.competencias:[]));
+  // Complete preceding calendar months, or a complete rolling 60-day statement.
+  const ranges=docs.map(x=>[x.d.periodoInicio,x.d.periodoFim]).filter(([a,b])=>/^\d{4}-\d{2}-\d{2}$/.test(a||'')&&/^\d{4}-\d{2}-\d{2}$/.test(b||'')&&a<=b&&b<=today).sort((a,b)=>a[0].localeCompare(b[0]));
+  const merged=[];for(const [a,b]of ranges){const last=merged.at(-1);if(last&&Date.parse(a)-Date.parse(last[1])<=86400000)last[1]=last[1]>b?last[1]:b;else merged.push([a,b]);}
+  const rollingStart=new Date(Date.parse(today+'T12:00:00Z')-59*86400000).toISOString().slice(0,10);
+  return {ok:months.every(m=>found.has(m))||merged.some(([a,b])=>a<=rollingStart&&b>=today),months};
+}
+export function documentFindings({q,cliente,cpf,readDocs,today=new Date().toLocaleDateString('en-CA',{timeZone:'America/Fortaleza'})}){
   const pending=[],notes=[];
   const expected={rgFrente:'identidade',cpfFrente:'cpf',comprovanteResidencia:'residencia',comprovanteRenda:'renda'};
   const typeLabels={identidade:'documento de identidade',cpf:'CPF',residencia:'comprovante de residência',renda:'comprovante de renda',conta:'comprovante bancário',outro:'outro tipo de documento'};
@@ -48,7 +62,11 @@ export function documentFindings({q,cliente,cpf,readDocs}){
   if(q.residenciaTitular==='terceiro'&&!String(q.residenciaJustificativa||'').trim())pending.push('Comprovante de residência em nome de terceiro: falta justificar a relação com o titular e o endereço informado.');
   for(const {key,label,d}of readDocs){
     if(d.legibilidade!=='legivel')continue;
-    if(d.tipo!==expected[key]){pending.push('Documento inadequado: '+label+'. Esperado: '+typeLabels[expected[key]]+'. O leitor identificou: '+(typeLabels[d.tipo]||'tipo não identificado')+'. Envie o documento solicitado.');continue;}
+    const bankIncome=key==='comprovanteRenda'&&d.extratoBancario===true;
+    const bankAddress=key==='comprovanteResidencia'&&d.contemEndereco===true;
+    const identityCpf=key==='cpfFrente'&&d.tipo==='identidade';
+    if(d.tipo!==expected[key]&&!bankIncome&&!bankAddress&&!identityCpf){pending.push('Documento inadequado: '+label+'. Esperado: '+typeLabels[expected[key]]+'. O conteúdo lido não confirmou essa finalidade. Confira o anexo antes de solicitar outro.');continue;}
+    if(bankAddress)notes.push('Documento bancário com endereço identificado em '+label+'. Confira se o endereço corresponde à ficha.');
     const third=key==='comprovanteResidencia'&&q.residenciaTitular==='terceiro';
     if(third){
       notes.push('Residência em nome de terceiro. Titular lido: '+(d.nome||'não identificado')+'. Justificativa: '+(q.residenciaJustificativa||'não preenchida')+'. A diferença de titular, sozinha, não é motivo de recusa. Confira o endereço e a justificativa.');
@@ -56,11 +74,19 @@ export function documentFindings({q,cliente,cpf,readDocs}){
       continue;
     }
     const name=normalizedName(d.nome),clientName=normalizedName(cliente);
-    if(name&&clientName&&name!==clientName)pending.push('Nome divergente em '+label+': a ficha está em nome de “'+cliente+'”, mas o nome lido no documento é “'+d.nome+'”. Confira o titular no anexo; erro de leitura, abreviação ou alteração de nome precisam de verificação.');
-    if(digits(d.cpf)&&digits(d.cpf)!==digits(cpf))pending.push('CPF divergente em '+label+': o CPF lido não corresponde ao CPF da ficha. Confira a identidade do titular antes de prosseguir.');
+    if(name&&clientName&&name!==clientName){
+      if(nearName(name,clientName)&&completeCpf(d.cpf)&&digits(d.cpf)===digits(cpf)&&q.documentosConferidos)notes.push('Pequena variação de grafia em '+label+': ficha “'+cliente+'”, leitura “'+d.nome+'”. CPF coincide e o administrador marcou os documentos como conferidos. A variação foi registrada, sem recusa automática.');
+      else pending.push('Nome divergente em '+label+': a ficha está em nome de “'+cliente+'”, mas o nome lido no documento é “'+d.nome+'”. Confira o titular no anexo; erro de leitura, abreviação ou alteração de nome precisam de verificação.');
+    }
+    if(completeCpf(d.cpf)&&digits(d.cpf)!==digits(cpf))pending.push('CPF divergente em '+label+': o CPF lido não corresponde ao CPF da ficha. Confira a identidade do titular antes de prosseguir.');
     if(!name&&!digits(d.cpf))pending.push('Titular não identificado em '+label+': a leitura não encontrou nome nem CPF suficientes para comparar com a ficha.');
   }
-  const incomes=readDocs.filter(x=>x.key==='comprovanteRenda'&&x.d.tipo==='renda'&&x.d.legibilidade==='legivel'&&Number.isFinite(x.d.rendaLiquida)&&x.d.rendaLiquida>0);
+  const cpfFound=readDocs.some(x=>['rgFrente','cpfFrente'].includes(x.key)&&['identidade','cpf'].includes(x.d.tipo)&&x.d.legibilidade==='legivel'&&completeCpf(x.d.cpf)&&digits(x.d.cpf)===digits(cpf));
+  if(!cpfFound)pending.push('CPF não confirmado na identidade ou no documento de CPF. Confira a leitura; se o número não estiver legível, envie um documento que o apresente completo.');
+  else notes.push('CPF identificado automaticamente nos documentos e compatível com a ficha. Não é necessário comprovante separado.');
+  const bankDocs=readDocs.filter(x=>x.key==='comprovanteRenda'&&x.d.legibilidade==='legivel'&&x.d.extratoBancario===true);
+  if(bankDocs.length){const coverage=statementCoverage(readDocs,today);if(!coverage.ok)pending.push('Movimentação bancária: apresente os últimos 2 meses. Confira a cobertura dos extratos; os meses esperados são '+coverage.months.slice().reverse().join(' e ')+' ou os últimos 60 dias completos.');else notes.push('Extrato bancário aceito para conferir a movimentação dos últimos 2 meses. Confira se as páginas e o período estão completos; entradas e saldo não equivalem automaticamente à renda.');}
+  const incomes=readDocs.filter(x=>x.key==='comprovanteRenda'&&(x.d.tipo==='renda'||x.d.extratoBancario===true)&&x.d.legibilidade==='legivel'&&Number.isFinite(x.d.rendaLiquida)&&x.d.rendaLiquida>0);
   if(!incomes.length)pending.push('Renda não confirmada nos anexos. Renda informada: '+(Number.isFinite(q.renda)&&q.renda>0?money(q.renda):'não preenchida')+'. Não foi possível identificar renda líquida comprovada. Isso não significa renda zero; envie ou confira o comprovante de renda.');
   else{
     notes.push('Renda informada: '+money(q.renda)+'. Valores líquidos identificados nos comprovantes: '+incomes.map(x=>money(x.d.rendaLiquida)+' ('+x.label+')').join('; ')+'.');
