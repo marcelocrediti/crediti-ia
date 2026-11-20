@@ -1,4 +1,4 @@
-import {mountCdcReview,readWithDeadline,createReviewContext,documentKeys} from '../cdc-review.mjs?v=20261120-view';
+import {mountCdcReview,readWithDeadline,createReviewContext,documentKeys} from '../cdc-review.mjs?v=20261120-leitura-v4';
 import {evaluateCredit,documentFindings,analysisSections,sectionsText} from '../cdc-policy.mjs?v=20261120-docs2meses';
 import {mountCustomer,validateResidence,receiveSubmission,digest} from '../cdc-preanalise.mjs?v=20261120-docs2meses';
 const root=document.querySelector('#fixture'),out=document.querySelector('#results');
@@ -82,6 +82,13 @@ document.querySelector('#start').onclick=async function(){
       try{const f=await setup({docs});el('documentosConferidos').checked=true;await click('analyze');assert(f.sim.analiseCdc.resultado.status===status,'Resultado inesperado: '+el('observacoes').value);await tick();if(['extrato_bancario','pagamento_inss'].includes(subtipo))assert(!root.querySelector('[data-result="comprovanteRenda"]').textContent.includes('Renda líquida: Não identificada'),'Exigiu líquido do extrato');}finally{window.fetch=original;}
     });
   }
+  await test('Conferência documental salva permanece marcada',async()=>{await setup();assert(el('documentosConferidos').checked,'Conferência salva foi perdida');});
+  await test('Falha no primeiro arquivo não abandona o segundo nem cria pendências fictícias',async()=>{
+    const docs={rgFrente:{nome:'falha.pdf',dataUrl:'data:application/pdf;base64,'+btoa('falha')},rgFrente__2:{nome:'legivel.pdf',dataUrl:'data:application/pdf;base64,'+btoa('legivel')}};
+    const original=window.fetch;let calls=0;
+    window.fetch=async(url,options)=>{calls++;if(atob(JSON.parse(options.body).dataUrl.split(',')[1])==='falha')return {ok:false,json:async()=>({error:'Serviço de leitura indisponível'})};return {ok:true,json:async()=>({version:'cdc-docs-tipos-v3',document:{tipo:'identidade',subtipo:'outro',legibilidade:'legivel',nome:'Cliente de teste',cpf:'00000000000',competencias:[],observacoes:''}})};};
+    try{const f=await setup({docs});await click('analyze');assert(calls===2,'Segundo arquivo não foi lido');assert(f.sim.analiseDocumentos.rgFrente__2.document.legibilidade==='legivel','Leitura válida perdida');assert(f.sim.analiseCdc.resultado.tipoFalha==='tecnica','Erro técnico misturado com avaliação');assert(!el('observacoes').value.includes('CPF não confirmado'),'Criou pendência por leitura incompleta');assert(el('observacoes').value.includes('falha.pdf'),'Não identificou arquivo com falha');}finally{window.fetch=original;}
+  });
   await test('Aprovação manual exige motivo',async()=>{const f=await setup({auto:false});await click('approve');assert(el('output').textContent.includes('motivo'),'Sem validação');assert(!f.sim.analiseCdc.decisao,'Aprovou sem motivo');});
   await test('Recusa manual fictícia registra motivo',async()=>{const f=await setup({auto:false});el('reason').value='Teste local';await click('refuse');assert(f.sim.analiseCdc.decisao.status==='Recusada','Não gravou');assert(f.sim.analiseCdc.decisao.motivo==='Teste local','Motivo');});
   await test('Automático não permite confirmar sem avaliação aprovada',async()=>{const f=await setup();el('reason').value='Teste';await click('approve');assert(!f.sim.analiseCdc.decisao,'Ignorou guarda');assert(el('output').textContent.includes('Conclua'),'Sem aviso');});

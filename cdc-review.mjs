@@ -14,6 +14,23 @@ export async function readWithDeadline(operation,label,ms=20000){
   try{return await Promise.race([Promise.resolve().then(operation),new Promise((_,reject)=>{timer=setTimeout(()=>reject(Error('Não foi possível carregar '+label+' a tempo. Confira a conexão e tente novamente.')),ms);})]);}
   finally{clearTimeout(timer);}
 }
+export async function requestDocument(dataUrl,user,{fetcher=fetch,wait=ms=>new Promise(resolve=>setTimeout(resolve,ms))}={}){
+  for(let attempt=0;attempt<2;attempt++){
+    const token=await readWithDeadline(()=>user.getIdToken(attempt>0),'a sessão');
+    const controller=new AbortController(),timeout=setTimeout(()=>controller.abort(),90000);
+    let response,data;
+    try{
+      response=await fetcher(API,{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+token},body:JSON.stringify({dataUrl}),signal:controller.signal});
+      data=await response.json().catch(()=>({error:'O serviço de leitura retornou uma resposta inválida (HTTP '+response.status+'). Os anexos foram preservados.'}));
+    }catch(error){
+      if(!attempt){await wait(1500);continue;}
+      throw Error(controller.signal.aborted?'O leitor não respondeu a tempo. Os anexos foram preservados.':'Falha de conexão com o leitor. Os anexos foram preservados.');
+    }finally{clearTimeout(timeout);}
+    if(response.ok&&data.document)return data;
+    if(!attempt&&(response.status===401||data.retryable===true||(response.status===429&&data.retryable!==false))){await wait(response.status===401?0:2000);continue;}
+    throw Error(data.error||'Falha técnica na leitura (HTTP '+response.status+'). Os anexos foram preservados.');
+  }
+}
 export function createReviewContext(ctx){
   const {db}=ctx;
   const documentReads=new Map();
@@ -122,6 +139,7 @@ export async function mountCdcReview(id,root,ctx){
   root.style.minWidth='0';
   root.querySelectorAll('input[type="checkbox"]').forEach(input=>{input.style.flex='0 0 22px';input.style.width='22px';input.style.height='22px';});
   for(const k of ['renda','despesas','outrasParcelas']){const input=el(k);input.oninput=()=>{input.value=input.value.replace(/[^\d.,]/g,'');};input.onblur=()=>{if(input.value.trim()&&Number.isFinite(number(input.value)))input.value=formatAmount(number(input.value));};}
+  el('documentosConferidos').checked=q.documentosConferidos===true;
   el('restricao').value=q.restricao||'';
   el('residenciaTitular').value=q.residenciaTitular||'';
   const residenceToggle=()=>{el('residenciaBox').hidden=el('residenciaTitular').value!=='terceiro';};
@@ -149,7 +167,7 @@ export async function mountCdcReview(id,root,ctx){
     ok.onclick=()=>dialog.close();dialog.addEventListener('close',()=>{dialog.remove();el('observacoes').scrollIntoView({behavior:'smooth',block:'center'});});
     dialog.append(heading,body,ok);document.body.append(dialog);dialog.showModal();heading.tabIndex=-1;heading.focus({preventScroll:true});dialog.scrollTop=0;
   };
-  if(record) message('Última avaliação: '+record.status+'\n'+record.motivos.join('\n')+'\n'+(s.analiseCdc.decisao?'Decisão confirmada: '+s.analiseCdc.decisao.status:'Aguardando conferência do administrador.'));
+  if(record) message('Última avaliação: '+(record.tipoFalha==='tecnica'?'Não concluída por falha técnica':record.status)+'\n'+record.motivos.join('\n')+'\n'+(s.analiseCdc.decisao?'Decisão confirmada: '+s.analiseCdc.decisao.status:'Aguardando conferência do administrador.'));
   const questionnaire=()=>Object.fromEntries(['renda','despesas','outrasParcelas','restricao','residenciaTitular','residenciaJustificativa','documentosConferidos'].map(k=>[k,['renda','despesas','outrasParcelas'].includes(k)?(el(k).value.trim()?number(el(k).value):null):el(k).type==='checkbox'?el(k).checked:k==='residenciaJustificativa'&&el('residenciaTitular').value!=='terceiro'?'':el(k).value.trim()]));
   const persist=async()=>{const current=await loadSim(id);if(!current)throw Error('Não foi possível carregar a ficha. Tente novamente.');const next=questionnaire();const changed=JSON.stringify(current.analiseCdc?.questionario)!==JSON.stringify(next);current.analiseCdc={...(current.analiseCdc||{}),questionario:next,atualizadoEm:Date.now()};if(changed){delete current.analiseCdc.decisao;delete current.analiseCdc.resultado;delete current.analiseCdc.snapshot;}await saveSim(current);return current;};
   const run=async button=>{
@@ -202,23 +220,22 @@ export async function mountCdcReview(id,root,ctx){
     button.task=async(auto=false)=>{
       try{
         const docs=await loadDocumentos(id),keys=documentKeys(docs,key);if(!keys.length)throw Error('Anexe os documentos desta categoria primeiro.');
+        const failures=[];
         for(const slot of keys){
+          try{
           message('Lendo '+(docs[slot].nome||slot)+'…');
           const fingerprint=await hash(docs[slot].dataUrl);let current=await loadSim(id);const previous=current.analiseDocumentos?.[slot];
           if(previous?.hash===fingerprint&&previous.document&&previous.versaoLeitor==='cdc-docs-tipos-v3')continue;
           const reused=Object.values(current.analiseDocumentos||{}).find(r=>r.hash===fingerprint&&r.document&&r.versaoLeitor==='cdc-docs-tipos-v3');
           if(reused){current.analiseDocumentos={...current.analiseDocumentos,[slot]:{...reused}};await saveSim(current);continue;}
           // A new reader version may reread the same attachment without counting a new illegible submission.
-          const token=await readWithDeadline(()=>auth.currentUser.getIdToken(),'a sessão');
-          const controller=new AbortController(),timeout=setTimeout(()=>controller.abort(),90000);let data,response;
-          try{response=await fetch(API,{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+token},body:JSON.stringify({dataUrl:docs[slot].dataUrl}),signal:controller.signal});data=await response.json();}
-          catch(e){throw Error(controller.signal.aborted?'A leitura demorou além do esperado. Tente novamente. Nenhuma recusa aplicada.':'Não foi possível ler o anexo. Confira a conexão e tente novamente.');}
-          finally{clearTimeout(timeout);}
-          if(!response.ok||!data.document)throw Error(data.error||'Falha de leitura. Nenhuma recusa aplicada.');
+          const data=await requestDocument(docs[slot].dataUrl,auth.currentUser);
           if(data.version!=='cdc-docs-tipos-v3')throw Error('O leitor está sendo atualizado. Aguarde e analise novamente. Nenhuma recusa aplicada.');
           const review={versaoLeitor:data.version||'legacy',hash:fingerprint,hashes:[...new Set([...(previous?.hashes||[]),fingerprint])],document:data.document,consecutivos:data.document.legibilidade==='ilegivel'?(previous?.consecutivos||0)+(previous?.hash===fingerprint?0:1):0,lidoEm:Date.now()};
           current=await loadSim(id);current.analiseDocumentos={...(current.analiseDocumentos||{}),[slot]:review};if(current.analiseCdc)delete current.analiseCdc.decisao;await saveSim(current);
+          }catch(error){failures.push((docs[slot].nome||slot)+': '+error.message);}
         }
+        if(failures.length)throw Error(failures.join('\n'));
         if(!auto)el('documentosConferidos').checked=false;
         message('Leitura concluída. Conferindo os dados da ficha…');
       }finally{void safeRefreshFiles();}
@@ -237,12 +254,13 @@ export async function mountCdcReview(id,root,ctx){
     el('analyze').textContent='Analisando ficha…';
     try{
     await persist();
-    const issues=[];const initialDocs=await loadDocumentos(id);
+    const issues=[],readingFailures=[];const initialDocs=await loadDocumentos(id);
     for(const [key,label] of DOCS){
       if(key==='cpfFrente'&&!documentKeys(initialDocs,key).length)continue;
       if(!documentKeys(initialDocs,key).length){issues.push('Documento obrigatório não enviado: '+label+'.');continue;}
-      try{await groupEl('read',key).task(true);}catch(e){issues.push('Não foi possível concluir a leitura de '+label+': '+e.message);}
+      try{await groupEl('read',key).task(true);}catch(e){readingFailures.push(e.message);}
     }
+    if(readingFailures.length)throw Error('Falha na leitura dos anexos:\n'+readingFailures.join('\n')+'\nOs arquivos lidos com sucesso foram preservados.');
     message('Conferindo renda, parcelas, valores e histórico do cliente…');
     const current=await loadSim(id);const sims=await related();const docs=await loadDocumentos(id);const checks=[];
     const readDocs=[];
@@ -267,8 +285,8 @@ export async function mountCdcReview(id,root,ctx){
     showResult(result.status==='Pendente'?'Análise pendente':result.status,observation,sections);
     }catch(e){
       const text='Não foi possível concluir a análise: '+(e.message||'falha inesperada')+'. Nenhuma aprovação ou recusa foi confirmada.';
-      let saved=false;try{const current=await loadSim(id);if(current){current.analiseCdc={...(current.analiseCdc||{}),observacoes:text,resultado:{status:'Pendente',motivos:[text]},avaliadoEm:Date.now()};delete current.analiseCdc.decisao;delete current.analiseCdc.snapshot;await saveSim(current);saved=true;}}catch{}
-      showResult('Análise não concluída',text+(saved?'':' Não foi possível salvar estas observações. Tente novamente.'));
+      let saved=false;try{const current=await loadSim(id);if(current){current.analiseCdc={...(current.analiseCdc||{}),observacoes:text,resultado:{status:'Pendente',tipoFalha:'tecnica',motivos:[text]},avaliadoEm:Date.now()};delete current.analiseCdc.decisao;delete current.analiseCdc.snapshot;await saveSim(current);saved=true;}}catch{}
+      showResult('Leitura ou análise não concluída',text+(saved?'':' Não foi possível salvar estas observações. Tente novamente.'));
     }
   });
   async function decide(status){
