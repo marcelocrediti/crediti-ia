@@ -1,4 +1,4 @@
-export const POLICY_VERSION = '2026-11-20-v8-cpf-legivel';
+export const POLICY_VERSION = '2026-11-20-v9-falha-sem-recusa';
 const cents = n => Math.round(Number(n)*100);
 const money = n => Number(n).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
 export function evaluateCredit({q, parcela, valor, history=[], contracts=[], documents=[], today}) {
@@ -30,7 +30,7 @@ export function evaluateCredit({q, parcela, valor, history=[], contracts=[], doc
     }
   }
   for(const d of documents){
-    if(d.consecutivos>=2) reasons.push('Documento ilegível: '+d.label+'. Foram registrados dois envios consecutivos ilegíveis, conforme a regra da Crediti. Confira os registros antes de confirmar a recusa.');
+    if(d.legibilidade!=='legivel'&&d.consecutivos>=2) pending.push('Leitura automática inconclusiva: '+d.label+'. O leitor não confirmou a legibilidade em duas tentativas. Confira o anexo manualmente; isso não gera recusa automática.');
     else if(d.legibilidade!=='legivel') pending.push('Documento '+(d.legibilidade==='ilegivel'?'ilegível':'com leitura inconclusiva')+': '+d.label+'. Envie uma cópia completa e legível. A leitura não foi suficiente para confirmar os dados.');
     else if(!d.confirmado) pending.push('Conferência documental: '+d.label+'. Falta a confirmação do administrador.');
   }

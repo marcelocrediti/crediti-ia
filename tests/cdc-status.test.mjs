@@ -44,3 +44,8 @@ for(const s of ['Recusada','Pendente','Aprovada']){
 }
 console.log('Customer reasons, safe wording, manual reasons, status rendering and minimum validity: PASS');
 
+const technical={analiseCdc:{resultado:{status:'Pendente',tipoFalha:'tecnica',motivos:['Falha interna']}}};
+assert.equal(publicStatus(technical),'Em análise');assert.deepEqual(publicDetails(technical),[]);
+assert.equal(publicStatus({analiseCdc:{resultado:{status:'Recusada',motivos:['Documento ilegível: teste. Foram registrados dois envios consecutivos ilegíveis.']}}}),'Em análise');
+assert.equal(publicStatus({analiseCdc:{...technical.analiseCdc,decisao:{status:'Recusada'}}}),'Recusada');
+console.log('PASS: technical failures and old OCR-only refusals remain under review, explicit decisions preserved');

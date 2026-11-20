@@ -1,4 +1,6 @@
-import {evaluateCredit,POLICY_VERSION,documentFindings,analysisSections,sectionsText,documentIncomeSummary,completeCpf} from './cdc-policy.mjs?v=20261120-leitor-cpf-v6';
+import {needsInternalReview} from './cdc-status.mjs?v=20261120-ficha-v7';
+import {readFirestore} from './cdc-firestore-read.mjs?v=20261120-ficha-v7';
+import {evaluateCredit,POLICY_VERSION,documentFindings,analysisSections,sectionsText,documentIncomeSummary,completeCpf} from './cdc-policy.mjs?v=20261120-ficha-v7';
 import {showAttachments} from './cdc-document-viewer.mjs?v=20261120-view';
 const API='https://crediti-ia-api.onrender.com/api/cdc/document';
 const DOCS=[['rgFrente','Identidade completa (RG, CIN ou CNH)'],['cpfFrente','CPF (se não constar na identidade)'],['comprovanteResidencia','Comprovante de residência'],['comprovanteRenda','Renda: 3 contracheques/holerites, extrato de pagamento do INSS ou extrato/comprovante bancário dos últimos 60 dias. Comprovante Pix não é aceito']];
@@ -22,7 +24,7 @@ export const documentKeys=(docs,key)=>Object.keys(docs||{}).filter(k=>k===key||k
 // Bound reads, not writes: a timed-out write may still commit and must not be retried blindly.
 export async function readWithDeadline(operation,label,ms=20000){
   let timer;
-  try{return await Promise.race([Promise.resolve().then(operation),new Promise((_,reject)=>{timer=setTimeout(()=>reject(Error('Não foi possível carregar '+label+' a tempo. Confira a conexão e tente novamente.')),ms);})]);}
+  try{return await Promise.race([Promise.resolve().then(operation),new Promise((_,reject)=>{timer=setTimeout(()=>reject(Error('O serviço demorou para carregar '+label+'. Essa falha não indica falta de documentos nem reprovação.')),ms);})]);}
   finally{clearTimeout(timer);}
 }
 export async function requestDocument(dataUrl,user,{categoria,fetcher=fetch,wait=ms=>new Promise(resolve=>setTimeout(resolve,ms))}={}){
@@ -43,36 +45,27 @@ export async function requestDocument(dataUrl,user,{categoria,fetcher=fetch,wait
   }
 }
 export function createReviewContext(ctx){
-  const {db}=ctx;
-  const documentReads=new Map();
-  let historyRead;
+  const simReads=new Map(),documentReads=new Map();let historyRead;
+  const shared=(map,id,operation)=>{
+    if(!map.has(id)){const read=operation();map.set(id,read);read.finally(()=>{if(map.get(id)===read)map.delete(id);}).catch(()=>{});}
+    return map.get(id);
+  };
   return {...ctx,
-    loadSim:async id=>{const doc=await readWithDeadline(()=>db.collection('simulacoes').doc(id).get({source:'server'}),'a ficha');if(!doc.exists)throw Error('Ficha não encontrada. Volte ao painel e abra a proposta novamente.');return {...doc.data(),id:doc.id||id};},
-    listSims:async()=>{
-      // Share only active reads. Never substitute stale/cache data for a credit check.
+    loadSim:id=>shared(simReads,id,async()=>{const doc=await readFirestore(ctx,'simulacoes/'+id,{label:'a ficha'});if(!doc.exists)throw Error('Ficha não encontrada. Volte ao painel e abra a proposta novamente.');return {...doc.data(),id:doc.id||id};}),
+    saveSim:async sim=>{simReads.delete(sim.id);try{return await ctx.saveSim(sim);}finally{simReads.delete(sim.id);}},
+    loadConfig:()=>readFirestore(ctx,'contadoresCCB/analise_config',{label:'a configuração'}),
+    listSims:()=>{
       if(!historyRead){
-        historyRead=readWithDeadline(async()=>{
-          for(let attempt=0;attempt<2;attempt++){
-            try{
-              const snap=await db.collection('simulacoes').get({source:'server'});
-              return snap.docs.map(doc=>({...doc.data(),id:doc.id}));
-            }catch(e){
-              if(attempt||!['unavailable','deadline-exceeded','firestore/unavailable','firestore/deadline-exceeded'].includes(e.code))throw e;
-            }
-          }
-        },'o histórico',60000);
-        const active=historyRead;
-        active.finally(()=>{if(historyRead===active)historyRead=undefined;}).catch(()=>{});
+        const read=readFirestore(ctx,'simulacoes',{collection:true,label:'o histórico'}).then(snap=>snap.docs.map(doc=>({...doc.data(),id:doc.id})));
+        historyRead=read;read.finally(()=>{if(historyRead===read)historyRead=undefined;}).catch(()=>{});
       }
       return historyRead;
     },
-    loadDocumentos:async id=>{
-      if(!documentReads.has(id)){
-        const read=readWithDeadline(()=>db.collection('simulacoes').doc(id).collection('documentos').get({source:'server'}),'os anexos',60000).then(snap=>Object.fromEntries(snap.docs.map(doc=>[doc.id,doc.data()])));
-        documentReads.set(id,read);read.finally(()=>{if(documentReads.get(id)===read)documentReads.delete(id);}).catch(()=>{});
-      }
-      return documentReads.get(id);
-    }
+    loadDocumentos:id=>shared(documentReads,id,async()=>{
+      const path='simulacoes/'+id+'/documentos';
+      const snap=await readFirestore(ctx,path,{collection:true,label:'os anexos',reference:ctx.db.collection('simulacoes').doc(id).collection('documentos')});
+      return Object.fromEntries(snap.docs.map(doc=>[doc.id,doc.data()]));
+    })
   };
 }
 const cpfOf=s=>String(s.dadosCliente?.cpf||'').replace(/\D/g,'');
@@ -117,7 +110,7 @@ export async function mountCdcReview(id,root,ctx){
   const {db,loadSim,saveSim,listSims,loadDocumentos,saveDocumento,auth}=ctx;
   const s=await loadSim(id); if(!s || !root.isConnected) return;
   let config;
-  try { const d=await readWithDeadline(()=>db.collection('contadoresCCB').doc('analise_config').get({source:'server'}),'a configuração'); config=d.exists?d.data():{automatica:false}; }
+  try { const d=await (ctx.loadConfig?ctx.loadConfig():readWithDeadline(()=>db.collection('contadoresCCB').doc('analise_config').get({source:'server'}),'a configuração')); config=d.exists?d.data():{automatica:false}; }
   catch {root.textContent='Não foi possível carregar a configuração da análise. Atualize a página.';return;}
   const q=s.analiseCdc?.questionario||{};
   const record=s.analiseCdc?.resultado;
@@ -156,7 +149,7 @@ export async function mountCdcReview(id,root,ctx){
   const residenceToggle=()=>{el('residenciaBox').hidden=el('residenciaTitular').value!=='terceiro';};
   el('residenciaTitular').onchange=residenceToggle;residenceToggle();
   const message=text=>{el('output').textContent=text;};
-  let busy=false;
+  let busy=false,analysisFailed=false;
   const updateReading=serialUpdates();
   const disabledBefore=new Map();
   const lock=value=>{
@@ -165,7 +158,7 @@ export async function mountCdcReview(id,root,ctx){
     else{for(const [e,disabled]of disabledBefore)e.disabled=disabled;disabledBefore.clear();}
   };
   const reportError=error=>{message(error?.message||'Não foi possível concluir. Tente novamente.');el('output').scrollIntoView({behavior:'smooth',block:'center'});};
-  el('observacoes').value=s.analiseCdc?.observacoes|| (record?record.status+'\n'+record.motivos.join('\n'):'');
+  el('observacoes').value=needsInternalReview(record)&&!s.analiseCdc?.decisao?'A leitura anterior não concluiu a conferência. Isso não representa reprovação do cliente. Use Analisar ficha para atualizar.':s.analiseCdc?.observacoes|| (record?record.status+'\n'+record.motivos.join('\n'):'');
   const showResult=(title,text,sections)=>{
     el('observacoes').value=text;message(title);
     const dialog=document.createElement('dialog');
@@ -179,7 +172,7 @@ export async function mountCdcReview(id,root,ctx){
     ok.onclick=()=>dialog.close();dialog.addEventListener('close',()=>{dialog.remove();el('observacoes').scrollIntoView({behavior:'smooth',block:'center'});});
     dialog.append(heading,body,ok);document.body.append(dialog);dialog.showModal();heading.tabIndex=-1;heading.focus({preventScroll:true});dialog.scrollTop=0;
   };
-  if(record) message('Última avaliação: '+(record.tipoFalha==='tecnica'?'Não concluída por falha técnica':record.status)+'\n'+record.motivos.join('\n')+'\n'+(s.analiseCdc.decisao?'Decisão confirmada: '+s.analiseCdc.decisao.status:'Aguardando conferência do administrador.'));
+  if(record) message('Última avaliação: '+(needsInternalReview(record)?'Não concluída. Conferência interna necessária':record.status)+'\n'+record.motivos.join('\n')+'\n'+(s.analiseCdc.decisao?'Decisão confirmada: '+s.analiseCdc.decisao.status:'Aguardando conferência do administrador.'));
   const questionnaire=()=>Object.fromEntries(['renda','despesas','outrasParcelas','restricao','residenciaTitular','residenciaJustificativa','documentosConferidos'].map(k=>[k,['renda','despesas','outrasParcelas'].includes(k)?(el(k).value.trim()?number(el(k).value):null):el(k).type==='checkbox'?el(k).checked:k==='residenciaJustificativa'&&el('residenciaTitular').value!=='terceiro'?'':el(k).value.trim()]));
   const persist=async()=>{const current=await loadSim(id);if(!current)throw Error('Não foi possível carregar a ficha. Tente novamente.');const next=questionnaire();const changed=JSON.stringify(current.analiseCdc?.questionario)!==JSON.stringify(next);current.analiseCdc={...(current.analiseCdc||{}),questionario:next,atualizadoEm:Date.now()};if(changed){delete current.analiseCdc.decisao;delete current.analiseCdc.resultado;delete current.analiseCdc.snapshot;}await saveSim(current);return current;};
   const run=async button=>{
@@ -298,17 +291,20 @@ export async function mountCdcReview(id,root,ctx){
     // Fingerprint exactly the evidence evaluated, without downloading the same history again.
     // Manual confirmation below still fetches fresh evidence and rejects any change.
     current.analiseCdc.snapshot=await creditSnapshot(current,{listSims:async()=>sims,loadDocumentos:async()=>docs});await saveSim(current);
+    analysisFailed=false;
     showResult(result.status==='Pendente'?'Análise pendente':result.status,observation,sections);
     }catch(e){
       const text='Não foi possível concluir a análise: '+(e.message||'falha inesperada')+'. Nenhuma aprovação ou recusa foi confirmada.';
-      let saved=false;try{const current=await loadSim(id);if(current){current.analiseCdc={...(current.analiseCdc||{}),observacoes:text,resultado:{status:'Pendente',tipoFalha:'tecnica',motivos:[text]},avaliadoEm:Date.now()};delete current.analiseCdc.decisao;delete current.analiseCdc.snapshot;await saveSim(current);saved=true;}}catch{}
-      showResult('Leitura ou análise não concluída',text+(saved?'':' Não foi possível salvar estas observações. Tente novamente.'));
+      analysisFailed=true;
+      // A transport/OCR failure is not a credit result. Preserve stored decisions and evidence.
+      showResult('Análise interrompida pelo sistema',text+' Os dados e as decisões já salvos foram preservados.');
     }
   });
   async function decide(status){
     const reason=el('reason').value.trim();if(!reason)throw Error('Informe o motivo da decisão.');
     const current=await loadSim(id);
     if(config.automatica && status==='Aprovada'){
+      if(analysisFailed)throw Error('A última tentativa foi interrompida pelo sistema. Conclua a análise antes de confirmar uma nova aprovação.');
       if(current.analiseCdc?.resultado?.status!=='Aprovada')throw Error('Conclua uma análise aprovada ou desligue o automático para decidir manualmente.');
       if(JSON.stringify(current.analiseCdc.questionario)!==JSON.stringify(questionnaire()))throw Error('A ficha mudou. Analise novamente.');
       if(current.analiseCdc.snapshot!==await snapshot(current))throw Error('Documentos, proposta ou histórico mudaram. Faça uma nova análise.');

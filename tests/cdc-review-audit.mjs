@@ -1,6 +1,7 @@
-import {mountCdcReview,readWithDeadline,createReviewContext,documentKeys} from '../cdc-review.mjs?v=20261120-leitor-cpf-v6';
-import {evaluateCredit,documentFindings,analysisSections,sectionsText} from '../cdc-policy.mjs?v=20261120-leitor-cpf-v6';
-import {mountCustomer,validateResidence,receiveSubmission,digest} from '../cdc-preanalise.mjs?v=20261120-leitor-cpf-v6';
+import {freshServerRead} from '../cdc-firestore-read.mjs?v=20261120-ficha-v7';
+import {mountCdcReview,readWithDeadline,createReviewContext,documentKeys} from '../cdc-review.mjs?v=20261120-ficha-v7';
+import {evaluateCredit,documentFindings,analysisSections,sectionsText} from '../cdc-policy.mjs?v=20261120-ficha-v7';
+import {mountCustomer,validateResidence,receiveSubmission,digest} from '../cdc-preanalise.mjs?v=20261120-ficha-v7';
 const root=document.querySelector('#fixture'),out=document.querySelector('#results');
 let failures=0,passes=0;
 const assert=(value,text)=>{if(!value)throw Error(text);};
@@ -30,7 +31,7 @@ document.querySelector('#start').onclick=async function(){
   await test('Residência de terceiro justificada não gera divergência de titular',()=>{const r=findings({residenciaTitular:'terceiro',residenciaJustificativa:'Moro com minha mãe.'},[doc('comprovanteResidencia','residencia','Maria da Silva',{cpf:'11111111111'})]);assert(!r.pending.some(x=>/divergente|falta justificar/.test(x)),'Terceiro bloqueado');assert(r.notes.some(x=>x.includes('Moro com minha mãe.')),'Justificativa ausente');});
   await test('Exceção de terceiro não se aplica a identidade nem renda',()=>{const r=findings({residenciaTitular:'terceiro',residenciaJustificativa:'Mãe'},[doc('rgFrente','identidade','Maria da Silva'),doc('comprovanteRenda','renda','Maria da Silva',{subtipo:'contracheque',rendaLiquida:1800})]);assert(r.pending.filter(x=>x.includes('Nome divergente')).length===2,'Exceção indevida');assert(r.pending.some(x=>x.includes('2.000,00')&&x.includes('1.800,00')),'Renda não explicada');});
   await test('Terceiro sem justificativa continua pendente',()=>{assert(findings({residenciaTitular:'terceiro'},[]).pending.some(x=>x.includes('falta justificar')),'Sem validação');});
-  await test('Documento ilegível não acusa nome divergente',()=>{const r=findings({},[doc('rgFrente','identidade','Maria',{legibilidade:'ilegivel'})]);assert(!r.pending.some(x=>x.includes('Nome divergente')),'Nome ilegível considerado');const p=evaluateCredit({q:{renda:2000,despesas:0,outrasParcelas:0,restricao:'nao',documentosConferidos:true},parcela:100,documents:[{label:'teste.pdf',consecutivos:2,legibilidade:'ilegivel'}]});assert(p.motivos.some(x=>x.includes('dois envios consecutivos')),'Regra alterada');});
+  await test('Documento ilegível não acusa nome divergente',()=>{const r=findings({},[doc('rgFrente','identidade','Maria',{legibilidade:'ilegivel'})]);assert(!r.pending.some(x=>x.includes('Nome divergente')),'Nome ilegível considerado');const p=evaluateCredit({q:{renda:2000,despesas:0,outrasParcelas:0,restricao:'nao',documentosConferidos:true},parcela:100,documents:[{label:'teste.pdf',consecutivos:2,legibilidade:'ilegivel'}]});assert(p.status!=='Recusada'&&p.pendencias.some(x=>x.includes('não gera recusa automática')),'Leitor recusou automaticamente');});
   await test('Campo de residência abre, salva e preserva justificativa',async()=>{const f=await setup();el('residenciaTitular').value='terceiro';el('residenciaTitular').dispatchEvent(new Event('change'));assert(!el('residenciaBox').hidden,'Campo oculto');el('residenciaJustificativa').value='Moro com minha mãe.';await click('save');assert(f.sim.analiseCdc.questionario.residenciaJustificativa==='Moro com minha mãe.','Não persistiu');el('residenciaTitular').value='proprio';el('residenciaTitular').dispatchEvent(new Event('change'));await click('save');assert(f.sim.analiseCdc.questionario.residenciaJustificativa==='','Justificativa antiga mantida');});
   await test('Diálogo separa recusa de pendências com 8px entre motivos',async()=>{await setup();el('restricao').value='sim';await click('analyze');const d=document.querySelector('dialog');assert(d.querySelectorAll('section').length>=3,'Sem seções');const li=d.querySelector('li');assert(getComputedStyle(li).marginBottom==='8px','Espaçamento');assert(el('observacoes').value.includes('Pendências de conferência\n\n'),'Observações sem seções');});
   await test('Prazo máximo para leituras sem resposta',async()=>{let failed=false;try{await readWithDeadline(()=>new Promise(()=>{}),'teste',5);}catch{failed=true;}assert(failed,'Leitura não expirou');});
@@ -52,7 +53,7 @@ document.querySelector('#start').onclick=async function(){
   await test('Modo manual responde ao botão analisar',async()=>{await setup({auto:false});await click('analyze');assert(document.querySelector('dialog')?.textContent.includes('desligada'),'Sem diálogo');});
   await test('Sem documentos: análise pendente com motivos e botão OK',async()=>{const f=await setup();el('documentosConferidos').checked=true;await click('analyze');assert(f.sim.analiseCdc.resultado.status==='Pendente','Estado incorreto');const dialog=document.querySelector('dialog');assert(dialog?.open,'Diálogo ausente');assert(el('observacoes').value.includes('obrigatório'),'Sem motivos');dialog.querySelector('button').click();assert(!document.querySelector('dialog[open]'),'Não fechou');});
   await test('Restrição informada retorna recusa na avaliação',async()=>{const f=await setup();el('restricao').value='sim';await click('analyze');assert(f.sim.analiseCdc.resultado.status==='Recusada','Resultado');assert(!f.sim.analiseCdc.decisao,'Decisão final não deve ser confirmada pelo teste');});
-  await test('Histórico inacessível nunca produz aprovação',async()=>{const f=await setup({history:async()=>{throw Error('Falha no histórico');}});await click('analyze');assert(f.sim.analiseCdc.resultado.status==='Pendente','Falha virou aprovação');assert(!el('save').disabled,'Não desbloqueou');});
+  await test('Histórico inacessível nunca produz aprovação',async()=>{const f=await setup({history:async()=>{throw Error('Falha no histórico');}});await click('analyze');assert(!f.sim.analiseCdc.resultado,'Falha alterou resultado');assert(!el('save').disabled,'Não desbloqueou');});
   await test('Ver anexos sem arquivo mostra orientação e desbloqueia',async()=>{await setup();root.querySelector('[data-read]').click();await until(()=>!el('save').disabled);assert(el('output').textContent.includes('Anexe'),'Sem orientação');});
   await test('Ver anexos abre documento sem executar análise',async()=>{
     const f=await setup({docs:{rgFrente:{nome:'teste.pdf',dataUrl:'data:application/pdf;base64,JVBERi0xLjQ='},rgFrente__2:{nome:'foto.jpg',dataUrl:'data:image/jpeg;base64,YWJj'}}});
@@ -65,7 +66,7 @@ document.querySelector('#start').onclick=async function(){
   await test('Chave de modo automático responde e salva configuração',async()=>{await setup();el('auto').checked=false;await el('auto').onchange();assert(el('output').textContent.includes('manual'),'Não mudou');assert(!el('auto').disabled,'Chave bloqueada');});
   await test('Falha do leitor não trava botões nem confirma decisão',async()=>{
     const original=window.fetch;window.fetch=async()=>{throw Error('Falha simulada');};
-    try{const f=await setup({docs:{rgFrente:{nome:'teste.pdf',dataUrl:'data:application/pdf;base64,VEVTVEU='}}});await click('analyze');assert(f.sim.analiseCdc.resultado.status==='Pendente','Resultado indevido');assert(!el('save').disabled,'Bloqueado');assert(el('observacoes').value.includes('leitura'),'Motivos ausentes');}finally{window.fetch=original;}
+    try{const f=await setup({docs:{rgFrente:{nome:'teste.pdf',dataUrl:'data:application/pdf;base64,VEVTVEU='}}});await click('analyze');assert(!f.sim.analiseCdc.resultado,'Resultado indevido');assert(!el('save').disabled,'Bloqueado');assert(document.querySelector('dialog').textContent.includes('leitura'),'Motivos ausentes');}finally{window.fetch=original;}
   });
   await test('Leitura fictícia completa, resultado, OK e confirmação manual',async()=>{
     const docs=Object.fromEntries([['rgFrente','identidade'],['comprovanteResidencia','residencia'],['comprovanteRenda','renda']].map(([k,t])=>[k,{nome:t+'.pdf',dataUrl:'data:application/pdf;base64,'+btoa(t)}]));
@@ -87,7 +88,7 @@ document.querySelector('#start').onclick=async function(){
     const docs={rgFrente:{nome:'falha.pdf',dataUrl:'data:application/pdf;base64,'+btoa('falha')},rgFrente__2:{nome:'legivel.pdf',dataUrl:'data:application/pdf;base64,'+btoa('legivel')}};
     const original=window.fetch;let calls=0;
     window.fetch=async(url,options)=>{calls++;if(atob(JSON.parse(options.body).dataUrl.split(',')[1])==='falha')return {ok:false,json:async()=>({error:'Serviço de leitura indisponível'})};return {ok:true,json:async()=>({version:'cdc-docs-tipos-v3',document:{tipo:'identidade',subtipo:'outro',legibilidade:'legivel',nome:'Cliente de teste',cpf:'00000000000',competencias:[],observacoes:''}})};};
-    try{const f=await setup({docs});await click('analyze');assert(calls===2,'Segundo arquivo não foi lido');assert(f.sim.analiseDocumentos.rgFrente__2.document.legibilidade==='legivel','Leitura válida perdida');assert(f.sim.analiseCdc.resultado.tipoFalha==='tecnica','Erro técnico misturado com avaliação');assert(!el('observacoes').value.includes('CPF não confirmado'),'Criou pendência por leitura incompleta');assert(el('observacoes').value.includes('falha.pdf'),'Não identificou arquivo com falha');}finally{window.fetch=original;}
+    try{const f=await setup({docs});await click('analyze');assert(calls===2,'Segundo arquivo não foi lido');assert(f.sim.analiseDocumentos.rgFrente__2.document.legibilidade==='legivel','Leitura válida perdida');assert(!f.sim.analiseCdc.resultado,'Erro técnico misturado com avaliação');assert(!el('observacoes').value.includes('CPF não confirmado'),'Criou pendência por leitura incompleta');assert(document.querySelector('dialog').textContent.includes('falha.pdf'),'Não identificou arquivo com falha');}finally{window.fetch=original;}
   });
   await test('Primeiro nome no extrato não gera divergência',()=>{const r=findings({},[doc('comprovanteRenda','conta','José',{subtipo:'extrato_bancario',extratoBancario:true})]);assert(!r.pending.some(x=>x.startsWith('Nome divergente')),'Abreviação virou divergência');assert(r.notes.some(x=>x.startsWith('Nome abreviado compatível')),'Compatibilidade não foi registrada');});
   await test('Número único da CIN confirma CPF sem comprovante separado',()=>{const r=findings({},[doc('rgFrente','identidade','José da Silva',{tipoIdentidade:'cin',numeroUnicoCin:'000.000.000-00'})]);assert(!r.pending.some(x=>x.startsWith('Leitura do CPF inconclusiva')),'CIN não confirmou CPF');});
@@ -99,7 +100,22 @@ document.querySelector('#start').onclick=async function(){
     const docs=Object.fromEntries([['rgFrente','identidade'],['comprovanteResidencia','residencia'],['comprovanteRenda','renda']].map(([k,t])=>[k,{nome:t+'.pdf',dataUrl:'data:application/pdf;base64,'+btoa(t)}]));
     const original=window.fetch;let active=0,peak=0;
     window.fetch=async(url,options)=>{active++;peak=Math.max(peak,active);await new Promise(r=>setTimeout(r,30));active--;const type=atob(JSON.parse(options.body).dataUrl.split(',')[1]);return {ok:true,json:async()=>({version:'cdc-docs-tipos-v3',document:{tipo:type,versaoIdentidade:2,legibilidade:'legivel',nome:'Cliente de teste',cpf:type==='identidade'?null:'00000000000',falhaLeituraCpf:type==='identidade'?'reader_timeout':undefined,observacoes:'Teste fictício'}})};};
-    try{const f=await setup({docs});await click('analyze');assert(peak===2,'Não leu dois anexos simultaneamente');assert(Object.keys(f.sim.analiseDocumentos).length===3,'Perdeu uma gravação');assert(f.sim.analiseCdc.resultado.tipoFalha==='tecnica','Falha do leitor virou ausência de CPF');}finally{window.fetch=original;}
+    try{const f=await setup({docs});await click('analyze');assert(peak===2,'Não leu dois anexos simultaneamente');assert(Object.keys(f.sim.analiseDocumentos).length===3,'Perdeu uma gravação');assert(!f.sim.analiseCdc.resultado,'Falha do leitor virou ausência de CPF');}finally{window.fetch=original;}
+  });
+  await test('Carregamento travado é recuperado sem dados antigos',async()=>{
+    const result=await freshServerRead(()=>new Promise(()=>{}),{fallback:async()=>({valor:123}),hedgeMs:5,timeoutMs:100});
+    assert(result.valor===123,'Não recuperou dados do servidor');
+  });
+  await test('Falha de análise preserva resultado e decisão já salvos',async()=>{
+    const f=await setup({history:async()=>{throw Error('Falha no carregamento');}});
+    await click('save');const saved=f.sim;
+    saved.analiseCdc.resultado={status:'Aprovada',motivos:['Avaliação anterior']};
+    saved.analiseCdc.decisao={status:'Aprovada',motivo:'Decisão registrada'};
+    await f.ctx.saveSim(saved);
+    await click('analyze');
+    assert(f.sim.analiseCdc.resultado.status==='Aprovada','Apagou resultado');
+    assert(f.sim.analiseCdc.decisao.motivo==='Decisão registrada','Apagou decisão');
+    assert(document.querySelector('dialog').textContent.includes('interrompida'),'Não distinguiu falha');
   });
   await test('Aprovação manual exige motivo',async()=>{const f=await setup({auto:false});await click('approve');assert(el('output').textContent.includes('motivo'),'Sem validação');assert(!f.sim.analiseCdc.decisao,'Aprovou sem motivo');});
   await test('Recusa manual fictícia registra motivo',async()=>{const f=await setup({auto:false});el('reason').value='Teste local';await click('refuse');assert(f.sim.analiseCdc.decisao.status==='Recusada','Não gravou');assert(f.sim.analiseCdc.decisao.motivo==='Teste local','Motivo');});

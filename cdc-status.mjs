@@ -9,12 +9,15 @@ export async function statusKey(cpf,code){
   const bytes=new TextEncoder().encode(digits(cpf)+'|'+normalizeCode(code));
   return Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',bytes))).map(n=>n.toString(16).padStart(2,'0')).join('');
 }
+export const needsInternalReview=evaluation=>evaluation?.tipoFalha==='tecnica'||(evaluation?.status==='Recusada'&&evaluation.motivos?.length>0&&evaluation.motivos.every(x=>/^Documento ilegível:/.test(x)&&/dois envios/.test(x)));
 export function publicStatus(sim){
   const decision=sim.analiseCdc?.decisao?.status;
   if(sim.aceite)return 'Contratada';
   if(decision==='Aprovada')return 'Pré-aprovada';
   if(decision==='Recusada')return 'Recusada';
-  const result=sim.analiseCdc?.resultado?.status;
+  const evaluation=sim.analiseCdc?.resultado;
+  if(needsInternalReview(evaluation))return 'Em análise';
+  const result=evaluation?.status;
   if(result==='Aprovada')return 'Pré-aprovada';
   if(result==='Recusada'||result==='Pendente')return result;
   return 'Em análise';
