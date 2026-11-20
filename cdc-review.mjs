@@ -83,7 +83,7 @@ export async function mountCdcHistory(id,root,{db,loadSim,listSims,auth}){
   async function refresh(){
     if(cpf.length!==11){el('list').textContent='Preencha o CPF para consultar o histórico.';return;}
     const related=(await listSims()).filter(x=>cpfOf(x)===cpf);
-    const entries=related.flatMap(x=>(x.historicoCrediti||[]).map(h=>({...h,contrato:x.numeroCCB||x.id})));
+    const entries=related.flatMap(x=>(x.historicoCrediti||[]).map(h=>({...h,contrato:x.numeroCCB?String(x.numeroCCB).replace(/\./g,''):x.id})));
     entries.sort((a,b)=>String(b.data).localeCompare(String(a.data))||(b.registradoEm||0)-(a.registradoEm||0));
     el('list').textContent=entries.length?entries.map(h=>`${String(h.data||'').split('-').reverse().join('/')} • ${h.tipo}${h.dias?' • '+h.dias+' dias de atraso':''}\n${h.nota||''}\nFicha: ${h.contrato}`).join('\n\n'):'Nenhuma observação registrada.';
   }

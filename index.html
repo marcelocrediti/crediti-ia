@@ -335,7 +335,9 @@ function uid(){
   return 'sim' + Date.now().toString(36) + Math.random().toString(36).slice(2,7);
 }
 
-// Número da CCB = sequência do dia + data (ex: 01.04.08.26, 02.04.08.26...)
+function formatNumeroCCB(value){return String(value||'').replace(/\./g,'');}
+// Número da CCB = sequência do dia + data, sem pontos (ex: 01040826).
+// Mantém as chaves dos contadores existentes para preservar a sequência.
 // O primeiro cliente a formalizar naquele dia recebe 01, o segundo 02, e assim por diante.
 // Usa transação do banco pra travar contra duplicidade mesmo se dois clientes assinarem ao mesmo tempo.
 const memContadoresCCB = {};
@@ -348,7 +350,7 @@ async function gerarNumeroCCB(){
 
   if(!firebaseOk){
     memContadoresCCB[sufixo] = (memContadoresCCB[sufixo] || 0) + 1;
-    return `${String(memContadoresCCB[sufixo]).padStart(2,'0')}.${sufixo}`;
+    return formatNumeroCCB(`${String(memContadoresCCB[sufixo]).padStart(2,'0')}.${sufixo}`);
   }
 
   try{
@@ -360,15 +362,15 @@ async function gerarNumeroCCB(){
       tx.set(ref, { contador: novo }, { merge: true });
       return novo;
     });
-    return `${String(novoValor).padStart(2,'0')}.${sufixo}`;
+    return formatNumeroCCB(`${String(novoValor).padStart(2,'0')}.${sufixo}`);
   }catch(e){
     console.error('Transação do número da CCB falhou, usando contagem simples como reserva:', e);
     let contagemHoje = 0;
     try{
       const todas = await listSims();
-      contagemHoje = todas.filter(s => s.numeroCCB && s.numeroCCB.endsWith('.'+sufixo)).length;
+      contagemHoje = todas.filter(s => s.numeroCCB && formatNumeroCCB(s.numeroCCB).endsWith(formatNumeroCCB(sufixo))).length;
     }catch(e2){}
-    return `${String(contagemHoje + 1).padStart(2,'0')}.${sufixo}`;
+    return formatNumeroCCB(`${String(contagemHoje + 1).padStart(2,'0')}.${sufixo}`);
   }
 }
 
@@ -546,7 +548,7 @@ window.gerarCodigoConsultaCDC=async function(id){
   if(button)button.disabled=true;
   try{
     if(!isCdcAdmin())throw Error('Entre como administrador.');
-    const module=await import('./cdc-status.mjs?v=20261120-contract-v10');
+    const module=await import('./cdc-status.mjs?v=20261120-pdf-v14');
     const code=await module.issueCode(id,{db,fb:firebase});
     const box=document.getElementById('codigo-consulta-salva');box.innerHTML='';
     const p=document.createElement('p');p.className='hint';p.textContent='Novo código gerado. O anterior foi cancelado. Envie este código ao cliente junto do endereço abaixo. Válido por 90 dias.';
@@ -596,7 +598,7 @@ async function criarLinkCDC(s){
     if(!s.dadosCliente?.pix?.trim())throw new Error('Ficha aprovada. Informe a chave Pix do cliente em Continuar contratação.');
     if(s.analiseCdc?.decisao?.status==='Aprovada'){
       if(s.analiseCdc?.decisao?.status!=='Aprovada')throw new Error('Abra a proposta, conclua a análise e confirme a aprovação antes de gerar o link.');
-      const {creditSnapshot,createReviewContext}=await import('./cdc-review.mjs?v=20261120-contract-v10');
+      const {creditSnapshot,createReviewContext}=await import('./cdc-review.mjs?v=20261120-pdf-v14');
       if(s.analiseCdc.snapshot!==await creditSnapshot(s,createReviewContext({db,auth:firebase.auth()})))throw new Error('Os dados da avaliação mudaram. Clique em Confirmar aprovação para atualizar antes de finalizar.');
     }
   }
@@ -651,7 +653,7 @@ async function saveSim(sim){
         sim.linkAssinatura=null;
       }else{sim.linkAssinatura=before.linkAssinatura;}
     }
-    const statusModule=await import('./cdc-status.mjs?v=20261120-contract-v10');
+    const statusModule=await import('./cdc-status.mjs?v=20261120-pdf-v14');
     await db.runTransaction(async tx=>{
       const ref=db.collection('simulacoes').doc(sim.id),latest=await tx.get(ref);
       if(latest.exists && latest.data().linkAssinatura && !signatureProposalChanged(latest.data(),sim) && !(latest.data().aceite&&!sim.aceite))sim.linkAssinatura=latest.data().linkAssinatura;
@@ -693,7 +695,7 @@ async function loadSim(id){
         const when=link.data().assinadoEm?.toDate()||new Date(aceite.timestamp);
         const parts=new Intl.DateTimeFormat('pt-BR',{timeZone:'America/Fortaleza',day:'2-digit',month:'2-digit',year:'2-digit'}).format(when).replaceAll('/','.');
         const ref=db.collection('simulacoes').doc(id),counter=db.collection('contadoresCCB').doc(parts);
-        await db.runTransaction(async tx=>{const current=await tx.get(ref);if(current.data().aceite)return;const count=await tx.get(counter);const next=(count.data()?.contador||0)+1;if(!current.data().numeroCCB)tx.set(counter,{contador:next},{merge:true});tx.update(ref,{aceite,numeroCCB:current.data().numeroCCB||String(next).padStart(2,'0')+'.'+parts});});
+        await db.runTransaction(async tx=>{const current=await tx.get(ref);if(current.data().aceite)return;const count=await tx.get(counter);const next=(count.data()?.contador||0)+1;if(!current.data().numeroCCB)tx.set(counter,{contador:next},{merge:true});tx.update(ref,{aceite,numeroCCB:current.data().numeroCCB||formatNumeroCCB(String(next).padStart(2,'0')+'.'+parts)});});
         data=(await ref.get()).data();
       }
     }
@@ -804,7 +806,7 @@ async function renderInner(){
   const route = getRoute();
   const app = document.getElementById('app');
   if(!cdcAuthReady){ app.innerHTML = '<div class="wrap"><div class="card">Verificando acesso…</div></div>'; return; }
-  if(route.view==='consulta'){const module=await import('./cdc-status.mjs?v=20261120-contract-v10');module.mountStatus(app,{db});return;}
+  if(route.view==='consulta'){const module=await import('./cdc-status.mjs?v=20261120-pdf-v14');module.mountStatus(app,{db});return;}
   if(route.view==='preanalise'){const module=await import('./cdc-preanalise.mjs?v=20261120-documentos-v3');await module.mountCustomer(app,route.id,{db,fb:firebase,logo:LOGO_DATAURL});return;}
   if(route.view==='cliente' && /^[a-f0-9]{64}$/.test(route.id)){app.innerHTML=await viewCliente(route.id);return;}
   if(!isCdcAdmin()) { renderCdcLogin(app); return; }
@@ -1244,12 +1246,12 @@ function onCalcularDecimoTerceiro(){
 }
 
 async function viewPainel(){
-  const {publicStatus}=await import('./cdc-status.mjs?v=20261120-contract-v10');
+  const {publicStatus}=await import('./cdc-status.mjs?v=20261120-pdf-v14');
   const sims = await listSims();
   // Repair old protected projections without changing decisions, codes or expiry.
   if(firebaseOk && isCdcAdmin()){
     void (async()=>{
-      const module=await import('./cdc-status.mjs?v=20261120-contract-v10');
+      const module=await import('./cdc-status.mjs?v=20261120-pdf-v14');
       let failed=false;
       for(const sim of sims.filter(s=>s.id&&s.consultaStatusId)){
         try{await module.syncStatus(sim.id,{db,fb:firebase});}catch{failed=true;}
@@ -1305,7 +1307,7 @@ window.abrirPaginaDetalhe = function(id){
 window.abrirDetalhe = async function(id){
   const s = await loadSim(id);
   if(s?.consultaStatusId && isCdcAdmin()){
-    try{const statusModule=await import('./cdc-status.mjs?v=20261120-contract-v10');await statusModule.syncStatus(id,{db,fb:firebase});}
+    try{const statusModule=await import('./cdc-status.mjs?v=20261120-pdf-v14');await statusModule.syncStatus(id,{db,fb:firebase});}
     catch(e){toast('Não foi possível atualizar a consulta do cliente. Tente salvar a ficha novamente.');}
   }
   const detalheEl = document.getElementById('detalhe');
@@ -1365,7 +1367,7 @@ window.abrirDetalhe = async function(id){
   <div class="card">
     <h2>${s.cliente}</h2>
     <div class="kv"><span>Produto</span><b>${nomeProduto(s)}</b></div>
-    ${s.numeroCCB ? `<div class="kv"><span>Nº da proposta</span><b>${s.numeroCCB}</b></div>` : ''}
+    ${s.numeroCCB ? `<div class="kv"><span>Nº da proposta</span><b>${formatNumeroCCB(s.numeroCCB)}</b></div>` : ''}
     <div class="kv"><span>${isDecimoTerceiro(s)?'Valor liberado':'Valor'}</span><b>${brl(s.valor)}</b></div>
     ${isDecimoTerceiro(s) ? `
       <div class="kv"><span>Salário bruto</span><b>${brl(s.salarioBruto)}</b></div>
@@ -1400,8 +1402,8 @@ window.abrirDetalhe = async function(id){
   if(documentosBlock) carregarDocumentosDetalhe(s.id);
   const reviewRoot=document.getElementById('cdc-review-card');
   const historyRoot=document.getElementById('cdc-history-card');
-  if(historyRoot) import('./cdc-review.mjs?v=20261120-contract-v10').then(module=>module.mountCdcHistory(s.id,historyRoot,module.createReviewContext({db,loadSim,listSims,auth:firebase.auth()}))).catch(()=>{historyRoot.textContent='Não foi possível carregar o histórico. Atualize a página.';});
-  if(reviewRoot) import('./cdc-review.mjs?v=20261120-contract-v10').then(module=>module.mountCdcReview(s.id,reviewRoot,module.createReviewContext({db,loadSim,saveSim,listSims,loadDocumentos,saveDocumento,auth:firebase.auth(),onApproved:()=>{location.hash='contratar/'+s.id;}}))).catch(()=>{reviewRoot.textContent='Não foi possível carregar a análise. Suas propostas continuam disponíveis. Atualize a página para tentar novamente.';});
+  if(historyRoot) import('./cdc-review.mjs?v=20261120-pdf-v14').then(module=>module.mountCdcHistory(s.id,historyRoot,module.createReviewContext({db,loadSim,listSims,auth:firebase.auth()}))).catch(()=>{historyRoot.textContent='Não foi possível carregar o histórico. Atualize a página.';});
+  if(reviewRoot) import('./cdc-review.mjs?v=20261120-pdf-v14').then(module=>module.mountCdcReview(s.id,reviewRoot,module.createReviewContext({db,loadSim,saveSim,listSims,loadDocumentos,saveDocumento,auth:firebase.auth(),onApproved:()=>{location.hash='contratar/'+s.id;}}))).catch(()=>{reviewRoot.textContent='Não foi possível carregar a análise. Suas propostas continuam disponíveis. Atualize a página para tentar novamente.';});
 };
 
 function htmlDocumentosCliente(simId, docs){
@@ -1945,7 +1947,7 @@ async function mountContratacaoReview(id){
   const s=await loadSim(id);
   if(!s?.dadosCliente?.cpf) return;
   try{
-    const module=await import('./cdc-review.mjs?v=20261120-contract-v10');
+    const module=await import('./cdc-review.mjs?v=20261120-pdf-v14');
     const advanceApproved=()=>{
       const step=document.getElementById('step1'),box=document.getElementById('pix-pos-aprovacao');
       if(step&&box){step.insertBefore(box,document.getElementById('btn-avancar'));step.querySelector('h2').textContent='Complete o cadastro aprovado';document.getElementById('btn-avancar').textContent='Salvar dados e continuar';}
@@ -2020,7 +2022,7 @@ function wireContratarEvents(id){
       try{
         const s = await loadSim(id);
         if(!s) throw new Error('sim não encontrada');
-        const {collectContractData}=await import('./cdc-contract.mjs?v=20261120-contract-v10');
+        const {collectContractData}=await import('./cdc-contract.mjs?v=20261120-pdf-v14');
         s.dadosCliente=collectContractData(s.dadosCliente,key=>document.getElementById(key)?.value);
         await saveSim(s);
         document.getElementById('step2').style.display = 'block';
@@ -2085,7 +2087,7 @@ function wireContratarEvents(id){
         const base = getBaseUrl();
         if(!isDecimoTerceiro(s)){
           if(s.analiseCdc?.decisao?.status!=='Aprovada')throw new Error('Conclua a pré-análise e confirme a aprovação antes de continuar.');
-          const {collectContractData,missingContractData}=await import('./cdc-contract.mjs?v=20261120-contract-v10');
+          const {collectContractData,missingContractData}=await import('./cdc-contract.mjs?v=20261120-pdf-v14');
           s.dadosCliente=collectContractData(s.dadosCliente,key=>document.getElementById(key)?.value);
           const missing=missingContractData(s.dadosCliente);
           if(missing.length){document.getElementById('step1').scrollIntoView({behavior:'smooth'});throw new Error('Complete o cadastro: '+missing.join(', ')+'.');}
@@ -2566,7 +2568,7 @@ async function finalizarAssinatura(id){
   box.innerHTML = `
     <div class="wrap"><div class="card final-ok">
       ✅ Proposta aceita e assinada com sucesso!<br>
-      ${s.numeroCCB?'Número da proposta: <b>'+s.numeroCCB+'</b><br>':'A Crediti disponibilizará a CCB com sua numeração.<br>'}
+      ${s.numeroCCB?'Número da proposta: <b>'+formatNumeroCCB(s.numeroCCB)+'</b><br>':'A Crediti disponibilizará a CCB com sua numeração.<br>'}
       Este link foi encerrado e não pode ser utilizado novamente.
     </div></div>`;
   window.__fotoTemp=null;window.__geoTemp=null;
@@ -2626,8 +2628,8 @@ async function salvarCCBComDocumentos(doc, documentos, filename){
           ? await pacote.embedPng(bytes)
           : await pacote.embedJpg(bytes);
         const pagina = pacote.addPage([595.28,841.89]);
-        pagina.drawText(label, {x:40,y:805,size:13,font:fonte,color:rgb(0.08,0.08,0.08)});
-        pagina.drawLine({start:{x:40,y:792},end:{x:555,y:792},thickness:1.5,color:rgb(0.89,0.61,0)});
+        pagina.drawText(label, {x:40,y:805,size:13,font:fonte,color:rgb(7/255,63/255,54/255)});
+        pagina.drawLine({start:{x:40,y:792},end:{x:555,y:792},thickness:1.5,color:rgb(8/255,117/255,73/255)});
         const escala = Math.min(515/imagem.width, 730/imagem.height);
         const largura = imagem.width*escala;
         const altura = imagem.height*escala;
@@ -2668,24 +2670,28 @@ window.gerarPDF = async function(id){
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF({unit:'pt', format:'a4'});
   const pageW = doc.internal.pageSize.getWidth();
+  const green=[7,63,54],accent=[8,117,73],pale=[233,244,239],ink=[21,57,76];
   let y = 40;
-
-  try{ doc.addImage(LOGO_DATAURL, 'JPEG', 40, y-10, 46, 46); }catch(e){}
-  doc.setFont('helvetica','bold'); doc.setFontSize(14);
-  doc.text(EMPRESA.nome, 96, y+8);
-  doc.setFont('helvetica','normal'); doc.setFontSize(9);
-  doc.text(`${EMPRESA.endereco} - CEP ${EMPRESA.cep}`, 96, y+22);
-  doc.text(`Telefone: ${EMPRESA.telefone}`, 96, y+34);
-  y += 60;
-  doc.setDrawColor(230,190,20); doc.setLineWidth(1.4);
-  doc.line(40, y, pageW-40, y);
-  y += 26;
-
-  doc.setFont('helvetica','bold'); doc.setFontSize(13);
-  const tituloLinhas = doc.splitTextToSize(`CÉDULA DE CRÉDITO BANCÁRIO (CCB) Nº PROPOSTA ${s.numeroCCB} - ${isDecimoTerceiro(s)?'ANTECIPAÇÃO DO 13º':'CDC'} CREDITI`, pageW-80);
-  doc.text(tituloLinhas, 40, y);
-  y += tituloLinhas.length*16 + 8;
-
+  const section=(title)=>{
+    if(y>730){doc.addPage();y=40;}
+    doc.setFillColor(...pale);doc.roundedRect(40,y,pageW-80,26,4,4,'F');
+    doc.setTextColor(...green);doc.setFont('helvetica','bold');doc.setFontSize(10.5);
+    doc.text(title,50,y+17);y+=42;doc.setTextColor(...ink);
+  };
+  doc.setFillColor(...green);doc.roundedRect(40,30,pageW-80,78,8,8,'F');
+  doc.setFillColor(255,255,255);doc.roundedRect(50,42,54,54,6,6,'F');
+  try{doc.addImage(LOGO_DATAURL,'JPEG',54,46,46,46);}catch(e){}
+  doc.setTextColor(255,255,255);doc.setFont('helvetica','bold');doc.setFontSize(13);
+  doc.text(EMPRESA.nome,116,57);
+  doc.setTextColor(215,234,229);doc.setFont('helvetica','normal');doc.setFontSize(8);
+  const address=doc.splitTextToSize(`${EMPRESA.endereco} - CEP ${EMPRESA.cep}`,pageW-166);
+  doc.text(address,116,73);doc.text(`Telefone: ${EMPRESA.telefone}`,116,73+address.length*10);
+  doc.setDrawColor(253,202,1);doc.setLineWidth(2);doc.line(48,109,pageW-48,109);
+  y=137;
+  doc.setTextColor(...green);doc.setFont('helvetica','bold');doc.setFontSize(12);
+  const tituloLinhas=doc.splitTextToSize(`CÉDULA DE CRÉDITO BANCÁRIO (CCB) Nº PROPOSTA ${formatNumeroCCB(s.numeroCCB)} - ${isDecimoTerceiro(s)?'ANTECIPAÇÃO DO 13º':'CDC'} CREDITI`,pageW-80);
+  doc.text(tituloLinhas,40,y);y+=tituloLinhas.length*15+16;
+  doc.setTextColor(...ink);
   doc.setFont('helvetica','normal'); doc.setFontSize(10.5);
   const linhas = isDecimoTerceiro(s) ? [
     ['Cliente', s.cliente],
@@ -2713,10 +2719,15 @@ window.gerarPDF = async function(id){
     ['CET', s.cet + '% a.m. (' + (s.cetAnual? s.cetAnual.toFixed(2):'-') + '% a.a. aprox.)'],
     ['Total a pagar (estimado)', brl(s.parcela*s.prazo)]
   ];
-  linhas.forEach(([k,v])=>{
-    doc.setFont('helvetica','bold'); doc.text(k+':', 40, y);
-    doc.setFont('helvetica','normal'); doc.text(String(v), 220, y);
-    y += 18;
+  linhas.forEach(([k,v],index)=>{
+    doc.setFontSize(9.5);
+    const keyLines=doc.splitTextToSize(k+':',202),valueLines=doc.splitTextToSize(String(v),pageW-304);
+    const height=Math.max(keyLines.length,valueLines.length)*12+12;
+    if(y+height>760){doc.addPage();y=40;}
+    doc.setFillColor(...(index%2===0?pale:[248,251,250]));doc.rect(40,y-11,pageW-80,height,'F');
+    doc.setTextColor(...green);doc.setFont('helvetica','bold');doc.text(keyLines,50,y+2);
+    doc.setTextColor(...ink);doc.setFont('helvetica','normal');doc.text(valueLines,264,y+2);
+    y+=height;
   });
 
   y += 8;
@@ -2725,11 +2736,13 @@ window.gerarPDF = async function(id){
     ? `Operação de antecipação da ${s.parcela13==='segunda'?'segunda':'primeira'} parcela do 13º salário, com desconto de ${s.taxa}% ao mês aplicado diretamente sobre o valor da parcela pelo período de ${s.mesesAntecipacao} ${s.mesesAntecipacao===1?'mês':'meses'}. O cálculo da segunda parcela considera o INSS informado nesta CCB e pode variar por IRRF ou ajustes da folha. Em caso de atraso, incidirá multa moratória de R$ ${CONFIG.multaDia.toFixed(2)} por dia, sem prejuízo dos demais encargos contratuais aplicáveis.`
     : `Taxa de juros remuneratórios: ${s.taxa}% ao mês. Em caso de atraso no pagamento de qualquer parcela, incidirá multa moratória de R$ ${CONFIG.multaDia.toFixed(2)} por dia de atraso, sem prejuízo dos demais encargos contratuais aplicáveis.`;
   const clausulaLines = doc.splitTextToSize(clausula, pageW-80);
+  if(y+clausulaLines.length*12>770){doc.addPage();y=40;}
   doc.text(clausulaLines, 40, y);
   y += clausulaLines.length*12 + 10;
 
   const aviso = 'Estas condições estão sujeitas à análise de crédito do banco/instituição financeira parceira e podem sofrer alteração após a avaliação cadastral. Este documento é uma proposta/registro interno da Crediti Soluções Financeiras e não substitui a formalização contratual definitiva junto à instituição financeira responsável pela operação.';
   const avisoLines = doc.splitTextToSize(aviso, pageW-80);
+  if(y+avisoLines.length*12>770){doc.addPage();y=40;}
   doc.text(avisoLines, 40, y);
   y += avisoLines.length*12 + 16;
 
@@ -2737,10 +2750,7 @@ window.gerarPDF = async function(id){
   if(s.dadosCliente){
     if(y > 600){ doc.addPage(); y = 40; }
     const d = s.dadosCliente;
-    doc.setDrawColor(20,20,20); doc.setLineWidth(1);
-    doc.line(40, y, pageW-40, y); y += 20;
-    doc.setFont('helvetica','bold'); doc.setFontSize(11);
-    doc.text('DADOS DO CLIENTE', 40, y); y += 16;
+    section('DADOS DO CLIENTE');
     doc.setFont('helvetica','normal'); doc.setFontSize(9.5);
     const pessoais = [
       ['CPF', formatCpf(d.cpf)||'-'], ['RG', d.rg||'-'],
@@ -2753,8 +2763,8 @@ window.gerarPDF = async function(id){
     ];
     pessoais.forEach(([k,v])=>{
       if(y > 760){ doc.addPage(); y = 40; }
-      doc.setFont('helvetica','bold'); doc.text(k+':', 40, y);
-      doc.setFont('helvetica','normal');
+      doc.setTextColor(...green);doc.setFont('helvetica','bold'); doc.text(k+':', 40, y);
+      doc.setTextColor(...ink);doc.setFont('helvetica','normal');
       const vLines = doc.splitTextToSize(String(v), pageW-260);
       doc.text(vLines, 220, y);
       y += Math.max(15, vLines.length*12);
@@ -2762,11 +2772,13 @@ window.gerarPDF = async function(id){
     y += 8;
   }
 
-  const {approvalPdfLines}=await import('./cdc-contract.mjs?v=20261120-contract-v10');
+  const {approvalPdfLines}=await import('./cdc-contract.mjs?v=20261120-pdf-v14');
   const approvalLines=approvalPdfLines(s);
   if(approvalLines.length){
     doc.addPage();y=40;
+    section(approvalLines[0]);
     for(const [i,text] of approvalLines.entries()){
+      if(i===0)continue;
       doc.setFont('helvetica',i===0?'bold':'normal');doc.setFontSize(i===0?12:10);
       for(const line of doc.splitTextToSize(text,pageW-80)){
         if(y>770){doc.addPage();y=40;}doc.text(line,40,y);y+=15;
@@ -2778,12 +2790,7 @@ window.gerarPDF = async function(id){
   const documentosCliente = await loadDocumentos(s.id);
 
   if(y > 620){ doc.addPage(); y = 40; }
-  doc.setDrawColor(20,20,20); doc.setLineWidth(1);
-  doc.line(40, y, pageW-40, y);
-  y += 20;
-  doc.setFont('helvetica','bold'); doc.setFontSize(11);
-  doc.text('ASSINATURA DIGITAL DO CLIENTE', 40, y);
-  y += 14;
+  section('ASSINATURA DIGITAL DO CLIENTE');
 
   if(s.aceite){
     doc.setFont('helvetica','normal'); doc.setFontSize(9.5);
@@ -2807,6 +2814,14 @@ window.gerarPDF = async function(id){
     doc.text('Proposta ainda não assinada pelo cliente.', 40, y); y+=14;
   }
 
+  const totalPages=doc.getNumberOfPages();
+  for(let page=1;page<=totalPages;page++){
+    doc.setPage(page);const bottom=doc.internal.pageSize.getHeight()-30;
+    doc.setDrawColor(...accent);doc.setLineWidth(.7);doc.line(40,bottom-12,pageW-40,bottom-12);
+    doc.setTextColor(...green);doc.setFont('helvetica','normal');doc.setFontSize(8);
+    doc.text(`Crediti | Contrato ${formatNumeroCCB(s.numeroCCB)}`,40,bottom);
+    doc.text(`${page} / ${totalPages}`,pageW-40,bottom,{align:'right'});
+  }
   await salvarCCBComDocumentos(doc, documentosCliente, `CCB_e_Documentos_${isDecimoTerceiro(s)?'Antecipacao_13':'CDC'}_Crediti_${(s.cliente||'cliente').replace(/\s+/g,'_')}.pdf`);
   }catch(e){
     console.error('Erro ao montar CCB em PDF:', e);
