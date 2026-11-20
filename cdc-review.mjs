@@ -86,6 +86,7 @@ export async function mountCdcReview(id,root,ctx){
   <div id="rev-output" style="white-space:pre-wrap;overflow-wrap:anywhere" role="status"></div>
   <label>Observações da análise</label><textarea id="rev-observacoes" readonly style="min-height:130px" placeholder="O resultado e os motivos aparecerão aqui após a análise."></textarea>
   <label>Motivo da decisão manual ou confirmação</label><textarea id="rev-reason" maxlength="500"></textarea>
+  <p class="hint">Ao recusar manualmente, este motivo será mostrado ao cliente na consulta por CPF e código. Escreva uma explicação curta, sem dados de terceiros ou observações internas.</p>
   <button type="button" class="btn btn-outline" id="rev-approve">Confirmar aprovação</button>
   <button type="button" class="btn btn-outline" id="rev-refuse">Recusar manualmente</button>
   <p class="hint">A decisão fica registrada com data e responsável. O retorno bruto da Crediti continua fora do PDF do cliente.</p>`;
@@ -239,13 +240,14 @@ export async function mountCdcReview(id,root,ctx){
       if(JSON.stringify(current.analiseCdc.questionario)!==JSON.stringify(questionnaire()))throw Error('A ficha mudou. Analise novamente.');
       if(current.analiseCdc.snapshot!==await snapshot(current))throw Error('Documentos, proposta ou histórico mudaram. Faça uma nova análise.');
     }
-    current.analiseCdc={...(current.analiseCdc||{}),decisao:{status,motivo:reason,modo:config.automatica?'confirmacao':'manual',por:auth.currentUser.uid,data:Date.now()}};
+    current.analiseCdc={...(current.analiseCdc||{}),decisao:{status,motivo:reason,motivoCliente:status==='Recusada'?reason:'',modo:config.automatica?'confirmacao':'manual',por:auth.currentUser.uid,data:Date.now()}};
     await saveSim(current);message('Decisão registrada: '+status+'. '+reason);void refreshHistory();
   }
   bind('approve',()=>decide('Aprovada'));bind('refuse',()=>decide('Recusada'));
   // Bind every action before optional/background loading. Slow history must never create inert buttons.
   void refreshHistory();void safeRefreshFiles();
 }
+
 
 
 

@@ -98,7 +98,9 @@ service cloud.firestore {
     match /consultasCDC/{key} {
       allow read, write: if admin();
       allow get: if key.matches('^[a-f0-9]{64}$')
-        && resource.data.keys().hasOnly(['status','atualizadoEm','expiraEm'])
+        && resource.data.keys().hasOnly(['status','motivos','atualizadoEm','expiraEm'])
+        && (!resource.data.keys().hasAny(['motivos']) ||
+          (resource.data.motivos is list && resource.data.motivos.size() <= 20))
         && resource.data.status in ['Em análise','Pendente','Pré-aprovada','Recusada','Contratada']
         && resource.data.expiraEm > request.time;
     }
@@ -107,4 +109,5 @@ service cloud.firestore {
     }
   }
 }
+
 
