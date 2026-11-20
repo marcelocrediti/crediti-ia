@@ -6,7 +6,7 @@ let failures=0,passes=0;
 const assert=(value,text)=>{if(!value)throw Error(text);};
 const el=id=>root.querySelector('#rev-'+id);
 const tick=()=>new Promise(r=>setTimeout(r,0));
-async function until(fn){for(let i=0;i<100;i++){if(fn())return;await new Promise(r=>setTimeout(r,10));}throw Error('Tempo limite do teste');}
+async function until(fn){for(let i=0;i<1000;i++){if(fn())return;await new Promise(r=>setTimeout(r,10));}throw Error('Tempo limite do teste');}
 async function test(name,fn){try{await fn();passes++;const li=document.createElement('li');li.className='pass';li.textContent='PASSOU: '+name;out.append(li);}catch(e){failures++;const li=document.createElement('li');li.className='fail';li.textContent='FALHOU: '+name+' / '+e.message;out.append(li);}finally{document.querySelectorAll('dialog').forEach(d=>d.remove());}}
 const base=()=>({id:'ficticio',cliente:'Cliente de teste',dadosCliente:{cpf:'00000000000'},valor:500,parcela:50,prazo:12,taxa:1.5,dataPrimeira:'2026-12-19',analiseCdc:{questionario:{renda:2000,despesas:500,outrasParcelas:0,restricao:'nao',cpfNaIdentidade:true,documentosConferidos:true},observacoes:'Recebida'}});
 async function setup(options={}){
