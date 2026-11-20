@@ -1,0 +1,31 @@
+<!doctype html><html lang="pt-BR"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Conferência de link CDC</title><style>body{font:17px system-ui;max-width:760px;margin:25px auto;padding:20px}input,button{box-sizing:border-box;width:100%;padding:14px;margin:10px 0}pre{white-space:pre-wrap}</style><h1>Conferência de link de assinatura</h1><p>Somente o administrador pode consultar o registro. A conferência não aprova, assina nem paga propostas.</p><p id="session">Verificando sessão…</p><label for="token">Link enviado ao cliente</label><input id="token" type="text"><button id="check" disabled>Conferir o link</button><button id="probe" disabled>Testar acesso com registro fictício</button><pre id="result"></pre><a id="detail" hidden>Abrir ficha no painel</a><p><a href="/?v=20261120-signature-v11">Abrir painel</a></p>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
+<script type="module">
+import {readPublicSignature,signatureAcceptance} from './cdc-signature.mjs?v=20261120-signature-v11';
+const source=await(await fetch('./index.html?v=20261120-signature-v11')).text();
+const config=JSON.parse(source.match(/const firebaseConfig\s*=\s*(\{[\s\S]*?\});/)[1].replace(/(^|\n)(\s*)(\w+):/g,'$1$2"$3":'));
+const app=firebase.initializeApp(config),db=app.firestore(),probe=firebase.initializeApp(config,'signature-public-diagnostic').firestore();
+const out=document.querySelector('#result'),check=document.querySelector('#check'),test=document.querySelector('#probe');
+const admin=u=>u?.uid==='LuvNA4bYAmQRkFTAHUTDMpsD1ZF2';
+firebase.auth().onAuthStateChanged(u=>{check.disabled=test.disabled=!admin(u);document.querySelector('#session').textContent=admin(u)?'Administrador conectado.':'Entre no painel para consultar o registro.';});
+check.onclick=async()=>{check.disabled=true;out.textContent='Consultando…';document.querySelector('#detail').hidden=true;try{
+ if(!admin(firebase.auth().currentUser))throw Error('Entre como administrador.');
+ const token=document.querySelector('#token').value.trim().split('/').pop();if(!/^[a-f0-9]{64}$/.test(token))throw Error('Informe o link completo de assinatura.');
+ const snap=await db.collection('assinaturasCDC').doc(token).get({source:'server'});
+ if(!snap.exists){out.textContent='O registro deste link não existe no banco.';return;}
+ const data=snap.data();out.textContent='Registro encontrado.\nAssinatura recebida: '+(data.aceite?'sim':'não')+'\nValidade: '+new Date(data.expiraEm.toMillis()).toLocaleString('pt-BR',{timeZone:'America/Fortaleza'})+'\n';
+ if(data.simId){const sim=await db.collection('simulacoes').doc(data.simId).get({source:'server'});out.textContent+='Ficha vinculada: '+(sim.exists?'encontrada':'ausente')+'\nLink ainda é o atual: '+(sim.exists&&sim.data().linkAssinatura===token?'sim':'não')+'\nDecisão salva: '+(sim.data()?.analiseCdc?.decisao?.status||'sem decisão')+'\n';if(sim.exists){const a=document.querySelector('#detail');a.href='./?v=20261120-signature-v11#detalhe/'+encodeURIComponent(data.simId);a.hidden=false;}}
+ try{await readPublicSignature({projectId:config.projectId,token});out.textContent+='Acesso do cliente: permitido.';}catch(e){out.textContent+='Acesso do cliente: '+e.code+'.';}
+}catch(e){out.textContent+='\n'+e.message;}finally{check.disabled=false;}};
+test.onclick=async()=>{test.disabled=true;out.textContent='';let ref;try{
+ if(!admin(firebase.auth().currentUser))throw Error('Entre como administrador.');
+ const token=Array.from(crypto.getRandomValues(new Uint8Array(32))).map(x=>x.toString(16).padStart(2,'0')).join('');ref=db.collection('assinaturasCDC').doc(token);
+ await ref.set({proposta:{cliente:'TESTE FICTÍCIO SEM CONTRATO'},simId:'TESTE-SEM-CONTRATO',teste:true,aceite:null,expiraEm:firebase.firestore.Timestamp.fromMillis(Date.now()+600000)});
+ await readPublicSignature({projectId:config.projectId,token});out.textContent+='PASSOU: leitura pública de registro novo.\n';
+ const canvas=document.createElement('canvas');canvas.width=80;canvas.height=40;canvas.getContext('2d').fillText('TESTE',5,20);
+ await probe.collection('assinaturasCDC').doc(token).update({aceite:signatureAcceptance({timestamp:Date.now(),foto:canvas.toDataURL('image/jpeg'),geo:{lat:0,lng:0,precisao:5},endereco:null}),assinadoEm:firebase.firestore.FieldValue.serverTimestamp()});
+ out.textContent+='PASSOU: envio de imagem fictícia e localização no formato aceito.\n';
+ const saved=(await ref.get({source:'server'})).data();if(!saved.aceite)throw Error('Envio não persistiu.');out.textContent+='PASSOU: envio salvo para o administrador.\n';
+ try{await readPublicSignature({projectId:config.projectId,token});throw Error('Link usado continua público.');}catch(e){if(e.code!=='signature-unavailable')throw e;out.textContent+='PASSOU: uso único.\n';}
+}catch(e){out.textContent+='FALHOU: '+e.message;}finally{if(ref)await ref.update({expiraEm:firebase.firestore.Timestamp.fromMillis(0)});test.disabled=false;}};
+</script></html>

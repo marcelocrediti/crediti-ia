@@ -1,0 +1,15 @@
+import assert from 'node:assert/strict';
+import {signatureProposalChanged,readPublicSignature,signatureAcceptance,signatureUrl} from '../cdc-signature.mjs';
+const before={cliente:'Fictício',valor:500,dadosCliente:{cpf:'123.456.789-00',telefone:'85999990000',enderecoEstruturado:{rua:'Rua',numero:'1'}}};
+const after={dadosCliente:{enderecoEstruturado:{numero:'1',rua:'Rua'},telefone:'85999990000',cpf:'12345678900'},valor:500,cliente:'Fictício'};
+assert(!signatureProposalChanged(before,after));assert(signatureProposalChanged(before,{...after,valor:501}));assert(signatureProposalChanged(before,{...after,dadosCliente:{...after.dadosCliente,cpf:'99999999999'}}));
+const token='a'.repeat(64),projectId='fixture';
+const fields={proposta:{mapValue:{fields:{cliente:{stringValue:'Pessoa fictícia'},valor:{integerValue:'500'}}}},aceite:{nullValue:null},expiraEm:{timestampValue:new Date(Date.now()+60000).toISOString()}};
+const read=fetcher=>readPublicSignature({projectId,token,fetcher});
+const s=await read(async(url,opts)=>{assert(url.endsWith(token));assert.equal(opts.credentials,'omit');return {ok:true,json:async()=>({fields})};});assert.equal(s.valor,500);assert.equal(s.id,token);
+for(const status of [403,404])await assert.rejects(()=>read(async()=>({status})),e=>e.code==='signature-unavailable'&&!e.message.includes('não encontrada'));
+await assert.rejects(()=>read(async()=>({status:503})),e=>e.code==='signature-service');await assert.rejects(()=>read(async()=>{throw Error('offline')}),e=>e.code==='signature-service');
+await assert.rejects(()=>readPublicSignature({projectId,token:'broken',fetcher:()=>{throw Error('não chamar')}}),e=>e.code==='signature-token');
+await assert.rejects(()=>read(async()=>({ok:true,json:async()=>({fields:{...fields,expiraEm:{timestampValue:'2000-01-01T00:00:00Z'}}})})),e=>e.code==='signature-closed');
+assert.deepEqual(signatureAcceptance({timestamp:1,foto:'fixture',geo:{lat:1,lng:2,precisao:3},endereco:null}).geo,{lat:1,lng:2});assert(signatureUrl('https://example.test/',token).endsWith('#cliente/'+token));
+console.log('PASS: reordered fields preserve link; true changes revoke; public load, permission failure, transient failures, expiration, incomplete URL and photo payload');
