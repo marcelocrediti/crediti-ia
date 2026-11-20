@@ -1,4 +1,5 @@
 import {evaluateCredit,POLICY_VERSION,documentFindings,analysisSections,sectionsText} from './cdc-policy.mjs?v=20261120-docs2meses';
+import {showAttachments} from './cdc-document-viewer.mjs?v=20261120-view';
 const API='https://crediti-ia-api.onrender.com/api/cdc/document';
 const DOCS=[['rgFrente','Identidade completa (RG, CIN ou CNH)'],['cpfFrente','CPF (se não constar na identidade)'],['comprovanteResidencia','Comprovante de residência'],['comprovanteRenda','Renda: 3 contracheques, benefício atual ou extratos com movimentação dos últimos 2 meses']];
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -195,7 +196,7 @@ export async function mountCdcReview(id,root,ctx){
           if(current.analiseCdc){delete current.analiseCdc.decisao;delete current.analiseCdc.resultado;}
           await saveSim(current);
         }
-        el('documentosConferidos').checked=false;message('Anexos salvos. Clique em Ler anexos e confira os dados.');
+        el('documentosConferidos').checked=false;message('Anexos salvos. Clique em Ver anexos para abrir os documentos. Use Analisar ficha para a leitura automática.');
       }catch(e){reportError(e);}finally{input.value='';lock(false);void safeRefreshFiles();}
     };
     button.task=async(auto=false)=>{
@@ -220,7 +221,14 @@ export async function mountCdcReview(id,root,ctx){
         if(!auto)el('documentosConferidos').checked=false;
         message('Leitura concluída. Conferindo os dados da ficha…');
       }finally{void safeRefreshFiles();}
-    };button.onclick=()=>run(button);
+    };
+    button.textContent='Ver anexos';
+    button.onclick=async()=>{
+      if(busy)return;
+      lock(true);button.textContent='Abrindo anexos…';
+      try{const docs=await loadDocumentos(id);showAttachments(documentKeys(docs,key).map(k=>docs[k]),DOCS.find(d=>d[0]===key)[1]);}
+      catch(e){reportError(e);}finally{button.textContent='Ver anexos';lock(false);}
+    };
   }
   bind('save',async()=>{await persist();message('Ficha da análise salva.');});
   bind('analyze',async()=>{
