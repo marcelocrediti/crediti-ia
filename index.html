@@ -608,9 +608,6 @@ async function criarLinkCDC(s){
   if(s.linkAssinatura)batch.update(db.collection('assinaturasCDC').doc(s.linkAssinatura),{expiraEm:firebase.firestore.Timestamp.fromMillis(0)});
   batch.update(db.collection('simulacoes').doc(s.id),{linkAssinatura:token,status:'aguardando_cliente',contratacao:{finalizadaEm:Date.now(),por:firebase.auth().currentUser.uid,motivoAprovacao:s.analiseCdc?.decisao?.motivo||''}});
   await batch.commit();
-  const {readPublicSignature}=await import('./cdc-signature.mjs?v=20261120-signature-v11');
-  try{await readPublicSignature({projectId:firebaseConfig.projectId,token});}
-  catch(e){throw new Error('O link foi salvo, mas o acesso do cliente não foi confirmado. '+(e.code==='signature-unavailable'?'O banco negou o acesso público. Verifique o link antes de enviar.':e.message));}
   return token;
 }
 window.renovarLinkCDC=async function(id){try{const s=await loadSim(id);await criarLinkCDC(s);await abrirDetalhe(id);}catch(e){toast('Não foi possível gerar o link protegido: '+e.message);}};
@@ -1308,7 +1305,7 @@ window.abrirDetalhe = async function(id){
     return;
   }
   const base = getBaseUrl();
-  const url = base && s.linkAssinatura ? (base + '?v=20261120-signature-v11#cliente/' + s.linkAssinatura) : null;
+  const url = base && s.linkAssinatura ? (base + '?v=20261120-signature-v12#cliente/' + s.linkAssinatura) : null;
   let signBlock = '';
   if(s.aceite){
     signBlock = `
@@ -2082,7 +2079,7 @@ function wireContratarEvents(id){
           await saveSim(s);
         }
         const token=await criarLinkCDC(s);
-        const url = base ? (base + '?v=20261120-signature-v11#cliente/' + token) : null;
+        const url = base ? (base + '?v=20261120-signature-v12#cliente/' + token) : null;
         const linkBlock = url
           ? `<div class="link-box"><input readonly value="${url}" id="link-cliente-final"><button class="btn btn-outline btn-sm" onclick="navigator.clipboard.writeText('${url}').then(()=>toast('Link copiado!'))">Copiar</button></div>`
           : linkIndisponivelHtml() + `<button class="btn btn-outline" onclick="location.hash='cliente/${s.id}'">Pré-visualizar como o cliente</button>`;
@@ -2822,8 +2819,8 @@ function renderCdcLogin(app){
     <div class="cdc-login-panel"><span class="cdc-login-kicker">CREDITI SOLUÇÕES FINANCEIRAS</span><h1>Bem-vindo ao<br>CDC Crediti</h1><p class="cdc-login-intro">Seu painel de crédito, em um só lugar.<br>Acesso exclusivo do administrador.</p>
     <form id="cdc-login-form">
     <label for="cdc-email">E-mail</label><input id="cdc-email" type="email" autocomplete="username" placeholder="Seu e-mail de acesso" required>
-    <label for="cdc-password">Senha</label>
-    <div class="cdc-login-password"><input id="cdc-password" type="password" autocomplete="current-password" placeholder="Digite sua senha" required>
+    <label for="cdc-password">Senha de 6 dígitos</label>
+    <div class="cdc-login-password"><input id="cdc-password" type="password" inputmode="numeric" pattern="[0-9]{6}" minlength="6" maxlength="6" autocomplete="current-password" placeholder="Digite sua senha" required>
     <button type="button" id="cdc-eye" aria-label="Mostrar senha" aria-controls="cdc-password" aria-pressed="false">Mostrar</button></div>
     <button type="submit" id="cdc-enter">Entrar no painel</button>
     <button type="button" id="cdc-reset">Esqueci minha senha</button>
