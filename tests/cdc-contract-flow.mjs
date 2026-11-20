@@ -1,0 +1,24 @@
+import {creditSnapshot} from '../cdc-review.mjs?v=20261120-contract-v9';
+const root=document.querySelector('#fixture'),out=document.querySelector('#results');
+const assert=(x,msg)=>{if(!x)throw Error(msg);};
+const source=await (await fetch('index.html?v=20261120-contract-v9')).text();
+const part=(start,end)=>{const a=source.indexOf(start),b=source.indexOf(end,a);if(a<0||b<0)throw Error('Função não encontrada');return source.slice(a,b);};
+// Run the actual production form and event handlers with in-memory persistence only.
+const body=part('async function viewContratar(id){','async function mountContratacaoReview(id){')+part('function wireContratarEvents(id){','async function viewCliente(');
+const date=new Date().toISOString().slice(0,10);
+const original={id:'ficticio',cliente:'Pessoa de teste',valor:500,parcela:50,prazo:12,taxa:1.5,cet:1.5,dataPrimeira:date,dataUltima:date,dadosCliente:{cpf:'00000000000',profissao:'Autônomo',endereco:'Rua Fictícia, 1',telefone:'85999990000'},analiseCdc:{questionario:{renda:2000,despesas:200,outrasParcelas:0,restricao:'nao',residenciaTitular:'proprio',documentosConferidos:true},decisao:{status:'Aprovada',motivo:'Conferência fictícia',data:Date.now(),por:'admin-ficticio'}}};
+let sim,links=0,lastToast='',failWrite=false;
+const docs={rgFrente:{nome:'identidade.pdf',dataUrl:'conteudo-ficticio'}};
+const context={listSims:async()=>[sim],loadDocumentos:async()=>docs};
+Object.assign(window,{loadSim:async()=>structuredClone(sim),saveSim:async value=>{if(failWrite)throw Error('Falha de gravação fictícia');sim=structuredClone(value);},isDecimoTerceiro:()=>false,LOGO_DATAURL:'',nomeProduto:()=> 'CDC fictício',formatCpf:v=>v,formatTelefone:v=>v,brl:v=>'R$ '+v,fmtDate:v=>v,wireMoedaMask:()=>{},wireTelefoneMask:()=>{},wireCpfMask:()=>{},wireCepMask:()=>{},wireWhatsMask:()=>{},toast:x=>{lastToast=x;},getBaseUrl:()=>location.origin+'/',mountContratacaoReview:async()=>{},iniciarVigiaAssinatura:()=>{},criarLinkCDC:async value=>{assert(value.analiseCdc.decisao.status==='Aprovada','Sem decisão');assert(value.analiseCdc.snapshot===await creditSnapshot(value,context),'Evidência alterada');links++;return 'f'.repeat(64);}});
+const script=document.createElement('script');script.textContent=body;document.body.append(script);
+async function setup(){sim=structuredClone(original);links=0;lastToast='';failWrite=false;sim.analiseCdc.snapshot=await creditSnapshot(sim,context);root.innerHTML=await window.viewContratar(sim.id);window.wireContratarEvents(sim.id);}
+async function test(name,fn){try{await fn();out.textContent+='PASSOU: '+name+'\n';}catch(e){out.textContent+='FALHOU: '+name+': '+e.message+'\n';throw e;}}
+document.querySelector('#start').onclick=async function(){this.disabled=true;out.textContent='';try{
+ await test('Finalizar pede cadastro e Pix, preservando a aprovação',async()=>{await setup();await document.querySelector('#btn-concluir').onclick();assert(links===0,'Gerou sem cadastro');assert(lastToast.includes('data de nascimento')&&lastToast.includes('chave Pix'),'Não orientou campos');assert(sim.analiseCdc.decisao.status==='Aprovada','Apagou aprovação');});
+ await test('Um clique salva dados ainda não salvos e gera link de assinatura',async()=>{await setup();document.querySelector('#dc-nasc').value='1990-01-01';document.querySelector('#dc-pix-aprovado').value='pessoa@example.test';document.querySelector('#dc-tel').value='85988880000';await document.querySelector('#btn-concluir').onclick();assert(links===1,'Não gerou link: '+lastToast);assert(sim.dadosCliente.pix==='pessoa@example.test'&&sim.dadosCliente.telefone==='85988880000','Dados perdidos');assert(sim.dadosCliente.endereco==='Rua Fictícia, 1','Endereço perdido');assert(document.querySelector('#link-cliente-final').value.endsWith('f'.repeat(64)),'Link ausente');assert(document.querySelector('#link-final').textContent.includes('aprovação em PDF'),'PDF ausente');});
+ await test('Falha de gravação não gera link',async()=>{await setup();failWrite=true;await document.querySelector('#btn-concluir').onclick();assert(!links&&!document.querySelector('#btn-concluir').disabled,'Não bloqueou falha');});
+ await test('Proposta sem decisão não pode finalizar pelo texto Aprovada',async()=>{await setup();delete sim.analiseCdc.decisao;sim.analiseCdc.observacoes='Aprovada';await document.querySelector('#btn-concluir').onclick();assert(!links,'Texto liberou link');});
+ await test('Alteração do CPF exige nova confirmação',async()=>{await setup();document.querySelector('#dc-nasc').value='1990-01-01';document.querySelector('#dc-pix-aprovado').value='pessoa@example.test';document.querySelector('#dc-cpf').value='11111111111';await document.querySelector('#btn-concluir').onclick();assert(!links,'CPF novo usou aprovação antiga');});
+ out.textContent+='5 testes passaram. Nenhum dado real foi acessado.';
+}catch(e){console.error(e);}finally{this.disabled=false;}};

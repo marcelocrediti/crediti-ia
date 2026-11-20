@@ -546,7 +546,7 @@ window.gerarCodigoConsultaCDC=async function(id){
   if(button)button.disabled=true;
   try{
     if(!isCdcAdmin())throw Error('Entre como administrador.');
-    const module=await import('./cdc-status.mjs?v=20261120-manual-v8');
+    const module=await import('./cdc-status.mjs?v=20261120-contract-v9');
     const code=await module.issueCode(id,{db,fb:firebase});
     const box=document.getElementById('codigo-consulta-salva');box.innerHTML='';
     const p=document.createElement('p');p.className='hint';p.textContent='Novo código gerado. O anterior foi cancelado. Envie este código ao cliente junto do endereço abaixo. Válido por 90 dias.';
@@ -590,14 +590,14 @@ async function criarLinkCDC(s){
   if(!isCdcAdmin())throw new Error('Entre como administrador.');
   if(s.aceite)throw new Error('Esta proposta já está assinada.');
   if(!isDecimoTerceiro(s)){
-    const cfg=await db.collection('contadoresCCB').doc('analise_config').get();
+    // The saved decision and its evidence govern this contract.
     if(s.analiseCdc?.decisao?.status==='Recusada')throw new Error('Ficha recusada. Revise a decisão no painel antes de continuar.');
     if(s.analiseCdc?.decisao?.status!=='Aprovada')throw new Error('Confirme a aprovação da ficha antes de informar o Pix e gerar o link.');
     if(!s.dadosCliente?.pix?.trim())throw new Error('Ficha aprovada. Informe a chave Pix do cliente em Continuar contratação.');
-    if(cfg.data()?.automatica){
+    if(s.analiseCdc?.decisao?.status==='Aprovada'){
       if(s.analiseCdc?.decisao?.status!=='Aprovada')throw new Error('Abra a proposta, conclua a análise e confirme a aprovação antes de gerar o link.');
-      const {creditSnapshot,createReviewContext}=await import('./cdc-review.mjs?v=20261120-manual-v8');
-      if(s.analiseCdc.snapshot!==await creditSnapshot(s,createReviewContext({db})))throw new Error('A ficha mudou. Faça uma nova análise antes de contratar.');
+      const {creditSnapshot,createReviewContext}=await import('./cdc-review.mjs?v=20261120-contract-v9');
+      if(s.analiseCdc.snapshot!==await creditSnapshot(s,createReviewContext({db})))throw new Error('Os dados da avaliação mudaram. Clique em Confirmar aprovação para atualizar antes de finalizar.');
     }
   }
   const token=Array.from(crypto.getRandomValues(new Uint8Array(32))).map(x=>x.toString(16).padStart(2,'0')).join('');
@@ -606,7 +606,7 @@ async function criarLinkCDC(s){
   const batch=db.batch();
   batch.set(db.collection('assinaturasCDC').doc(token),{proposta,simId:s.id,aceite:null,expiraEm:firebase.firestore.Timestamp.fromMillis(Date.now()+7*86400000)});
   if(s.linkAssinatura)batch.update(db.collection('assinaturasCDC').doc(s.linkAssinatura),{expiraEm:firebase.firestore.Timestamp.fromMillis(0)});
-  batch.update(db.collection('simulacoes').doc(s.id),{linkAssinatura:token});
+  batch.update(db.collection('simulacoes').doc(s.id),{linkAssinatura:token,status:'aguardando_cliente',contratacao:{finalizadaEm:Date.now(),por:firebase.auth().currentUser.uid,motivoAprovacao:s.analiseCdc?.decisao?.motivo||'',estado:'aguardando_assinatura'}});
   await batch.commit();return token;
 }
 window.renovarLinkCDC=async function(id){try{const s=await loadSim(id);await criarLinkCDC(s);await abrirDetalhe(id);}catch(e){toast('Não foi possível gerar o link protegido: '+e.message);}};
@@ -636,7 +636,7 @@ async function saveSim(sim){
         sim.linkAssinatura=null;
       }
     }
-    const statusModule=await import('./cdc-status.mjs?v=20261120-manual-v8');
+    const statusModule=await import('./cdc-status.mjs?v=20261120-contract-v9');
     await db.runTransaction(async tx=>{
       const ref=db.collection('simulacoes').doc(sim.id),latest=await tx.get(ref);
       const oldConsulta=latest.exists?latest.data().consultaStatusId:null;
@@ -787,7 +787,7 @@ async function renderInner(){
   const route = getRoute();
   const app = document.getElementById('app');
   if(!cdcAuthReady){ app.innerHTML = '<div class="wrap"><div class="card">Verificando acesso…</div></div>'; return; }
-  if(route.view==='consulta'){const module=await import('./cdc-status.mjs?v=20261120-manual-v8');module.mountStatus(app,{db});return;}
+  if(route.view==='consulta'){const module=await import('./cdc-status.mjs?v=20261120-contract-v9');module.mountStatus(app,{db});return;}
   if(route.view==='preanalise'){const module=await import('./cdc-preanalise.mjs?v=20261120-documentos-v3');await module.mountCustomer(app,route.id,{db,fb:firebase,logo:LOGO_DATAURL});return;}
   if(route.view==='cliente' && /^[a-f0-9]{64}$/.test(route.id)){app.innerHTML=await viewCliente(route.id);return;}
   if(!isCdcAdmin()) { renderCdcLogin(app); return; }
@@ -1227,12 +1227,12 @@ function onCalcularDecimoTerceiro(){
 }
 
 async function viewPainel(){
-  const {publicStatus}=await import('./cdc-status.mjs?v=20261120-manual-v8');
+  const {publicStatus}=await import('./cdc-status.mjs?v=20261120-contract-v9');
   const sims = await listSims();
   // Repair old protected projections without changing decisions, codes or expiry.
   if(firebaseOk && isCdcAdmin()){
     void (async()=>{
-      const module=await import('./cdc-status.mjs?v=20261120-manual-v8');
+      const module=await import('./cdc-status.mjs?v=20261120-contract-v9');
       let failed=false;
       for(const sim of sims.filter(s=>s.id&&s.consultaStatusId)){
         try{await module.syncStatus(sim.id,{db,fb:firebase});}catch{failed=true;}
@@ -1288,7 +1288,7 @@ window.abrirPaginaDetalhe = function(id){
 window.abrirDetalhe = async function(id){
   const s = await loadSim(id);
   if(s?.consultaStatusId && isCdcAdmin()){
-    try{const statusModule=await import('./cdc-status.mjs?v=20261120-manual-v8');await statusModule.syncStatus(id,{db,fb:firebase});}
+    try{const statusModule=await import('./cdc-status.mjs?v=20261120-contract-v9');await statusModule.syncStatus(id,{db,fb:firebase});}
     catch(e){toast('Não foi possível atualizar a consulta do cliente. Tente salvar a ficha novamente.');}
   }
   const detalheEl = document.getElementById('detalhe');
@@ -1312,7 +1312,7 @@ window.abrirDetalhe = async function(id){
       <div class="kv"><span>Endereço aproximado</span><b>${s.aceite.endereco || 'não identificado'}</b></div>
       ${s.aceite.foto ? `<div class="step-title" style="margin-top:10px;">Foto capturada</div><img src="${s.aceite.foto}" style="width:140px;border-radius:12px;border:2px solid var(--line);">` : ''}
     </div>
-    <button class="btn btn-primary" onclick="gerarPDF('${s.id}')">Baixar CCB + documentos em PDF</button>
+    <button class="btn btn-primary" onclick="gerarPDF('${s.id}')">Baixar contrato, documentos e aprovação em PDF</button>
     ${isDecimoTerceiro(s) ? '' : `<button class="btn btn-outline" style="margin-top:10px;" onclick="editarSimulacaoInline('${s.id}')">✏️ Editar CCB</button>`}
     <button class="btn btn-outline" style="margin-top:10px;" onclick="location.hash='contratar/${s.id}'">📎 Reenviar documentos</button>
     <button class="btn btn-outline" style="margin-top:10px;border-color:var(--danger);color:var(--danger);" onclick="apagarAssinatura('${s.id}')">🗑️ Apagar assinatura/foto e pedir novo envio</button>`;
@@ -1383,8 +1383,8 @@ window.abrirDetalhe = async function(id){
   if(documentosBlock) carregarDocumentosDetalhe(s.id);
   const reviewRoot=document.getElementById('cdc-review-card');
   const historyRoot=document.getElementById('cdc-history-card');
-  if(historyRoot) import('./cdc-review.mjs?v=20261120-manual-v8').then(module=>module.mountCdcHistory(s.id,historyRoot,module.createReviewContext({db,loadSim,listSims,auth:firebase.auth()}))).catch(()=>{historyRoot.textContent='Não foi possível carregar o histórico. Atualize a página.';});
-  if(reviewRoot) import('./cdc-review.mjs?v=20261120-manual-v8').then(module=>module.mountCdcReview(s.id,reviewRoot,module.createReviewContext({db,loadSim,saveSim,listSims,loadDocumentos,saveDocumento,auth:firebase.auth()}))).catch(()=>{reviewRoot.textContent='Não foi possível carregar a análise. Suas propostas continuam disponíveis. Atualize a página para tentar novamente.';});
+  if(historyRoot) import('./cdc-review.mjs?v=20261120-contract-v9').then(module=>module.mountCdcHistory(s.id,historyRoot,module.createReviewContext({db,loadSim,listSims,auth:firebase.auth()}))).catch(()=>{historyRoot.textContent='Não foi possível carregar o histórico. Atualize a página.';});
+  if(reviewRoot) import('./cdc-review.mjs?v=20261120-contract-v9').then(module=>module.mountCdcReview(s.id,reviewRoot,module.createReviewContext({db,loadSim,saveSim,listSims,loadDocumentos,saveDocumento,auth:firebase.auth(),onApproved:()=>{location.hash='contratar/'+s.id;}}))).catch(()=>{reviewRoot.textContent='Não foi possível carregar a análise. Suas propostas continuam disponíveis. Atualize a página para tentar novamente.';});
 };
 
 function htmlDocumentosCliente(simId, docs){
@@ -1840,7 +1840,7 @@ async function viewContratar(id){
   <div class="wrap">
   <header class="top"><img src="${LOGO_DATAURL}"><div><div class="brand-name">CDC Crediti</div><div class="brand-sub">${nomeProduto(s)} — ${s.cliente}</div></div></header>
   <div class="card" id="step1">
-    <h2>Dados do cliente</h2>
+    <h2>${s.analiseCdc?.decisao?.status==='Aprovada'?'Complete o cadastro aprovado':'Dados do cliente'}</h2>
     <p class="hint">Preencha os dados para dar continuidade à contratação.</p>
     <label>Nome completo</label><input type="text" id="dc-nome" value="${s.cliente}" readonly>
     <div class="row2">
@@ -1900,7 +1900,8 @@ async function viewContratar(id){
     <p class="hint">Preencha as perguntas, anexe e leia os documentos, depois clique em Analisar ficha. Confirme a decisão antes de gerar o link.</p>
     <div id="cdc-review-contratacao">Carregando a ficha de análise...</div>
     <div id="pix-pos-aprovacao" ${s.analiseCdc?.decisao?.status==='Aprovada'?'':'hidden'} style="margin-top:20px;">
-      <h3>Ficha aprovada: recebimento por Pix</h3>
+      <h3>Ficha aprovada: complete os dados e informe o Pix</h3>
+      <button type="button" class="btn btn-outline" onclick="document.getElementById('step1').scrollIntoView({behavior:'smooth'})">Conferir os dados do cliente</button>
       <label for="dc-pix-aprovado">Chave Pix do cliente</label>
       <input type="text" id="dc-pix-aprovado" value="${String(d.pix||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;')}" ${s.analiseCdc?.decisao?.status==='Aprovada'?'':'disabled'} placeholder="Informe a chave Pix para receber o crédito">
       <p class="hint">Confira o titular antes de fazer o pagamento. A chave será salva ao gerar o link da contratação.</p>
@@ -1914,7 +1915,7 @@ async function viewContratar(id){
     <label>Comprovante de Residência</label><input type="file" id="doc-residencia" accept="image/*,.pdf,.jpg,.jpeg,.png,.gif,.webp,.heic,.heif,.bmp,.tiff">
     <label>Comprovante de Renda <span style="font-weight:400;color:var(--ink-soft);">(opcional)</span></label><input type="file" id="doc-comprovante-renda" accept="image/*,.pdf,.jpg,.jpeg,.png,.gif,.webp,.heic,.heif,.bmp,.tiff">
     `}
-    <button class="btn btn-primary" id="btn-concluir">${s.aceite?'Salvar documentos':!isDecimoTerceiro(s)?'Gerar link após aprovação':'Concluir e gerar link para o cliente'}</button>
+    <button class="btn btn-primary" id="btn-concluir">${s.aceite?'Salvar documentos':!isDecimoTerceiro(s)?'Finalizar contratação e gerar link de assinatura':'Concluir e gerar link para o cliente'}</button>
   </div>
   <div id="link-final"></div>
   <button class="btn btn-outline" onclick="location.hash=''">Voltar ao painel</button>
@@ -1927,14 +1928,21 @@ async function mountContratacaoReview(id){
   const s=await loadSim(id);
   if(!s?.dadosCliente?.cpf) return;
   try{
-    const module=await import('./cdc-review.mjs?v=20261120-manual-v8');
+    const module=await import('./cdc-review.mjs?v=20261120-contract-v9');
+    const advanceApproved=()=>{
+      const step=document.getElementById('step1'),box=document.getElementById('pix-pos-aprovacao');
+      if(step&&box){step.insertBefore(box,document.getElementById('btn-avancar'));step.querySelector('h2').textContent='Complete o cadastro aprovado';document.getElementById('btn-avancar').textContent='Salvar dados e continuar';}
+      step?.scrollIntoView({behavior:'smooth',block:'start'});
+      toast('Aprovação confirmada. Complete o cadastro e informe a chave Pix.');
+    };
     const saveReview=async current=>{
       await saveSim(current);
       const box=document.getElementById('pix-pos-aprovacao'),input=document.getElementById('dc-pix-aprovado');
       const approved=current.analiseCdc?.decisao?.status==='Aprovada';
       if(box)box.hidden=!approved;if(input)input.disabled=!approved;
     };
-    await module.mountCdcReview(id,root,module.createReviewContext({db,loadSim,saveSim:saveReview,listSims,loadDocumentos,saveDocumento,auth:firebase.auth()}));
+    await module.mountCdcReview(id,root,module.createReviewContext({db,loadSim,saveSim:saveReview,listSims,loadDocumentos,saveDocumento,auth:firebase.auth(),onApproved:advanceApproved}));
+    if(s.analiseCdc?.decisao?.status==='Aprovada')advanceApproved();
   }catch(e){
     root.textContent='Não foi possível carregar a análise. Atualize a página para tentar novamente. O link não será liberado sem a decisão exigida.';
   }
@@ -1964,7 +1972,7 @@ function iniciarVigiaAssinatura(id){
             ✅ Documento assinado · CCB assinada · Cliente concluiu com foto às ${fmtTimestamp(s.aceite.timestamp)}
           </div>
           <div class="card">
-            <button class="btn btn-primary" onclick="gerarPDF('${s.id}')">Baixar CCB em PDF</button>
+            <button class="btn btn-primary" onclick="gerarPDF('${s.id}')">Baixar contrato, documentos e aprovação em PDF</button>
             <button class="btn btn-outline" style="margin-top:10px;" onclick="location.hash=''">Voltar ao painel</button>
           </div>`;
         toast('O cliente assinou! CCB pronta pra baixar.');
@@ -1995,42 +2003,14 @@ function wireContratarEvents(id){
       try{
         const s = await loadSim(id);
         if(!s) throw new Error('sim não encontrada');
-        const enderecoEstruturado = {
-          cep: document.getElementById('dc-cep').value.trim(),
-          rua: document.getElementById('dc-rua').value.trim(),
-          numero: document.getElementById('dc-numero').value.trim(),
-          bairro: document.getElementById('dc-bairro').value.trim(),
-          complemento: document.getElementById('dc-complemento').value.trim(),
-          cidade: document.getElementById('dc-cidade').value.trim(),
-          uf: document.getElementById('dc-uf').value.trim().toUpperCase(),
-        };
-        const enderecoTexto = [
-          enderecoEstruturado.rua && (enderecoEstruturado.rua + (enderecoEstruturado.numero ? ', '+enderecoEstruturado.numero : '')),
-          enderecoEstruturado.complemento,
-          enderecoEstruturado.bairro,
-          (enderecoEstruturado.cidade || enderecoEstruturado.uf) && `${enderecoEstruturado.cidade}${enderecoEstruturado.uf?'/'+enderecoEstruturado.uf:''}`,
-          enderecoEstruturado.cep && `CEP ${enderecoEstruturado.cep}`
-        ].filter(Boolean).join(', ');
-        s.dadosCliente = {
-          cpf,
-          rg: document.getElementById('dc-rg').value.trim(),
-          nascimento: document.getElementById('dc-nasc').value,
-          nomePai: document.getElementById('dc-pai').value.trim(),
-          nomeMae: document.getElementById('dc-mae').value.trim(),
-          profissao: document.getElementById('dc-prof').value.trim(),
-          renda: document.getElementById('dc-renda').value.trim(),
-          escolaridade: document.getElementById('dc-escola').value.trim(),
-          telefone: document.getElementById('dc-tel').value.trim(),
-          email: document.getElementById('dc-email').value.trim(),
-          endereco: enderecoTexto,
-          enderecoEstruturado,
-          pix: document.getElementById('dc-pix')?.value.trim() || s.dadosCliente?.pix || '',
-        };
+        const {collectContractData}=await import('./cdc-contract.mjs?v=20261120-contract-v9');
+        s.dadosCliente=collectContractData(s.dadosCliente,key=>document.getElementById(key)?.value);
         await saveSim(s);
         document.getElementById('step2').style.display = 'block';
         await mountContratacaoReview(id);
         document.getElementById('step2').scrollIntoView({behavior:'smooth'});
-        toast('Dados salvos. Preencha a ficha abaixo e anexe os documentos.');
+        if(s.analiseCdc?.decisao?.status==='Aprovada'){document.getElementById('btn-concluir').scrollIntoView({behavior:'smooth',block:'center'});toast('Dados salvos. Finalize para gerar o link de assinatura.');}
+        else toast('Dados salvos. Preencha a ficha abaixo e anexe os documentos.');
       }catch(e){
         toast('Não deu pra salvar os dados. Tente novamente.');
       }
@@ -2088,23 +2068,25 @@ function wireContratarEvents(id){
         const base = getBaseUrl();
         if(!isDecimoTerceiro(s)){
           if(s.analiseCdc?.decisao?.status!=='Aprovada')throw new Error('Conclua a pré-análise e confirme a aprovação antes de continuar.');
-          const pix=document.getElementById('dc-pix-aprovado')?.value.trim();
-          if(!pix)throw new Error('Informe a chave Pix no campo liberado após a aprovação.');
-          s.dadosCliente={...(s.dadosCliente||{}),pix};
+          const {collectContractData,missingContractData}=await import('./cdc-contract.mjs?v=20261120-contract-v9');
+          s.dadosCliente=collectContractData(s.dadosCliente,key=>document.getElementById(key)?.value);
+          const missing=missingContractData(s.dadosCliente);
+          if(missing.length){document.getElementById('step1').scrollIntoView({behavior:'smooth'});throw new Error('Complete o cadastro: '+missing.join(', ')+'.');}
           await saveSim(s);
         }
         const token=await criarLinkCDC(s);
-        await db.collection('simulacoes').doc(id).update({status:'aguardando_cliente'});
         const url = base ? (base + '#cliente/' + token) : null;
         const linkBlock = url
           ? `<div class="link-box"><input readonly value="${url}" id="link-cliente-final"><button class="btn btn-outline btn-sm" onclick="navigator.clipboard.writeText('${url}').then(()=>toast('Link copiado!'))">Copiar</button></div>`
           : linkIndisponivelHtml() + `<button class="btn btn-outline" onclick="location.hash='cliente/${s.id}'">Pré-visualizar como o cliente</button>`;
         document.getElementById('link-final').innerHTML = `
-          <div class="card final-ok">Ficha completa! Envie o link abaixo para o cliente finalizar com a foto e o aceite.</div>
+          <div class="card final-ok">Contratação finalizada. Envie o link para o cliente assinar com a foto e o aceite. O contrato, os dados e os documentos permanecem salvos na ficha.</div>
           <div class="card">
             ${linkBlock}
+            <button class="btn btn-outline" onclick="gerarPDF('${s.id}')">Baixar contrato, documentos e aprovação em PDF</button>
+            <p class="hint">Antes do aceite, o PDF identifica a proposta como ainda não assinada. Após a assinatura, baixe a versão atualizada na ficha.</p>
             <label style="margin-top:14px;">WhatsApp do cliente</label>
-            <input type="text" id="wa-numero-final" placeholder="(85) 90000-0000">
+            <input type="text" id="wa-numero-final" placeholder="(85) 90000-0000" value="${String(s.dadosCliente?.telefone||'').replace(/[^0-9()+ -]/g,'')}">
             <button class="btn btn-ok" id="btn-wa-final">Enviar via WhatsApp</button>
           </div>`;
         wireWhatsMask(document.getElementById('wa-numero-final'));
@@ -2635,6 +2617,7 @@ async function salvarCCBComDocumentos(doc, documentos, filename){
     }
   }
 
+  if(falhas.length)throw new Error('O PDF completo não foi gerado porque não foi possível incluir: '+falhas.join(', ')+'. Os anexos continuam salvos na ficha.');
   const bytesFinais = await pacote.save();
   const blob = new Blob([bytesFinais], {type:'application/pdf'});
   const blobUrl = URL.createObjectURL(blob);
@@ -2757,6 +2740,18 @@ window.gerarPDF = async function(id){
     y += 8;
   }
 
+  const {approvalPdfLines}=await import('./cdc-contract.mjs?v=20261120-contract-v9');
+  const approvalLines=approvalPdfLines(s);
+  if(approvalLines.length){
+    doc.addPage();y=40;
+    for(const [i,text] of approvalLines.entries()){
+      doc.setFont('helvetica',i===0?'bold':'normal');doc.setFontSize(i===0?12:10);
+      for(const line of doc.splitTextToSize(text,pageW-80)){
+        if(y>770){doc.addPage();y=40;}doc.text(line,40,y);y+=15;
+      }
+      y+=10;
+    }
+  }
   // Os documentos reais serão acrescentados depois da CCB, página por página.
   const documentosCliente = await loadDocumentos(s.id);
 

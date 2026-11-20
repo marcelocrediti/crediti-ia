@@ -1,7 +1,7 @@
-import {freshServerRead} from '../cdc-firestore-read.mjs?v=20261120-manual-v8';
-import {mountCdcReview,readWithDeadline,createReviewContext,documentKeys} from '../cdc-review.mjs?v=20261120-manual-v8';
-import {evaluateCredit,documentFindings,analysisSections,sectionsText} from '../cdc-policy.mjs?v=20261120-manual-v8';
-import {mountCustomer,validateResidence,receiveSubmission,digest} from '../cdc-preanalise.mjs?v=20261120-manual-v8';
+import {freshServerRead} from '../cdc-firestore-read.mjs?v=20261120-contract-v9';
+import {mountCdcReview,readWithDeadline,createReviewContext,documentKeys,canonical,creditSnapshot} from '../cdc-review.mjs?v=20261120-contract-v9';
+import {evaluateCredit,documentFindings,analysisSections,sectionsText} from '../cdc-policy.mjs?v=20261120-contract-v9';
+import {mountCustomer,validateResidence,receiveSubmission,digest} from '../cdc-preanalise.mjs?v=20261120-contract-v9';
 const root=document.querySelector('#fixture'),out=document.querySelector('#results');
 let failures=0,passes=0;
 const assert=(value,text)=>{if(!value)throw Error(text);};
@@ -13,7 +13,7 @@ const base=()=>({id:'ficticio',cliente:'Cliente de teste',dadosCliente:{cpf:'000
 async function setup(options={}){
   root.innerHTML='';let sim=base(),writes=0,docs=options.docs||{},config={automatica:options.auto??true};sim.analiseCdc.questionario.residenciaTitular='proprio';sim.analiseCdc.questionario.residenciaJustificativa='';
   if(options.readings)sim.analiseDocumentos=options.readings;
-  const ctx={auth:{currentUser:{uid:'admin-ficticio',getIdToken:async()=> 'token-ficticio'}},db:{collection:()=>({doc:()=>({get:async()=>({exists:true,data:()=>config}),set:async value=>{config=value;}})})},loadSim:async()=>structuredClone(sim),saveSim:async s=>{if(options.failSave)throw Error('Falha de gravação simulada');writes++;sim=structuredClone(s);},listSims:options.history||(async()=>[structuredClone(sim)]),loadDocumentos:options.loadDocs||(async()=>structuredClone(docs)),saveDocumento:async(id,k,d)=>{docs[k]=d;}};
+  const ctx={auth:{currentUser:{uid:'admin-ficticio',getIdToken:async()=> 'token-ficticio'}},db:{collection:()=>({doc:()=>({get:async()=>({exists:true,data:()=>config}),set:async value=>{config=value;}})})},onApproved:options.onApproved,loadSim:async()=>options.sorted?JSON.parse(canonical(sim)):structuredClone(sim),saveSim:async s=>{if(options.failSave)throw Error('Falha de gravação simulada');writes++;sim=options.sorted?JSON.parse(canonical(s)):structuredClone(s);},listSims:options.history||(async()=>[structuredClone(sim)]),loadDocumentos:options.loadDocs||(async()=>structuredClone(docs)),saveDocumento:async(id,k,d)=>{docs[k]=d;}};
   await mountCdcReview(sim.id,root,ctx);await tick();
   return {ctx,get sim(){return sim;},get writes(){return writes;}};
 }
@@ -72,7 +72,7 @@ document.querySelector('#start').onclick=async function(){
     const docs=Object.fromEntries([['rgFrente','identidade'],['comprovanteResidencia','residencia'],['comprovanteRenda','renda']].map(([k,t])=>[k,{nome:t+'.pdf',dataUrl:'data:application/pdf;base64,'+btoa(t)}]));
     const original=window.fetch;let reads=0;
     window.fetch=async(url,options)=>{assert(url.includes('/api/cdc/document'),'Destino inesperado');reads++;const type=atob(JSON.parse(options.body).dataUrl.split(',')[1]);return {ok:true,json:async()=>({version:'cdc-docs-tipos-v3',document:{tipo:type,subtipo:type==='renda'?'contracheque':'outro',legibilidade:'legivel',cpf:'00000000000',rendaLiquida:type==='renda'?2000:null,competencias:['2026-10'],observacoes:'Teste local'}})};};
-    try{const f=await setup({docs});el('documentosConferidos').checked=true;await click('analyze');assert(reads===3,'Leituras');assert(f.sim.analiseCdc.resultado.status==='Aprovada','Resultado');assert(!f.sim.analiseCdc.decisao,'Confirmação automática indevida');document.querySelector('dialog button').click();await tick();el('reason').value='Conferência fictícia';await click('approve');assert(f.sim.analiseCdc.decisao.status==='Aprovada','Não confirmou');await click('save');assert(f.sim.analiseCdc.decisao.status==='Aprovada','Salvar sem mudanças apagou decisão');}finally{window.fetch=original;}
+    try{let advanced=0;const f=await setup({docs,sorted:true,onApproved:async saved=>{assert(saved.analiseCdc.decisao.status==='Aprovada','Callback antes de salvar');advanced++;}});el('documentosConferidos').checked=true;await click('analyze');assert(reads===3,'Leituras');assert(f.sim.analiseCdc.resultado.status==='Aprovada','Resultado');assert(!f.sim.analiseCdc.decisao,'Confirmação automática indevida');document.querySelector('dialog button').click();await tick();el('reason').value='Conferência fictícia';await click('approve');assert(f.sim.analiseCdc.decisao.status==='Aprovada','Não confirmou');await click('save');assert(f.sim.analiseCdc.decisao.status==='Aprovada','Salvar sem mudanças apagou decisão');assert(advanced===1,'Não avançou após aprovação salva');}finally{window.fetch=original;}
   });
   for(const [subtipo,status]of [['extrato_bancario','Aprovada'],['pagamento_inss','Aprovada'],['pix','Pendente'],['contracheque','Pendente']]){
     await test('Documento '+subtipo+' sem renda líquida: '+status,async()=>{
@@ -83,6 +83,18 @@ document.querySelector('#start').onclick=async function(){
       try{const f=await setup({docs});el('documentosConferidos').checked=true;await click('analyze');assert(f.sim.analiseCdc.resultado.status===status,'Resultado inesperado: '+el('observacoes').value);await tick();if(['extrato_bancario','pagamento_inss'].includes(subtipo))assert(!root.querySelector('[data-result="comprovanteRenda"]').textContent.includes('Renda líquida: Não identificada'),'Exigiu líquido do extrato');}finally{window.fetch=original;}
     });
   }
+  await test('Texto Aprovada sozinho não libera contratação e atualiza avaliação',async()=>{
+    let advanced=0;const f=await setup({onApproved:()=>advanced++});f.sim.analiseCdc.observacoes='Aprovada';el('reason').value='Conferi';await click('approve');assert(!f.sim.analiseCdc.decisao&&!advanced,'Aprovou pelo texto');assert(f.sim.analiseCdc.resultado.status==='Pendente','Não atualizou a avaliação');
+  });
+  await test('Mudança real de questionário limpa o texto antigo de aprovação',async()=>{
+    const f=await setup();f.sim.analiseCdc.resultado={status:'Aprovada'};f.sim.analiseCdc.observacoes='Aprovada';el('renda').value='3000';await click('save');assert(!f.sim.analiseCdc.resultado,'Resultado antigo mantido');assert(!el('observacoes').value.startsWith('Aprovada'),'Texto antigo mantido');
+  });
+  await test('Falha ao salvar aprovação não avança para contratação',async()=>{
+    let advanced=0;await setup({auto:false,failSave:true,onApproved:()=>advanced++});el('reason').value='Conferência fictícia';await click('approve');assert(!advanced,'Avançou sem persistência');assert(el('output').textContent.includes('Falha de gravação'),'Sem erro');
+  });
+  await test('Aprovação manual salva motivo e avança uma vez',async()=>{
+    let advanced=0;const f=await setup({auto:false,onApproved:()=>advanced++});el('reason').value='Conferência documental fictícia';await click('approve');assert(advanced===1&&f.sim.analiseCdc.decisao.motivo==='Conferência documental fictícia','Não concluiu');assert(f.sim.analiseCdc.snapshot,'Sem evidência da confirmação');
+  });
   await test('Conferência documental salva permanece marcada',async()=>{await setup();assert(el('documentosConferidos').checked,'Conferência salva foi perdida');});
   await test('Falha no primeiro arquivo não abandona o segundo nem cria pendências fictícias',async()=>{
     const docs={rgFrente:{nome:'falha.pdf',dataUrl:'data:application/pdf;base64,'+btoa('falha')},rgFrente__2:{nome:'legivel.pdf',dataUrl:'data:application/pdf;base64,'+btoa('legivel')}};

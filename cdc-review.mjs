@@ -1,14 +1,18 @@
-import {categoryEvidence,manualConfirmed} from './cdc-manual-review.mjs?v=20261120-manual-v8';
-import {needsInternalReview} from './cdc-status.mjs?v=20261120-manual-v8';
-import {readFirestore} from './cdc-firestore-read.mjs?v=20261120-manual-v8';
-import {evaluateCredit,POLICY_VERSION,documentFindings,analysisSections,sectionsText,documentIncomeSummary,completeCpf,documentCpf} from './cdc-policy.mjs?v=20261120-manual-v8';
-import {showAttachments} from './cdc-document-viewer.mjs?v=20261120-manual-v8';
+import {categoryEvidence,manualConfirmed} from './cdc-manual-review.mjs?v=20261120-contract-v9';
+import {needsInternalReview} from './cdc-status.mjs?v=20261120-contract-v9';
+import {readFirestore} from './cdc-firestore-read.mjs?v=20261120-contract-v9';
+import {evaluateCredit,POLICY_VERSION,documentFindings,analysisSections,sectionsText,documentIncomeSummary,completeCpf,documentCpf} from './cdc-policy.mjs?v=20261120-contract-v9';
+import {showAttachments} from './cdc-document-viewer.mjs?v=20261120-contract-v9';
 const API='https://crediti-ia-api.onrender.com/api/cdc/document';
 const DOCS=[['rgFrente','Identidade: RG, CIN ou CNH'],['cpfFrente','CPF (se não constar na identidade)'],['comprovanteResidencia','Comprovante de residência'],['comprovanteRenda','Renda: 3 contracheques/holerites, extrato de pagamento do INSS ou extrato/comprovante bancário dos últimos 60 dias. Comprovante Pix não é aceito']];
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const money=v=>Number(v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
 const hash=async value=>Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(value)))).map(x=>x.toString(16).padStart(2,'0')).join('');
 const number=v=>{let text=String(v).trim();if(text.includes(','))text=text.replace(/\./g,'').replace(',','.');else if(/^\d{1,3}(\.\d{3})+$/.test(text))text=text.replace(/\./g,'');return Number(text);};
+// Firestore may return map keys in a different order. Compare values, not insertion order.
+export const canonical=value=>JSON.stringify(value,(_,v)=>v&&typeof v==='object'&&!Array.isArray(v)?Object.fromEntries(Object.keys(v).sort().map(k=>[k,v[k]])):v);
+export const normalizedQuestionnaire=q=>({renda:q?.renda==null||q.renda===''?null:number(q.renda),despesas:q?.despesas==null||q.despesas===''?null:number(q.despesas),outrasParcelas:q?.outrasParcelas==null||q.outrasParcelas===''?null:number(q.outrasParcelas),restricao:q?.restricao||'',residenciaTitular:q?.residenciaTitular||'',residenciaJustificativa:q?.residenciaTitular==='terceiro'?String(q.residenciaJustificativa||'').trim():'',documentosConferidos:q?.documentosConferidos===true});
+export const sameQuestionnaire=(a,b)=>canonical(normalizedQuestionnaire(a))===canonical(normalizedQuestionnaire(b));
 export const formatAmount=v=>v===null||v===undefined||v===''?'':Number(v).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
 export const currentDocumentReading=(r,key)=>!!r?.document&&r.versaoLeitor==='cdc-docs-tipos-v3'&&(!['rgFrente','cpfFrente'].includes(key)||!!documentCpf(r.document)||r.document.versaoIdentidade===3);
 export const reusableDocumentReading=(r,key,now=Date.now())=>currentDocumentReading(r,key)&&!r.document.falhaLeituraCpf&&(!['rgFrente','cpfFrente'].includes(key)||!!documentCpf(r.document)||now-Number(r.lidoEm||0)<30000);
@@ -104,8 +108,8 @@ export async function creditSnapshot(current,{listSims,loadDocumentos}){
   const cpf=String(current.dadosCliente?.cpf||'').replace(/\D/g,'');
   const relatives=(await listSims()).filter(x=>String(x.dadosCliente?.cpf||'').replace(/\D/g,'')===cpf);
   const docs=await loadDocumentos(current.id);
-  current={...current,analiseCdc:{...current.analiseCdc,questionario:{...current.analiseCdc?.questionario,politica:POLICY_VERSION}}};
-  return hash(JSON.stringify({questionario:current.analiseCdc?.questionario,valor:current.valor,parcela:current.parcela,prazo:current.prazo,taxa:current.taxa,dataPrimeira:current.dataPrimeira,cpf:current.dadosCliente?.cpf,history:relatives.sort((a,b)=>a.id.localeCompare(b.id)).map(x=>({id:x.id,assinado:!!x.aceite,hist:x.historicoCrediti||[]})),docs:await Promise.all(Object.keys(docs).sort().map(async key=>[key,await hash(docs[key].dataUrl||'')])),leitura:current.analiseDocumentos||{},conferencias:current.analiseCdc?.conferencias||{}}));
+  current={...current,analiseCdc:{...current.analiseCdc,questionario:{...normalizedQuestionnaire(current.analiseCdc?.questionario),politica:POLICY_VERSION}}};
+  return hash(canonical({questionario:current.analiseCdc?.questionario,valor:current.valor,parcela:current.parcela,prazo:current.prazo,taxa:current.taxa,dataPrimeira:current.dataPrimeira,cpf,cliente:String(current.cliente||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[-–—]/g,' ').replace(/\s+/g,' ').trim().toUpperCase(),history:relatives.sort((a,b)=>a.id.localeCompare(b.id)).map(x=>({id:x.id,assinado:!!x.aceite,hist:x.historicoCrediti||[]})),docs:await Promise.all(Object.keys(docs).sort().map(async key=>[key,await hash(docs[key].dataUrl||'')])),leitura:current.analiseDocumentos||{},conferencias:current.analiseCdc?.conferencias||{}}));
 }
 export async function mountCdcReview(id,root,ctx){
   const {db,loadSim,saveSim,listSims,loadDocumentos,saveDocumento,auth}=ctx;
@@ -161,6 +165,8 @@ export async function mountCdcReview(id,root,ctx){
   };
   const reportError=error=>{message(error?.message||'Não foi possível concluir. Tente novamente.');el('output').scrollIntoView({behavior:'smooth',block:'center'});};
   el('observacoes').value=needsInternalReview(record)&&!s.analiseCdc?.decisao?'A leitura anterior não concluiu a conferência. Isso não representa reprovação do cliente. Use Analisar ficha para atualizar.':s.analiseCdc?.observacoes|| (record?record.status+'\n'+record.motivos.join('\n'):'');
+  if(!record&&!s.analiseCdc?.decisao&&/^Aprovada\b/.test(el('observacoes').value))el('observacoes').value='A avaliação anterior precisa ser atualizada. Use Confirmar aprovação para conferir os dados salvos e continuar.';
+  el('reason').value=s.analiseCdc?.decisao?.motivo||'';
   const showResult=(title,text,sections)=>{
     el('observacoes').value=text;message(title);
     const dialog=document.createElement('dialog');
@@ -176,7 +182,7 @@ export async function mountCdcReview(id,root,ctx){
   };
   if(record) message('Última avaliação: '+(needsInternalReview(record)?'Não concluída. Conferência interna necessária':record.status)+'\n'+record.motivos.join('\n')+'\n'+(s.analiseCdc.decisao?'Decisão confirmada: '+s.analiseCdc.decisao.status:'Aguardando conferência do administrador.'));
   const questionnaire=()=>Object.fromEntries(['renda','despesas','outrasParcelas','restricao','residenciaTitular','residenciaJustificativa','documentosConferidos'].map(k=>[k,['renda','despesas','outrasParcelas'].includes(k)?(el(k).value.trim()?number(el(k).value):null):el(k).type==='checkbox'?el(k).checked:k==='residenciaJustificativa'&&el('residenciaTitular').value!=='terceiro'?'':el(k).value.trim()]));
-  const persist=async()=>{const current=await loadSim(id);if(!current)throw Error('Não foi possível carregar a ficha. Tente novamente.');const next=questionnaire();const changed=JSON.stringify(current.analiseCdc?.questionario)!==JSON.stringify(next);current.analiseCdc={...(current.analiseCdc||{}),questionario:next,atualizadoEm:Date.now()};if(changed){delete current.analiseCdc.decisao;delete current.analiseCdc.resultado;delete current.analiseCdc.snapshot;}await saveSim(current);return current;};
+  const persist=async()=>{const current=await loadSim(id);if(!current)throw Error('Não foi possível carregar a ficha. Tente novamente.');const next=questionnaire();const changed=!sameQuestionnaire(current.analiseCdc?.questionario,next);current.analiseCdc={...(current.analiseCdc||{}),questionario:next,atualizadoEm:Date.now()};if(changed){delete current.analiseCdc.decisao;delete current.analiseCdc.resultado;delete current.analiseCdc.snapshot;current.analiseCdc.observacoes='Ficha alterada. Confirme a aprovação para atualizar a avaliação.';}await saveSim(current);el('observacoes').value=current.analiseCdc.observacoes||'';return current;};
   const run=async button=>{
     if(busy)return;
     if(!auth.currentUser){reportError(Error('Sua sessão terminou. Entre novamente no painel.'));return;}
@@ -262,6 +268,7 @@ export async function mountCdcReview(id,root,ctx){
         if(confirmed&&evidence.anexos.some(x=>openedFiles.get(x.slot)!==x.hash))throw Error('Abra cada anexo desta categoria em Ver anexos antes de marcar a conferência.');
         current.analiseCdc.conferencias={...current.analiseCdc.conferencias,[key]:{...evidence,confirmado:confirmed,por:auth.currentUser.uid,data:Date.now(),origem:'conferencia_manual'}};
         delete current.analiseCdc.resultado;delete current.analiseCdc.decisao;delete current.analiseCdc.snapshot;
+        current.analiseCdc.observacoes='Conferência atualizada. Confirme a aprovação para atualizar a avaliação.';el('observacoes').value=current.analiseCdc.observacoes;
         await saveSim(current);message(confirmed?'Conferência manual salva. Esta categoria não ficará pendente por falha do leitor.':'Conferência manual desmarcada.');
       }catch(error){manual.checked=!confirmed;reportError(error);}finally{lock(false);void safeRefreshFiles();}
     };
@@ -274,7 +281,7 @@ export async function mountCdcReview(id,root,ctx){
     };
   }
   bind('save',async()=>{await persist();message('Ficha da análise salva.');});
-  bind('analyze',async()=>{
+  async function analyze(silent=false){
     if(!config.automatica){showResult('Análise automática desligada','Ative a análise automática ou registre uma decisão manual.');return;}
     el('analyze').textContent='Analisando ficha…';
     try{
@@ -313,25 +320,36 @@ export async function mountCdcReview(id,root,ctx){
     // Manual confirmation below still fetches fresh evidence and rejects any change.
     current.analiseCdc.snapshot=await creditSnapshot(current,{listSims:async()=>sims,loadDocumentos:async()=>docs});await saveSim(current);
     analysisFailed=false;
-    showResult(result.status==='Pendente'?'Análise pendente':result.status,observation,sections);
+    if(!silent||result.status!=='Aprovada')showResult(result.status==='Pendente'?'Análise pendente':result.status,observation,sections);else el('observacoes').value=observation;
+    return result;
     }catch(e){
       const text='Não foi possível concluir a análise: '+(e.message||'falha inesperada')+'. Nenhuma aprovação ou recusa foi confirmada.';
       analysisFailed=true;
       // A transport/OCR failure is not a credit result. Preserve stored decisions and evidence.
       showResult('Análise interrompida pelo sistema',text+' Os dados e as decisões já salvos foram preservados.');
-    }
-  });
+    }finally{el('analyze').textContent='Analisar ficha';}
+  }
+  bind('analyze',()=>analyze());
   async function decide(status){
     const reason=el('reason').value.trim();if(!reason)throw Error('Informe o motivo da decisão.');
-    const current=await loadSim(id);
+    let current=await loadSim(id);
     if(config.automatica && status==='Aprovada'){
-      if(analysisFailed)throw Error('A última tentativa foi interrompida pelo sistema. Conclua a análise antes de confirmar uma nova aprovação.');
-      if(current.analiseCdc?.resultado?.status!=='Aprovada')throw Error('Conclua uma análise aprovada ou desligue o automático para decidir manualmente.');
-      if(JSON.stringify(current.analiseCdc.questionario)!==JSON.stringify(questionnaire()))throw Error('A ficha mudou. Analise novamente.');
-      if(current.analiseCdc.snapshot!==await snapshot(current))throw Error('Documentos, proposta ou histórico mudaram. Faça uma nova análise.');
+      const unchanged=sameQuestionnaire(current.analiseCdc?.questionario,questionnaire());
+      const valid=!analysisFailed&&unchanged&&current.analiseCdc?.resultado?.status==='Aprovada'&&current.analiseCdc.snapshot===await snapshot(current);
+      if(!valid){
+        message('Atualizando a avaliação com os documentos e as conferências salvas…');
+        const result=await analyze(true);
+        if(!result||result.status!=='Aprovada')return;
+        current=await loadSim(id);
+      }
+      if(current.analiseCdc?.resultado?.status!=='Aprovada'||!sameQuestionnaire(current.analiseCdc.questionario,questionnaire())||current.analiseCdc.snapshot!==await snapshot(current))throw Error('A ficha mudou durante a confirmação. Confira os dados e tente novamente.');
+    }else if(status==='Aprovada'){
+      current=await persist();
+      current.analiseCdc.snapshot=await snapshot(current);
     }
     current.analiseCdc={...(current.analiseCdc||{}),decisao:{status,motivo:reason,motivoCliente:status==='Recusada'?reason:'',modo:config.automatica?'confirmacao':'manual',por:auth.currentUser.uid,data:Date.now()}};
-    await saveSim(current);message('Decisão registrada: '+status+'. '+reason);void refreshHistory();
+    await saveSim(current);message('Decisão registrada: '+status+'. '+reason);
+    if(status==='Aprovada'&&ctx.onApproved)await ctx.onApproved(current);else void refreshHistory();
   }
   bind('approve',()=>decide('Aprovada'));bind('refuse',()=>decide('Recusada'));
   // Bind every action before optional/background loading. Slow history must never create inert buttons.
