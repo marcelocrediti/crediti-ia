@@ -546,7 +546,7 @@ window.gerarCodigoConsultaCDC=async function(id){
   if(button)button.disabled=true;
   try{
     if(!isCdcAdmin())throw Error('Entre como administrador.');
-    const module=await import('./cdc-status.mjs?v=20261120-contract-v9');
+    const module=await import('./cdc-status.mjs?v=20261120-contract-v10');
     const code=await module.issueCode(id,{db,fb:firebase});
     const box=document.getElementById('codigo-consulta-salva');box.innerHTML='';
     const p=document.createElement('p');p.className='hint';p.textContent='Novo código gerado. O anterior foi cancelado. Envie este código ao cliente junto do endereço abaixo. Válido por 90 dias.';
@@ -596,8 +596,8 @@ async function criarLinkCDC(s){
     if(!s.dadosCliente?.pix?.trim())throw new Error('Ficha aprovada. Informe a chave Pix do cliente em Continuar contratação.');
     if(s.analiseCdc?.decisao?.status==='Aprovada'){
       if(s.analiseCdc?.decisao?.status!=='Aprovada')throw new Error('Abra a proposta, conclua a análise e confirme a aprovação antes de gerar o link.');
-      const {creditSnapshot,createReviewContext}=await import('./cdc-review.mjs?v=20261120-contract-v9');
-      if(s.analiseCdc.snapshot!==await creditSnapshot(s,createReviewContext({db})))throw new Error('Os dados da avaliação mudaram. Clique em Confirmar aprovação para atualizar antes de finalizar.');
+      const {creditSnapshot,createReviewContext}=await import('./cdc-review.mjs?v=20261120-contract-v10');
+      if(s.analiseCdc.snapshot!==await creditSnapshot(s,createReviewContext({db,auth:firebase.auth()})))throw new Error('Os dados da avaliação mudaram. Clique em Confirmar aprovação para atualizar antes de finalizar.');
     }
   }
   const token=Array.from(crypto.getRandomValues(new Uint8Array(32))).map(x=>x.toString(16).padStart(2,'0')).join('');
@@ -606,7 +606,7 @@ async function criarLinkCDC(s){
   const batch=db.batch();
   batch.set(db.collection('assinaturasCDC').doc(token),{proposta,simId:s.id,aceite:null,expiraEm:firebase.firestore.Timestamp.fromMillis(Date.now()+7*86400000)});
   if(s.linkAssinatura)batch.update(db.collection('assinaturasCDC').doc(s.linkAssinatura),{expiraEm:firebase.firestore.Timestamp.fromMillis(0)});
-  batch.update(db.collection('simulacoes').doc(s.id),{linkAssinatura:token,status:'aguardando_cliente',contratacao:{finalizadaEm:Date.now(),por:firebase.auth().currentUser.uid,motivoAprovacao:s.analiseCdc?.decisao?.motivo||'',estado:'aguardando_assinatura'}});
+  batch.update(db.collection('simulacoes').doc(s.id),{linkAssinatura:token,status:'aguardando_cliente',contratacao:{finalizadaEm:Date.now(),por:firebase.auth().currentUser.uid,motivoAprovacao:s.analiseCdc?.decisao?.motivo||''}});
   await batch.commit();return token;
 }
 window.renovarLinkCDC=async function(id){try{const s=await loadSim(id);await criarLinkCDC(s);await abrirDetalhe(id);}catch(e){toast('Não foi possível gerar o link protegido: '+e.message);}};
@@ -636,7 +636,7 @@ async function saveSim(sim){
         sim.linkAssinatura=null;
       }
     }
-    const statusModule=await import('./cdc-status.mjs?v=20261120-contract-v9');
+    const statusModule=await import('./cdc-status.mjs?v=20261120-contract-v10');
     await db.runTransaction(async tx=>{
       const ref=db.collection('simulacoes').doc(sim.id),latest=await tx.get(ref);
       const oldConsulta=latest.exists?latest.data().consultaStatusId:null;
@@ -787,7 +787,7 @@ async function renderInner(){
   const route = getRoute();
   const app = document.getElementById('app');
   if(!cdcAuthReady){ app.innerHTML = '<div class="wrap"><div class="card">Verificando acesso…</div></div>'; return; }
-  if(route.view==='consulta'){const module=await import('./cdc-status.mjs?v=20261120-contract-v9');module.mountStatus(app,{db});return;}
+  if(route.view==='consulta'){const module=await import('./cdc-status.mjs?v=20261120-contract-v10');module.mountStatus(app,{db});return;}
   if(route.view==='preanalise'){const module=await import('./cdc-preanalise.mjs?v=20261120-documentos-v3');await module.mountCustomer(app,route.id,{db,fb:firebase,logo:LOGO_DATAURL});return;}
   if(route.view==='cliente' && /^[a-f0-9]{64}$/.test(route.id)){app.innerHTML=await viewCliente(route.id);return;}
   if(!isCdcAdmin()) { renderCdcLogin(app); return; }
@@ -1227,12 +1227,12 @@ function onCalcularDecimoTerceiro(){
 }
 
 async function viewPainel(){
-  const {publicStatus}=await import('./cdc-status.mjs?v=20261120-contract-v9');
+  const {publicStatus}=await import('./cdc-status.mjs?v=20261120-contract-v10');
   const sims = await listSims();
   // Repair old protected projections without changing decisions, codes or expiry.
   if(firebaseOk && isCdcAdmin()){
     void (async()=>{
-      const module=await import('./cdc-status.mjs?v=20261120-contract-v9');
+      const module=await import('./cdc-status.mjs?v=20261120-contract-v10');
       let failed=false;
       for(const sim of sims.filter(s=>s.id&&s.consultaStatusId)){
         try{await module.syncStatus(sim.id,{db,fb:firebase});}catch{failed=true;}
@@ -1288,7 +1288,7 @@ window.abrirPaginaDetalhe = function(id){
 window.abrirDetalhe = async function(id){
   const s = await loadSim(id);
   if(s?.consultaStatusId && isCdcAdmin()){
-    try{const statusModule=await import('./cdc-status.mjs?v=20261120-contract-v9');await statusModule.syncStatus(id,{db,fb:firebase});}
+    try{const statusModule=await import('./cdc-status.mjs?v=20261120-contract-v10');await statusModule.syncStatus(id,{db,fb:firebase});}
     catch(e){toast('Não foi possível atualizar a consulta do cliente. Tente salvar a ficha novamente.');}
   }
   const detalheEl = document.getElementById('detalhe');
@@ -1383,8 +1383,8 @@ window.abrirDetalhe = async function(id){
   if(documentosBlock) carregarDocumentosDetalhe(s.id);
   const reviewRoot=document.getElementById('cdc-review-card');
   const historyRoot=document.getElementById('cdc-history-card');
-  if(historyRoot) import('./cdc-review.mjs?v=20261120-contract-v9').then(module=>module.mountCdcHistory(s.id,historyRoot,module.createReviewContext({db,loadSim,listSims,auth:firebase.auth()}))).catch(()=>{historyRoot.textContent='Não foi possível carregar o histórico. Atualize a página.';});
-  if(reviewRoot) import('./cdc-review.mjs?v=20261120-contract-v9').then(module=>module.mountCdcReview(s.id,reviewRoot,module.createReviewContext({db,loadSim,saveSim,listSims,loadDocumentos,saveDocumento,auth:firebase.auth(),onApproved:()=>{location.hash='contratar/'+s.id;}}))).catch(()=>{reviewRoot.textContent='Não foi possível carregar a análise. Suas propostas continuam disponíveis. Atualize a página para tentar novamente.';});
+  if(historyRoot) import('./cdc-review.mjs?v=20261120-contract-v10').then(module=>module.mountCdcHistory(s.id,historyRoot,module.createReviewContext({db,loadSim,listSims,auth:firebase.auth()}))).catch(()=>{historyRoot.textContent='Não foi possível carregar o histórico. Atualize a página.';});
+  if(reviewRoot) import('./cdc-review.mjs?v=20261120-contract-v10').then(module=>module.mountCdcReview(s.id,reviewRoot,module.createReviewContext({db,loadSim,saveSim,listSims,loadDocumentos,saveDocumento,auth:firebase.auth(),onApproved:()=>{location.hash='contratar/'+s.id;}}))).catch(()=>{reviewRoot.textContent='Não foi possível carregar a análise. Suas propostas continuam disponíveis. Atualize a página para tentar novamente.';});
 };
 
 function htmlDocumentosCliente(simId, docs){
@@ -1928,7 +1928,7 @@ async function mountContratacaoReview(id){
   const s=await loadSim(id);
   if(!s?.dadosCliente?.cpf) return;
   try{
-    const module=await import('./cdc-review.mjs?v=20261120-contract-v9');
+    const module=await import('./cdc-review.mjs?v=20261120-contract-v10');
     const advanceApproved=()=>{
       const step=document.getElementById('step1'),box=document.getElementById('pix-pos-aprovacao');
       if(step&&box){step.insertBefore(box,document.getElementById('btn-avancar'));step.querySelector('h2').textContent='Complete o cadastro aprovado';document.getElementById('btn-avancar').textContent='Salvar dados e continuar';}
@@ -2003,7 +2003,7 @@ function wireContratarEvents(id){
       try{
         const s = await loadSim(id);
         if(!s) throw new Error('sim não encontrada');
-        const {collectContractData}=await import('./cdc-contract.mjs?v=20261120-contract-v9');
+        const {collectContractData}=await import('./cdc-contract.mjs?v=20261120-contract-v10');
         s.dadosCliente=collectContractData(s.dadosCliente,key=>document.getElementById(key)?.value);
         await saveSim(s);
         document.getElementById('step2').style.display = 'block';
@@ -2068,7 +2068,7 @@ function wireContratarEvents(id){
         const base = getBaseUrl();
         if(!isDecimoTerceiro(s)){
           if(s.analiseCdc?.decisao?.status!=='Aprovada')throw new Error('Conclua a pré-análise e confirme a aprovação antes de continuar.');
-          const {collectContractData,missingContractData}=await import('./cdc-contract.mjs?v=20261120-contract-v9');
+          const {collectContractData,missingContractData}=await import('./cdc-contract.mjs?v=20261120-contract-v10');
           s.dadosCliente=collectContractData(s.dadosCliente,key=>document.getElementById(key)?.value);
           const missing=missingContractData(s.dadosCliente);
           if(missing.length){document.getElementById('step1').scrollIntoView({behavior:'smooth'});throw new Error('Complete o cadastro: '+missing.join(', ')+'.');}
@@ -2740,7 +2740,7 @@ window.gerarPDF = async function(id){
     y += 8;
   }
 
-  const {approvalPdfLines}=await import('./cdc-contract.mjs?v=20261120-contract-v9');
+  const {approvalPdfLines}=await import('./cdc-contract.mjs?v=20261120-contract-v10');
   const approvalLines=approvalPdfLines(s);
   if(approvalLines.length){
     doc.addPage();y=40;

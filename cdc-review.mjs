@@ -1,8 +1,8 @@
-import {categoryEvidence,manualConfirmed} from './cdc-manual-review.mjs?v=20261120-contract-v9';
-import {needsInternalReview} from './cdc-status.mjs?v=20261120-contract-v9';
-import {readFirestore} from './cdc-firestore-read.mjs?v=20261120-contract-v9';
-import {evaluateCredit,POLICY_VERSION,documentFindings,analysisSections,sectionsText,documentIncomeSummary,completeCpf,documentCpf} from './cdc-policy.mjs?v=20261120-contract-v9';
-import {showAttachments} from './cdc-document-viewer.mjs?v=20261120-contract-v9';
+import {categoryEvidence,manualConfirmed} from './cdc-manual-review.mjs?v=20261120-contract-v10';
+import {needsInternalReview} from './cdc-status.mjs?v=20261120-contract-v10';
+import {readFirestore} from './cdc-firestore-read.mjs?v=20261120-contract-v10';
+import {evaluateCredit,POLICY_VERSION,documentFindings,analysisSections,sectionsText,documentIncomeSummary,completeCpf,documentCpf} from './cdc-policy.mjs?v=20261120-contract-v10';
+import {showAttachments} from './cdc-document-viewer.mjs?v=20261120-contract-v10';
 const API='https://crediti-ia-api.onrender.com/api/cdc/document';
 const DOCS=[['rgFrente','Identidade: RG, CIN ou CNH'],['cpfFrente','CPF (se não constar na identidade)'],['comprovanteResidencia','Comprovante de residência'],['comprovanteRenda','Renda: 3 contracheques/holerites, extrato de pagamento do INSS ou extrato/comprovante bancário dos últimos 60 dias. Comprovante Pix não é aceito']];
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -164,7 +164,7 @@ export async function mountCdcReview(id,root,ctx){
     else{for(const [e,disabled]of disabledBefore)e.disabled=disabled;disabledBefore.clear();}
   };
   const reportError=error=>{message(error?.message||'Não foi possível concluir. Tente novamente.');el('output').scrollIntoView({behavior:'smooth',block:'center'});};
-  el('observacoes').value=needsInternalReview(record)&&!s.analiseCdc?.decisao?'A leitura anterior não concluiu a conferência. Isso não representa reprovação do cliente. Use Analisar ficha para atualizar.':s.analiseCdc?.observacoes|| (record?record.status+'\n'+record.motivos.join('\n'):'');
+  el('observacoes').value=needsInternalReview(record)&&!s.analiseCdc?.decisao?'A leitura anterior não concluiu a conferência. Isso não representa reprovação do cliente. Use Analisar ficha para atualizar.':s.analiseCdc?.observacoes|| (record?record.status+'\n'+(record.motivos||[]).join('\n'):'');
   if(!record&&!s.analiseCdc?.decisao&&/^Aprovada\b/.test(el('observacoes').value))el('observacoes').value='A avaliação anterior precisa ser atualizada. Use Confirmar aprovação para conferir os dados salvos e continuar.';
   el('reason').value=s.analiseCdc?.decisao?.motivo||'';
   const showResult=(title,text,sections)=>{
@@ -180,7 +180,7 @@ export async function mountCdcReview(id,root,ctx){
     ok.onclick=()=>dialog.close();dialog.addEventListener('close',()=>{dialog.remove();el('observacoes').scrollIntoView({behavior:'smooth',block:'center'});});
     dialog.append(heading,body,ok);document.body.append(dialog);dialog.showModal();heading.tabIndex=-1;heading.focus({preventScroll:true});dialog.scrollTop=0;
   };
-  if(record) message('Última avaliação: '+(needsInternalReview(record)?'Não concluída. Conferência interna necessária':record.status)+'\n'+record.motivos.join('\n')+'\n'+(s.analiseCdc.decisao?'Decisão confirmada: '+s.analiseCdc.decisao.status:'Aguardando conferência do administrador.'));
+  if(record) message('Última avaliação: '+(needsInternalReview(record)?'Não concluída. Conferência interna necessária':record.status)+'\n'+(record.motivos||[]).join('\n')+'\n'+(s.analiseCdc.decisao?'Decisão confirmada: '+s.analiseCdc.decisao.status:'Aguardando conferência do administrador.'));
   const questionnaire=()=>Object.fromEntries(['renda','despesas','outrasParcelas','restricao','residenciaTitular','residenciaJustificativa','documentosConferidos'].map(k=>[k,['renda','despesas','outrasParcelas'].includes(k)?(el(k).value.trim()?number(el(k).value):null):el(k).type==='checkbox'?el(k).checked:k==='residenciaJustificativa'&&el('residenciaTitular').value!=='terceiro'?'':el(k).value.trim()]));
   const persist=async()=>{const current=await loadSim(id);if(!current)throw Error('Não foi possível carregar a ficha. Tente novamente.');const next=questionnaire();const changed=!sameQuestionnaire(current.analiseCdc?.questionario,next);current.analiseCdc={...(current.analiseCdc||{}),questionario:next,atualizadoEm:Date.now()};if(changed){delete current.analiseCdc.decisao;delete current.analiseCdc.resultado;delete current.analiseCdc.snapshot;current.analiseCdc.observacoes='Ficha alterada. Confirme a aprovação para atualizar a avaliação.';}await saveSim(current);el('observacoes').value=current.analiseCdc.observacoes||'';return current;};
   const run=async button=>{
@@ -227,7 +227,7 @@ export async function mountCdcReview(id,root,ctx){
           await saveDocumento(id,slot,{dataUrl,tipo:file.type,nome:file.name,categoria:key});
           docs[slot]={dataUrl,nome:file.name};fingerprints.add(fingerprint);
           const current=await loadSim(id);current.documentosEnviados=[...new Set([...(current.documentosEnviados||[]),slot])];
-          if(current.analiseCdc){delete current.analiseCdc.decisao;delete current.analiseCdc.resultado;}
+          if(current.analiseCdc){delete current.analiseCdc.decisao;delete current.analiseCdc.resultado;delete current.analiseCdc.snapshot;current.analiseCdc.observacoes='Anexos atualizados. Confirme a aprovação para avaliar os documentos atuais.';el('observacoes').value=current.analiseCdc.observacoes;}
           await saveSim(current);
         }
         el('documentosConferidos').checked=false;message('Anexos salvos. Clique em Ver anexos para abrir os documentos. Use Analisar ficha para a leitura automática.');

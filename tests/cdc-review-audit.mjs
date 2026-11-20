@@ -1,7 +1,7 @@
-import {freshServerRead} from '../cdc-firestore-read.mjs?v=20261120-contract-v9';
-import {mountCdcReview,readWithDeadline,createReviewContext,documentKeys,canonical,creditSnapshot} from '../cdc-review.mjs?v=20261120-contract-v9';
-import {evaluateCredit,documentFindings,analysisSections,sectionsText} from '../cdc-policy.mjs?v=20261120-contract-v9';
-import {mountCustomer,validateResidence,receiveSubmission,digest} from '../cdc-preanalise.mjs?v=20261120-contract-v9';
+import {freshServerRead} from '../cdc-firestore-read.mjs?v=20261120-contract-v10';
+import {mountCdcReview,readWithDeadline,createReviewContext,documentKeys,canonical,creditSnapshot} from '../cdc-review.mjs?v=20261120-contract-v10';
+import {evaluateCredit,documentFindings,analysisSections,sectionsText} from '../cdc-policy.mjs?v=20261120-contract-v10';
+import {mountCustomer,validateResidence,receiveSubmission,digest} from '../cdc-preanalise.mjs?v=20261120-contract-v10';
 const root=document.querySelector('#fixture'),out=document.querySelector('#results');
 let failures=0,passes=0;
 const assert=(value,text)=>{if(!value)throw Error(text);};
@@ -159,7 +159,7 @@ document.querySelector('#start').onclick=async function(){
   });
   await test('Aprovação manual exige motivo',async()=>{const f=await setup({auto:false});await click('approve');assert(el('output').textContent.includes('motivo'),'Sem validação');assert(!f.sim.analiseCdc.decisao,'Aprovou sem motivo');});
   await test('Recusa manual fictícia registra motivo',async()=>{const f=await setup({auto:false});el('reason').value='Teste local';await click('refuse');assert(f.sim.analiseCdc.decisao.status==='Recusada','Não gravou');assert(f.sim.analiseCdc.decisao.motivo==='Teste local','Motivo');});
-  await test('Automático não permite confirmar sem avaliação aprovada',async()=>{const f=await setup();el('reason').value='Teste';await click('approve');assert(!f.sim.analiseCdc.decisao,'Ignorou guarda');assert(el('output').textContent.includes('Conclua'),'Sem aviso');});
+  await test('Automático não permite confirmar sem avaliação aprovada',async()=>{const f=await setup();el('reason').value='Teste';await click('approve');assert(!f.sim.analiseCdc.decisao,'Ignorou guarda');assert(el('output').textContent.includes('pendente')&&f.sim.analiseCdc.resultado.status==='Pendente','Sem avaliação atualizada');});
   await test('Sessão encerrada recebe aviso sem gravar',async()=>{const f=await setup();f.ctx.auth.currentUser=null;await click('save');assert(!f.writes,'Gravou sem sessão');assert(el('output').textContent.includes('sessão'),'Sem aviso');});
   document.querySelector('#summary').textContent=`${passes} testes passaram; ${failures} falharam.`;
   await setup();this.disabled=false;

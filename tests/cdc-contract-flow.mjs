@@ -1,7 +1,7 @@
-import {creditSnapshot} from '../cdc-review.mjs?v=20261120-contract-v9';
+import {creditSnapshot} from '../cdc-review.mjs?v=20261120-contract-v10';
 const root=document.querySelector('#fixture'),out=document.querySelector('#results');
 const assert=(x,msg)=>{if(!x)throw Error(msg);};
-const source=await (await fetch('index.html?v=20261120-contract-v9')).text();
+const source=await (await fetch('index.html?v=20261120-contract-v10')).text();
 const part=(start,end)=>{const a=source.indexOf(start),b=source.indexOf(end,a);if(a<0||b<0)throw Error('Função não encontrada');return source.slice(a,b);};
 // Run the actual production form and event handlers with in-memory persistence only.
 const body=part('async function viewContratar(id){','async function mountContratacaoReview(id){')+part('function wireContratarEvents(id){','async function viewCliente(');
