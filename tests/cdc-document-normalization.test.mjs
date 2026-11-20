@@ -11,3 +11,17 @@ assert.equal(inss.rendaLiquida,null);assert.equal(inss.valorBeneficio,2000);asse
 assert.equal(normalizeDocument({subtipo:'contracheque',rendaLiquida:2000}).rendaLiquida,2000);
 assert.equal(normalizeDocument({subtipo:'outro',rendaLiquida:3000,extratoBancario:true}).extratoBancario,false);
 console.log('PASS: model output normalized for payroll, INSS, statements, Pix and isolated transfers');
+const cin=normalizeDocument({tipoIdentidade:'cin',cpf:null,numeroUnicoCin:'529.982.247-25'});
+assert.equal(cin.cpf,'52998224725');assert.equal(cin.tipo,'identidade');
+assert.equal(normalizeDocument({tipoIdentidade:'rg',cpf:null,numeroUnicoCin:'52998224725'}).cpf,null);
+assert.equal(normalizeDocument({tipoIdentidade:'cnh',cpf:null,numeroUnicoCin:'52998224725'}).cpf,null);
+assert.equal(normalizeDocument({tipoIdentidade:'cin',cpf:null,numeroUnicoCin:'***.982.247-25'}).cpf,null);
+const {readDocument}=await import('../server/cdc-analysis.mjs');
+let calls=0;
+const fake={responses:{create:async req=>{calls++;return {status:'completed',output_text:JSON.stringify({tipo:'identidade',tipoIdentidade:'cnh',cpf:calls===1?null:'52998224725',legibilidade:'legivel',observacoes:'Teste fictício',subtipo:'outro'})};}}};
+const reread=await readDocument(fake,'data:application/pdf;base64,JVBERg==','rgFrente');
+assert.equal(calls,2);assert.equal(reread.cpf,'52998224725');assert.equal(reread.versaoIdentidade,1);
+calls=0;
+const direct={responses:{create:async()=>{calls++;return {status:'completed',output_text:JSON.stringify({tipo:'identidade',tipoIdentidade:'cin',cpf:null,numeroUnicoCin:'52998224725',legibilidade:'legivel',observacoes:'Teste fictício'})};}}};
+assert.equal((await readDocument(direct,'data:application/pdf;base64,JVBERg==','rgFrente')).cpf,'52998224725');assert.equal(calls,1);
+console.log('PASS: CIN unique ID, CNH focused reread, no old-RG substitution or extra call for already readable CPF');
