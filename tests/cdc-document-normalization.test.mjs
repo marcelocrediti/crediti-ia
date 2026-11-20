@@ -20,7 +20,7 @@ const {readDocument}=await import('../server/cdc-analysis.mjs');
 let calls=0;
 const fake={responses:{create:async req=>{calls++;return {status:'completed',output_text:JSON.stringify({tipo:'identidade',tipoIdentidade:'cnh',cpf:calls===1?null:'52998224725',legibilidade:'legivel',observacoes:'Teste fictício',subtipo:'outro'})};}}};
 const reread=await readDocument(fake,'data:application/pdf;base64,JVBERg==','rgFrente');
-assert.equal(calls,2);assert.equal(reread.cpf,'52998224725');assert.equal(reread.versaoIdentidade,2);
+assert.equal(calls,2);assert.equal(reread.cpf,'52998224725');assert.equal(reread.versaoIdentidade,3);
 calls=0;
 const direct={responses:{create:async()=>{calls++;return {status:'completed',output_text:JSON.stringify({tipo:'identidade',tipoIdentidade:'cin',cpf:null,numeroUnicoCin:'52998224725',legibilidade:'legivel',observacoes:'Teste fictício'})};}}};
 assert.equal((await readDocument(direct,'data:application/pdf;base64,JVBERg==','rgFrente')).cpf,'52998224725');assert.equal(calls,1);
@@ -45,3 +45,10 @@ assert.equal(a,same);await assert.rejects(sharedDocumentRead('c',op),e=>e.status
 release();assert.deepEqual(await Promise.all([a,same,b]),['ok','ok','ok']);assert.equal(cost,2);assert.equal(peak,2);
 assert.equal(await sharedDocumentRead('c',async()=>'released'),'released');
 console.log('PASS: focused identity schema, readable CPF in partial document, checksum, preserved fields on timeout, deduplicated reads and concurrency limit');
+
+let partialCalls=0;
+const firstNine={responses:{create:async()=>{partialCalls++;return {status:'completed',output_text:JSON.stringify({tipo:'identidade',tipoIdentidade:'cnh',cpf:null,cpfParcial:'529.982.247',nome:'Pessoa Teste',legibilidade:'incerto',observacoes:'Primeiros nove dígitos legíveis'})};}}};
+const nine=await readDocument(firstNine,'data:image/jpeg;base64,/9g=','rgFrente');
+assert.equal(nine.cpf,null);assert.equal(nine.cpfParcial,'529982247');assert.equal(partialCalls,1);
+assert.equal(normalizeDocument({cpfParcial:'529.***.247'}).cpfParcial,null);
+console.log('PASS: first nine explicit CPF digits preserved without inventing check digits or repeating the read');
