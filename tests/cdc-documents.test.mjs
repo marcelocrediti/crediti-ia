@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {documentFindings,statementCoverage,completeCpf} from '../cdc-policy.mjs';
+import {documentFindings,statementCoverage,completeCpf,documentIncomeSummary} from '../cdc-policy.mjs';
 import {createReviewContext} from '../cdc-review.mjs';
 const cpf='52998224725'; // synthetic fixture
 const doc=(key,tipo,extra={})=>({key,label:key+'.pdf',d:{tipo,nome:'José da Silva',cpf,legibilidade:'legivel',...extra}});
@@ -19,7 +19,7 @@ assert(!check([id,doc('cpfFrente','identidade'),home,bank]).pending.length);
 assert(check([id,home,doc('comprovanteRenda','conta',{extratoBancario:false})]).pending.some(x=>x.startsWith('Documento inadequado')));
 assert(!check([id,doc('comprovanteResidencia','conta',{contemEndereco:true}),bank]).pending.length);
 assert(check([id,doc('comprovanteResidencia','conta',{contemEndereco:false}),bank]).pending.some(x=>x.startsWith('Documento inadequado')));
-assert(check([id,home,{...bank,d:{...bank.d,rendaLiquida:null}}]).pending.some(x=>x.startsWith('Renda não confirmada')));
+assert.deepEqual(check([id,home,{...bank,d:{...bank.d,rendaLiquida:null}}]).pending,[]);
 assert(!check([id,home,{...bank,d:{...bank.d,rendaLiquida:null}}]).pending.some(x=>x.startsWith('Documento inadequado')));
 assert(!statementCoverage([{...bank,d:{...bank.d,competencias:['2026-10']}}],'2026-11-20').ok);
 assert(!statementCoverage([{...bank,d:{...bank.d,competencias:['2026-07','2026-08']}}],'2026-11-20').ok);
@@ -46,3 +46,29 @@ await assert.rejects(deniedContext.listSims(),/denied/);assert.equal(deniedReads
 assert(!check([doc('rgFrente','identidade',{nome:'JOSE DA SILVA'}),home,bank]).pending.length);
 assert(!check([doc('rgFrente','identidade',{nome:'Conceição Gonçalves'}),home,bank],{cliente:'Conceicao Goncalves',readDocs:[doc('rgFrente','identidade',{nome:'Conceição Gonçalves'})]}).pending.some(x=>x.startsWith('Nome divergente')));
 console.log('PASS: shared history, fresh subsequent read, transient retry, permission failure preserved, accents and cedilla');
+
+// Document-specific income rules and misleading receipt flags.
+const payroll=doc('comprovanteRenda','renda',{subtipo:'contracheque',rendaLiquida:2000});
+const inss=doc('comprovanteRenda','renda',{subtipo:'pagamento_inss',rendaLiquida:null,valorBeneficio:2000});
+assert.deepEqual(check([id,home,inss]).pending,[]);
+assert.deepEqual(check([id,home,payroll]).pending,[]);
+assert(check([id,home,{...payroll,d:{...payroll.d,rendaLiquida:null}}]).pending.some(x=>x.startsWith('Renda não confirmada')));
+assert(check([id,home,{...payroll,d:{...payroll.d,rendaLiquida:1000}}]).pending.some(x=>x.startsWith('Renda divergente')));
+assert(!check([id,home,{...bank,d:{...bank.d,rendaLiquida:1000}}]).pending.some(x=>x.startsWith('Renda divergente')));
+for(const subtipo of ['pix','recibo_transferencia']){
+ const receipt=doc('comprovanteRenda','renda',{subtipo,extratoBancario:true,rendaLiquida:2000,competencias:['2026-09','2026-10']});
+ assert(check([id,home,receipt]).pending.some(x=>x.startsWith('Documento inadequado')));
+ assert(!statementCoverage([receipt],'2026-11-20').ok);
+ assert(check([id,home,bank,receipt]).pending.some(x=>x.startsWith('Documento inadequado')));
+}
+assert(!check([id,home,{...bank,d:{...bank.d,subtipo:'extrato_bancario',observacoes:'Movimentações com vários Pix recebidos'}}]).pending.length);
+assert(check([id,home,doc('comprovanteRenda','renda',{subtipo:'outro',rendaLiquida:2000})]).pending.some(x=>x.startsWith('Documento inadequado')));
+for(const [a,b]of [['Conceição Gonçalves','CONCEICAO GONCALVES'],['Ana-Cláudia D’Ávila','ANA CLAUDIA DAVILA'],['João Gonçalves','JOAO GONCALVES']]){
+ const r=check([doc('rgFrente','identidade',{nome:a})],{cliente:b});
+ assert(!r.pending.some(x=>x.startsWith('Nome divergente')),a);
+}
+assert(!documentIncomeSummary(bank.d).includes('Não identificada'));
+assert(!documentIncomeSummary(inss.d).includes('Não identificada'));
+assert.equal(documentIncomeSummary(id.d),'');
+assert(documentIncomeSummary({...payroll.d,rendaLiquida:null}).includes('Não identificada'));
+console.log('PASS: payroll-only net income, INSS accepted, Pix rejected, transfers rejected, statement Pix allowed, punctuation names');

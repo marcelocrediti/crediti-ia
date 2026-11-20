@@ -1,7 +1,7 @@
 // Remote intake is separate from contracts. Public input never approves credit.
 import {newCode,statusKey,statusRecord,showReceipt} from './cdc-status.mjs?v=20261120-docs2meses';
 export const TTL_MS=30*60*1000;
-export const GROUPS=[['rgFrente','Identidade: RG, CIN ou CNH, frente e verso'],['cpfFrente','CPF, se não constar na identidade'],['comprovanteResidencia','Comprovante de residência recente'],['comprovanteRenda','Renda: 3 contracheques, benefício atual ou extratos com movimentação dos últimos 2 meses']];
+export const GROUPS=[['rgFrente','Identidade: RG, CIN ou CNH, frente e verso'],['cpfFrente','CPF, se não constar na identidade'],['comprovanteResidencia','Comprovante de residência recente'],['comprovanteRenda','Renda: 3 contracheques/holerites, extrato de pagamento do INSS ou extrato/comprovante bancário dos últimos 60 dias. Comprovante Pix não é aceito']];
 export const WARNING='A nova parcela pode usar até 15% do que sobra da renda após os gastos e as parcelas atuais. Depois da nova parcela, devem restar pelo menos R$ 600,00 por mês. Empréstimo mínimo: R$ 300,00. Sujeito à análise.';
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const clean=(v,max=160)=>String(v??'').replace(/[<>"'`&]/g,'').trim().slice(0,max);

@@ -1,4 +1,4 @@
-export const POLICY_VERSION = '2026-11-20-v5-documentos-2meses';
+export const POLICY_VERSION = '2026-11-20-v6-documentos-renda';
 const cents = n => Math.round(Number(n)*100);
 const money = n => Number(n).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
 export function evaluateCredit({q, parcela, valor, history=[], contracts=[], documents=[], today}) {
@@ -43,10 +43,26 @@ const digits=v=>String(v||'').replace(/\D/g,'');
 export const completeCpf=v=>/^\d{11}$/.test(String(v||'').replace(/[.\-\s]/g,''));
 const oneEdit=(a,b)=>{if(a===b)return true;if(Math.abs(a.length-b.length)>1)return false;let i=0,j=0,errors=0;while(i<a.length&&j<b.length){if(a[i]===b[j]){i++;j++;continue;}if(++errors>1)return false;if(a.length>=b.length)i++;if(b.length>=a.length)j++;}return errors+(a.length-i)+(b.length-j)<=1;};
 const nearName=(a,b)=>{const x=a.split(' '),y=b.split(' ');return x.length>=2&&x.length===y.length&&x.filter((v,i)=>v!==y[i]).length===1&&x.every((v,i)=>oneEdit(v,y[i]));};
+export function incomeDocumentKind(d){
+  // Classification comes from the document content, never its filename.
+  if(['pix','recibo_transferencia'].includes(d.subtipo))return 'recibo';
+  if(d.subtipo==='extrato_bancario'||d.extratoBancario===true)return 'extrato';
+  if(d.subtipo==='pagamento_inss')return 'inss';
+  if(d.subtipo==='contracheque')return 'contracheque';
+  return 'outro';
+}
+export function documentIncomeSummary(d){
+  const kind=incomeDocumentKind(d);
+  if(kind==='recibo')return 'Recibo de operação isolada: não aceito como extrato bancário.';
+  if(kind==='extrato')return 'Movimentação bancária: não exige renda líquida no documento. Saldo e entradas não são renda líquida.';
+  if(kind==='inss')return 'Extrato de pagamento do INSS'+(Number.isFinite(d.valorBeneficio)?': valor do benefício '+money(d.valorBeneficio):': sem exigência de campo de renda líquida')+'.';
+  if(kind==='contracheque')return 'Renda líquida: '+(Number.isFinite(d.rendaLiquida)&&d.rendaLiquida>0?money(d.rendaLiquida):'Não identificada no contracheque/holerite');
+  return '';
+}
 export function statementCoverage(readDocs,today){
   const date=new Date(today+'T12:00:00Z');
   const months=[1,2].map(n=>new Date(Date.UTC(date.getUTCFullYear(),date.getUTCMonth()-n,1)).toISOString().slice(0,7));
-  const docs=readDocs.filter(x=>x.key==='comprovanteRenda'&&x.d.legibilidade==='legivel'&&x.d.extratoBancario===true);
+  const docs=readDocs.filter(x=>x.key==='comprovanteRenda'&&x.d.legibilidade==='legivel'&&incomeDocumentKind(x.d)==='extrato');
   const found=new Set(docs.flatMap(x=>Array.isArray(x.d.competencias)?x.d.competencias:[]));
   // Complete preceding calendar months, or a complete rolling 60-day statement.
   const ranges=docs.map(x=>[x.d.periodoInicio,x.d.periodoFim]).filter(([a,b])=>/^\d{4}-\d{2}-\d{2}$/.test(a||'')&&/^\d{4}-\d{2}-\d{2}$/.test(b||'')&&a<=b&&b<=today).sort((a,b)=>a[0].localeCompare(b[0]));
@@ -62,10 +78,15 @@ export function documentFindings({q,cliente,cpf,readDocs,today=new Date().toLoca
   if(q.residenciaTitular==='terceiro'&&!String(q.residenciaJustificativa||'').trim())pending.push('Comprovante de residência em nome de terceiro: falta justificar a relação com o titular e o endereço informado.');
   for(const {key,label,d}of readDocs){
     if(d.legibilidade!=='legivel')continue;
-    const bankIncome=key==='comprovanteRenda'&&d.extratoBancario===true;
+    const kind=incomeDocumentKind(d);
+    if(key==='comprovanteRenda'&&kind==='recibo'){
+      pending.push('Documento inadequado: '+label+'. Comprovante Pix ou recibo isolado de transferência, depósito ou pagamento não é extrato bancário. Envie contracheque/holerite, extrato de pagamento do INSS ou extrato/comprovante bancário com movimentação dos últimos 60 dias.');
+      continue;
+    }
+    const bankIncome=key==='comprovanteRenda'&&['extrato','inss','contracheque'].includes(kind);
     const bankAddress=key==='comprovanteResidencia'&&d.contemEndereco===true;
     const identityCpf=key==='cpfFrente'&&d.tipo==='identidade';
-    if(d.tipo!==expected[key]&&!bankIncome&&!bankAddress&&!identityCpf){pending.push('Documento inadequado: '+label+'. Esperado: '+typeLabels[expected[key]]+'. O conteúdo lido não confirmou essa finalidade. Confira o anexo antes de solicitar outro.');continue;}
+    if((key==='comprovanteRenda'&&!bankIncome)||(d.tipo!==expected[key]&&!bankIncome&&!bankAddress&&!identityCpf)){pending.push('Documento inadequado: '+label+'. Esperado: '+typeLabels[expected[key]]+'. O conteúdo lido não confirmou essa finalidade. Confira o anexo antes de solicitar outro.');continue;}
     if(bankAddress)notes.push('Documento bancário com endereço identificado em '+label+'. Confira se o endereço corresponde à ficha.');
     const third=key==='comprovanteResidencia'&&q.residenciaTitular==='terceiro';
     if(third){
@@ -74,7 +95,7 @@ export function documentFindings({q,cliente,cpf,readDocs,today=new Date().toLoca
       continue;
     }
     const name=normalizedName(d.nome),clientName=normalizedName(cliente);
-    if(name&&clientName&&name!==clientName){
+    if(name&&clientName&&name.replace(/ /g,'')!==clientName.replace(/ /g,'')){
       if(nearName(name,clientName)&&completeCpf(d.cpf)&&digits(d.cpf)===digits(cpf)&&q.documentosConferidos)notes.push('Pequena variação de grafia em '+label+': ficha “'+cliente+'”, leitura “'+d.nome+'”. CPF coincide e o administrador marcou os documentos como conferidos. A variação foi registrada, sem recusa automática.');
       else pending.push('Nome divergente em '+label+': a ficha está em nome de “'+cliente+'”, mas o nome lido no documento é “'+d.nome+'”. Confira o titular no anexo; erro de leitura, abreviação ou alteração de nome precisam de verificação.');
     }
@@ -84,14 +105,20 @@ export function documentFindings({q,cliente,cpf,readDocs,today=new Date().toLoca
   const cpfFound=readDocs.some(x=>['rgFrente','cpfFrente'].includes(x.key)&&['identidade','cpf'].includes(x.d.tipo)&&x.d.legibilidade==='legivel'&&completeCpf(x.d.cpf)&&digits(x.d.cpf)===digits(cpf));
   if(!cpfFound)pending.push('CPF não confirmado na identidade ou no documento de CPF. Confira a leitura; se o número não estiver legível, envie um documento que o apresente completo.');
   else notes.push('CPF identificado automaticamente nos documentos e compatível com a ficha. Não é necessário comprovante separado.');
-  const bankDocs=readDocs.filter(x=>x.key==='comprovanteRenda'&&x.d.legibilidade==='legivel'&&x.d.extratoBancario===true);
+  const bankDocs=readDocs.filter(x=>x.key==='comprovanteRenda'&&x.d.legibilidade==='legivel'&&incomeDocumentKind(x.d)==='extrato');
   if(bankDocs.length){const coverage=statementCoverage(readDocs,today);if(!coverage.ok)pending.push('Movimentação bancária: apresente os últimos 2 meses. Confira a cobertura dos extratos; os meses esperados são '+coverage.months.slice().reverse().join(' e ')+' ou os últimos 60 dias completos.');else notes.push('Extrato bancário aceito para conferir a movimentação dos últimos 2 meses. Confira se as páginas e o período estão completos; entradas e saldo não equivalem automaticamente à renda.');}
-  const incomes=readDocs.filter(x=>x.key==='comprovanteRenda'&&(x.d.tipo==='renda'||x.d.extratoBancario===true)&&x.d.legibilidade==='legivel'&&Number.isFinite(x.d.rendaLiquida)&&x.d.rendaLiquida>0);
-  if(!incomes.length)pending.push('Renda não confirmada nos anexos. Renda informada: '+(Number.isFinite(q.renda)&&q.renda>0?money(q.renda):'não preenchida')+'. Não foi possível identificar renda líquida comprovada. Isso não significa renda zero; envie ou confira o comprovante de renda.');
-  else{
-    notes.push('Renda informada: '+money(q.renda)+'. Valores líquidos identificados nos comprovantes: '+incomes.map(x=>money(x.d.rendaLiquida)+' ('+x.label+')').join('; ')+'.');
-    if(q.renda>Math.min(...incomes.map(x=>x.d.rendaLiquida))+0.01)pending.push('Renda divergente: informada '+money(q.renda)+', mas há comprovante com renda líquida de '+money(Math.min(...incomes.map(x=>x.d.rendaLiquida)))+'. Confira as competências, variações mensais e eventual soma de fontes de renda. A diferença exige conferência, não comprova informação falsa.');
+  const payrolls=readDocs.filter(x=>x.key==='comprovanteRenda'&&x.d.legibilidade==='legivel'&&incomeDocumentKind(x.d)==='contracheque');
+  const benefits=readDocs.filter(x=>x.key==='comprovanteRenda'&&x.d.legibilidade==='legivel'&&incomeDocumentKind(x.d)==='inss');
+  if(bankDocs.length)notes.push('Extrato/comprovante bancário: renda líquida não se aplica. A renda mensal informada na ficha permanece para conferência do administrador, sem transformar movimentação ou saldo em renda.');
+  if(benefits.length)notes.push('Extrato de pagamento do INSS aceito. Não se exige o campo de renda líquida de contracheque neste documento. Confira o benefício e a competência.');
+  for(const x of payrolls){
+    if(!Number.isFinite(x.d.rendaLiquida)||x.d.rendaLiquida<=0)pending.push('Renda não confirmada no contracheque/holerite: '+x.label+'. Confira o valor líquido no documento.');
+    else{
+      notes.push('Renda informada: '+money(q.renda)+'. Renda líquida no contracheque/holerite: '+money(x.d.rendaLiquida)+' ('+x.label+').');
+      if(q.renda>x.d.rendaLiquida+0.01)pending.push('Renda divergente: informada '+money(q.renda)+', mas o contracheque/holerite apresenta '+money(x.d.rendaLiquida)+'. Confira as competências e as fontes de renda.');
+    }
   }
+  if(!bankDocs.length&&!benefits.length&&!payrolls.length)pending.push('Comprovante de renda: envie contracheque/holerite, extrato de pagamento do INSS ou extrato/comprovante bancário dos últimos 60 dias. Comprovante Pix não é aceito como extrato.');
   return {pending:[...new Set(pending)],notes:[...new Set(notes)]};
 }
 

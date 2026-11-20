@@ -1,7 +1,7 @@
-import {evaluateCredit,POLICY_VERSION,documentFindings,analysisSections,sectionsText} from './cdc-policy.mjs?v=20261120-docs2meses';
+import {evaluateCredit,POLICY_VERSION,documentFindings,analysisSections,sectionsText,documentIncomeSummary} from './cdc-policy.mjs?v=20261120-documentos-v3';
 import {showAttachments} from './cdc-document-viewer.mjs?v=20261120-view';
 const API='https://crediti-ia-api.onrender.com/api/cdc/document';
-const DOCS=[['rgFrente','Identidade completa (RG, CIN ou CNH)'],['cpfFrente','CPF (se não constar na identidade)'],['comprovanteResidencia','Comprovante de residência'],['comprovanteRenda','Renda: 3 contracheques, benefício atual ou extratos com movimentação dos últimos 2 meses']];
+const DOCS=[['rgFrente','Identidade completa (RG, CIN ou CNH)'],['cpfFrente','CPF (se não constar na identidade)'],['comprovanteResidencia','Comprovante de residência'],['comprovanteRenda','Renda: 3 contracheques/holerites, extrato de pagamento do INSS ou extrato/comprovante bancário dos últimos 60 dias. Comprovante Pix não é aceito']];
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const money=v=>Number(v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
 const hash=async value=>Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(value)))).map(x=>x.toString(16).padStart(2,'0')).join('');
@@ -96,7 +96,7 @@ export async function mountCdcReview(id,root,ctx){
   root.innerHTML=`<h2>Análise de crédito</h2>
   <label style="display:flex;gap:12px;align-items:center"><input id="rev-auto" type="checkbox" style="width:auto" ${config.automatica?'checked':''}>Ativar análise automática para novas avaliações</label>
   <p class="hint">Não altera contratos existentes. O resultado usa apenas a ficha e o histórico registrado. Confira as evidências antes de confirmar a decisão.</p>
-  <label>Renda líquida mensal comprovada (R$)</label><input type="text" id="rev-renda" inputmode="decimal" placeholder="0,00" value="${esc(formatAmount(q.renda))}">
+  <label>Renda mensal informada (R$)</label><input type="text" id="rev-renda" inputmode="decimal" placeholder="0,00" value="${esc(formatAmount(q.renda))}">
   <label>Soma dos gastos com mercado, energia, água, internet, remédios, aluguéis (R$)</label><input type="text" id="rev-despesas" inputmode="decimal" placeholder="0,00" value="${esc(formatAmount(q.despesas))}">
   <label>Soma dos empréstimos e financiamentos em andamento (R$)</label><input type="text" id="rev-outrasParcelas" inputmode="decimal" placeholder="0,00" value="${esc(formatAmount(q.outrasParcelas))}">
   <label>Tem restrições no nome?</label><select id="rev-restricao"><option value="">Selecione</option><option value="nao">Não</option><option value="sim">Sim</option></select>
@@ -105,7 +105,7 @@ export async function mountCdcReview(id,root,ctx){
   <h3>Documentos para análise</h3><p class="hint">Até 5 anexos por categoria, em PDF, JPG ou JPEG, até 700 KB cada. Você pode enviar frente e verso ou os comprovantes mensais separados.</p>
   ${DOCS.map(([key,label])=>`<div style="margin-bottom:18px;min-width:0"><label>${esc(label)}</label><input type="file" multiple data-doc="${key}" style="display:block;width:100%;max-width:100%;min-width:0;box-sizing:border-box;font-size:14px" accept="application/pdf,image/jpeg,.jpg,.jpeg"><div data-files="${key}" class="hint" style="overflow-wrap:anywhere"></div><button type="button" class="btn btn-outline" data-read="${key}">Ler anexos</button><div data-result="${key}" style="white-space:pre-wrap;overflow-wrap:anywhere"></div></div>`).join('')}
   <p class="hint">O CPF será identificado nos documentos, sem necessidade de marcar uma confirmação.</p>
-  <label style="display:flex;gap:10px"><input id="rev-documentosConferidos" type="checkbox" style="width:auto">Conferi os documentos, titularidade, datas, renda líquida e competências exigidas. Os dados correspondem à ficha.</label>
+  <label style="display:flex;gap:10px"><input id="rev-documentosConferidos" type="checkbox" style="width:auto">Conferi os documentos, titularidade, datas, valores aplicáveis a cada documento e períodos exigidos. Os dados correspondem à ficha.</label>
   <div id="rev-history"></div>
   <button type="button" class="btn btn-gold" id="rev-save">Salvar ficha da análise</button>
   <button type="button" class="btn btn-primary" id="rev-analyze">Analisar ficha</button>
@@ -172,7 +172,7 @@ export async function mountCdcReview(id,root,ctx){
     for(const [key] of DOCS){
       const keys=documentKeys(docs,key);
       groupEl('files',key).textContent=keys.length?keys.length+'/5 anexos: '+keys.map(k=>docs[k].nome||k).join('; '):'Nenhum anexo enviado.';
-      groupEl('result',key).textContent=keys.map(k=>{const r=current.analiseDocumentos?.[k];if(!r?.document)return (docs[k].nome||k)+': aguardando leitura';const d=r.document;return (docs[k].nome||k)+'\nLeitura: '+d.legibilidade+' | Tipo: '+d.tipo+'\nRenda líquida: '+(d.rendaLiquida==null?'Não identificada':money(d.rendaLiquida))+'\nCompetências: '+(Array.isArray(d.competencias)?d.competencias:[]).join(', ')+'\n'+(d.observacoes||'');}).join('\n\n');
+      groupEl('result',key).textContent=keys.map(k=>{const r=current.analiseDocumentos?.[k];if(!r?.document)return (docs[k].nome||k)+': aguardando leitura';if(r.versaoLeitor!=='cdc-docs-tipos-v3')return (docs[k].nome||k)+': leitura anterior. Clique em Analisar ficha para aplicar as regras atualizadas.';const d=r.document;return (docs[k].nome||k)+'\nLeitura: '+d.legibilidade+' | Tipo: '+d.tipo+(documentIncomeSummary(d)?'\n'+documentIncomeSummary(d):'')+'\nCompetências: '+(Array.isArray(d.competencias)?d.competencias:[]).join(', ')+'\n'+(d.observacoes||'');}).join('\n\n');
     }
   };
   const safeRefreshFiles=async()=>{try{await refreshFiles();}catch(e){for(const [key]of DOCS)groupEl('files',key).textContent='Não foi possível atualizar os anexos: '+e.message;}};
@@ -205,8 +205,8 @@ export async function mountCdcReview(id,root,ctx){
         for(const slot of keys){
           message('Lendo '+(docs[slot].nome||slot)+'…');
           const fingerprint=await hash(docs[slot].dataUrl);let current=await loadSim(id);const previous=current.analiseDocumentos?.[slot];
-          if(previous?.hash===fingerprint&&previous.document&&previous.versaoLeitor==='cdc-docs-2meses-v2')continue;
-          const reused=Object.values(current.analiseDocumentos||{}).find(r=>r.hash===fingerprint&&r.document&&r.versaoLeitor==='cdc-docs-2meses-v2');
+          if(previous?.hash===fingerprint&&previous.document&&previous.versaoLeitor==='cdc-docs-tipos-v3')continue;
+          const reused=Object.values(current.analiseDocumentos||{}).find(r=>r.hash===fingerprint&&r.document&&r.versaoLeitor==='cdc-docs-tipos-v3');
           if(reused){current.analiseDocumentos={...current.analiseDocumentos,[slot]:{...reused}};await saveSim(current);continue;}
           // A new reader version may reread the same attachment without counting a new illegible submission.
           const token=await readWithDeadline(()=>auth.currentUser.getIdToken(),'a sessão');
@@ -215,6 +215,7 @@ export async function mountCdcReview(id,root,ctx){
           catch(e){throw Error(controller.signal.aborted?'A leitura demorou além do esperado. Tente novamente. Nenhuma recusa aplicada.':'Não foi possível ler o anexo. Confira a conexão e tente novamente.');}
           finally{clearTimeout(timeout);}
           if(!response.ok||!data.document)throw Error(data.error||'Falha de leitura. Nenhuma recusa aplicada.');
+          if(data.version!=='cdc-docs-tipos-v3')throw Error('O leitor está sendo atualizado. Aguarde e analise novamente. Nenhuma recusa aplicada.');
           const review={versaoLeitor:data.version||'legacy',hash:fingerprint,hashes:[...new Set([...(previous?.hashes||[]),fingerprint])],document:data.document,consecutivos:data.document.legibilidade==='ilegivel'?(previous?.consecutivos||0)+(previous?.hash===fingerprint?0:1):0,lidoEm:Date.now()};
           current=await loadSim(id);current.analiseDocumentos={...(current.analiseDocumentos||{}),[slot]:review};if(current.analiseCdc)delete current.analiseCdc.decisao;await saveSim(current);
         }
@@ -248,7 +249,7 @@ export async function mountCdcReview(id,root,ctx){
     for(const [key,label]of DOCS){
       if(key==='cpfFrente'&&!documentKeys(docs,key).length)continue;
       const keys=documentKeys(docs,key);
-      for(const slot of keys){const r=current.analiseDocumentos?.[slot];if(!r?.document||r.hash!==await hash(docs[slot].dataUrl)){issues.push('Leitura não concluída: '+(docs[slot].nome||label));continue;}checks.push({label:docs[slot].nome||label,legibilidade:r.document.legibilidade,consecutivos:r.consecutivos,confirmado:questionnaire().documentosConferidos});readDocs.push({key,label:label+' ('+(docs[slot].nome||slot)+')',d:r.document});}
+      for(const slot of keys){const r=current.analiseDocumentos?.[slot];if(!r?.document||r.versaoLeitor!=='cdc-docs-tipos-v3'||r.hash!==await hash(docs[slot].dataUrl)){issues.push('Leitura não concluída: '+(docs[slot].nome||label));continue;}checks.push({label:docs[slot].nome||label,legibilidade:r.document.legibilidade,consecutivos:r.consecutivos,confirmado:questionnaire().documentosConferidos});readDocs.push({key,label:label+' ('+(docs[slot].nome||slot)+')',d:r.document});}
     }
     const history=sims.flatMap(x=>(x.historicoCrediti||[]).map(h=>({...h,contrato:x.id})));
     const result=evaluateCredit({q:questionnaire(),parcela:current.parcela,valor:current.valor,history,contracts:sims.filter(x=>x.aceite&&x.id!==id).map(x=>x.id),documents:checks,today:new Date().toLocaleDateString('en-CA',{timeZone:'America/Fortaleza'})});
