@@ -1,4 +1,4 @@
-export const POLICY_VERSION = '2026-11-20-v9-falha-sem-recusa';
+export const POLICY_VERSION = '2026-11-20-v10-conferencia-manual';
 const cents = n => Math.round(Number(n)*100);
 const money = n => Number(n).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
 export function evaluateCredit({q, parcela, valor, history=[], contracts=[], documents=[], today}) {
@@ -30,6 +30,7 @@ export function evaluateCredit({q, parcela, valor, history=[], contracts=[], doc
     }
   }
   for(const d of documents){
+    if(d.manual===true)continue;
     if(d.legibilidade!=='legivel'&&d.consecutivos>=2) pending.push('Leitura automática inconclusiva: '+d.label+'. O leitor não confirmou a legibilidade em duas tentativas. Confira o anexo manualmente; isso não gera recusa automática.');
     else if(d.legibilidade!=='legivel') pending.push('Documento '+(d.legibilidade==='ilegivel'?'ilegível':'com leitura inconclusiva')+': '+d.label+'. Envie uma cópia completa e legível. A leitura não foi suficiente para confirmar os dados.');
     else if(!d.confirmado) pending.push('Conferência documental: '+d.label+'. Falta a confirmação do administrador.');
@@ -51,8 +52,12 @@ export function compatibleShortName(documentName,clientName){
 export function documentCpf(d){
   if(completeCpf(d.cpf))return digits(d.cpf);
   if(d.tipoIdentidade==='cin'&&completeCpf(d.numeroUnicoCin))return digits(d.numeroUnicoCin);
+  const partial=d.cpfParcial||d.cpf;
+  if(/^[0-9.\-\s]+$/.test(String(partial||''))&&digits(partial).length===9)return digits(partial);
   return '';
 }
+export const cpfMatches=(d,expected)=>{const read=documentCpf(d),full=digits(expected);return full.length===11&&(read.length===11?read===full:read.length===9&&read===full.slice(0,9));};
+export const identityDocument=d=>['rg','cin','cnh','identidade','carteira identidade nacional','carteira nacional habilitacao'].includes(normalizedName(d.tipo).toLowerCase())||['rg','cin','cnh'].includes(String(d.tipoIdentidade||'').toLowerCase());
 export function incomeDocumentKind(d){
   // Classification comes from the document content, never its filename.
   if(['pix','recibo_transferencia'].includes(d.subtipo))return 'recibo';
@@ -86,9 +91,11 @@ export function documentFindings({q,cliente,cpf,readDocs,today=new Date().toLoca
   const typeLabels={identidade:'documento de identidade',cpf:'CPF',residencia:'comprovante de residência',renda:'comprovante de renda',conta:'comprovante bancário',outro:'outro tipo de documento'};
   if(!['proprio','terceiro'].includes(q.residenciaTitular))pending.push('Comprovante de residência: informe se está no nome do cliente ou de terceiro.');
   if(q.residenciaTitular==='terceiro'&&!String(q.residenciaJustificativa||'').trim())pending.push('Comprovante de residência em nome de terceiro: falta justificar a relação com o titular e o endereço informado.');
-  for(const {key,label,d}of readDocs){
+  const manualKeys=new Set(readDocs.filter(x=>x.manual===true).map(x=>x.key));
+  for(const {key,label,d,manual}of readDocs){
+    if(manual===true){notes.push('Conferência manual registrada em '+label+': o administrador abriu e conferiu o documento. Essa conferência prevalece sobre a leitura automática desta categoria.');continue;}
     if(d.legibilidade!=='legivel'){
-      if(d.legibilidade==='incerto'&&documentCpf(d)&&documentCpf(d)!==digits(cpf))pending.push('CPF divergente em '+label+': o CPF lido não corresponde ao CPF da ficha. Confira a identidade do titular antes de prosseguir.');
+      if(d.legibilidade==='incerto'&&documentCpf(d)&&!cpfMatches(d,cpf))pending.push('CPF divergente em '+label+': o CPF lido não corresponde ao CPF da ficha. Confira a identidade do titular antes de prosseguir.');
       continue;
     }
     const kind=incomeDocumentKind(d);
@@ -98,7 +105,7 @@ export function documentFindings({q,cliente,cpf,readDocs,today=new Date().toLoca
     }
     const bankIncome=key==='comprovanteRenda'&&['extrato','inss','contracheque'].includes(kind);
     const bankAddress=key==='comprovanteResidencia'&&d.contemEndereco===true;
-    const identityCpf=key==='cpfFrente'&&d.tipo==='identidade';
+    const identityCpf=['rgFrente','cpfFrente'].includes(key)&&identityDocument(d);
     if((key==='comprovanteRenda'&&!bankIncome)||(d.tipo!==expected[key]&&!bankIncome&&!bankAddress&&!identityCpf)){pending.push('Documento inadequado: '+label+'. Esperado: '+typeLabels[expected[key]]+'. O conteúdo lido não confirmou essa finalidade. Confira o anexo antes de solicitar outro.');continue;}
     if(bankAddress)notes.push('Documento bancário com endereço identificado em '+label+'. Confira se o endereço corresponde à ficha.');
     const third=key==='comprovanteResidencia'&&q.residenciaTitular==='terceiro';
@@ -110,29 +117,29 @@ export function documentFindings({q,cliente,cpf,readDocs,today=new Date().toLoca
     const name=normalizedName(d.nome),clientName=normalizedName(cliente);
     if(name&&clientName&&name.replace(/ /g,'')!==clientName.replace(/ /g,'')){
       if(key==='comprovanteRenda'&&bankIncome&&compatibleShortName(name,clientName))notes.push('Nome abreviado compatível em '+label+': “'+d.nome+'”. A abreviação, sozinha, não gera pendência; a identificação completa é conferida na identidade.');
-      else if(nearName(name,clientName)&&documentCpf(d)&&documentCpf(d)===digits(cpf)&&q.documentosConferidos)notes.push('Pequena variação de grafia em '+label+': ficha “'+cliente+'”, leitura “'+d.nome+'”. CPF coincide e o administrador marcou os documentos como conferidos. A variação foi registrada, sem recusa automática.');
+      else if(nearName(name,clientName)&&documentCpf(d)&&cpfMatches(d,cpf)&&q.documentosConferidos)notes.push('Pequena variação de grafia em '+label+': ficha “'+cliente+'”, leitura “'+d.nome+'”. CPF coincide e o administrador marcou os documentos como conferidos. A variação foi registrada, sem recusa automática.');
       else pending.push('Nome divergente em '+label+': a ficha está em nome de “'+cliente+'”, mas o nome lido no documento é “'+d.nome+'”. Confira o titular no anexo; erro de leitura, abreviação ou alteração de nome precisam de verificação.');
     }
-    if(documentCpf(d)&&documentCpf(d)!==digits(cpf))pending.push('CPF divergente em '+label+': o CPF lido não corresponde ao CPF da ficha. Confira a identidade do titular antes de prosseguir.');
+    if(documentCpf(d)&&!cpfMatches(d,cpf))pending.push('CPF divergente em '+label+': o CPF lido não corresponde ao CPF da ficha. Confira a identidade do titular antes de prosseguir.');
     if(!name&&!documentCpf(d))pending.push('Titular não identificado em '+label+': a leitura não encontrou nome nem CPF suficientes para comparar com a ficha.');
   }
-  const cpfFound=readDocs.some(x=>['rgFrente','cpfFrente'].includes(x.key)&&['identidade','cpf'].includes(x.d.tipo)&&['legivel','incerto'].includes(x.d.legibilidade)&&documentCpf(x.d)&&documentCpf(x.d)===digits(cpf));
+  const cpfFound=manualKeys.has('rgFrente')||manualKeys.has('cpfFrente')||readDocs.some(x=>['rgFrente','cpfFrente'].includes(x.key)&&(identityDocument(x.d)||x.d.tipo==='cpf')&&['legivel','incerto'].includes(x.d.legibilidade)&&cpfMatches(x.d,cpf));
   if(!cpfFound)pending.push('Leitura do CPF inconclusiva. Isso não significa que o CPF esteja ausente do documento. Abra o anexo para conferir o campo CPF da CNH ou o número único da CIN e tente Analisar ficha novamente. Não é necessário comprovante separado quando o número consta na identidade.');
-  else notes.push('CPF identificado automaticamente nos documentos e compatível com a ficha. Não é necessário comprovante separado.');
+  else notes.push(manualKeys.has('rgFrente')||manualKeys.has('cpfFrente')?'CPF conferido manualmente pelo administrador no documento. Não é necessário comprovante separado.':readDocs.some(x=>documentCpf(x.d).length===9&&cpfMatches(x.d,cpf))?'Os nove primeiros dígitos do CPF lidos no documento correspondem à ficha. Os dois restantes não foram inventados nem preenchidos pelo leitor.':'CPF identificado automaticamente nos documentos e compatível com a ficha. Não é necessário comprovante separado.');
   const bankDocs=readDocs.filter(x=>x.key==='comprovanteRenda'&&x.d.legibilidade==='legivel'&&incomeDocumentKind(x.d)==='extrato');
-  if(bankDocs.length){const coverage=statementCoverage(readDocs,today);if(!coverage.ok)pending.push('Movimentação bancária: apresente os últimos 2 meses. Confira a cobertura dos extratos; os meses esperados são '+coverage.months.slice().reverse().join(' e ')+' ou os últimos 60 dias completos.');else notes.push('Extrato bancário aceito para conferir a movimentação dos últimos 2 meses. Confira se as páginas e o período estão completos; entradas e saldo não equivalem automaticamente à renda.');}
+  if(!manualKeys.has('comprovanteRenda')&&bankDocs.length){const coverage=statementCoverage(readDocs,today);if(!coverage.ok)pending.push('Movimentação bancária: apresente os últimos 2 meses. Confira a cobertura dos extratos; os meses esperados são '+coverage.months.slice().reverse().join(' e ')+' ou os últimos 60 dias completos.');else notes.push('Extrato bancário aceito para conferir a movimentação dos últimos 2 meses. Confira se as páginas e o período estão completos; entradas e saldo não equivalem automaticamente à renda.');}
   const payrolls=readDocs.filter(x=>x.key==='comprovanteRenda'&&x.d.legibilidade==='legivel'&&incomeDocumentKind(x.d)==='contracheque');
   const benefits=readDocs.filter(x=>x.key==='comprovanteRenda'&&x.d.legibilidade==='legivel'&&incomeDocumentKind(x.d)==='inss');
   if(bankDocs.length)notes.push('Extrato/comprovante bancário: renda líquida não se aplica. A renda mensal informada na ficha permanece para conferência do administrador, sem transformar movimentação ou saldo em renda.');
   if(benefits.length)notes.push('Extrato de pagamento do INSS aceito. Não se exige o campo de renda líquida de contracheque neste documento. Confira o benefício e a competência.');
-  for(const x of payrolls){
+  for(const x of manualKeys.has('comprovanteRenda')?[]:payrolls){
     if(!Number.isFinite(x.d.rendaLiquida)||x.d.rendaLiquida<=0)pending.push('Renda não confirmada no contracheque/holerite: '+x.label+'. Confira o valor líquido no documento.');
     else{
       notes.push('Renda informada: '+money(q.renda)+'. Renda líquida no contracheque/holerite: '+money(x.d.rendaLiquida)+' ('+x.label+').');
       if(q.renda>x.d.rendaLiquida+0.01)pending.push('Renda divergente: informada '+money(q.renda)+', mas o contracheque/holerite apresenta '+money(x.d.rendaLiquida)+'. Confira as competências e as fontes de renda.');
     }
   }
-  if(!bankDocs.length&&!benefits.length&&!payrolls.length)pending.push('Comprovante de renda: envie contracheque/holerite, extrato de pagamento do INSS ou extrato/comprovante bancário dos últimos 60 dias. Comprovante Pix não é aceito como extrato.');
+  if(!manualKeys.has('comprovanteRenda')&&!bankDocs.length&&!benefits.length&&!payrolls.length)pending.push('Comprovante de renda: envie contracheque/holerite, extrato de pagamento do INSS ou extrato/comprovante bancário dos últimos 60 dias. Comprovante Pix não é aceito como extrato.');
   return {pending:[...new Set(pending)],notes:[...new Set(notes)]};
 }
 

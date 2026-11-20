@@ -15,8 +15,8 @@ assert.equal(currentDocumentReading({versaoLeitor:'cdc-docs-tipos-v3',document:{
 assert.equal(currentDocumentReading({versaoLeitor:'cdc-docs-tipos-v3',document:{cpf:null}},'comprovanteRenda'),true);
 console.log('PASS: old missing-CPF readings are refreshed without rereading valid income documents');
 
-assert.equal(reusableDocumentReading({versaoLeitor:'cdc-docs-tipos-v3',lidoEm:1000,document:{cpf:null,versaoIdentidade:2}},'rgFrente',32000),false);
-assert.equal(reusableDocumentReading({versaoLeitor:'cdc-docs-tipos-v3',lidoEm:1000,document:{cpf:null,versaoIdentidade:2}},'rgFrente',2000),true);
+assert.equal(reusableDocumentReading({versaoLeitor:'cdc-docs-tipos-v3',lidoEm:1000,document:{cpf:null,versaoIdentidade:3}},'rgFrente',32000),false);
+assert.equal(reusableDocumentReading({versaoLeitor:'cdc-docs-tipos-v3',lidoEm:1000,document:{cpf:null,versaoIdentidade:3}},'rgFrente',2000),true);
 let active=0,peak=0;const started=[];
 const results=await mapConcurrent([1,2,3,4],2,async n=>{active++;peak=Math.max(peak,active);started.push(n);await new Promise(r=>setTimeout(r,10));active--;if(n===2)throw Error('expected');return n;});
 assert.equal(peak,2);assert.deepEqual(started,[1,2,3,4]);assert.equal(results[1].status,'rejected');assert.equal(results[3].value,4);

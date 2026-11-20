@@ -6,7 +6,7 @@ export function attachmentBlob(file){
   return new Blob([Uint8Array.from(binary,c=>c.charCodeAt(0))],{type:match[1].toLowerCase().replace('image/jpg','image/jpeg')});
 }
 
-export function showAttachments(files,title='Documentos anexados'){
+export function showAttachments(files,title='Documentos anexados',{onView}={}){
   if(!files.length)throw Error('Anexe os documentos desta categoria primeiro.');
   const dialog=document.createElement('dialog'),urls=[];
   dialog.setAttribute('aria-label',title);
@@ -27,6 +27,7 @@ export function showAttachments(files,title='Documentos anexados'){
       if(blob.type==='application/pdf'){view.title=file.nome||'Documento PDF';Object.assign(view.style,{width:'100%',height:'55dvh',border:'1px solid #d9e5e5'});}
       else{view.alt=file.nome||'Documento anexado';Object.assign(view.style,{width:'100%',height:'auto',display:'block'});}
       view.src=url;preview.append(view);
+      onView?.(file);
       for(const b of list.children)b.setAttribute('aria-pressed',String(b===button));
     }catch(e){name.textContent=e.message;preview.replaceChildren();open.removeAttribute('href');download.removeAttribute('href');}
   };

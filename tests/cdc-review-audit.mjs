@@ -1,7 +1,7 @@
-import {freshServerRead} from '../cdc-firestore-read.mjs?v=20261120-ficha-v7';
-import {mountCdcReview,readWithDeadline,createReviewContext,documentKeys} from '../cdc-review.mjs?v=20261120-ficha-v7';
-import {evaluateCredit,documentFindings,analysisSections,sectionsText} from '../cdc-policy.mjs?v=20261120-ficha-v7';
-import {mountCustomer,validateResidence,receiveSubmission,digest} from '../cdc-preanalise.mjs?v=20261120-ficha-v7';
+import {freshServerRead} from '../cdc-firestore-read.mjs?v=20261120-manual-v8';
+import {mountCdcReview,readWithDeadline,createReviewContext,documentKeys} from '../cdc-review.mjs?v=20261120-manual-v8';
+import {evaluateCredit,documentFindings,analysisSections,sectionsText} from '../cdc-policy.mjs?v=20261120-manual-v8';
+import {mountCustomer,validateResidence,receiveSubmission,digest} from '../cdc-preanalise.mjs?v=20261120-manual-v8';
 const root=document.querySelector('#fixture'),out=document.querySelector('#results');
 let failures=0,passes=0;
 const assert=(value,text)=>{if(!value)throw Error(text);};
@@ -116,6 +116,34 @@ document.querySelector('#start').onclick=async function(){
     assert(f.sim.analiseCdc.resultado.status==='Aprovada','Apagou resultado');
     assert(f.sim.analiseCdc.decisao.motivo==='Decisão registrada','Apagou decisão');
     assert(document.querySelector('dialog').textContent.includes('interrompida'),'Não distinguiu falha');
+  });
+  await test('Conferência da categoria exige abrir seus anexos',async()=>{
+    const f=await setup({docs:{rgFrente:{nome:'IMG_1234.jpg',dataUrl:'data:image/jpeg;base64,YWJj'}}});
+    const input=root.querySelector('[data-manual="rgFrente"]');input.checked=true;await input.onchange();
+    assert(!f.sim.analiseCdc.conferencias?.rgFrente?.confirmado,'Confirmou sem abrir');
+    assert(el('output').textContent.includes('Abra cada anexo'),'Não orientou abertura');
+  });
+  await test('Conferência manual por categoria salva e dispensa OCR sem aprovação final',async()=>{
+    const docs=Object.fromEntries(['rgFrente','comprovanteResidencia','comprovanteRenda'].map((key,i)=>[key,{nome:'IMG_'+i+'.jpg',dataUrl:'data:image/jpeg;base64,'+btoa('ficticio'+i)}]));
+    const f=await setup({docs});el('documentosConferidos').checked=false;
+    for(const key of Object.keys(docs)){
+      root.querySelector('[data-read="'+key+'"]').click();await until(()=>document.querySelector('dialog'));
+      document.querySelector('dialog button').click();await until(()=>root.getAttribute('aria-busy')!=='true');
+      const input=root.querySelector('[data-manual="'+key+'"]');input.checked=true;await input.onchange();
+      assert(f.sim.analiseCdc.conferencias[key].confirmado,'Não salvou '+key);
+      assert(f.sim.analiseCdc.conferencias[key].por==='admin-ficticio','Sem responsável');
+    }
+    const original=window.fetch;let calls=0;window.fetch=async()=>{calls++;throw Error('OCR não deve ser chamado');};
+    try{await click('analyze');assert(calls===0,'Releu categoria já conferida');assert(f.sim.analiseCdc.resultado.status==='Aprovada','Conferência manual não aplicada: '+el('observacoes').value);assert(!f.sim.analiseCdc.decisao,'Confirmou crédito sozinho');}finally{window.fetch=original;}
+    document.querySelector('dialog button').click();
+    await mountCdcReview('ficticio',root,f.ctx);await until(()=>root.querySelector('[data-manual="rgFrente"]').checked);
+    assert(root.querySelector('[data-manual="comprovanteRenda"]').checked,'Não restaurou conferência salva');
+  });
+  await test('RG, CIN e CNH aceitos com nove dígitos iniciais do CPF',()=>{
+    for(const tipo of ['RG','CIN','CNH']){
+      const r=documentFindings({q:{residenciaTitular:'proprio',documentosConferidos:true},cliente:'José Silva',cpf:'52998224725',readDocs:[{key:'rgFrente',label:'IMG_1234.jpg',d:{tipo,nome:'José Silva',cpfParcial:'529982247',legibilidade:'legivel'}}]});
+      assert(!r.pending.some(x=>x.startsWith('Leitura do CPF')||x.startsWith('Documento inadequado')),'Não reconheceu '+tipo);
+    }
   });
   await test('Aprovação manual exige motivo',async()=>{const f=await setup({auto:false});await click('approve');assert(el('output').textContent.includes('motivo'),'Sem validação');assert(!f.sim.analiseCdc.decisao,'Aprovou sem motivo');});
   await test('Recusa manual fictícia registra motivo',async()=>{const f=await setup({auto:false});el('reason').value='Teste local';await click('refuse');assert(f.sim.analiseCdc.decisao.status==='Recusada','Não gravou');assert(f.sim.analiseCdc.decisao.motivo==='Teste local','Motivo');});

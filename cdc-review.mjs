@@ -1,16 +1,17 @@
-import {needsInternalReview} from './cdc-status.mjs?v=20261120-ficha-v7';
-import {readFirestore} from './cdc-firestore-read.mjs?v=20261120-ficha-v7';
-import {evaluateCredit,POLICY_VERSION,documentFindings,analysisSections,sectionsText,documentIncomeSummary,completeCpf} from './cdc-policy.mjs?v=20261120-ficha-v7';
-import {showAttachments} from './cdc-document-viewer.mjs?v=20261120-view';
+import {categoryEvidence,manualConfirmed} from './cdc-manual-review.mjs?v=20261120-manual-v8';
+import {needsInternalReview} from './cdc-status.mjs?v=20261120-manual-v8';
+import {readFirestore} from './cdc-firestore-read.mjs?v=20261120-manual-v8';
+import {evaluateCredit,POLICY_VERSION,documentFindings,analysisSections,sectionsText,documentIncomeSummary,completeCpf,documentCpf} from './cdc-policy.mjs?v=20261120-manual-v8';
+import {showAttachments} from './cdc-document-viewer.mjs?v=20261120-manual-v8';
 const API='https://crediti-ia-api.onrender.com/api/cdc/document';
-const DOCS=[['rgFrente','Identidade completa (RG, CIN ou CNH)'],['cpfFrente','CPF (se não constar na identidade)'],['comprovanteResidencia','Comprovante de residência'],['comprovanteRenda','Renda: 3 contracheques/holerites, extrato de pagamento do INSS ou extrato/comprovante bancário dos últimos 60 dias. Comprovante Pix não é aceito']];
+const DOCS=[['rgFrente','Identidade: RG, CIN ou CNH'],['cpfFrente','CPF (se não constar na identidade)'],['comprovanteResidencia','Comprovante de residência'],['comprovanteRenda','Renda: 3 contracheques/holerites, extrato de pagamento do INSS ou extrato/comprovante bancário dos últimos 60 dias. Comprovante Pix não é aceito']];
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const money=v=>Number(v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
 const hash=async value=>Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(value)))).map(x=>x.toString(16).padStart(2,'0')).join('');
 const number=v=>{let text=String(v).trim();if(text.includes(','))text=text.replace(/\./g,'').replace(',','.');else if(/^\d{1,3}(\.\d{3})+$/.test(text))text=text.replace(/\./g,'');return Number(text);};
 export const formatAmount=v=>v===null||v===undefined||v===''?'':Number(v).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
-export const currentDocumentReading=(r,key)=>!!r?.document&&r.versaoLeitor==='cdc-docs-tipos-v3'&&(!['rgFrente','cpfFrente'].includes(key)||completeCpf(r.document.cpf)||r.document.versaoIdentidade===2);
-export const reusableDocumentReading=(r,key,now=Date.now())=>currentDocumentReading(r,key)&&!r.document.falhaLeituraCpf&&(!['rgFrente','cpfFrente'].includes(key)||completeCpf(r.document.cpf)||now-Number(r.lidoEm||0)<30000);
+export const currentDocumentReading=(r,key)=>!!r?.document&&r.versaoLeitor==='cdc-docs-tipos-v3'&&(!['rgFrente','cpfFrente'].includes(key)||!!documentCpf(r.document)||r.document.versaoIdentidade===3);
+export const reusableDocumentReading=(r,key,now=Date.now())=>currentDocumentReading(r,key)&&!r.document.falhaLeituraCpf&&(!['rgFrente','cpfFrente'].includes(key)||!!documentCpf(r.document)||now-Number(r.lidoEm||0)<30000);
 export async function mapConcurrent(items,limit,operation){
   let next=0;const results=new Array(items.length);
   await Promise.all(Array.from({length:Math.min(limit,items.length)},async()=>{while(next<items.length){const i=next++;try{results[i]={status:'fulfilled',value:await operation(items[i],i)};}catch(reason){results[i]={status:'rejected',reason};}}}));
@@ -104,7 +105,7 @@ export async function creditSnapshot(current,{listSims,loadDocumentos}){
   const relatives=(await listSims()).filter(x=>String(x.dadosCliente?.cpf||'').replace(/\D/g,'')===cpf);
   const docs=await loadDocumentos(current.id);
   current={...current,analiseCdc:{...current.analiseCdc,questionario:{...current.analiseCdc?.questionario,politica:POLICY_VERSION}}};
-  return hash(JSON.stringify({questionario:current.analiseCdc?.questionario,valor:current.valor,parcela:current.parcela,prazo:current.prazo,taxa:current.taxa,dataPrimeira:current.dataPrimeira,cpf:current.dadosCliente?.cpf,history:relatives.sort((a,b)=>a.id.localeCompare(b.id)).map(x=>({id:x.id,assinado:!!x.aceite,hist:x.historicoCrediti||[]})),docs:await Promise.all(Object.keys(docs).sort().map(async key=>[key,await hash(docs[key].dataUrl||'')])),leitura:current.analiseDocumentos||{}}));
+  return hash(JSON.stringify({questionario:current.analiseCdc?.questionario,valor:current.valor,parcela:current.parcela,prazo:current.prazo,taxa:current.taxa,dataPrimeira:current.dataPrimeira,cpf:current.dadosCliente?.cpf,history:relatives.sort((a,b)=>a.id.localeCompare(b.id)).map(x=>({id:x.id,assinado:!!x.aceite,hist:x.historicoCrediti||[]})),docs:await Promise.all(Object.keys(docs).sort().map(async key=>[key,await hash(docs[key].dataUrl||'')])),leitura:current.analiseDocumentos||{},conferencias:current.analiseCdc?.conferencias||{}}));
 }
 export async function mountCdcReview(id,root,ctx){
   const {db,loadSim,saveSim,listSims,loadDocumentos,saveDocumento,auth}=ctx;
@@ -123,9 +124,9 @@ export async function mountCdcReview(id,root,ctx){
   <label>Tem restrições no nome?</label><select id="rev-restricao"><option value="">Selecione</option><option value="nao">Não</option><option value="sim">Sim</option></select>
   <label for="rev-residenciaTitular">O comprovante de endereço está em nome de quem?</label><select id="rev-residenciaTitular"><option value="">Selecione</option><option value="proprio">Do próprio cliente</option><option value="terceiro">De terceiro</option></select>
   <div id="rev-residenciaBox" hidden><label for="rev-residenciaJustificativa">Justifique aqui</label><textarea id="rev-residenciaJustificativa" maxlength="600" placeholder="Informe o nome do titular, a relação com o cliente e por que o comprovante está em nome dessa pessoa.">${esc(q.residenciaJustificativa||'')}</textarea></div>
-  <h3>Documentos para análise</h3><p class="hint">Até 5 anexos por categoria, em PDF, JPG ou JPEG, até 700 KB cada. Você pode enviar frente e verso ou os comprovantes mensais separados.</p>
-  ${DOCS.map(([key,label])=>`<div style="margin-bottom:18px;min-width:0"><label>${esc(label)}</label><input type="file" multiple data-doc="${key}" style="display:block;width:100%;max-width:100%;min-width:0;box-sizing:border-box;font-size:14px" accept="application/pdf,image/jpeg,.jpg,.jpeg"><div data-files="${key}" class="hint" style="overflow-wrap:anywhere"></div><button type="button" class="btn btn-outline" data-read="${key}">Ler anexos</button><div data-result="${key}" style="white-space:pre-wrap;overflow-wrap:anywhere"></div></div>`).join('')}
-  <p class="hint">O CPF será identificado nos documentos, sem necessidade de marcar uma confirmação.</p>
+  <h3>Documentos para análise</h3><p class="hint">Não precisa renomear os arquivos. RG, CIN ou CNH são aceitos como identidade. Até 5 anexos por categoria, em PDF, JPG ou JPEG, até 700 KB cada. Você pode enviar frente e verso ou os comprovantes mensais separados.</p>
+  ${DOCS.map(([key,label])=>`<div style="margin-bottom:18px;min-width:0"><label>${esc(label)}</label><input type="file" multiple data-doc="${key}" style="display:block;width:100%;max-width:100%;min-width:0;box-sizing:border-box;font-size:14px" accept="application/pdf,image/jpeg,.jpg,.jpeg"><div data-files="${key}" class="hint" style="overflow-wrap:anywhere"></div><button type="button" class="btn btn-outline" data-read="${key}">Ler anexos</button><div data-result="${key}" style="white-space:pre-wrap;overflow-wrap:anywhere"></div><label style="display:flex;gap:10px;margin-top:12px"><input type="checkbox" data-manual="${key}">Abri e conferi os anexos desta categoria. Estão legíveis e os dados correspondem à ficha.</label><p class="hint" data-manual-info="${key}">Abra cada anexo em Ver anexos e marque após conferir. ${key==='rgFrente'?'Confira RG, CIN ou CNH, titularidade e CPF.':key==='comprovanteRenda'?'Confira o documento de renda aceito, valores aplicáveis e período. Comprovante Pix não é extrato bancário.':key==='comprovanteResidencia'?'Confira endereço e titularidade.':'Confira o CPF no documento.'}</p></div>`).join('')}
+  <p class="hint">O leitor compara o CPF completo ou seus nove primeiros dígitos. Se a leitura falhar, use a conferência manual da categoria após abrir os anexos.</p>
   <label style="display:flex;gap:10px"><input id="rev-documentosConferidos" type="checkbox" style="width:auto">Conferi os documentos, titularidade, datas, valores aplicáveis a cada documento e períodos exigidos. Os dados correspondem à ficha.</label>
   <div id="rev-history"></div>
   <button type="button" class="btn btn-gold" id="rev-save">Salvar ficha da análise</button>
@@ -151,6 +152,7 @@ export async function mountCdcReview(id,root,ctx){
   const message=text=>{el('output').textContent=text;};
   let busy=false,analysisFailed=false;
   const updateReading=serialUpdates();
+  const openedFiles=new Map();
   const disabledBefore=new Map();
   const lock=value=>{
     busy=value;root.setAttribute('aria-busy',String(value));
@@ -194,6 +196,9 @@ export async function mountCdcReview(id,root,ctx){
     if(!current)throw Error('Não foi possível carregar a ficha para conferir os anexos.');
     for(const [key] of DOCS){
       const keys=documentKeys(docs,key);
+      const checked=await manualConfirmed(current,docs,key);groupEl('manual',key).checked=checked;
+      if(checked)groupEl('manual-info',key).textContent='Conferência manual salva. Estes anexos serão considerados conferidos na análise.';
+      else if(current.analiseCdc?.conferencias?.[key]?.confirmado)groupEl('manual-info',key).textContent='Os anexos ou os dados da ficha mudaram. Abra e confira novamente.';
       groupEl('files',key).textContent=keys.length?keys.length+'/5 anexos: '+keys.map(k=>docs[k].nome||k).join('; '):'Nenhum anexo enviado.';
       groupEl('result',key).textContent=keys.map(k=>{const r=current.analiseDocumentos?.[k];if(!r?.document)return (docs[k].nome||k)+': aguardando leitura';if(r.versaoLeitor!=='cdc-docs-tipos-v3')return (docs[k].nome||k)+': leitura anterior. Clique em Analisar ficha para aplicar as regras atualizadas.';const d=r.document;return (docs[k].nome||k)+'\nLeitura: '+d.legibilidade+' | Tipo: '+d.tipo+(documentIncomeSummary(d)?'\n'+documentIncomeSummary(d):'')+'\nCompetências: '+(Array.isArray(d.competencias)?d.competencias:[]).join(', ')+'\n'+(d.observacoes||'');}).join('\n\n');
     }
@@ -225,6 +230,7 @@ export async function mountCdcReview(id,root,ctx){
     button.task=async(auto=false)=>{
       try{
         const docs=await loadDocumentos(id),keys=documentKeys(docs,key);if(!keys.length)throw Error('Anexe os documentos desta categoria primeiro.');
+        if(await manualConfirmed(await loadSim(id),docs,key)){message('Categoria conferida manualmente. Não é necessário repetir a leitura automática.');return;}
         const failures=[];
         for(const slot of keys){
           try{
@@ -246,11 +252,24 @@ export async function mountCdcReview(id,root,ctx){
         message('Leitura concluída. Conferindo os dados da ficha…');
       }finally{void safeRefreshFiles();}
     };
+    const manual=groupEl('manual',key);
+    manual.onchange=async()=>{
+      if(busy)return;
+      const confirmed=manual.checked;lock(true);
+      try{
+        const current=await persist(),docs=await loadDocumentos(id),evidence=await categoryEvidence(current,docs,key);
+        if(confirmed&&!evidence.anexos.length)throw Error('Anexe o documento antes de marcar a conferência.');
+        if(confirmed&&evidence.anexos.some(x=>openedFiles.get(x.slot)!==x.hash))throw Error('Abra cada anexo desta categoria em Ver anexos antes de marcar a conferência.');
+        current.analiseCdc.conferencias={...current.analiseCdc.conferencias,[key]:{...evidence,confirmado:confirmed,por:auth.currentUser.uid,data:Date.now(),origem:'conferencia_manual'}};
+        delete current.analiseCdc.resultado;delete current.analiseCdc.decisao;delete current.analiseCdc.snapshot;
+        await saveSim(current);message(confirmed?'Conferência manual salva. Esta categoria não ficará pendente por falha do leitor.':'Conferência manual desmarcada.');
+      }catch(error){manual.checked=!confirmed;reportError(error);}finally{lock(false);void safeRefreshFiles();}
+    };
     button.textContent='Ver anexos';
     button.onclick=async()=>{
       if(busy)return;
       lock(true);button.textContent='Abrindo anexos…';
-      try{const docs=await loadDocumentos(id);showAttachments(documentKeys(docs,key).map(k=>docs[k]),DOCS.find(d=>d[0]===key)[1]);}
+      try{const docs=await loadDocumentos(id);const files=await Promise.all(documentKeys(docs,key).map(async slot=>({...docs[slot],slot,fingerprint:await hash(docs[slot].dataUrl)})));showAttachments(files,DOCS.find(d=>d[0]===key)[1],{onView:file=>{openedFiles.set(file.slot,file.fingerprint);groupEl('manual-info',key).textContent='Após abrir e conferir todos os anexos desta categoria, marque a confirmação abaixo.';}});}
       catch(e){reportError(e);}finally{button.textContent='Ver anexos';lock(false);}
     };
   }
@@ -272,15 +291,17 @@ export async function mountCdcReview(id,root,ctx){
     if(readingFailures.length)throw Error('Falha na leitura dos anexos:\n'+readingFailures.join('\n')+'\nOs arquivos lidos com sucesso foram preservados.');
     message('Conferindo renda, parcelas, valores e histórico do cliente…');
     const current=await loadSim(id);const sims=await related();const docs=await loadDocumentos(id);const checks=[];
-    const readDocs=[];
+    const readDocs=[],manualCategories=new Set();
+    for(const [key]of DOCS)if(await manualConfirmed(current,docs,key))manualCategories.add(key);
     for(const [key,label]of DOCS){
       if(key==='cpfFrente'&&!documentKeys(docs,key).length)continue;
       const keys=documentKeys(docs,key);
-      for(const slot of keys){const r=current.analiseDocumentos?.[slot];if(!currentDocumentReading(r,key)||r.hash!==await hash(docs[slot].dataUrl)){issues.push('Leitura não concluída: '+(docs[slot].nome||label));continue;}checks.push({label:docs[slot].nome||label,legibilidade:r.document.legibilidade,consecutivos:r.consecutivos,confirmado:questionnaire().documentosConferidos});readDocs.push({key,label:docs[slot].nome||label,d:r.document});}
+      for(const slot of keys){const r=current.analiseDocumentos?.[slot];if(manualCategories.has(key)){checks.push({label:docs[slot].nome||label,manual:true,confirmado:true});readDocs.push({key,label:docs[slot].nome||label,manual:true,d:r?.document||{tipo:'outro',legibilidade:'incerto'}});continue;}if(!currentDocumentReading(r,key)||r.hash!==await hash(docs[slot].dataUrl)){issues.push('Leitura não concluída: '+(docs[slot].nome||label));continue;}checks.push({label:docs[slot].nome||label,legibilidade:r.document.legibilidade,consecutivos:r.consecutivos,confirmado:questionnaire().documentosConferidos});readDocs.push({key,label:docs[slot].nome||label,d:r.document});}
     }
     const history=sims.flatMap(x=>(x.historicoCrediti||[]).map(h=>({...h,contrato:x.id})));
-    const result=evaluateCredit({q:questionnaire(),parcela:current.parcela,valor:current.valor,history,contracts:sims.filter(x=>x.aceite&&x.id!==id).map(x=>x.id),documents:checks,today:new Date().toLocaleDateString('en-CA',{timeZone:'America/Fortaleza'})});
-    const findings=documentFindings({q:questionnaire(),cliente:current.cliente,cpf,readDocs});
+    const effectiveQ={...questionnaire(),documentosConferidos:questionnaire().documentosConferidos||['rgFrente','comprovanteResidencia','comprovanteRenda'].every(key=>manualCategories.has(key))};
+    const result=evaluateCredit({q:effectiveQ,parcela:current.parcela,valor:current.valor,history,contracts:sims.filter(x=>x.aceite&&x.id!==id).map(x=>x.id),documents:checks,today:new Date().toLocaleDateString('en-CA',{timeZone:'America/Fortaleza'})});
+    const findings=documentFindings({q:effectiveQ,cliente:current.cliente,cpf,readDocs});
     const conflicts=[...issues,...findings.pending];result.notasDocumentos=findings.notes;
     result.historicoConsiderado=history.map(h=>({contrato:h.contrato,tipo:h.tipo,data:h.data,nota:h.nota||'',dias:h.dias||0}));
     result.pendencias=[...new Set([...(result.pendencias||[]),...conflicts])];
