@@ -1,6 +1,6 @@
-import {mountCdcReview,readWithDeadline,createReviewContext,documentKeys} from '../cdc-review.mjs';
-import {evaluateCredit,documentFindings,analysisSections,sectionsText} from '../cdc-policy.mjs';
-import {mountCustomer,validateResidence,receiveSubmission,digest} from '../cdc-preanalise.mjs';
+import {mountCdcReview,readWithDeadline,createReviewContext,documentKeys} from '../cdc-review.mjs?v=20261120-docs2meses';
+import {evaluateCredit,documentFindings,analysisSections,sectionsText} from '../cdc-policy.mjs?v=20261120-docs2meses';
+import {mountCustomer,validateResidence,receiveSubmission,digest} from '../cdc-preanalise.mjs?v=20261120-docs2meses';
 const root=document.querySelector('#fixture'),out=document.querySelector('#results');
 let failures=0,passes=0;
 const assert=(value,text)=>{if(!value)throw Error(text);};
