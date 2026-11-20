@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {documentFindings,statementCoverage,completeCpf,documentIncomeSummary} from '../cdc-policy.mjs';
+import {documentFindings,statementCoverage,completeCpf,documentIncomeSummary,documentCpf} from '../cdc-policy.mjs';
 import {createReviewContext} from '../cdc-review.mjs';
 const cpf='52998224725'; // synthetic fixture
 const doc=(key,tipo,extra={})=>({key,label:key+'.pdf',d:{tipo,nome:'José da Silva',cpf,legibilidade:'legivel',...extra}});
@@ -12,7 +12,7 @@ assert(!check([doc('rgFrente','identidade',{nome:'JOSE SILVA'}),home,bank]).pend
 assert(!check([doc('rgFrente','identidade',{nome:'José da Silvva'}),home,bank]).pending.length);
 assert(check([doc('rgFrente','identidade',{nome:'Maria da Silva'}),home,bank]).pending.some(x=>x.startsWith('Nome divergente')));
 assert(check([doc('rgFrente','identidade',{cpf:'11111111111'}),home,bank]).pending.some(x=>x.startsWith('CPF divergente')));
-assert(check([doc('rgFrente','identidade',{cpf:null}),home,bank]).pending.some(x=>x.startsWith('CPF não confirmado')));
+assert(check([doc('rgFrente','identidade',{cpf:null}),home,bank]).pending.some(x=>x.startsWith('CPF não identificado')));
 assert(!completeCpf('***.982.247-25'));
 assert(completeCpf('529.982.247-25'));
 assert(!check([id,doc('cpfFrente','identidade'),home,bank]).pending.length);
@@ -72,3 +72,21 @@ assert(!documentIncomeSummary(inss.d).includes('Não identificada'));
 assert.equal(documentIncomeSummary(id.d),'');
 assert(documentIncomeSummary({...payroll.d,rendaLiquida:null}).includes('Não identificada'));
 console.log('PASS: payroll-only net income, INSS accepted, Pix rejected, transfers rejected, statement Pix allowed, punctuation names');
+
+// Abbreviated names in income/statement evidence do not imply a different person.
+for(const nome of ['Francisco','FRANCISCO JOSE']){
+ const statement={...bank,d:{...bank.d,nome,cpf:null}};
+ const person=doc('rgFrente','identidade',{nome:'Francisco José de Teste'});
+ const address=doc('comprovanteResidencia','residencia',{nome:'Francisco José de Teste'});
+ assert.deepEqual(check([person,address,statement],{cliente:'Francisco José de Teste'}).pending,[]);
+ for(const subtipo of ['contracheque','pagamento_inss'])assert(!check([person,address,doc('comprovanteRenda','renda',{nome,cpf:null,subtipo,rendaLiquida:2000})],{cliente:'Francisco José de Teste'}).pending.some(x=>x.startsWith('Nome divergente')));
+}
+assert(check([id,home,{...bank,d:{...bank.d,nome:'Maria'}}]).pending.some(x=>x.startsWith('Nome divergente')));
+assert(check([id,home,{...bank,d:{...bank.d,nome:'José',cpf:'11111111111'}}]).pending.some(x=>x.startsWith('CPF divergente')));
+assert(check([doc('rgFrente','identidade',{nome:'José'}),home,bank]).pending.some(x=>x.startsWith('Nome divergente')));
+const cin=doc('rgFrente','identidade',{tipoIdentidade:'cin',cpf:null,numeroUnicoCin:cpf});
+assert.equal(documentCpf(cin.d),cpf);assert.deepEqual(check([cin,home,bank]).pending,[]);
+assert.equal(documentCpf({...cin.d,tipoIdentidade:'rg'}),'');
+assert.equal(documentCpf({...cin.d,tipoIdentidade:'cnh'}),'');
+assert.equal(documentCpf({...cin.d,numeroUnicoCin:'***.982.247-25'}),'');
+console.log('PASS: one/two-name income prefixes, different names/CPFs preserved, CIN unique number, no old-RG/CNH-registration substitution');

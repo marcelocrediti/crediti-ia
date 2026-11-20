@@ -1,4 +1,4 @@
-export const POLICY_VERSION = '2026-11-20-v6-documentos-renda';
+export const POLICY_VERSION = '2026-11-20-v7-nomes-cpf';
 const cents = n => Math.round(Number(n)*100);
 const money = n => Number(n).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
 export function evaluateCredit({q, parcela, valor, history=[], contracts=[], documents=[], today}) {
@@ -43,6 +43,16 @@ const digits=v=>String(v||'').replace(/\D/g,'');
 export const completeCpf=v=>/^\d{11}$/.test(String(v||'').replace(/[.\-\s]/g,''));
 const oneEdit=(a,b)=>{if(a===b)return true;if(Math.abs(a.length-b.length)>1)return false;let i=0,j=0,errors=0;while(i<a.length&&j<b.length){if(a[i]===b[j]){i++;j++;continue;}if(++errors>1)return false;if(a.length>=b.length)i++;if(b.length>=a.length)j++;}return errors+(a.length-i)+(b.length-j)<=1;};
 const nearName=(a,b)=>{const x=a.split(' '),y=b.split(' ');return x.length>=2&&x.length===y.length&&x.filter((v,i)=>v!==y[i]).length===1&&x.every((v,i)=>oneEdit(v,y[i]));};
+export function compatibleShortName(documentName,clientName){
+  const short=normalizedName(documentName).split(' ').filter(Boolean),full=normalizedName(clientName).split(' ').filter(Boolean);
+  // Only a complete one/two-word prefix, never a substring or a different surname.
+  return short.length>0&&short.length<=2&&short.length<full.length&&short.every((word,i)=>word===full[i]);
+}
+export function documentCpf(d){
+  if(completeCpf(d.cpf))return digits(d.cpf);
+  if(d.tipoIdentidade==='cin'&&completeCpf(d.numeroUnicoCin))return digits(d.numeroUnicoCin);
+  return '';
+}
 export function incomeDocumentKind(d){
   // Classification comes from the document content, never its filename.
   if(['pix','recibo_transferencia'].includes(d.subtipo))return 'recibo';
@@ -96,14 +106,15 @@ export function documentFindings({q,cliente,cpf,readDocs,today=new Date().toLoca
     }
     const name=normalizedName(d.nome),clientName=normalizedName(cliente);
     if(name&&clientName&&name.replace(/ /g,'')!==clientName.replace(/ /g,'')){
-      if(nearName(name,clientName)&&completeCpf(d.cpf)&&digits(d.cpf)===digits(cpf)&&q.documentosConferidos)notes.push('Pequena variação de grafia em '+label+': ficha “'+cliente+'”, leitura “'+d.nome+'”. CPF coincide e o administrador marcou os documentos como conferidos. A variação foi registrada, sem recusa automática.');
+      if(key==='comprovanteRenda'&&bankIncome&&compatibleShortName(name,clientName))notes.push('Nome abreviado compatível em '+label+': “'+d.nome+'”. A abreviação, sozinha, não gera pendência; a identificação completa é conferida na identidade.');
+      else if(nearName(name,clientName)&&documentCpf(d)&&documentCpf(d)===digits(cpf)&&q.documentosConferidos)notes.push('Pequena variação de grafia em '+label+': ficha “'+cliente+'”, leitura “'+d.nome+'”. CPF coincide e o administrador marcou os documentos como conferidos. A variação foi registrada, sem recusa automática.');
       else pending.push('Nome divergente em '+label+': a ficha está em nome de “'+cliente+'”, mas o nome lido no documento é “'+d.nome+'”. Confira o titular no anexo; erro de leitura, abreviação ou alteração de nome precisam de verificação.');
     }
-    if(completeCpf(d.cpf)&&digits(d.cpf)!==digits(cpf))pending.push('CPF divergente em '+label+': o CPF lido não corresponde ao CPF da ficha. Confira a identidade do titular antes de prosseguir.');
-    if(!name&&!digits(d.cpf))pending.push('Titular não identificado em '+label+': a leitura não encontrou nome nem CPF suficientes para comparar com a ficha.');
+    if(documentCpf(d)&&documentCpf(d)!==digits(cpf))pending.push('CPF divergente em '+label+': o CPF lido não corresponde ao CPF da ficha. Confira a identidade do titular antes de prosseguir.');
+    if(!name&&!documentCpf(d))pending.push('Titular não identificado em '+label+': a leitura não encontrou nome nem CPF suficientes para comparar com a ficha.');
   }
-  const cpfFound=readDocs.some(x=>['rgFrente','cpfFrente'].includes(x.key)&&['identidade','cpf'].includes(x.d.tipo)&&x.d.legibilidade==='legivel'&&completeCpf(x.d.cpf)&&digits(x.d.cpf)===digits(cpf));
-  if(!cpfFound)pending.push('CPF não confirmado na identidade ou no documento de CPF. Confira a leitura; se o número não estiver legível, envie um documento que o apresente completo.');
+  const cpfFound=readDocs.some(x=>['rgFrente','cpfFrente'].includes(x.key)&&['identidade','cpf'].includes(x.d.tipo)&&x.d.legibilidade==='legivel'&&documentCpf(x.d)&&documentCpf(x.d)===digits(cpf));
+  if(!cpfFound)pending.push('CPF não identificado com segurança após a leitura da identidade. Abra o anexo e confira o campo CPF da CNH ou o número único da CIN. Não é necessário documento separado se o número estiver legível na identidade.');
   else notes.push('CPF identificado automaticamente nos documentos e compatível com a ficha. Não é necessário comprovante separado.');
   const bankDocs=readDocs.filter(x=>x.key==='comprovanteRenda'&&x.d.legibilidade==='legivel'&&incomeDocumentKind(x.d)==='extrato');
   if(bankDocs.length){const coverage=statementCoverage(readDocs,today);if(!coverage.ok)pending.push('Movimentação bancária: apresente os últimos 2 meses. Confira a cobertura dos extratos; os meses esperados são '+coverage.months.slice().reverse().join(' e ')+' ou os últimos 60 dias completos.');else notes.push('Extrato bancário aceito para conferir a movimentação dos últimos 2 meses. Confira se as páginas e o período estão completos; entradas e saldo não equivalem automaticamente à renda.');}

@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {requestDocument} from '../cdc-review.mjs';
+import {requestDocument,currentDocumentReading} from '../cdc-review.mjs';
 const data={document:{legibilidade:'legivel'},version:'cdc-docs-tipos-v3'};
 let calls=0;const tokens=[];const user={getIdToken:async refresh=>{tokens.push(refresh);return 'test-token';}};
 assert.deepEqual(await requestDocument('synthetic',user,{wait:async()=>{},fetcher:async()=>++calls===1?{status:401,ok:false,json:async()=>({error:'session'})}:{ok:true,json:async()=>data}}),data);
@@ -8,3 +8,9 @@ calls=0;assert.deepEqual(await requestDocument('synthetic',user,{wait:async()=>{
 calls=0;await assert.rejects(requestDocument('synthetic',user,{wait:async()=>{},fetcher:async()=>{calls++;return {status:503,ok:false,json:async()=>({error:'Quota unavailable',retryable:false})};}}),/Quota unavailable/);assert.equal(calls,1);
 calls=0;assert.deepEqual(await requestDocument('synthetic',user,{wait:async()=>{},fetcher:async()=>++calls===1?{status:429,ok:false,json:async()=>({retryable:true,error:'busy'})}:{ok:true,json:async()=>data}}),data);assert.equal(calls,2);
 console.log('PASS: token refresh, bounded connection retry, busy retry and quota error without repeated billing');
+
+assert.equal(currentDocumentReading({versaoLeitor:'cdc-docs-tipos-v3',document:{cpf:null}},'rgFrente'),false);
+assert.equal(currentDocumentReading({versaoLeitor:'cdc-docs-tipos-v3',document:{cpf:null,versaoIdentidade:1}},'rgFrente'),true);
+assert.equal(currentDocumentReading({versaoLeitor:'cdc-docs-tipos-v3',document:{cpf:'52998224725'}},'rgFrente'),true);
+assert.equal(currentDocumentReading({versaoLeitor:'cdc-docs-tipos-v3',document:{cpf:null}},'comprovanteRenda'),true);
+console.log('PASS: old missing-CPF readings are refreshed without rereading valid income documents');

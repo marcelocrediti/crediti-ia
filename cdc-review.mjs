@@ -1,4 +1,4 @@
-import {evaluateCredit,POLICY_VERSION,documentFindings,analysisSections,sectionsText,documentIncomeSummary} from './cdc-policy.mjs?v=20261120-documentos-v3';
+import {evaluateCredit,POLICY_VERSION,documentFindings,analysisSections,sectionsText,documentIncomeSummary,completeCpf} from './cdc-policy.mjs?v=20261120-nomes-cpf-v5';
 import {showAttachments} from './cdc-document-viewer.mjs?v=20261120-view';
 const API='https://crediti-ia-api.onrender.com/api/cdc/document';
 const DOCS=[['rgFrente','Identidade completa (RG, CIN ou CNH)'],['cpfFrente','CPF (se não constar na identidade)'],['comprovanteResidencia','Comprovante de residência'],['comprovanteRenda','Renda: 3 contracheques/holerites, extrato de pagamento do INSS ou extrato/comprovante bancário dos últimos 60 dias. Comprovante Pix não é aceito']];
@@ -7,6 +7,7 @@ const money=v=>Number(v||0).toLocaleString('pt-BR',{style:'currency',currency:'B
 const hash=async value=>Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(value)))).map(x=>x.toString(16).padStart(2,'0')).join('');
 const number=v=>{let text=String(v).trim();if(text.includes(','))text=text.replace(/\./g,'').replace(',','.');else if(/^\d{1,3}(\.\d{3})+$/.test(text))text=text.replace(/\./g,'');return Number(text);};
 export const formatAmount=v=>v===null||v===undefined||v===''?'':Number(v).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+export const currentDocumentReading=(r,key)=>!!r?.document&&r.versaoLeitor==='cdc-docs-tipos-v3'&&(!['rgFrente','cpfFrente'].includes(key)||completeCpf(r.document.cpf)||r.document.versaoIdentidade===1);
 export const documentKeys=(docs,key)=>Object.keys(docs||{}).filter(k=>k===key||k.startsWith(key+'__')||(key==='rgFrente'&&k==='rgVerso')).filter(k=>docs[k]?.dataUrl).sort();
 // Bound reads, not writes: a timed-out write may still commit and must not be retried blindly.
 export async function readWithDeadline(operation,label,ms=20000){
@@ -14,13 +15,13 @@ export async function readWithDeadline(operation,label,ms=20000){
   try{return await Promise.race([Promise.resolve().then(operation),new Promise((_,reject)=>{timer=setTimeout(()=>reject(Error('Não foi possível carregar '+label+' a tempo. Confira a conexão e tente novamente.')),ms);})]);}
   finally{clearTimeout(timer);}
 }
-export async function requestDocument(dataUrl,user,{fetcher=fetch,wait=ms=>new Promise(resolve=>setTimeout(resolve,ms))}={}){
+export async function requestDocument(dataUrl,user,{categoria,fetcher=fetch,wait=ms=>new Promise(resolve=>setTimeout(resolve,ms))}={}){
   for(let attempt=0;attempt<2;attempt++){
     const token=await readWithDeadline(()=>user.getIdToken(attempt>0),'a sessão');
     const controller=new AbortController(),timeout=setTimeout(()=>controller.abort(),90000);
     let response,data;
     try{
-      response=await fetcher(API,{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+token},body:JSON.stringify({dataUrl}),signal:controller.signal});
+      response=await fetcher(API,{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+token},body:JSON.stringify({dataUrl,categoria}),signal:controller.signal});
       data=await response.json().catch(()=>({error:'O serviço de leitura retornou uma resposta inválida (HTTP '+response.status+'). Os anexos foram preservados.'}));
     }catch(error){
       if(!attempt){await wait(1500);continue;}
@@ -225,11 +226,11 @@ export async function mountCdcReview(id,root,ctx){
           try{
           message('Lendo '+(docs[slot].nome||slot)+'…');
           const fingerprint=await hash(docs[slot].dataUrl);let current=await loadSim(id);const previous=current.analiseDocumentos?.[slot];
-          if(previous?.hash===fingerprint&&previous.document&&previous.versaoLeitor==='cdc-docs-tipos-v3')continue;
-          const reused=Object.values(current.analiseDocumentos||{}).find(r=>r.hash===fingerprint&&r.document&&r.versaoLeitor==='cdc-docs-tipos-v3');
+          if(previous?.hash===fingerprint&&currentDocumentReading(previous,key))continue;
+          const reused=Object.values(current.analiseDocumentos||{}).find(r=>r.hash===fingerprint&&currentDocumentReading(r,key));
           if(reused){current.analiseDocumentos={...current.analiseDocumentos,[slot]:{...reused}};await saveSim(current);continue;}
           // A new reader version may reread the same attachment without counting a new illegible submission.
-          const data=await requestDocument(docs[slot].dataUrl,auth.currentUser);
+          const data=await requestDocument(docs[slot].dataUrl,auth.currentUser,{categoria:key});
           if(data.version!=='cdc-docs-tipos-v3')throw Error('O leitor está sendo atualizado. Aguarde e analise novamente. Nenhuma recusa aplicada.');
           const review={versaoLeitor:data.version||'legacy',hash:fingerprint,hashes:[...new Set([...(previous?.hashes||[]),fingerprint])],document:data.document,consecutivos:data.document.legibilidade==='ilegivel'?(previous?.consecutivos||0)+(previous?.hash===fingerprint?0:1):0,lidoEm:Date.now()};
           current=await loadSim(id);current.analiseDocumentos={...(current.analiseDocumentos||{}),[slot]:review};if(current.analiseCdc)delete current.analiseCdc.decisao;await saveSim(current);
@@ -267,7 +268,7 @@ export async function mountCdcReview(id,root,ctx){
     for(const [key,label]of DOCS){
       if(key==='cpfFrente'&&!documentKeys(docs,key).length)continue;
       const keys=documentKeys(docs,key);
-      for(const slot of keys){const r=current.analiseDocumentos?.[slot];if(!r?.document||r.versaoLeitor!=='cdc-docs-tipos-v3'||r.hash!==await hash(docs[slot].dataUrl)){issues.push('Leitura não concluída: '+(docs[slot].nome||label));continue;}checks.push({label:docs[slot].nome||label,legibilidade:r.document.legibilidade,consecutivos:r.consecutivos,confirmado:questionnaire().documentosConferidos});readDocs.push({key,label:label+' ('+(docs[slot].nome||slot)+')',d:r.document});}
+      for(const slot of keys){const r=current.analiseDocumentos?.[slot];if(!currentDocumentReading(r,key)||r.hash!==await hash(docs[slot].dataUrl)){issues.push('Leitura não concluída: '+(docs[slot].nome||label));continue;}checks.push({label:docs[slot].nome||label,legibilidade:r.document.legibilidade,consecutivos:r.consecutivos,confirmado:questionnaire().documentosConferidos});readDocs.push({key,label:docs[slot].nome||label,d:r.document});}
     }
     const history=sims.flatMap(x=>(x.historicoCrediti||[]).map(h=>({...h,contrato:x.id})));
     const result=evaluateCredit({q:questionnaire(),parcela:current.parcela,valor:current.valor,history,contracts:sims.filter(x=>x.aceite&&x.id!==id).map(x=>x.id),documents:checks,today:new Date().toLocaleDateString('en-CA',{timeZone:'America/Fortaleza'})});
