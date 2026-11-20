@@ -1,4 +1,4 @@
-import {CURRENT_LATE_CHARGES,LEGACY_LATE_CHARGES} from './cdc-charges.mjs?v=20261120-multa-v15';
+import {CURRENT_LATE_CHARGES,LEGACY_LATE_CHARGES} from './cdc-charges.mjs?v=20261120-aviso-v16';
 const stable=v=>JSON.stringify(v,(_,x)=>x&&typeof x==='object'&&!Array.isArray(x)?Object.fromEntries(Object.keys(x).sort().map(k=>[k,x[k]])):x);
 const comparable=s=>Object.fromEntries(['cliente','valor','parcela','prazo','taxa','dataPrimeira','dataUltima','dadosCliente'].map(k=>[k,k==='dadosCliente'&&s[k]?{...s[k],cpf:String(s[k].cpf||'').replace(/\D/g,'')}:s[k]]));
 export const signatureProposalChanged=(before,after)=>stable(comparable(before))!==stable(comparable(after));

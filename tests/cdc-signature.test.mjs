@@ -23,7 +23,7 @@ const db={collection:c=>({doc:id=>({key:c+'/'+id})}),runTransaction:fn=>{
 }};
 let sequence=0;const options={db,fb:{firestore:{Timestamp:{fromMillis:stamp}}},sim:fixture,uid:'fixture-admin',now:()=>1000,newToken:()=>String(++sequence).padStart(64,'0')};
 const first=await ensureSignatureLink(options);assert.equal(records.get('simulacoes/fixture').linkAssinatura,first);
-assert.deepEqual(records.get('assinaturasCDC/'+first).proposta.encargosAtraso,{version:'multa-unica-2-v1',multaPercentual:2,jurosMoraMensal:0});
+assert.deepEqual(records.get('assinaturasCDC/'+first).proposta.encargosAtraso,{version:'multa-unica-2-v1',multaPercentual:2,jurosMoraMensal:0,avisoSerasa:'atraso-7-dias-v1'});
 assert.deepEqual(records.get('simulacoes/fixture').encargosAtraso,records.get('assinaturasCDC/'+first).proposta.encargosAtraso);
 const writesBefore=writes;
 assert.deepEqual(await Promise.all([ensureSignatureLink(options),ensureSignatureLink(options)]),[first,first]);assert.equal(writes,writesBefore,'Repeated/concurrent clicks do not write or revoke');
@@ -47,3 +47,14 @@ assert(lateChargeClause({linkAssinatura:'legacy'}).includes('R$ 1.00 por dia'));
 assert(lateChargeClause({aceite:{timestamp:1},encargosAtraso:CURRENT_LATE_CHARGES}).includes('2%'));
 assert(lateChargeClause(s).includes('R$ 1.00 por dia'),'Legacy public link preserves its issued terms');
 console.log('PASS: new terms persist with proposal, one-time 2%, no late interest, historical terms preserved');
+
+const {creditBureauNotice}=await import('../cdc-charges.mjs');
+assert(creditBureauNotice({}).includes('pelo menos uma parcela'));
+assert(creditBureauNotice({}).includes('igual ou superior a 7 dias'));
+assert(creditBureauNotice({}).includes('poderá ser encaminhado ao Serasa'));
+assert(creditBureauNotice({}).includes('não substitui a notificação prévia'));
+assert.equal(creditBureauNotice({aceite:{timestamp:1}}),'');
+assert.equal(creditBureauNotice({linkAssinatura:'legacy'}),'');
+assert.equal(creditBureauNotice({encargosAtraso:{version:'multa-unica-2-v1',multaPercentual:2,jurosMoraMensal:0}}),'');
+assert(creditBureauNotice({aceite:{timestamp:1},encargosAtraso:CURRENT_LATE_CHARGES}).includes('Serasa'));
+console.log('PASS: notice preserved with new terms, issued and signed older contracts unchanged');
