@@ -1,4 +1,4 @@
-export const POLICY_VERSION = '2026-11-20-v7-nomes-cpf';
+export const POLICY_VERSION = '2026-11-20-v8-cpf-legivel';
 const cents = n => Math.round(Number(n)*100);
 const money = n => Number(n).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
 export function evaluateCredit({q, parcela, valor, history=[], contracts=[], documents=[], today}) {
@@ -87,7 +87,10 @@ export function documentFindings({q,cliente,cpf,readDocs,today=new Date().toLoca
   if(!['proprio','terceiro'].includes(q.residenciaTitular))pending.push('Comprovante de residência: informe se está no nome do cliente ou de terceiro.');
   if(q.residenciaTitular==='terceiro'&&!String(q.residenciaJustificativa||'').trim())pending.push('Comprovante de residência em nome de terceiro: falta justificar a relação com o titular e o endereço informado.');
   for(const {key,label,d}of readDocs){
-    if(d.legibilidade!=='legivel')continue;
+    if(d.legibilidade!=='legivel'){
+      if(d.legibilidade==='incerto'&&documentCpf(d)&&documentCpf(d)!==digits(cpf))pending.push('CPF divergente em '+label+': o CPF lido não corresponde ao CPF da ficha. Confira a identidade do titular antes de prosseguir.');
+      continue;
+    }
     const kind=incomeDocumentKind(d);
     if(key==='comprovanteRenda'&&kind==='recibo'){
       pending.push('Documento inadequado: '+label+'. Comprovante Pix ou recibo isolado de transferência, depósito ou pagamento não é extrato bancário. Envie contracheque/holerite, extrato de pagamento do INSS ou extrato/comprovante bancário com movimentação dos últimos 60 dias.');
@@ -113,8 +116,8 @@ export function documentFindings({q,cliente,cpf,readDocs,today=new Date().toLoca
     if(documentCpf(d)&&documentCpf(d)!==digits(cpf))pending.push('CPF divergente em '+label+': o CPF lido não corresponde ao CPF da ficha. Confira a identidade do titular antes de prosseguir.');
     if(!name&&!documentCpf(d))pending.push('Titular não identificado em '+label+': a leitura não encontrou nome nem CPF suficientes para comparar com a ficha.');
   }
-  const cpfFound=readDocs.some(x=>['rgFrente','cpfFrente'].includes(x.key)&&['identidade','cpf'].includes(x.d.tipo)&&x.d.legibilidade==='legivel'&&documentCpf(x.d)&&documentCpf(x.d)===digits(cpf));
-  if(!cpfFound)pending.push('CPF não identificado com segurança após a leitura da identidade. Abra o anexo e confira o campo CPF da CNH ou o número único da CIN. Não é necessário documento separado se o número estiver legível na identidade.');
+  const cpfFound=readDocs.some(x=>['rgFrente','cpfFrente'].includes(x.key)&&['identidade','cpf'].includes(x.d.tipo)&&['legivel','incerto'].includes(x.d.legibilidade)&&documentCpf(x.d)&&documentCpf(x.d)===digits(cpf));
+  if(!cpfFound)pending.push('Leitura do CPF inconclusiva. Isso não significa que o CPF esteja ausente do documento. Abra o anexo para conferir o campo CPF da CNH ou o número único da CIN e tente Analisar ficha novamente. Não é necessário comprovante separado quando o número consta na identidade.');
   else notes.push('CPF identificado automaticamente nos documentos e compatível com a ficha. Não é necessário comprovante separado.');
   const bankDocs=readDocs.filter(x=>x.key==='comprovanteRenda'&&x.d.legibilidade==='legivel'&&incomeDocumentKind(x.d)==='extrato');
   if(bankDocs.length){const coverage=statementCoverage(readDocs,today);if(!coverage.ok)pending.push('Movimentação bancária: apresente os últimos 2 meses. Confira a cobertura dos extratos; os meses esperados são '+coverage.months.slice().reverse().join(' e ')+' ou os últimos 60 dias completos.');else notes.push('Extrato bancário aceito para conferir a movimentação dos últimos 2 meses. Confira se as páginas e o período estão completos; entradas e saldo não equivalem automaticamente à renda.');}

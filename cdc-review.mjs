@@ -1,4 +1,4 @@
-import {evaluateCredit,POLICY_VERSION,documentFindings,analysisSections,sectionsText,documentIncomeSummary,completeCpf} from './cdc-policy.mjs?v=20261120-nomes-cpf-v5';
+import {evaluateCredit,POLICY_VERSION,documentFindings,analysisSections,sectionsText,documentIncomeSummary,completeCpf} from './cdc-policy.mjs?v=20261120-leitor-cpf-v6';
 import {showAttachments} from './cdc-document-viewer.mjs?v=20261120-view';
 const API='https://crediti-ia-api.onrender.com/api/cdc/document';
 const DOCS=[['rgFrente','Identidade completa (RG, CIN ou CNH)'],['cpfFrente','CPF (se não constar na identidade)'],['comprovanteResidencia','Comprovante de residência'],['comprovanteRenda','Renda: 3 contracheques/holerites, extrato de pagamento do INSS ou extrato/comprovante bancário dos últimos 60 dias. Comprovante Pix não é aceito']];
@@ -7,7 +7,17 @@ const money=v=>Number(v||0).toLocaleString('pt-BR',{style:'currency',currency:'B
 const hash=async value=>Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(value)))).map(x=>x.toString(16).padStart(2,'0')).join('');
 const number=v=>{let text=String(v).trim();if(text.includes(','))text=text.replace(/\./g,'').replace(',','.');else if(/^\d{1,3}(\.\d{3})+$/.test(text))text=text.replace(/\./g,'');return Number(text);};
 export const formatAmount=v=>v===null||v===undefined||v===''?'':Number(v).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
-export const currentDocumentReading=(r,key)=>!!r?.document&&r.versaoLeitor==='cdc-docs-tipos-v3'&&(!['rgFrente','cpfFrente'].includes(key)||completeCpf(r.document.cpf)||r.document.versaoIdentidade===1);
+export const currentDocumentReading=(r,key)=>!!r?.document&&r.versaoLeitor==='cdc-docs-tipos-v3'&&(!['rgFrente','cpfFrente'].includes(key)||completeCpf(r.document.cpf)||r.document.versaoIdentidade===2);
+export const reusableDocumentReading=(r,key,now=Date.now())=>currentDocumentReading(r,key)&&!r.document.falhaLeituraCpf&&(!['rgFrente','cpfFrente'].includes(key)||completeCpf(r.document.cpf)||now-Number(r.lidoEm||0)<30000);
+export async function mapConcurrent(items,limit,operation){
+  let next=0;const results=new Array(items.length);
+  await Promise.all(Array.from({length:Math.min(limit,items.length)},async()=>{while(next<items.length){const i=next++;try{results[i]={status:'fulfilled',value:await operation(items[i],i)};}catch(reason){results[i]={status:'rejected',reason};}}}));
+  return results;
+}
+export function serialUpdates(){
+  let tail=Promise.resolve();
+  return operation=>{const next=tail.then(operation);tail=next.catch(()=>{});return next;};
+}
 export const documentKeys=(docs,key)=>Object.keys(docs||{}).filter(k=>k===key||k.startsWith(key+'__')||(key==='rgFrente'&&k==='rgVerso')).filter(k=>docs[k]?.dataUrl).sort();
 // Bound reads, not writes: a timed-out write may still commit and must not be retried blindly.
 export async function readWithDeadline(operation,label,ms=20000){
@@ -18,17 +28,17 @@ export async function readWithDeadline(operation,label,ms=20000){
 export async function requestDocument(dataUrl,user,{categoria,fetcher=fetch,wait=ms=>new Promise(resolve=>setTimeout(resolve,ms))}={}){
   for(let attempt=0;attempt<2;attempt++){
     const token=await readWithDeadline(()=>user.getIdToken(attempt>0),'a sessão');
-    const controller=new AbortController(),timeout=setTimeout(()=>controller.abort(),90000);
+    const controller=new AbortController(),timeout=setTimeout(()=>controller.abort(),65000);
     let response,data;
     try{
       response=await fetcher(API,{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+token},body:JSON.stringify({dataUrl,categoria}),signal:controller.signal});
       data=await response.json().catch(()=>({error:'O serviço de leitura retornou uma resposta inválida (HTTP '+response.status+'). Os anexos foram preservados.'}));
     }catch(error){
-      if(!attempt){await wait(1500);continue;}
+      if(!attempt&&!controller.signal.aborted){await wait(1500);continue;}
       throw Error(controller.signal.aborted?'O leitor não respondeu a tempo. Os anexos foram preservados.':'Falha de conexão com o leitor. Os anexos foram preservados.');
     }finally{clearTimeout(timeout);}
     if(response.ok&&data.document)return data;
-    if(!attempt&&(response.status===401||data.retryable===true||(response.status===429&&data.retryable!==false))){await wait(response.status===401?0:2000);continue;}
+    if(!attempt&&(response.status===401||(data.retryable===true&&data.code!=='reader_timeout')||(response.status===429&&data.retryable!==false))){await wait(response.status===401?0:2000);continue;}
     throw Error(data.error||'Falha técnica na leitura (HTTP '+response.status+'). Os anexos foram preservados.');
   }
 }
@@ -147,6 +157,7 @@ export async function mountCdcReview(id,root,ctx){
   el('residenciaTitular').onchange=residenceToggle;residenceToggle();
   const message=text=>{el('output').textContent=text;};
   let busy=false;
+  const updateReading=serialUpdates();
   const disabledBefore=new Map();
   const lock=value=>{
     busy=value;root.setAttribute('aria-busy',String(value));
@@ -226,14 +237,15 @@ export async function mountCdcReview(id,root,ctx){
           try{
           message('Lendo '+(docs[slot].nome||slot)+'…');
           const fingerprint=await hash(docs[slot].dataUrl);let current=await loadSim(id);const previous=current.analiseDocumentos?.[slot];
-          if(previous?.hash===fingerprint&&currentDocumentReading(previous,key))continue;
-          const reused=Object.values(current.analiseDocumentos||{}).find(r=>r.hash===fingerprint&&currentDocumentReading(r,key));
-          if(reused){current.analiseDocumentos={...current.analiseDocumentos,[slot]:{...reused}};await saveSim(current);continue;}
+          if(previous?.hash===fingerprint&&reusableDocumentReading(previous,key))continue;
+          const reused=Object.values(current.analiseDocumentos||{}).find(r=>r.hash===fingerprint&&reusableDocumentReading(r,key));
+          if(reused){await updateReading(async()=>{const latest=await loadSim(id);latest.analiseDocumentos={...latest.analiseDocumentos,[slot]:{...reused}};await saveSim(latest);});continue;}
           // A new reader version may reread the same attachment without counting a new illegible submission.
           const data=await requestDocument(docs[slot].dataUrl,auth.currentUser,{categoria:key});
           if(data.version!=='cdc-docs-tipos-v3')throw Error('O leitor está sendo atualizado. Aguarde e analise novamente. Nenhuma recusa aplicada.');
           const review={versaoLeitor:data.version||'legacy',hash:fingerprint,hashes:[...new Set([...(previous?.hashes||[]),fingerprint])],document:data.document,consecutivos:data.document.legibilidade==='ilegivel'?(previous?.consecutivos||0)+(previous?.hash===fingerprint?0:1):0,lidoEm:Date.now()};
-          current=await loadSim(id);current.analiseDocumentos={...(current.analiseDocumentos||{}),[slot]:review};if(current.analiseCdc)delete current.analiseCdc.decisao;await saveSim(current);
+          await updateReading(async()=>{const latest=await loadSim(id);latest.analiseDocumentos={...(latest.analiseDocumentos||{}),[slot]:review};if(latest.analiseCdc)delete latest.analiseCdc.decisao;await saveSim(latest);});
+          if(data.document.falhaLeituraCpf)throw Error('A conferência do CPF foi interrompida pelo leitor. Os campos já lidos foram preservados. Tente analisar novamente.');
           }catch(error){failures.push((docs[slot].nome||slot)+': '+error.message);}
         }
         if(failures.length)throw Error(failures.join('\n'));
@@ -256,11 +268,14 @@ export async function mountCdcReview(id,root,ctx){
     try{
     await persist();
     const issues=[],readingFailures=[];const initialDocs=await loadDocumentos(id);
+    const categories=[];
     for(const [key,label] of DOCS){
       if(key==='cpfFrente'&&!documentKeys(initialDocs,key).length)continue;
       if(!documentKeys(initialDocs,key).length){issues.push('Documento obrigatório não enviado: '+label+'.');continue;}
-      try{await groupEl('read',key).task(true);}catch(e){readingFailures.push(e.message);}
+      categories.push(key);
     }
+    const reads=await mapConcurrent(categories,2,key=>groupEl('read',key).task(true));
+    for(const read of reads)if(read.status==='rejected')readingFailures.push(read.reason.message);
     if(readingFailures.length)throw Error('Falha na leitura dos anexos:\n'+readingFailures.join('\n')+'\nOs arquivos lidos com sucesso foram preservados.');
     message('Conferindo renda, parcelas, valores e histórico do cliente…');
     const current=await loadSim(id);const sims=await related();const docs=await loadDocumentos(id);const checks=[];

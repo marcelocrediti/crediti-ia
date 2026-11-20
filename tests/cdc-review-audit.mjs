@@ -1,6 +1,6 @@
-import {mountCdcReview,readWithDeadline,createReviewContext,documentKeys} from '../cdc-review.mjs?v=20261120-nomes-cpf-v5';
-import {evaluateCredit,documentFindings,analysisSections,sectionsText} from '../cdc-policy.mjs?v=20261120-nomes-cpf-v5';
-import {mountCustomer,validateResidence,receiveSubmission,digest} from '../cdc-preanalise.mjs?v=20261120-nomes-cpf-v5';
+import {mountCdcReview,readWithDeadline,createReviewContext,documentKeys} from '../cdc-review.mjs?v=20261120-leitor-cpf-v6';
+import {evaluateCredit,documentFindings,analysisSections,sectionsText} from '../cdc-policy.mjs?v=20261120-leitor-cpf-v6';
+import {mountCustomer,validateResidence,receiveSubmission,digest} from '../cdc-preanalise.mjs?v=20261120-leitor-cpf-v6';
 const root=document.querySelector('#fixture'),out=document.querySelector('#results');
 let failures=0,passes=0;
 const assert=(value,text)=>{if(!value)throw Error(text);};
@@ -90,7 +90,17 @@ document.querySelector('#start').onclick=async function(){
     try{const f=await setup({docs});await click('analyze');assert(calls===2,'Segundo arquivo não foi lido');assert(f.sim.analiseDocumentos.rgFrente__2.document.legibilidade==='legivel','Leitura válida perdida');assert(f.sim.analiseCdc.resultado.tipoFalha==='tecnica','Erro técnico misturado com avaliação');assert(!el('observacoes').value.includes('CPF não confirmado'),'Criou pendência por leitura incompleta');assert(el('observacoes').value.includes('falha.pdf'),'Não identificou arquivo com falha');}finally{window.fetch=original;}
   });
   await test('Primeiro nome no extrato não gera divergência',()=>{const r=findings({},[doc('comprovanteRenda','conta','José',{subtipo:'extrato_bancario',extratoBancario:true})]);assert(!r.pending.some(x=>x.startsWith('Nome divergente')),'Abreviação virou divergência');assert(r.notes.some(x=>x.startsWith('Nome abreviado compatível')),'Compatibilidade não foi registrada');});
-  await test('Número único da CIN confirma CPF sem comprovante separado',()=>{const r=findings({},[doc('rgFrente','identidade','José da Silva',{tipoIdentidade:'cin',numeroUnicoCin:'000.000.000-00'})]);assert(!r.pending.some(x=>x.startsWith('CPF não identificado')),'CIN não confirmou CPF');});
+  await test('Número único da CIN confirma CPF sem comprovante separado',()=>{const r=findings({},[doc('rgFrente','identidade','José da Silva',{tipoIdentidade:'cin',numeroUnicoCin:'000.000.000-00'})]);assert(!r.pending.some(x=>x.startsWith('Leitura do CPF inconclusiva')),'CIN não confirmou CPF');});
+  await test('CPF legível em identidade parcialmente legível não vira CPF ausente',()=>{
+    const r=findings({},[doc('rgFrente','identidade','José da Silva',{cpf:'00000000000',legibilidade:'incerto'})]);
+    assert(!r.pending.some(x=>x.startsWith('Leitura do CPF inconclusiva')),'Ignorou CPF extraído');
+  });
+  await test('Leituras paralelas preservam todos os anexos e sinalizam falha técnica do CPF',async()=>{
+    const docs=Object.fromEntries([['rgFrente','identidade'],['comprovanteResidencia','residencia'],['comprovanteRenda','renda']].map(([k,t])=>[k,{nome:t+'.pdf',dataUrl:'data:application/pdf;base64,'+btoa(t)}]));
+    const original=window.fetch;let active=0,peak=0;
+    window.fetch=async(url,options)=>{active++;peak=Math.max(peak,active);await new Promise(r=>setTimeout(r,30));active--;const type=atob(JSON.parse(options.body).dataUrl.split(',')[1]);return {ok:true,json:async()=>({version:'cdc-docs-tipos-v3',document:{tipo:type,versaoIdentidade:2,legibilidade:'legivel',nome:'Cliente de teste',cpf:type==='identidade'?null:'00000000000',falhaLeituraCpf:type==='identidade'?'reader_timeout':undefined,observacoes:'Teste fictício'}})};};
+    try{const f=await setup({docs});await click('analyze');assert(peak===2,'Não leu dois anexos simultaneamente');assert(Object.keys(f.sim.analiseDocumentos).length===3,'Perdeu uma gravação');assert(f.sim.analiseCdc.resultado.tipoFalha==='tecnica','Falha do leitor virou ausência de CPF');}finally{window.fetch=original;}
+  });
   await test('Aprovação manual exige motivo',async()=>{const f=await setup({auto:false});await click('approve');assert(el('output').textContent.includes('motivo'),'Sem validação');assert(!f.sim.analiseCdc.decisao,'Aprovou sem motivo');});
   await test('Recusa manual fictícia registra motivo',async()=>{const f=await setup({auto:false});el('reason').value='Teste local';await click('refuse');assert(f.sim.analiseCdc.decisao.status==='Recusada','Não gravou');assert(f.sim.analiseCdc.decisao.motivo==='Teste local','Motivo');});
   await test('Automático não permite confirmar sem avaliação aprovada',async()=>{const f=await setup();el('reason').value='Teste';await click('approve');assert(!f.sim.analiseCdc.decisao,'Ignorou guarda');assert(el('output').textContent.includes('Conclua'),'Sem aviso');});

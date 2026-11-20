@@ -12,7 +12,7 @@ assert(!check([doc('rgFrente','identidade',{nome:'JOSE SILVA'}),home,bank]).pend
 assert(!check([doc('rgFrente','identidade',{nome:'José da Silvva'}),home,bank]).pending.length);
 assert(check([doc('rgFrente','identidade',{nome:'Maria da Silva'}),home,bank]).pending.some(x=>x.startsWith('Nome divergente')));
 assert(check([doc('rgFrente','identidade',{cpf:'11111111111'}),home,bank]).pending.some(x=>x.startsWith('CPF divergente')));
-assert(check([doc('rgFrente','identidade',{cpf:null}),home,bank]).pending.some(x=>x.startsWith('CPF não identificado')));
+assert(check([doc('rgFrente','identidade',{cpf:null}),home,bank]).pending.some(x=>x.startsWith('Leitura do CPF inconclusiva')));
 assert(!completeCpf('***.982.247-25'));
 assert(completeCpf('529.982.247-25'));
 assert(!check([id,doc('cpfFrente','identidade'),home,bank]).pending.length);
@@ -90,3 +90,10 @@ assert.equal(documentCpf({...cin.d,tipoIdentidade:'rg'}),'');
 assert.equal(documentCpf({...cin.d,tipoIdentidade:'cnh'}),'');
 assert.equal(documentCpf({...cin.d,numeroUnicoCin:'***.982.247-25'}),'');
 console.log('PASS: one/two-name income prefixes, different names/CPFs preserved, CIN unique number, no old-RG/CNH-registration substitution');
+
+const partialIdentity=doc('rgFrente','identidade',{legibilidade:'incerto',cpf:'52998224725'});
+const partialFindings=check([partialIdentity,home,bank]);
+assert(!partialFindings.pending.some(x=>x.startsWith('Leitura do CPF inconclusiva')));
+const conflictingPartial=check([doc('rgFrente','identidade',{legibilidade:'incerto',cpf:'12345678901'}),home,bank]);
+assert(conflictingPartial.pending.some(x=>x.startsWith('CPF divergente')));
+console.log('PASS: extracted CPF retained for partially readable identity; differing CPF still flagged');
