@@ -563,7 +563,7 @@ window.renovarPreanaliseCDC=async function(id){
   if(button)button.disabled=true;
   try{
     const s=await loadSim(id);
-    const module=await import('./cdc-preanalise.mjs?v=20261120-documentos-v3');
+    const module=await import('./cdc-preanalise.mjs?v=20261125-formatos-v17');
     if(!module.validCpf(s.dadosCliente?.cpf)){
       toast('Informe um CPF válido nos dados do cliente antes de gerar o link da ficha.');
       return;
@@ -685,7 +685,7 @@ async function loadSim(id){
     const doc = await db.collection('simulacoes').doc(id).get();
     if(!doc.exists)return null;
     let data=doc.data();
-    if(data.linkPreanalise && isCdcAdmin()){try{const module=await import('./cdc-preanalise.mjs?v=20261120-documentos-v3');data=await module.receiveSubmission(data,{db});}catch(e){toast('Não foi possível receber a pré-análise: '+e.message);}}
+    if(data.linkPreanalise && isCdcAdmin()){try{const module=await import('./cdc-preanalise.mjs?v=20261125-formatos-v17');data=await module.receiveSubmission(data,{db});}catch(e){toast('Não foi possível receber a pré-análise: '+e.message);}}
 
     if(data.linkAssinatura && !data.aceite && isCdcAdmin()){
       const link=await db.collection('assinaturasCDC').doc(data.linkAssinatura).get();
@@ -806,7 +806,7 @@ async function renderInner(){
   const app = document.getElementById('app');
   if(!cdcAuthReady){ app.innerHTML = '<div class="wrap"><div class="card">Verificando acesso…</div></div>'; return; }
   if(route.view==='consulta'){const module=await import('./cdc-status.mjs?v=20261120-pdf-v14');module.mountStatus(app,{db});return;}
-  if(route.view==='preanalise'){const module=await import('./cdc-preanalise.mjs?v=20261120-documentos-v3');await module.mountCustomer(app,route.id,{db,fb:firebase,logo:LOGO_DATAURL});return;}
+  if(route.view==='preanalise'){const module=await import('./cdc-preanalise.mjs?v=20261125-formatos-v17');await module.mountCustomer(app,route.id,{db,fb:firebase,logo:LOGO_DATAURL});return;}
   if(route.view==='cliente' && /^[a-f0-9]{64}$/.test(route.id)){app.innerHTML=await viewCliente(route.id);return;}
   if(!isCdcAdmin()) { renderCdcLogin(app); return; }
   if(route.view === 'cliente'){
@@ -2381,7 +2381,7 @@ async function onCalcular(){
     if(!cdcProntoParaEnviar())return;
     preButton.disabled=true;preButton.textContent='Gerando link protegido…';
     try{
-      const module=await import('./cdc-preanalise.mjs?v=20261120-documentos-v3');
+      const module=await import('./cdc-preanalise.mjs?v=20261125-formatos-v17');
       if(!module.validCpf(window.__simTemp.dadosCliente?.cpf))throw Error('Preencha um CPF válido e clique em Calcular simulação novamente.');
       await saveSim(window.__simTemp);
       const link=await module.createLink(window.__simTemp,{db,fb:firebase});
